@@ -47,7 +47,7 @@ public class InterpreterScreen {
         "colspan", "col_span", "rowspan", "row_span",
         "layoutpos", "layout_pos", "relativepos", "relative_pos",
         "varref", "var_ref", "name", "editable", "disabled", "visible", "tooltip",
-        "textcolor", "text_color", "backgroundcolor", "background_color"
+        "backgroundcolor", "background_color"
     );
 
     public InterpreterScreen(InterpreterContext context, Interpreter interpreter) {
@@ -1631,9 +1631,11 @@ public class InterpreterScreen {
             // Tree properties
             "treeitems", "tree_items", "expandall", "expand_all", "showroot", "show_root",
             // Styling properties
-            "labelcolor", "label_color", "labelbold", "label_bold", 
-            "labelitalic", "label_italic", "labelfontsize", "label_font_size",
+            "labelcolor", "label_color", "labelbackgroundcolor", "label_background_color",
+            "labelbold", "label_bold", "labelitalic", "label_italic", 
+            "labelfontsize", "label_font_size",
             "itemfontsize", "item_font_size", "itemcolor", "item_color",
+            "textcolor", "text_color",
             "itembold", "item_bold", "itemitalic", "item_italic",
             "maxlength", "max_length", "height",
             // Image properties
@@ -1708,9 +1710,11 @@ public class InterpreterScreen {
             "labeltext", "label_text", "labeltextalignment", "label_text_alignment",
             "labelposition", "label_position", "labelpos", "label_pos",
             // Styling properties (can be at item level for override/merge behavior)
-            "labelcolor", "label_color", "labelbold", "label_bold",
-            "labelitalic", "label_italic", "labelfontsize", "label_font_size",
+            "labelcolor", "label_color", "labelbackgroundcolor", "label_background_color",
+            "labelbold", "label_bold", "labelitalic", "label_italic", 
+            "labelfontsize", "label_font_size",
             "itemfontsize", "item_font_size", "itemcolor", "item_color",
+            "textcolor", "text_color",
             "itembold", "item_bold", "itemitalic", "item_italic"
         ));
         
@@ -1958,6 +1962,36 @@ public class InterpreterScreen {
             } catch (InterpreterError e) {
                 // Log warning and continue with unsubstituted color
                 System.err.println("Warning: Could not substitute variables in labelcolor: " + e.getMessage());
+            }
+        }
+
+        // Extract labelBackgroundColor property
+        if (displayDef.containsKey("labelBackgroundColor")) {
+            metadata.labelBackgroundColor = String.valueOf(displayDef.get("labelBackgroundColor"));
+            // Substitute variables in labelBackgroundColor
+            try {
+                metadata.labelBackgroundColor = substituteVariablesInStyle(metadata.labelBackgroundColor, line);
+            } catch (InterpreterError e) {
+                // Log warning and continue with unsubstituted color
+                System.err.println("Warning: Could not substitute variables in labelBackgroundColor: " + e.getMessage());
+            }
+        } else if (displayDef.containsKey("labelbackgroundcolor")) {
+            metadata.labelBackgroundColor = String.valueOf(displayDef.get("labelbackgroundcolor"));
+            // Substitute variables in labelBackgroundColor
+            try {
+                metadata.labelBackgroundColor = substituteVariablesInStyle(metadata.labelBackgroundColor, line);
+            } catch (InterpreterError e) {
+                // Log warning and continue with unsubstituted color
+                System.err.println("Warning: Could not substitute variables in labelbackgroundcolor: " + e.getMessage());
+            }
+        } else if (displayDef.containsKey("label_background_color")) {
+            metadata.labelBackgroundColor = String.valueOf(displayDef.get("label_background_color"));
+            // Substitute variables in label_background_color
+            try {
+                metadata.labelBackgroundColor = substituteVariablesInStyle(metadata.labelBackgroundColor, line);
+            } catch (InterpreterError e) {
+                // Log warning and continue with unsubstituted color
+                System.err.println("Warning: Could not substitute variables in label_background_color: " + e.getMessage());
             }
         }
 

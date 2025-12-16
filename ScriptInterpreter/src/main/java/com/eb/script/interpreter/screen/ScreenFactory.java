@@ -4745,9 +4745,11 @@ public class ScreenFactory {
             // Tree properties
             "treeitems", "tree_items", "expandall", "expand_all", "showroot", "show_root",
             // Styling properties
-            "labelcolor", "label_color", "labelbold", "label_bold", 
-            "labelitalic", "label_italic", "labelfontsize", "label_font_size",
+            "labelcolor", "label_color", "labelbackgroundcolor", "label_background_color",
+            "labelbold", "label_bold", "labelitalic", "label_italic", 
+            "labelfontsize", "label_font_size",
             "itemfontsize", "item_font_size", "itemcolor", "item_color",
+            "textcolor", "text_color",
             "itembold", "item_bold", "itemitalic", "item_italic",
             "maxlength", "max_length", "height",
             // Image properties
@@ -4770,7 +4772,7 @@ public class ScreenFactory {
             "colspan", "col_span", "rowspan", "row_span",
             "layoutpos", "layout_pos", "relativepos", "relative_pos",
             "varref", "var_ref", "name", "editable", "disabled", "visible", "tooltip",
-            "textcolor", "text_color", "backgroundcolor", "background_color"
+            "backgroundcolor", "background_color"
         ));
         
         // Check for invalid properties
@@ -4825,9 +4827,11 @@ public class ScreenFactory {
             "labeltext", "label_text", "labeltextalignment", "label_text_alignment",
             "labelposition", "label_position",
             // Styling properties (can be at item level for override/merge behavior)
-            "labelcolor", "label_color", "labelbold", "label_bold",
-            "labelitalic", "label_italic", "labelfontsize", "label_font_size",
+            "labelcolor", "label_color", "labelbackgroundcolor", "label_background_color",
+            "labelbold", "label_bold", "labelitalic", "label_italic", 
+            "labelfontsize", "label_font_size",
             "itemfontsize", "item_font_size", "itemcolor", "item_color",
+            "textcolor", "text_color",
             "itembold", "item_bold", "itemitalic", "item_italic"
         ));
         
@@ -5018,6 +5022,7 @@ public class ScreenFactory {
         
         // Extract styling properties
         metadata.labelColor = getStringValue(displayDef, "labelColor", getStringValue(displayDef, "label_color", null));
+        metadata.labelBackgroundColor = getStringValue(displayDef, "labelBackgroundColor", getStringValue(displayDef, "label_background_color", null));
         metadata.labelBold = getBooleanValue(displayDef, "labelBold", getBooleanValue(displayDef, "label_bold", null));
         metadata.labelItalic = getBooleanValue(displayDef, "labelItalic", getBooleanValue(displayDef, "label_italic", null));
         metadata.labelFontSize = getStringValue(displayDef, "labelFontSize", getStringValue(displayDef, "label_font_size", null));
@@ -5080,6 +5085,7 @@ public class ScreenFactory {
         merged.expandAll = base.expandAll;
         merged.showRoot = base.showRoot;
         merged.labelColor = base.labelColor;
+        merged.labelBackgroundColor = base.labelBackgroundColor;
         merged.labelBold = base.labelBold;
         merged.labelItalic = base.labelItalic;
         merged.labelFontSize = base.labelFontSize;
@@ -5119,6 +5125,7 @@ public class ScreenFactory {
         if (overlay.expandAll != null) merged.expandAll = overlay.expandAll;
         if (overlay.showRoot != null) merged.showRoot = overlay.showRoot;
         if (overlay.labelColor != null) merged.labelColor = overlay.labelColor;
+        if (overlay.labelBackgroundColor != null) merged.labelBackgroundColor = overlay.labelBackgroundColor;
         if (overlay.labelBold != null) merged.labelBold = overlay.labelBold;
         if (overlay.labelItalic != null) merged.labelItalic = overlay.labelItalic;
         if (overlay.labelFontSize != null) merged.labelFontSize = overlay.labelFontSize;
@@ -5427,6 +5434,11 @@ public class ScreenFactory {
                 currentStyle = currentStyle.replace("-fx-text-fill: #333333;", "");
                 styleBuilder = new StringBuilder(currentStyle);
                 styleBuilder.append(" -fx-text-fill: ").append(metadata.labelColor).append(";");
+            }
+
+            // Apply label background color if specified
+            if (metadata.labelBackgroundColor != null && !metadata.labelBackgroundColor.isEmpty()) {
+                styleBuilder.append(" -fx-background-color: ").append(metadata.labelBackgroundColor).append(";");
             }
 
             // Apply bold if specified
@@ -6044,6 +6056,7 @@ public class ScreenFactory {
         clone.labelTextAlignment = source.labelTextAlignment;
         clone.labelPosition = source.labelPosition;
         clone.labelColor = source.labelColor;
+        clone.labelBackgroundColor = source.labelBackgroundColor;
         clone.labelBold = source.labelBold;
         clone.labelItalic = source.labelItalic;
         clone.labelFontSize = source.labelFontSize;
