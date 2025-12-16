@@ -522,14 +522,14 @@ setPieceImage(x: int, y: int, pieceImage: imagedata) {
     }
 }
 
-// Get chess piece letter for move notation (K, Q, R, B, N, P)
+// Get chess piece letter for move notation (K, Q, R, B, N, p)
 getPieceLetter(pieceType: int) return string {
     if pieceType == KING then { return "K"; }
     if pieceType == QUEEN then { return "Q"; }
     if pieceType == ROOK then { return "R"; }
     if pieceType == BISHOP then { return "B"; }
     if pieceType == KNIGHT then { return "N"; }
-    if pieceType == PAWN then { return "P"; }
+    if pieceType == PAWN then { return "p"; }
     return "";
 }
 
