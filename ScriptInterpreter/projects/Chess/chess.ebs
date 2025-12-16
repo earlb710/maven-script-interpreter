@@ -1207,9 +1207,13 @@ handleExitGame() {
 // Startup dialog screen definition
 screen startupDialog = {
     "title": "Chess Game - Start",
-    "width": 400,
-    "height": 330,
+    "width": 450,
+    "height": 500,
     "vars": [
+        {
+            "name": "logo",
+            "type": "imagedata"
+        },
         {
             "name": "timeLimit",
             "type": "string",
@@ -1233,6 +1237,7 @@ screen startupDialog = {
             "padding": "30",
             "style": "-fx-background-color: #2c2c2c; -fx-alignment: center;",
             "items": [
+                {"name": "logoImage", "varRef": "logo", "display": {"type": "image", "fitWidth": 400, "fitHeight": 200, "preserveRatio": true}},
                 {"name": "titleLabel", "display": {"type": "label", "labelText": "\u265A Welcome to Chess! \u2654", "labelColor": "#ffcc00", "labelFontSize": "20px", "labelBold": true}},
                 {"name": "instructionLabel", "display": {"type": "label", "labelText": "Select the time limit for each player:", "labelColor": "#ffffff", "labelFontSize": "14px"}},
                 {"name": "timeLimitField", "varRef": "timeLimit"}
@@ -1912,5 +1917,7 @@ print "Initializing board layer (checkerboard pattern)...";
 
 // Show startup dialog first
 // All game initialization happens in handleStartGame() when user clicks Start
+print "Loading chess logo...";
+startupDialog.logo = call image.load(imgPath + "chess_logo.svg");
 print "Showing startup dialog...";
 show screen startupDialog;
