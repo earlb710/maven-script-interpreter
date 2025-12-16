@@ -1783,7 +1783,7 @@ screen chessScreen = {
                     "maxHeight": "624",
                     "style": "-fx-background-color: $COLOR_MOVE_HISTORY_BG; -fx-background-radius: 5;",
                     "items": [
-                        {"name": "moveHistoryTitle", "display": {"type": "label", "labelText": "Move History", "labelColor": "$COLOR_TEXT_WHITE", "labelFontSize": "16px", "labelBold": true}, "labelPos": "top"}
+                        {"name": "moveHistoryTitle", "display": {"type": "label", "labelText": "Move History", "labelColor": "$COLOR_MOVE_HISTORY_TEXT", "labelFontSize": "16px", "labelBold": true}, "labelPos": "top"}
                     ],
                     "areas": [
                         {
