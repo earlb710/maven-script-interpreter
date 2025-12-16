@@ -164,13 +164,20 @@ public final class Console {
         // Buttons (optional)
         Button btnClear = new Button(" Clear ");
         btnClear.setOnAction(e -> outputArea.clear());
+        
+        Button btnReset = new Button(" Reset ");
+        btnReset.setOnAction(e -> resetConsole());
+        Tooltip resetTooltip = new Tooltip("Clear console, close all screens, stop all threads, and clear all globals");
+        resetTooltip.setShowDelay(javafx.util.Duration.millis(500));
+        btnReset.setTooltip(resetTooltip);
+        
         Button btnSubmit = new Button("Submit");
         btnSubmit.setOnAction(e -> submitInputBuffer());
         Tooltip bt = new Tooltip("[control + enter]");
         bt.setShowDelay(javafx.util.Duration.millis(500));
         btnSubmit.setTooltip(bt);
 
-        HBox bottom = new HBox(1, inputFrame, new Separator(Orientation.VERTICAL), new VBox(1, btnClear, btnSubmit));
+        HBox bottom = new HBox(1, inputFrame, new Separator(Orientation.VERTICAL), new VBox(1, btnClear, btnReset, btnSubmit));
         bottom.setPadding(new Insets(3));
         inputScroller.setMaxWidth(Double.MAX_VALUE);
         inputEvents();
@@ -424,6 +431,86 @@ public final class Console {
             outputArea.clear();
             inputArea.clear();
         });
+    }
+
+    /**
+     * Reset the console by clearing output, closing all screens, stopping all threads,
+     * and clearing all global variables.
+     */
+    private void resetConsole() {
+        // Ensure we're on the JavaFX thread
+        if (!Platform.isFxApplicationThread()) {
+            Platform.runLater(this::resetConsole);
+            return;
+        }
+        
+        try {
+            // Get the handler as EbsHandler to access interpreter and context
+            if (handler instanceof com.eb.ui.ebs.EbsHandler) {
+                com.eb.ui.ebs.EbsHandler ebsHandler = (com.eb.ui.ebs.EbsHandler) handler;
+                
+                // Get the interpreter and context
+                com.eb.script.interpreter.Interpreter interpreter = ebsHandler.getInterpreter();
+                if (interpreter != null) {
+                    com.eb.script.interpreter.InterpreterContext context = interpreter.getContext();
+                    
+                    // Close all screens synchronously (we're already on JavaFX thread)
+                    if (context != null) {
+                        java.util.concurrent.ConcurrentHashMap<String, javafx.stage.Stage> screens = context.getScreens();
+                        for (java.util.Map.Entry<String, javafx.stage.Stage> entry : screens.entrySet()) {
+                            try {
+                                javafx.stage.Stage stage = entry.getValue();
+                                if (stage != null) {
+                                    stage.close();
+                                }
+                            } catch (Exception e) {
+                                // Ignore errors during cleanup
+                            }
+                        }
+                        
+                        // Interrupt all screen threads
+                        java.util.concurrent.ConcurrentHashMap<String, Thread> threads = context.getScreenThreads();
+                        for (java.util.Map.Entry<String, Thread> entry : threads.entrySet()) {
+                            try {
+                                Thread thread = entry.getValue();
+                                if (thread != null && thread.isAlive()) {
+                                    thread.interrupt();
+                                }
+                            } catch (Exception e) {
+                                // Ignore errors during cleanup
+                            }
+                        }
+                        
+                        // Clear all loaded plugins
+                        com.eb.script.interpreter.builtins.BuiltinsPlugin.clearAllPlugins();
+                        
+                        // Shutdown thread timers
+                        com.eb.script.interpreter.builtins.BuiltinsThread.shutdown();
+                        
+                        // Clear the context (screens, threads, etc.)
+                        context.clear();
+                    }
+                    
+                    // Clear all global variables from the environment
+                    com.eb.script.interpreter.Environment env = interpreter.environment();
+                    if (env != null) {
+                        env.clear();
+                    }
+                }
+                
+                // Clear console output and input
+                outputArea.clear();
+                inputArea.clear();
+                
+                // Print confirmation message
+                outputArea.printlnOk("Console reset: output cleared, screens closed, threads stopped, globals cleared.");
+            } else {
+                outputArea.printlnWarn("Cannot perform full reset: handler type not supported.");
+            }
+        } catch (Exception ex) {
+            outputArea.printlnError("Error during reset: " + ex.getMessage());
+            ex.printStackTrace();
+        }
     }
 
     /**
