@@ -110,6 +110,12 @@ public class Parser {
         return ret;
     }
 
+    /**
+     * Parse a script from a string. 
+     * Note: Import statements are NOT validated at parse time for string-based parsing
+     * because there is no file path context to resolve relative imports. Imports will
+     * be validated at runtime when the interpreter executes the import statement.
+     */
     public static RuntimeContext parse(String name, String script) throws IOException, ParseError {
         List<EbsToken> tokens = lexer.tokenize(script);
 
@@ -119,6 +125,12 @@ public class Parser {
         return ret;
     }
 
+    /**
+     * Parse source code and update an existing RuntimeContext.
+     * Note: Import statements are NOT validated at parse time because this method
+     * is typically used for REPL-style interactive execution. Imports will be
+     * validated at runtime when the interpreter executes the import statement.
+     */
     public static void parse(RuntimeContext context, String source, List<EbsToken> tokens) throws IOException, ParseError {
         Parser parser = new Parser(source, tokens);
         parser.parse();
