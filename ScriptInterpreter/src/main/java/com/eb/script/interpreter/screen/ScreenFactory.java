@@ -3573,7 +3573,8 @@ public class ScreenFactory {
                     if (dotIndex > 0) {
                         String setName = varRef.substring(0, dotIndex);
                         // Create or get the ToggleGroup for this screen and setname
-                        String toggleGroupKey = (screenName + "." + setName).toLowerCase();
+                        // Note: setName is already lowercase from varRef.toLowerCase() above
+                        String toggleGroupKey = screenName.toLowerCase() + "." + setName;
                         ToggleGroup toggleGroup = radioButtonToggleGroups.computeIfAbsent(toggleGroupKey, 
                             k -> new ToggleGroup());
                         // Assign the radio button to the toggle group

@@ -60,15 +60,23 @@ The implementation includes:
   - Demonstrates mutual exclusivity
   - Minimal example for testing
 
-### 5. RADIO_BUTTON_TEST_IMPLEMENTATION.md
-- **Location:** `RADIO_BUTTON_TEST_IMPLEMENTATION.md`
+### 4. TEST_RADIO_BUTTON_README.md
+- **Location:** `ScriptInterpreter/scripts/test/TEST_RADIO_BUTTON_README.md`
 - **Purpose:** Comprehensive documentation
 - **Content:**
-  - Usage instructions
-  - Test coverage details
-  - Expected output
+  - Usage instructions for all test scripts
+  - Detailed test coverage explanation
+  - Expected output examples
   - Troubleshooting guide
-  - Best practices
+  - Best practices for radio button usage
+
+### 5. RADIO_BUTTON_TEST_IMPLEMENTATION.md
+- **Location:** `RADIO_BUTTON_TEST_IMPLEMENTATION.md`
+- **Purpose:** Implementation summary document
+- **Content:**
+  - Overview of all changes and files
+  - Technical implementation details of the ToggleGroup fix
+  - Test results and validation
 
 ## Test Coverage
 
