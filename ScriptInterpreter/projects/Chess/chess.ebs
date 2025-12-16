@@ -522,8 +522,8 @@ setPieceImage(x: int, y: int, pieceImage: imagedata) {
     }
 }
 
-// Get chess piece symbol for move notation (letter)
-getPieceSymbol(pieceType: int) return string {
+// Get chess piece letter for move notation (K, Q, R, B, N, P)
+getPieceLetter(pieceType: int) return string {
     if pieceType == KING then { return "K"; }
     if pieceType == QUEEN then { return "Q"; }
     if pieceType == ROOK then { return "R"; }
@@ -566,7 +566,7 @@ coordsToAlgebraic(x: int, y: int) return string {
 // Format a move for the move history with piece icon, from position, and to position
 formatMove(fromX: int, fromY: int, toX: int, toY: int, pieceType: int, pieceColor: int, isCapture: bool, capturedPieceType: int, capturedPieceColor: int) return string {
     var pieceIcon: string = call getPieceIcon(pieceType, pieceColor);
-    var pieceSymbol: string = call getPieceSymbol(pieceType);
+    var pieceLetter: string = call getPieceLetter(pieceType);
     var fromSquare: string = call coordsToAlgebraic(fromX, fromY);
     var toSquare: string = call coordsToAlgebraic(toX, toY);
     
@@ -575,9 +575,9 @@ formatMove(fromX: int, fromY: int, toX: int, toY: int, pieceType: int, pieceColo
     
     if isCapture then {
         var capturedIcon: string = call getPieceIcon(capturedPieceType, capturedPieceColor);
-        moveText = pieceIcon + pieceSymbol + " " + fromSquare + "x" + toSquare + capturedIcon;
+        moveText = pieceIcon + pieceLetter + " " + fromSquare + "x" + toSquare + capturedIcon;
     } else {
-        moveText = pieceIcon + pieceSymbol + " " + fromSquare + "-" + toSquare;
+        moveText = pieceIcon + pieceLetter + " " + fromSquare + "-" + toSquare;
     }
     
     return moveText;
