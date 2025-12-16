@@ -22,11 +22,6 @@ import "chess-moves.ebs";
 // Usage:
 //   Run in EBS Console: /open scripts/app/chess.ebs then Ctrl+Enter
 
-// Define the chess cell bitmap type for bit-level field access
-ChessCell typeof bitmap { cellColor: 0, pieceType: 1-6, pieceColor: 7 };
-
-// Define position type for x,y coordinates
-posType typeof record { x: int, y: int };
 
 // Define chess piece record type with piece name, color, and position
 // Piece codes: K=King, Q=Queen, R=Rook, B=Bishop, N=Knight, P=Pawn

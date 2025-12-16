@@ -8,6 +8,12 @@
 //   - Move calculation for each piece type (pawn, knight, bishop, rook, queen, king)
 //   - Main validMoves() function that determines legal moves for any piece
 
+// Define the chess cell bitmap type for bit-level field access
+ChessCell typeof bitmap { cellColor: 0, pieceType: 1-6, pieceColor: 7 };
+
+// Define position type for x,y coordinates
+posType typeof record { x: int, y: int };
+
 // Helper function to create a posType record from x, y coordinates
 function createPos(x: int, y: int) return posType {
     var jsonStr: string = '{"x": ' + x + ', "y": ' + y + '}';
