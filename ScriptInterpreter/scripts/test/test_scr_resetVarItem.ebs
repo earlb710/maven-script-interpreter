@@ -29,29 +29,79 @@ show screen testScreen;
 // Test resetVarItem
 print "Testing scr.resetVarItem...\n\n";
 
+// Test 1: Check initial original value
 var original: string = call scr.getVarOriginalValue("testScreen", "email");
 print "Original value: ";
 print original;
-print " (expected: john@example.com)\n\n";
+if original = "john@example.com" then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: john@example.com)\n";
+}
+
+// Test 2: Check initial status
+var status1: string = call scr.getItemStatus("testScreen", "email");
+print "Initial status: ";
+print status1;
+if status1 = "clean" then {
+    print " - PASS\n\n";
+} else {
+    print " - FAIL (expected: clean)\n\n";
+}
 
 print "Modifying email to 'jane@example.com'...\n";
 testScreen.email = "jane@example.com";
 
+// Test 3: Check current value after modification
 print "Current value: ";
 print testScreen.email;
-print " (expected: jane@example.com)\n\n";
+if testScreen.email = "jane@example.com" then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: jane@example.com)\n";
+}
+
+// Test 4: Check status is changed
+var status2: string = call scr.getItemStatus("testScreen", "email");
+print "Status after modification: ";
+print status2;
+if status2 = "changed" then {
+    print " - PASS\n\n";
+} else {
+    print " - FAIL (expected: changed)\n\n";
+}
 
 print "Calling scr.resetVarItem (simulating Cancel button)...\n";
 call scr.resetVarItem("testScreen", "email");
 
+// Test 5: Check current value reverted
 print "Current value after reset: ";
 print testScreen.email;
-print " (expected: john@example.com - reverted)\n";
+if testScreen.email = "john@example.com" then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: john@example.com)\n";
+}
 
+// Test 6: Check original value unchanged
 var originalAfter: string = call scr.getVarOriginalValue("testScreen", "email");
 print "Original value (unchanged): ";
 print originalAfter;
-print " (expected: john@example.com)\n";
+if originalAfter = "john@example.com" then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: john@example.com)\n";
+}
+
+// Test 7: Check status is clean again
+var status3: string = call scr.getItemStatus("testScreen", "email");
+print "Status after reset: ";
+print status3;
+if status3 = "clean" then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: clean)\n";
+}
 
 print "\n";
 print "Test completed successfully!\n";

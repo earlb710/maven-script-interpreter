@@ -54,25 +54,40 @@ print "Test 1: scr.getVarStateful\n";
 print "-------------------------------\n";
 
 var nameStateful: bool = call scr.getVarStateful("testVars", "customerName");
-var emailStateful: bool = call scr.getVarStateful("testVars", "email");
-var searchStateful: bool = call scr.getVarStateful("testVars", "searchFilter");
-var ageStateful: bool = call scr.getVarStateful("testVars", "age");
-
 print "customerName stateful: ";
 print nameStateful;
-print " (expected: true)\n";
+if nameStateful = true then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: true)\n";
+}
 
+var emailStateful: bool = call scr.getVarStateful("testVars", "email");
 print "email stateful: ";
 print emailStateful;
-print " (expected: true)\n";
+if emailStateful = true then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: true)\n";
+}
 
+var searchStateful: bool = call scr.getVarStateful("testVars", "searchFilter");
 print "searchFilter stateful: ";
 print searchStateful;
-print " (expected: false)\n";
+if searchStateful = false then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: false)\n";
+}
 
+var ageStateful: bool = call scr.getVarStateful("testVars", "age");
 print "age stateful: ";
 print ageStateful;
-print " (expected: true)\n";
+if ageStateful = true then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: true)\n";
+}
 print "\n";
 
 // ============================================
@@ -105,20 +120,41 @@ print "Test 3: scr.getVarOriginalValue\n";
 print "-------------------------------\n";
 
 var nameOriginal: string = call scr.getVarOriginalValue("testVars", "customerName");
-var emailOriginal: string = call scr.getVarOriginalValue("testVars", "email");
-var ageOriginal: int = call scr.getVarOriginalValue("testVars", "age");
-
 print "customerName original: ";
 print nameOriginal;
-print " (expected: John Doe)\n";
+if nameOriginal = "John Doe" then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: John Doe)\n";
+}
 
+var emailOriginal: string = call scr.getVarOriginalValue("testVars", "email");
 print "email original: ";
 print emailOriginal;
-print " (expected: john@example.com)\n";
+if emailOriginal = "john@example.com" then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: john@example.com)\n";
+}
 
+var ageOriginal: int = call scr.getVarOriginalValue("testVars", "age");
 print "age original: ";
 print ageOriginal;
-print " (expected: 30)\n";
+if ageOriginal = 30 then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: 30)\n";
+}
+
+// Check initial status
+var nameStatus1: string = call scr.getItemStatus("testVars", "customerName");
+print "customerName status: ";
+print nameStatus1;
+if nameStatus1 = "clean" then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: clean)\n";
+}
 print "\n";
 
 // ============================================
@@ -132,12 +168,29 @@ testVars.customerName = "Jane Smith";
 
 print "Current value: ";
 print testVars.customerName;
-print "\n";
+if testVars.customerName = "Jane Smith" then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: Jane Smith)\n";
+}
+
+var statusBeforeSubmit: string = call scr.getItemStatus("testVars", "customerName");
+print "Status before submit: ";
+print statusBeforeSubmit;
+if statusBeforeSubmit = "changed" then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: changed)\n";
+}
 
 var origBeforeSubmit: string = call scr.getVarOriginalValue("testVars", "customerName");
 print "Original before submit: ";
 print origBeforeSubmit;
-print "\n";
+if origBeforeSubmit = "John Doe" then {
+    print " - PASS\n\n";
+} else {
+    print " - FAIL (expected: John Doe)\n\n";
+}
 
 print "Calling scr.submitVarItem (simulating save to database)...\n";
 call scr.submitVarItem("testVars", "customerName");
@@ -145,7 +198,20 @@ call scr.submitVarItem("testVars", "customerName");
 var origAfterSubmit: string = call scr.getVarOriginalValue("testVars", "customerName");
 print "Original after submit: ";
 print origAfterSubmit;
-print " (expected: Jane Smith)\n";
+if origAfterSubmit = "Jane Smith" then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: Jane Smith)\n";
+}
+
+var statusAfterSubmit: string = call scr.getItemStatus("testVars", "customerName");
+print "Status after submit: ";
+print statusAfterSubmit;
+if statusAfterSubmit = "clean" then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: clean)\n";
+}
 print "\n";
 
 // ============================================
@@ -159,14 +225,40 @@ testVars.customerName = "Alice Brown";
 
 print "Current value before reset: ";
 print testVars.customerName;
-print "\n";
+if testVars.customerName = "Alice Brown" then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: Alice Brown)\n";
+}
+
+var statusBeforeReset: string = call scr.getItemStatus("testVars", "customerName");
+print "Status before reset: ";
+print statusBeforeReset;
+if statusBeforeReset = "changed" then {
+    print " - PASS\n\n";
+} else {
+    print " - FAIL (expected: changed)\n\n";
+}
 
 print "Calling scr.resetVarItem (reverting to original)...\n";
 call scr.resetVarItem("testVars", "customerName");
 
 print "Current value after reset: ";
 print testVars.customerName;
-print " (expected: Jane Smith from previous submit)\n";
+if testVars.customerName = "Jane Smith" then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: Jane Smith)\n";
+}
+
+var statusAfterReset: string = call scr.getItemStatus("testVars", "customerName");
+print "Status after reset: ";
+print statusAfterReset;
+if statusAfterReset = "clean" then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: clean)\n";
+}
 print "\n";
 
 // ============================================

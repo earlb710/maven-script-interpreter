@@ -29,24 +29,69 @@ show screen testScreen;
 // Test clearVarItem
 print "Testing scr.clearVarItem...\n\n";
 
+// Test 1: Check initial status
+var status1: string = call scr.getItemStatus("testScreen", "notes");
+print "Initial status: ";
+print status1;
+if status1 = "clean" then {
+    print " - PASS\n\n";
+} else {
+    print " - FAIL (expected: clean)\n\n";
+}
+
 print "Setting notes to 'User typed something'...\n";
 testScreen.notes = "User typed something";
 
+// Test 2: Check current value after modification
 print "Current value: ";
 print testScreen.notes;
-print " (expected: User typed something)\n\n";
+if testScreen.notes = "User typed something" then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: User typed something)\n";
+}
+
+// Test 3: Check status is changed
+var status2: string = call scr.getItemStatus("testScreen", "notes");
+print "Status after modification: ";
+print status2;
+if status2 = "changed" then {
+    print " - PASS\n\n";
+} else {
+    print " - FAIL (expected: changed)\n\n";
+}
 
 print "Calling scr.clearVarItem (simulating Clear Form button)...\n";
 call scr.clearVarItem("testScreen", "notes");
 
+// Test 4: Check current value cleared to default
 print "Current value after clear: ";
 print testScreen.notes;
-print " (expected: Enter notes here - the default)\n";
+if testScreen.notes = "Enter notes here" then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: Enter notes here)\n";
+}
 
+// Test 5: Check original value unchanged
 var original: string = call scr.getVarOriginalValue("testScreen", "notes");
 print "Original value (unchanged): ";
 print original;
-print " (expected: Enter notes here - still the same)\n";
+if original = "Enter notes here" then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: Enter notes here)\n";
+}
+
+// Test 6: Check status is clean (current equals original/default)
+var status3: string = call scr.getItemStatus("testScreen", "notes");
+print "Status after clear: ";
+print status3;
+if status3 = "clean" then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: clean)\n";
+}
 
 print "\n";
 print "Test completed successfully!\n";

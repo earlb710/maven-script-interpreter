@@ -29,27 +29,75 @@ show screen testScreen;
 // Test setVarStateful
 print "Testing scr.setVarStateful...\n\n";
 
+// Test 1: Check initial stateful property
 var initialStateful: bool = call scr.getVarStateful("testScreen", "myField");
 print "Initial stateful: ";
 print initialStateful;
-print " (expected: true)\n\n";
+if initialStateful = true then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: true)\n";
+}
+
+// Test 2: Check initial state
+var status1: string = call scr.getItemStatus("testScreen", "myField");
+print "Initial status: ";
+print status1;
+if status1 = "clean" then {
+    print " - PASS\n\n";
+} else {
+    print " - FAIL (expected: clean)\n\n";
+}
 
 print "Setting stateful to false...\n";
 call scr.setVarStateful("testScreen", "myField", false);
 
+// Test 3: Verify stateful changed to false
 var afterStateful: bool = call scr.getVarStateful("testScreen", "myField");
 print "After change: ";
 print afterStateful;
-print " (expected: false)\n\n";
+if afterStateful = false then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: false)\n";
+}
+
+// Test 4: Test that modifications still update status
+testScreen.myField = "modified value";
+var status2: string = call scr.getItemStatus("testScreen", "myField");
+print "Status after modification: ";
+print status2;
+if status2 = "changed" then {
+    print " - PASS\n\n";
+} else {
+    print " - FAIL (expected: changed)\n\n";
+}
 
 print "Setting stateful back to true...\n";
 call scr.setVarStateful("testScreen", "myField", true);
 
+// Test 5: Verify stateful changed back to true
 var finalStateful: bool = call scr.getVarStateful("testScreen", "myField");
 print "Final stateful: ";
 print finalStateful;
-print " (expected: true)\n";
+if finalStateful = true then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: true)\n";
+}
+
+// Test 6: Verify status remains unchanged (still "changed")
+var status3: string = call scr.getItemStatus("testScreen", "myField");
+print "Status (should be unchanged): ";
+print status3;
+if status3 = "changed" then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: changed)\n";
+}
 
 print "\n";
 print "Test completed successfully!\n";
+print "Note: Changing stateful property does not affect existing status,\n";
+print "      only future screen-level dirty tracking behavior.\n";
 print "\n";

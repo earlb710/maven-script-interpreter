@@ -29,30 +29,89 @@ show screen testScreen;
 // Test submitVarItem
 print "Testing scr.submitVarItem...\n\n";
 
+// Test 1: Check initial original value
 var original1: string = call scr.getVarOriginalValue("testScreen", "customerName");
 print "Initial original value: ";
 print original1;
-print " (expected: John Doe)\n\n";
+if original1 = "John Doe" then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: John Doe)\n";
+}
+
+// Test 2: Check initial status is clean
+var status1: string = call scr.getItemStatus("testScreen", "customerName");
+print "Initial status: ";
+print status1;
+if status1 = "clean" then {
+    print " - PASS\n\n";
+} else {
+    print " - FAIL (expected: clean)\n\n";
+}
 
 print "Modifying customer name to 'Jane Smith'...\n";
 testScreen.customerName = "Jane Smith";
 
+// Test 3: Check current value after modification
 print "Current value: ";
 print testScreen.customerName;
-print "\n";
+if testScreen.customerName = "Jane Smith" then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: Jane Smith)\n";
+}
 
+// Test 4: Check status is now changed
+var status2: string = call scr.getItemStatus("testScreen", "customerName");
+print "Status after modification: ";
+print status2;
+if status2 = "changed" then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: changed)\n";
+}
+
+// Test 5: Check original value is still unchanged before submit
 var original2: string = call scr.getVarOriginalValue("testScreen", "customerName");
 print "Original value (before submit): ";
 print original2;
-print " (expected: still John Doe)\n\n";
+if original2 = "John Doe" then {
+    print " - PASS\n\n";
+} else {
+    print " - FAIL (expected: John Doe)\n\n";
+}
 
 print "Calling scr.submitVarItem (simulating database save)...\n";
 call scr.submitVarItem("testScreen", "customerName");
 
+// Test 6: Check original value updated after submit
 var original3: string = call scr.getVarOriginalValue("testScreen", "customerName");
 print "Original value (after submit): ";
 print original3;
-print " (expected: now Jane Smith)\n";
+if original3 = "Jane Smith" then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: Jane Smith)\n";
+}
+
+// Test 7: Check current value unchanged
+print "Current value (after submit): ";
+print testScreen.customerName;
+if testScreen.customerName = "Jane Smith" then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: Jane Smith)\n";
+}
+
+// Test 8: Check status is now clean again
+var status3: string = call scr.getItemStatus("testScreen", "customerName");
+print "Status after submit: ";
+print status3;
+if status3 = "clean" then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: clean)\n";
+}
 
 print "\n";
 print "Test completed successfully!\n";

@@ -29,6 +29,24 @@ show screen testScreen;
 // Test initVarItem
 print "Testing scr.initVarItem...\n\n";
 
+// Test 1: Check initial values
+print "Initial current value: ";
+print testScreen.count;
+if testScreen.count = 0 then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: 0)\n";
+}
+
+var originalInit: int = call scr.getVarOriginalValue("testScreen", "count");
+print "Initial original value: ";
+print originalInit;
+if originalInit = 0 then {
+    print " - PASS\n\n";
+} else {
+    print " - FAIL (expected: 0)\n\n";
+}
+
 print "Setting count to 42...\n";
 testScreen.count = 42;
 
@@ -36,29 +54,79 @@ testScreen.count = 42;
 print "Submitting to make 42 the original value...\n";
 call scr.submitVarItem("testScreen", "count");
 
+// Test 2: Check original value updated after submit
 var original1: int = call scr.getVarOriginalValue("testScreen", "count");
 print "Current original value: ";
 print original1;
-print " (expected: 42)\n\n";
+if original1 = 42 then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: 42)\n";
+}
+
+// Test 3: Check status is clean after submit
+var status1: string = call scr.getItemStatus("testScreen", "count");
+print "Status after submit: ";
+print status1;
+if status1 = "clean" then {
+    print " - PASS\n\n";
+} else {
+    print " - FAIL (expected: clean)\n\n";
+}
 
 print "Setting count to 100...\n";
 testScreen.count = 100;
 
+// Test 4: Check current value
 print "Current value: ";
 print testScreen.count;
-print " (expected: 100)\n\n";
+if testScreen.count = 100 then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: 100)\n";
+}
+
+// Test 5: Check status is changed
+var status2: string = call scr.getItemStatus("testScreen", "count");
+print "Status after change: ";
+print status2;
+if status2 = "changed" then {
+    print " - PASS\n\n";
+} else {
+    print " - FAIL (expected: changed)\n\n";
+}
 
 print "Calling scr.initVarItem (resetting to default as new original)...\n";
 call scr.initVarItem("testScreen", "count");
 
+// Test 6: Check current value reset to default
 print "Current value after init: ";
 print testScreen.count;
-print " (expected: 0 - the default)\n";
+if testScreen.count = 0 then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: 0)\n";
+}
 
+// Test 7: Check original value also reset to default
 var original2: int = call scr.getVarOriginalValue("testScreen", "count");
 print "Original value after init: ";
 print original2;
-print " (expected: 0 - now the new original)\n";
+if original2 = 0 then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: 0)\n";
+}
+
+// Test 8: Check status is clean
+var status3: string = call scr.getItemStatus("testScreen", "count");
+print "Status after init: ";
+print status3;
+if status3 = "clean" then {
+    print " - PASS\n";
+} else {
+    print " - FAIL (expected: clean)\n";
+}
 
 print "\n";
 print "Test completed successfully!\n";
