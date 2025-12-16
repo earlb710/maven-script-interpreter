@@ -3764,6 +3764,8 @@ call system.alertDialog(message, title?, alertType?);
 
 // Thread/timing
 call thread.sleep(milliseconds);  // Pause execution
+var timerName = call thread.timerStart(name, period, callback);  // Start repeating timer
+var stopped = call thread.timerStop(name);  // Stop repeating timer
 ```
 
 #### thread.sleep(milliseconds)
@@ -3793,6 +3795,109 @@ for (var i: int = 0; i < 5; i++) {
 - Rate limiting API calls
 - Animation timing
 - Waiting for resources to become available
+
+#### thread.timerStart(name, period, callback)
+Starts a repeating timer that invokes a callback function at fixed intervals. The timer runs asynchronously in the background and continues until explicitly stopped with `thread.timerStop()`.
+
+```javascript
+// Define callback function (receives timer name as parameter)
+timerCallback(timerName: string) {
+    print "Timer fired: " + timerName;
+}
+
+// Start timer that fires every 1000ms (1 second)
+var name: string = call thread.timerStart("myTimer", 1000, "timerCallback");
+
+// Stop the timer when done
+call thread.timerStop("myTimer");
+```
+
+**Parameters:**
+- `name` (string, required): Unique identifier for the timer
+- `period` (long, required): Time interval in milliseconds between callback invocations
+- `callback` (string, required): Name of the function to call when the timer fires
+
+**Returns:** String - The timer name for convenience
+
+**Behavior:**
+- Callbacks execute on the JavaFX Application Thread for UI safety
+- Multiple timers can run concurrently with unique names
+- Starting a timer with an existing name replaces the old timer
+- The callback function receives the timer name as its only parameter
+
+**Use Cases:**
+- Periodic polling or checking
+- Animation updates
+- Auto-refresh functionality
+- Background monitoring tasks
+- Countdown timers
+
+**Example - Self-stopping timer:**
+```javascript
+var count: int = 0;
+
+countdownCallback(name: string) {
+    count = count + 1;
+    print "Count: " + call str.toString(count);
+    
+    // Stop after 5 iterations
+    if count >= 5 then
+        call thread.timerStop(name);
+        print "Timer stopped!";
+    end
+}
+
+call thread.timerStart("countdown", 1000, "countdownCallback");
+```
+
+**Example - Multiple concurrent timers:**
+```javascript
+fastCallback(name: string) {
+    print "Fast: " + name;
+}
+
+slowCallback(name: string) {
+    print "Slow: " + name;
+}
+
+// Start two timers with different periods
+call thread.timerStart("fast", 500, "fastCallback");
+call thread.timerStart("slow", 2000, "slowCallback");
+
+// Stop both when done
+call thread.timerStop("fast");
+call thread.timerStop("slow");
+```
+
+#### thread.timerStop(name)
+Stops a repeating timer that was started with `thread.timerStart()`. The timer is cancelled gracefully and removed from the registry.
+
+```javascript
+// Stop a running timer
+var stopped: bool = call thread.timerStop("myTimer");
+
+if stopped then
+    print "Timer stopped successfully";
+else
+    print "Timer not found (already stopped or never started)";
+end
+```
+
+**Parameters:**
+- `name` (string, required): The name of the timer to stop
+
+**Returns:** Boolean - `true` if timer was stopped, `false` if timer was not found
+
+**Behavior:**
+- Safe to call on non-existent timers (returns false)
+- Does not interrupt currently executing callbacks
+- Thread-safe operation
+
+**Use Cases:**
+- Stopping timers when conditions are met
+- Cleanup on exit or navigation
+- Manual stop controls
+- Timer lifecycle management
 
 #### Dialog Functions
 

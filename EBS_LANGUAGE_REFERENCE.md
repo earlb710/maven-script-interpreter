@@ -1,6 +1,6 @@
 # EBS Language Reference
 
-**Documentation Version: 1.0.7.11**
+**Documentation Version: 1.0.8.12**
 
 This document serves as a pointer to the comprehensive EBS (Earl Bosch Script) language documentation.
 
@@ -85,7 +85,7 @@ EBS uses a four-part versioning system: **`language.keyword.builtin.build`**
 
 Each version component is incremented independently based on the type of change made.
 
-**Current Version: 1.0.7.11** (Language v1, Keyword v0, Builtin v7, Build 11)
+**Current Version: 1.0.8.12** (Language v1, Keyword v0, Builtin v8, Build 12)
 
 ### Getting the Language Version Programmatically
 

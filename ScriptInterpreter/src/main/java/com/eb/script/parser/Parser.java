@@ -2308,9 +2308,18 @@ public class Parser {
             if (requireSemicolon) {
                 consume(EbsTokenType.SEMICOLON, "Expected ';' after compound assignment.");
             }
+        } else if (match(EbsTokenType.PERCENT_EQUAL)) {
+            // i %= x becomes i = i % x
+            Expression right = expression();
+            value = new BinaryExpression(name.line, lvalue, 
+                new EbsToken(EbsTokenType.PERCENT, "%", name.line, 0, 0),
+                right);
+            if (requireSemicolon) {
+                consume(EbsTokenType.SEMICOLON, "Expected ';' after compound assignment.");
+            }
         } else {
             // Regular assignment
-            consume(EbsTokenType.EQUAL, "Expected '=', '+=', '-=', '*=', '/=', '++', or '--' after variable name or index.");
+            consume(EbsTokenType.EQUAL, "Expected '=', '+=', '-=', '*=', '/=', '%=', '++', or '--' after variable name or index.");
             if (check(EbsTokenType.SELECT)) {
                 value = parseSqlSelectFromSource();
             } else {
@@ -2641,7 +2650,7 @@ public class Parser {
     private Expression multiplication() throws ParseError {
         Expression expr = unary();
 
-        while (match(EbsTokenType.STAR, EbsTokenType.SLASH)) {
+        while (match(EbsTokenType.STAR, EbsTokenType.SLASH, EbsTokenType.PERCENT)) {
             EbsToken operator = previous();
             Expression right = unary();
             expr = new BinaryExpression(currToken.line, expr, operator, right);

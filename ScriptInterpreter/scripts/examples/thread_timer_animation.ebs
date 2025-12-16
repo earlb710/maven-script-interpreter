@@ -1,0 +1,34 @@
+// EBS Language Reference v1.0.8.12 - Animation timer
+// Example: Simple text-based animation using repeating timer
+
+var frame: int = 0;
+var maxFrames: int = 20;
+var animChars = ["|", "/", "-", "\\"];
+
+// Animation callback - updates every 100ms
+animationFrame(timerName: string) {
+    frame = frame + 1;
+    
+    // Get animation character (cycle through the array)
+    var charIndex: int = frame % 4;
+    var animChar: string = animChars[charIndex];
+    
+    // Display progress bar
+    var progress: int = (frame * 100) / maxFrames;
+    var progressStr: string = call str.toString(progress);
+    
+    print "Loading " + animChar + " " + progressStr + "%";
+    
+    // Stop after maxFrames
+    if frame >= maxFrames then {
+        call thread.timerStop(timerName);
+        print "";
+        print "Animation complete!";
+    }
+}
+
+// Start animation timer
+print "Starting animation (will run for " + call str.toString(maxFrames / 10) + " seconds)";
+print "";
+
+call thread.timerStart("animation", 100, "animationFrame");
