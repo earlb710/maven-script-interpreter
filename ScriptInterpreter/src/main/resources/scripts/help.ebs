@@ -465,10 +465,48 @@ tempNode = call json.set(tempNode, "value", "Screen areas");
 tempNode = call json.set(tempNode, "icon", "icons/info-page.png");
 call array.add(screenChildren, tempNode);
 
-tempNode = call json.jsonFromString("{}");
-tempNode = call json.set(tempNode, "value", "Screen items");
-tempNode = call json.set(tempNode, "icon", "icons/info-page.png");
-call array.add(screenChildren, tempNode);
+// Build Screen items with control type sub-nodes
+var screenItemsChildren: array[*];
+
+// Add control type nodes
+var controlTypes: array[*] = [];
+call array.add(controlTypes, "textfield");
+call array.add(controlTypes, "textarea");
+call array.add(controlTypes, "passwordfield");
+call array.add(controlTypes, "checkbox");
+call array.add(controlTypes, "radiobutton");
+call array.add(controlTypes, "togglebutton");
+call array.add(controlTypes, "combobox");
+call array.add(controlTypes, "choicebox");
+call array.add(controlTypes, "listview");
+call array.add(controlTypes, "spinner");
+call array.add(controlTypes, "slider");
+call array.add(controlTypes, "datepicker");
+call array.add(controlTypes, "colorpicker");
+call array.add(controlTypes, "button");
+call array.add(controlTypes, "label");
+call array.add(controlTypes, "text");
+call array.add(controlTypes, "hyperlink");
+call array.add(controlTypes, "separator");
+call array.add(controlTypes, "imageview");
+call array.add(controlTypes, "webview");
+call array.add(controlTypes, "treeview");
+call array.add(controlTypes, "progressbar");
+call array.add(controlTypes, "chart");
+
+foreach controlType in controlTypes {
+    var ctNode: json = call json.jsonFromString("{}");
+    ctNode = call json.set(ctNode, "value", controlType);
+    ctNode = call json.set(ctNode, "icon", "icons/info-page.png");
+    call array.add(screenItemsChildren, ctNode);
+}
+
+var screenItemsNode: json = call json.jsonFromString("{}");
+screenItemsNode = call json.set(screenItemsNode, "value", "Screen items");
+screenItemsNode = call json.set(screenItemsNode, "icon", "icons/tree-node.png");
+screenItemsNode = call json.set(screenItemsNode, "expanded", false);
+screenItemsNode = call json.set(screenItemsNode, "children", screenItemsChildren);
+call array.add(screenChildren, screenItemsNode);
 
 // Create screen node with children
 var screenNode: json = call json.jsonFromString("{}");
@@ -741,8 +779,8 @@ convertToHtml(text: string) return string {
                                 var m: int = 0;
                                 while m < bcLen {
                                     var ch: string = call str.substring(beforeColon, m, m + 1);
-                                    // Allow uppercase letters, spaces, numbers, and common punctuation
-                                    if ch != " " and ch != "A" and ch != "B" and ch != "C" and ch != "D" and ch != "E" and ch != "F" and ch != "G" and ch != "H" and ch != "I" and ch != "J" and ch != "K" and ch != "L" and ch != "M" and ch != "N" and ch != "O" and ch != "P" and ch != "Q" and ch != "R" and ch != "S" and ch != "T" and ch != "U" and ch != "V" and ch != "W" and ch != "X" and ch != "Y" and ch != "Z" and ch != "0" and ch != "1" and ch != "2" and ch != "3" and ch != "4" and ch != "5" and ch != "6" and ch != "7" and ch != "8" and ch != "9" then {
+                                    // Allow uppercase letters, spaces, numbers, and common punctuation (&, -, /)
+                                    if ch != " " and ch != "&" and ch != "-" and ch != "/" and ch != "A" and ch != "B" and ch != "C" and ch != "D" and ch != "E" and ch != "F" and ch != "G" and ch != "H" and ch != "I" and ch != "J" and ch != "K" and ch != "L" and ch != "M" and ch != "N" and ch != "O" and ch != "P" and ch != "Q" and ch != "R" and ch != "S" and ch != "T" and ch != "U" and ch != "V" and ch != "W" and ch != "X" and ch != "Y" and ch != "Z" and ch != "0" and ch != "1" and ch != "2" and ch != "3" and ch != "4" and ch != "5" and ch != "6" and ch != "7" and ch != "8" and ch != "9" then {
                                         allUpper = false;
                                         break;
                                     }
@@ -1252,6 +1290,9 @@ call scr.setTreeItemBold("helpScreen", "Help Topics.Syntax.Screen", true);
 
 // Data section - Integer Types has children
 call scr.setTreeItemBold("helpScreen", "Help Topics.Syntax.Data.Integer Types", true);
+
+// Screen section - Screen items has children (control types)
+call scr.setTreeItemBold("helpScreen", "Help Topics.Syntax.Screen.Screen items", true);
 
 // Builtins section - all category nodes have children
 if categoryOrderArray.length > 0 then {
