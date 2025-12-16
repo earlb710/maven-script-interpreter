@@ -69,16 +69,20 @@ public class ControlUpdater {
                 String valueStr = value != null ? String.valueOf(value) : null;
                 
                 // Find and select the radio button that matches the value
+                // The ToggleGroup automatically handles deselecting other radio buttons
                 for (javafx.scene.Node child : vbox.getChildren()) {
                     if (child instanceof RadioButton) {
                         RadioButton rb = (RadioButton) child;
                         Object userData = rb.getUserData();
                         if (userData != null && userData.equals(valueStr)) {
-                            rb.setSelected(true);
+                            // Using ToggleGroup.selectToggle ensures proper mutual exclusivity
+                            toggleGroup.selectToggle(rb);
                             return;
                         }
                     }
                 }
+                // If no match found, clear the selection
+                toggleGroup.selectToggle(null);
                 return;
             }
         }

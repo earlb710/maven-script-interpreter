@@ -156,7 +156,6 @@ public class ControlListenerFactory {
             Object toggleGroupObj = vbox.getProperties().get("toggleGroup");
             if (toggleGroupObj instanceof ToggleGroup) {
                 ToggleGroup toggleGroup = (ToggleGroup) toggleGroupObj;
-                Object optionsMapObj = vbox.getProperties().get("optionsMap");
                 
                 // Add listener to the ToggleGroup
                 toggleGroup.selectedToggleProperty().addListener((obs, oldToggle, newToggle) -> {
