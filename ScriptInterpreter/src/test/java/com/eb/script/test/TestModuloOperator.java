@@ -148,6 +148,45 @@ public class TestModuloOperator {
             }
             System.out.println();
             
+            // Test 8: Using "mod" keyword instead of %
+            System.out.println("Test 8: Using 'mod' keyword");
+            String script8 = """
+                var a: int = 17;
+                var b: int = 5;
+                var result: int = a mod b;
+                print("17 mod 5 = " + result);
+                """;
+            
+            try {
+                RuntimeContext ctx8 = Parser.parse("test8", script8);
+                Interpreter interp8 = new Interpreter();
+                interp8.interpret(ctx8);
+                System.out.println("✓ Test 8 passed - 'mod' keyword works");
+            } catch (Exception e) {
+                System.err.println("✗ Test 8 failed: " + e.getMessage());
+                e.printStackTrace();
+            }
+            System.out.println();
+            
+            // Test 9: Using %= compound assignment operator
+            System.out.println("Test 9: Using %= compound assignment");
+            String script9 = """
+                var x: int = 17;
+                x %= 5;
+                print("17 %= 5: x = " + x);
+                """;
+            
+            try {
+                RuntimeContext ctx9 = Parser.parse("test9", script9);
+                Interpreter interp9 = new Interpreter();
+                interp9.interpret(ctx9);
+                System.out.println("✓ Test 9 passed - %= compound assignment works");
+            } catch (Exception e) {
+                System.err.println("✗ Test 9 failed: " + e.getMessage());
+                e.printStackTrace();
+            }
+            System.out.println();
+            
             System.out.println("All tests completed!");
             
         } catch (Exception e) {
