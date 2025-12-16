@@ -1,0 +1,85 @@
+// Test script to verify timer screen updates work correctly
+// This script creates a simple screen with a label that updates via a timer callback
+
+print "=== Timer Screen Update Test ===";
+print "";
+
+// Create a simple test screen
+screen testTimerScreen {
+    area main {
+        label timerLabel {
+            text: "00:00";
+            font: {name: "Arial", size: 24};
+        }
+        
+        button startBtn {
+            text: "Start Timer";
+            onClick: startTimerTest;
+        }
+        
+        button stopBtn {
+            text: "Stop Timer";
+            onClick: stopTimerTest;
+        }
+    }
+}
+
+var timerValue: int = 0;
+var timerRunning: bool = false;
+
+// Timer callback that updates the screen label
+timerUpdateCallback(timerName: string) {
+    if timerRunning then {
+        timerValue = timerValue + 1;
+        
+        // Format timer value as MM:SS
+        var minutes: int = timerValue / 60;
+        var seconds: int = call modulo(timerValue, 60);
+        
+        var minutesStr: string = call str.toString(minutes);
+        if minutes < 10 then {
+            minutesStr = "0" + minutesStr;
+        }
+        
+        var secondsStr: string = call str.toString(seconds);
+        if seconds < 10 then {
+            secondsStr = "0" + secondsStr;
+        }
+        
+        var timeText: string = minutesStr + ":" + secondsStr;
+        
+        // Update the screen label using scr.setproperty
+        // This should update immediately when called from timer callback (fix applied)
+        call scr.setproperty("testTimerScreen.timerLabel", "text", timeText);
+        
+        // Print every 5 seconds to show it's working
+        if call modulo(timerValue, 5) == 0 then {
+            print "Timer: " + timeText + " (updated via scr.setproperty)";
+        }
+    }
+}
+
+startTimerTest() {
+    if !timerRunning then {
+        timerRunning = true;
+        timerValue = 0;
+        print "Starting timer...";
+        call thread.timerStart("testTimer", 1000, "timerUpdateCallback");
+    }
+}
+
+stopTimerTest() {
+    if timerRunning then {
+        timerRunning = false;
+        print "Stopping timer...";
+        call thread.timerStop("testTimer");
+    }
+}
+
+// Show the screen
+call scr.show("testTimerScreen");
+
+print "Timer screen test ready!";
+print "Click 'Start Timer' to begin, 'Stop Timer' to end.";
+print "The timer label should update smoothly every second.";
+print "";
