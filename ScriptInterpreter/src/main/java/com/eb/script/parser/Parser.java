@@ -68,8 +68,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Parser {
@@ -86,7 +88,7 @@ public class Parser {
     private int loopDepth;
     private final String source;
     private final Path sourcePath; // Path to the source file being parsed, null for string-based parsing
-    private final java.util.Set<String> importedFiles; // Track imported files during parse phase
+    private final Set<String> importedFiles; // Track imported files during parse phase
 
     public static RuntimeContext parse(Path file) throws IOException, ParseError {
         // Check if this is a packaged .ebsp file
@@ -102,12 +104,12 @@ public class Parser {
 
         List<EbsToken> tokens = lexer.tokenize(script);
 
-        Parser parser = new Parser(script, tokens, file, new java.util.HashSet<>());
+        Parser parser = new Parser(script, tokens, file, new HashSet<>());
         parser.parse();
         RuntimeContext ret = new RuntimeContext(file.getFileName().toString(), file, parser.blocks, statementsToArray(parser.statements));
         
         // Validate all imports before returning
-        validateImports(ret, new java.util.HashSet<>());
+        validateImports(ret, new HashSet<>());
         
         return ret;
     }
@@ -121,7 +123,7 @@ public class Parser {
     public static RuntimeContext parse(String name, String script) throws IOException, ParseError {
         List<EbsToken> tokens = lexer.tokenize(script);
 
-        Parser parser = new Parser(script, tokens, null, new java.util.HashSet<>());
+        Parser parser = new Parser(script, tokens, null, new HashSet<>());
         parser.parse();
         RuntimeContext ret = new RuntimeContext(name, parser.blocks, statementsToArray(parser.statements));
         return ret;
@@ -134,13 +136,13 @@ public class Parser {
      * validated at runtime when the interpreter executes the import statement.
      */
     public static void parse(RuntimeContext context, String source, List<EbsToken> tokens) throws IOException, ParseError {
-        Parser parser = new Parser(source, tokens, null, new java.util.HashSet<>());
+        Parser parser = new Parser(source, tokens, null, new HashSet<>());
         parser.parse();
         context.blocks = parser.blocks;
         context.statements = statementsToArray(parser.statements);
     }
 
-    private Parser(String source, List<EbsToken> tokens, Path sourcePath, java.util.Set<String> importedFiles) {
+    private Parser(String source, List<EbsToken> tokens, Path sourcePath, Set<String> importedFiles) {
         this.tokens = tokens;
         this.source = source;
         this.sourcePath = sourcePath;
@@ -553,8 +555,10 @@ public class Parser {
         // Mark this file as processed
         importedFiles.add(importKey);
         
-        // Parse the imported file to register its typedefs
+        // Parse the imported file to register its typedefs in the TypeRegistry
         // The parse() method will recursively process any imports in the imported file
+        // Note: We discard the returned RuntimeContext because we only need the side effect
+        // of registering typedefs. The imported code will be executed later at runtime by the Interpreter.
         try {
             Parser.parse(importPath);
         } catch (ParseError e) {
@@ -1390,7 +1394,7 @@ public class Parser {
                 List<EbsToken> callTokens = lexer.tokenize(callText);
                 
                 // Create a temporary parser for this expression
-                Parser tempParser = new Parser(callText, callTokens, null, new java.util.HashSet<>());
+                Parser tempParser = new Parser(callText, callTokens, null, new HashSet<>());
                 // Initialize the parser state
                 tempParser.current = 0;
                 tempParser.currToken = callTokens.get(0);
