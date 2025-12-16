@@ -1357,6 +1357,7 @@ screen chessScreen = {
     "title": "Chess Game",
     "width": 980,
     "height": 780,
+    "cleanup": "print '=== SCREEN CLEANUP HANDLER EXECUTED ==='; print 'Stopping game and timer via cleanup handler...'; gameStarted = false; call thread.timerStop('chessTimer'); print 'Timer stopped by cleanup handler.'; print '=== CLEANUP HANDLER COMPLETE ==='; print '';",
     "vars": [
         {"name": "whiteTimer", "type": "string", "default": "10:00"},
         {"name": "blackTimer", "type": "string", "default": "10:00"},
