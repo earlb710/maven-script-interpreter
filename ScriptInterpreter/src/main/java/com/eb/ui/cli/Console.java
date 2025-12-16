@@ -164,13 +164,20 @@ public final class Console {
         // Buttons (optional)
         Button btnClear = new Button(" Clear ");
         btnClear.setOnAction(e -> outputArea.clear());
+        
+        Button btnReset = new Button(" Reset ");
+        btnReset.setOnAction(e -> resetConsole());
+        Tooltip resetTooltip = new Tooltip("Clear console, close all screens, stop all threads, and clear all globals");
+        resetTooltip.setShowDelay(javafx.util.Duration.millis(500));
+        btnReset.setTooltip(resetTooltip);
+        
         Button btnSubmit = new Button("Submit");
         btnSubmit.setOnAction(e -> submitInputBuffer());
         Tooltip bt = new Tooltip("[control + enter]");
         bt.setShowDelay(javafx.util.Duration.millis(500));
         btnSubmit.setTooltip(bt);
 
-        HBox bottom = new HBox(1, inputFrame, new Separator(Orientation.VERTICAL), new VBox(1, btnClear, btnSubmit));
+        HBox bottom = new HBox(1, inputFrame, new Separator(Orientation.VERTICAL), new VBox(1, btnClear, btnReset, btnSubmit));
         bottom.setPadding(new Insets(3));
         inputScroller.setMaxWidth(Double.MAX_VALUE);
         inputEvents();
@@ -424,6 +431,47 @@ public final class Console {
             outputArea.clear();
             inputArea.clear();
         });
+    }
+
+    /**
+     * Reset the console by clearing output, closing all screens, stopping all threads,
+     * and clearing all global variables.
+     */
+    private void resetConsole() {
+        try {
+            // Get the handler as EbsHandler to access interpreter and context
+            if (handler instanceof com.eb.ui.ebs.EbsHandler) {
+                com.eb.ui.ebs.EbsHandler ebsHandler = (com.eb.ui.ebs.EbsHandler) handler;
+                
+                // Get the interpreter and call cleanup to close screens and stop threads
+                com.eb.script.interpreter.Interpreter interpreter = ebsHandler.getInterpreter();
+                if (interpreter != null) {
+                    interpreter.cleanup();
+                }
+                
+                // Clear all global variables from the environment
+                com.eb.script.interpreter.Environment env = interpreter.environment();
+                if (env != null) {
+                    env.clear();
+                }
+                
+                // Clear console output and input (on JavaFX thread)
+                Platform.runLater(() -> {
+                    outputArea.clear();
+                    inputArea.clear();
+                    // Print confirmation message
+                    outputArea.printlnOk("Console reset: output cleared, screens closed, threads stopped, globals cleared.");
+                });
+            } else {
+                Platform.runLater(() -> {
+                    outputArea.printlnWarn("Cannot perform full reset: handler type not supported.");
+                });
+            }
+        } catch (Exception ex) {
+            Platform.runLater(() -> {
+                outputArea.printlnError("Error during reset: " + ex.getMessage());
+            });
+        }
     }
 
     /**
