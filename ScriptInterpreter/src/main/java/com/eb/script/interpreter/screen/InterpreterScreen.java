@@ -2673,6 +2673,24 @@ public class InterpreterScreen {
                             item.alignment = String.valueOf(itemDef.get("alignment")).toLowerCase();
                         }
                         
+                        // Parse contentAlignment (with snake_case support)
+                        if (itemDef.containsKey("contentAlignment")) {
+                            item.contentAlignment = String.valueOf(itemDef.get("contentAlignment")).toLowerCase();
+                        } else if (itemDef.containsKey("content_alignment")) {
+                            item.contentAlignment = String.valueOf(itemDef.get("content_alignment")).toLowerCase();
+                        } else if (itemDef.containsKey("contentalignment")) {
+                            item.contentAlignment = String.valueOf(itemDef.get("contentalignment")).toLowerCase();
+                        }
+                        
+                        // Parse itemAlignment (with snake_case support)
+                        if (itemDef.containsKey("itemAlignment")) {
+                            item.itemAlignment = String.valueOf(itemDef.get("itemAlignment")).toLowerCase();
+                        } else if (itemDef.containsKey("item_alignment")) {
+                            item.itemAlignment = String.valueOf(itemDef.get("item_alignment")).toLowerCase();
+                        } else if (itemDef.containsKey("itemalignment")) {
+                            item.itemAlignment = String.valueOf(itemDef.get("itemalignment")).toLowerCase();
+                        }
+                        
                         // Event handlers
                         // onValidate handler
                         if (itemDef.containsKey("onValidate")) {
