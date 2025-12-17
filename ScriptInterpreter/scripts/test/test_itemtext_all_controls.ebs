@@ -7,7 +7,7 @@ screen testAllControlsScreen = {
     "height": 700,
     "vars": [
         {
-            "name": "updateCount",
+            "name": "updatecount",
             "type": "int",
             "default": 0
         }
@@ -129,8 +129,8 @@ screen testAllControlsScreen = {
 
 // Function to update all control texts
 updateAllTexts() {
-    updateCount = updateCount + 1;
-    var countStr: string = string(updateCount);
+    updatecount = updatecount + 1;
+    var countStr: string = string(updatecount);
     
     // Update Button
     call scr.setProperty("testAllControlsScreen.testButton", "itemText", "Button: Updated " + countStr);
@@ -158,7 +158,7 @@ updateAllTexts() {
 
 // Function to reset all control texts
 resetAllTexts() {
-    updateCount = 0;
+    updatecount = 0;
     
     // Reset all controls to initial text
     call scr.setProperty("testAllControlsScreen.testButton", "itemText", "Button: Reset");
