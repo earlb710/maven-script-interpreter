@@ -236,6 +236,7 @@ public class InterpreterScreen {
             int height = config.containsKey("height") ? ((Number) config.get("height")).intValue() : 600;
             boolean maximize = config.containsKey("maximize") && Boolean.TRUE.equals(config.get("maximize"));
             boolean resizable = !config.containsKey("resizable") || Boolean.TRUE.equals(config.get("resizable")); // default true
+            boolean showMenu = !config.containsKey("showMenu") || Boolean.TRUE.equals(config.get("showMenu")); // default true
             
             // Extract startup and cleanup inline code if present
             String startupCode = config.containsKey("startup") ? String.valueOf(config.get("startup")) : null;
@@ -543,7 +544,7 @@ public class InterpreterScreen {
 
             // Store the screen configuration for lazy initialization
             ScreenConfig screenConfig = new ScreenConfig(
-                stmt.name, title, width, height, maximize, resizable,
+                stmt.name, title, width, height, maximize, resizable, showMenu,
                 screenVarMap, screenVarTypeMap,
                 varSetsMap, varItemsMap, areaItemsMap,
                 areas,
@@ -752,6 +753,8 @@ public class InterpreterScreen {
                     onClickHandler,
                     context
             );
+            // Set showMenu property before creating the screen
+            screenDef.setShowMenu(config.isShowMenu());
             stage = screenDef.createScreen();
         } else {
             // Create simple ScreenDefinition without areas
