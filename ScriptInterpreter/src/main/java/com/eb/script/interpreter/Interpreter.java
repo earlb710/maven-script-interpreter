@@ -123,6 +123,10 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         return context.isEchoOn();
     }
 
+    public ConcurrentHashMap<String, Object> getScreenVars(String screenName) {
+        return context.getScreenVars(screenName);
+    }
+    
     public void setDbAdapter(DbAdapter adapter) {
         context.setDb(adapter);
     }
