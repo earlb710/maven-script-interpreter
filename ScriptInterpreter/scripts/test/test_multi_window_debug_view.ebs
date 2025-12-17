@@ -16,7 +16,7 @@ var screen3Data: string = "Screen 3 Data";
 var testCounter: int = 0;
 
 // Helper function to generate unique test values
-incrementCounter() return int {
+incrementCounter return int {
     testCounter = testCounter + 1;
     return testCounter;
 }
@@ -65,19 +65,18 @@ screen testScreen1 = {
         },
         {
             "name": "incrementBtn",
-            "type": "button",
+            "type": "string",
+            "default": "",
             "display": {
                 "type": "button",
                 "labelText": "Increment Counter",
-                "onClick": "
-                    var c: int = call incrementCounter();
-                    scr.setVar('testScreen1', 'counter', c);
-                "
+                "onClick": "var c: int = call incrementCounter(); testScreen1.counter = c;"
             }
         },
         {
             "name": "instructions",
-            "type": "label",
+            "type": "string",
+            "default": "",
             "display": {
                 "type": "label",
                 "labelText": "Instructions: Press Ctrl+D to toggle debug view. Test copy button functionality."
@@ -139,19 +138,18 @@ screen testScreen2 = {
         },
         {
             "name": "updateBtn",
-            "type": "button",
+            "type": "string",
+            "default": "",
             "display": {
                 "type": "button",
                 "labelText": "Update Age",
-                "onClick": "
-                    var currentAge: int = scr.getVar('testScreen2', 'age');
-                    scr.setVar('testScreen2', 'age', currentAge + 1);
-                "
+                "onClick": "var currentAge: int = testScreen2.age; testScreen2.age = currentAge + 1;"
             }
         },
         {
             "name": "instructions2",
-            "type": "label",
+            "type": "string",
+            "default": "",
             "display": {
                 "type": "label",
                 "labelText": "Instructions: Open debug view here too (Ctrl+D). Both debug panels should work independently."
@@ -195,19 +193,18 @@ screen testScreen3 = {
         },
         {
             "name": "randomBtn",
-            "type": "button",
+            "type": "string",
+            "default": "",
             "display": {
                 "type": "button",
                 "labelText": "Randomize",
-                "onClick": "
-                    var r: int = call random.nextInt(1000);
-                    scr.setVar('testScreen3', 'testValue3', r);
-                "
+                "onClick": "var r: int = int(call random.nextLong(1000)); testScreen3.testValue3 = r;"
             }
         },
         {
             "name": "instructions3",
-            "type": "label",
+            "type": "string",
+            "default": "",
             "display": {
                 "type": "label",
                 "labelText": "Instructions: This is the third screen. Test rapid open/close of debug views across all screens."
