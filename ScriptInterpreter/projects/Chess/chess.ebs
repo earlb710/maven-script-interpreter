@@ -1288,6 +1288,7 @@ screen startupDialog = {
     "title": "Chess Game - Start",
     "width": 660,
     "height": 580,
+    "showMenu": false,
     "vars": [
         {
             "name": "logo",
@@ -1325,9 +1326,10 @@ screen startupDialog = {
         {
             "name": "mainArea",
             "type": "vbox",
+            "alignment": "center",
             "spacing": "10",
             "padding": "10",
-            "style": "-fx-background-color: #2c2c2c; -fx-alignment: center;",
+            "style": "-fx-background-color: #2c2c2c;",
             "items": [
                 {"name": "logoImage", "varRef": "logo", "display": {"type": "image", "fitWidth": 400, "fitHeight": 200, "preserveRatio": true}},
                 {"name": "titleLabel", "display": {"type": "label", "labelText": "\u265A Welcome to Chess! \u2654", "labelColor": "#ffcc00", "labelFontSize": "20px", "labelBold": true}},
@@ -1337,9 +1339,9 @@ screen startupDialog = {
                 {
                     "name": "timeLimitArea",
                     "type": "vbox",
+                    "alignment": "center",
                     "spacing": "10",
                     "padding": "10",
-                    "style": "-fx-alignment: center;",
                     "items": [
                         {"name": "instructionLabel", "display": {"type": "label", "labelText": "Select the time limit for each player:", "labelColor": "#ffffff", "labelFontSize": "14px", "style": "-fx-text-alignment: center;"}},
                         {"name": "timeLimitField", "varRef": "timeLimit"}
@@ -1348,9 +1350,9 @@ screen startupDialog = {
                 {
                     "name": "buttonArea",
                     "type": "hbox",
+                    "alignment": "center",
                     "spacing": "10",
                     "padding": "10",
-                    "style": "-fx-alignment: center;",
                     "items": [
                         {"name": "startBtn", "display": {"type": "button", "labelText": "Start Game", "onClick": "call handleStartGame();", "style": "-fx-font-size: 16px; -fx-padding: 10 30 10 30;"}},
                         {"name": "exitBtn", "display": {"type": "button", "labelText": "Exit", "onClick": "call handleExitGame();", "style": "-fx-font-size: 16px; -fx-padding: 10 30 10 30;"}}
