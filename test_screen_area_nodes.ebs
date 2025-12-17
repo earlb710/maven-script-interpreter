@@ -1,0 +1,112 @@
+// Test script for screen area nodes and properties
+
+screen loginScreen = {
+    "title": "Login Form - Area Nodes Test",
+    "width": 600,
+    "height": 400,
+    "sets": [
+        {
+            "setname": "main",
+            "vars": [
+                {"name": "message", "type": "string", "default": "Welcome!"},
+                {"name": "username", "type": "string", "default": ""},
+                {"name": "password", "type": "string", "default": ""}
+            ]
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "10",
+            "padding": "10",
+            "items": [],
+            "areas": [
+                {
+                    "name": "headerArea",
+                    "type": "hbox",
+                    "alignment": "center",
+                    "spacing": "10",
+                    "padding": "20",
+                    "items": [
+                        {
+                            "name": "messageLabel",
+                            "varRef": "message",
+                            "sequence": 1,
+                            "display": {
+                                "type": "label",
+                                "labelText": "Welcome Message"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "formArea",
+                    "type": "vbox",
+                    "alignment": "center",
+                    "spacing": "15",
+                    "padding": "20",
+                    "items": [
+                        {
+                            "name": "usernameField",
+                            "varRef": "username",
+                            "sequence": 1,
+                            "display": {
+                                "type": "textfield",
+                                "labelText": "Username:",
+                                "maxLength": 50
+                            }
+                        },
+                        {
+                            "name": "passwordField",
+                            "varRef": "password",
+                            "sequence": 2,
+                            "display": {
+                                "type": "passwordfield",
+                                "labelText": "Password:",
+                                "maxLength": 50
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "footerArea",
+                    "type": "hbox",
+                    "alignment": "right",
+                    "spacing": "10",
+                    "padding": "20",
+                    "items": []
+                }
+            ]
+        }
+    ]
+};
+
+show screen loginScreen;
+
+// Test 1: Get list of all area nodes
+print "Test 1: List all area nodes";
+print "===========================";
+var nodes = loginScreen.area.nodes;
+var numAreas = call array.length(nodes);
+print "Number of areas: " + call str.toString(numAreas);
+for (i = 0; i < numAreas; i = i + 1) {
+    print "  Area " + (i + 1) + ": " + nodes[i];
+}
+print "";
+
+// Test 2: Get help for each area type
+print "Test 2: Get help for each area";
+print "===============================";
+print loginScreen.headerArea.help;
+print "";
+print loginScreen.formArea.help;
+print "";
+
+// Test 3: Get JavaFX description for an area
+print "Test 3: Get JavaFX description";
+print "===============================";
+print loginScreen.headerArea.javafx;
+print "";
+
+print "All tests completed!";

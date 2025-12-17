@@ -902,6 +902,24 @@ public class ScreenFactory {
                                 // Limit to last two direct parents only
                                 String limitedAreaPath = limitAreaPathToTwoLevels(parentArea);
                                 tooltipText.append("\nArea: ").append(limitedAreaPath);
+                                
+                                // Add .javafx information for the area (container)
+                                java.util.concurrent.ConcurrentHashMap<String, com.eb.script.interpreter.screen.ScreenContainerType> containerTypes = 
+                                    context.getScreenContainerTypes(screenName);
+                                if (containerTypes != null) {
+                                    // Get the last area name from the path (e.g., "mainArea.childArea" -> "childArea")
+                                    String[] pathParts = parentArea.split("\\.");
+                                    String lastAreaName = pathParts[pathParts.length - 1];
+                                    String areaNameLower = lastAreaName.toLowerCase(java.util.Locale.ROOT);
+                                    
+                                    com.eb.script.interpreter.screen.ScreenContainerType containerType = containerTypes.get(areaNameLower);
+                                    if (containerType != null) {
+                                        String javafxInfo = containerType.getJavaFXDescription();
+                                        if (javafxInfo != null && !javafxInfo.isEmpty()) {
+                                            tooltipText.append("\n---\nContainer Info:\n").append(javafxInfo);
+                                        }
+                                    }
+                                }
                             }
                             tooltipText.append("\nState: ").append(state);
                             // Add all lookup keys if present
@@ -1054,6 +1072,24 @@ public class ScreenFactory {
                             // Limit to last two direct parents only (same as tooltip)
                             String limitedAreaPath = limitAreaPathToTwoLevels(parentArea);
                             clipboardBuilder.append("\nArea: ").append(limitedAreaPath);
+                            
+                            // Add .javafx information for the area (container) - same as tooltip
+                            java.util.concurrent.ConcurrentHashMap<String, com.eb.script.interpreter.screen.ScreenContainerType> containerTypes = 
+                                context.getScreenContainerTypes(screenName);
+                            if (containerTypes != null) {
+                                // Get the last area name from the path (e.g., "mainArea.childArea" -> "childArea")
+                                String[] pathParts = parentArea.split("\\.");
+                                String lastAreaName = pathParts[pathParts.length - 1];
+                                String areaNameLower = lastAreaName.toLowerCase(java.util.Locale.ROOT);
+                                
+                                com.eb.script.interpreter.screen.ScreenContainerType containerType = containerTypes.get(areaNameLower);
+                                if (containerType != null) {
+                                    String javafxInfo = containerType.getJavaFXDescription();
+                                    if (javafxInfo != null && !javafxInfo.isEmpty()) {
+                                        clipboardBuilder.append("\n---\nContainer Info:\n").append(javafxInfo);
+                                    }
+                                }
+                            }
                         }
                         clipboardBuilder.append("\nState: ").append(state);
                         // Add all lookup keys if present
@@ -3500,6 +3536,18 @@ public class ScreenFactory {
                 String containerTypeName = areaDef.areaType.toString().toLowerCase();
                 com.eb.script.interpreter.screen.ScreenContainerType containerType = 
                     new com.eb.script.interpreter.screen.ScreenContainerType(containerTypeName, container);
+                containerType.setScreenName(screenName);
+                containerType.setAreaName(areaDef.name);
+                
+                // Set child area names if they exist
+                if (areaDef.childAreas != null && !areaDef.childAreas.isEmpty()) {
+                    for (AreaDefinition childArea : areaDef.childAreas) {
+                        if (childArea.name != null) {
+                            containerType.addChildAreaName(childArea.name);
+                        }
+                    }
+                }
+                
                 containerTypes.put(areaNameLower, containerType);
             }
         }
@@ -3922,6 +3970,19 @@ public class ScreenFactory {
                 } else {
                     // Normal nested area handling
                     Region childContainer = createAreaWithItems(childArea, screenName, context, screenVars, varTypes, onClickHandler, boundControls);
+                    
+                    // Set parent relationship for the child container
+                    if (childArea.name != null && areaDef.name != null) {
+                        java.util.concurrent.ConcurrentHashMap<String, com.eb.script.interpreter.screen.ScreenContainerType> containerTypes = 
+                            context.getScreenContainerTypes(screenName);
+                        if (containerTypes != null) {
+                            String childAreaNameLower = childArea.name.toLowerCase(java.util.Locale.ROOT);
+                            com.eb.script.interpreter.screen.ScreenContainerType childContainerType = containerTypes.get(childAreaNameLower);
+                            if (childContainerType != null) {
+                                childContainerType.setParentAreaName(areaDef.name);
+                            }
+                        }
+                    }
                     
                     // Add the child container to the parent container
                     // Treat child areas as regular nodes

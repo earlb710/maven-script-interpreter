@@ -2128,8 +2128,9 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 String varName = propExpr.propertyName.toLowerCase(java.util.Locale.ROOT);
                 String property = expr.propertyName.toLowerCase(java.util.Locale.ROOT);
                 
-                // Check if this is .javafx property access
+                // Check if this is .javafx property access on a screen control
                 if ("javafx".equals(property)) {
+                    // First check if this is a screen control (button, textfield, etc.)
                     ConcurrentHashMap<String, com.eb.script.interpreter.screen.ScreenComponentType> componentTypes = 
                         context.getScreenComponentTypes(screenName);
                     
@@ -2138,7 +2139,125 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                         return componentType.getJavaFXDescription();
                     }
                     
-                    throw error(expr.getLine(), "No JavaFX component found for " + screenName + "." + varName);
+                    // If not a control, check if it's a container (area)
+                    ConcurrentHashMap<String, com.eb.script.interpreter.screen.ScreenContainerType> containerTypes = 
+                        context.getScreenContainerTypes(screenName);
+                    
+                    if (containerTypes != null && containerTypes.containsKey(varName)) {
+                        com.eb.script.interpreter.screen.ScreenContainerType containerType = containerTypes.get(varName);
+                        return containerType.getJavaFXDescription();
+                    }
+                    
+                    throw error(expr.getLine(), "No JavaFX component or container found for " + screenName + "." + varName);
+                }
+                
+                // Check if this is .help property access on a container (area)
+                if ("help".equals(property)) {
+                    ConcurrentHashMap<String, com.eb.script.interpreter.screen.ScreenContainerType> containerTypes = 
+                        context.getScreenContainerTypes(screenName);
+                    
+                    if (containerTypes != null && containerTypes.containsKey(varName)) {
+                        com.eb.script.interpreter.screen.ScreenContainerType containerType = containerTypes.get(varName);
+                        return containerType.getHelp();
+                    }
+                    
+                    throw error(expr.getLine(), "No container found for " + screenName + "." + varName);
+                }
+                
+                // Check if this is .properties property access on a container (area)
+                if ("properties".equals(property)) {
+                    ConcurrentHashMap<String, com.eb.script.interpreter.screen.ScreenContainerType> containerTypes = 
+                        context.getScreenContainerTypes(screenName);
+                    
+                    if (containerTypes != null && containerTypes.containsKey(varName)) {
+                        com.eb.script.interpreter.screen.ScreenContainerType containerType = containerTypes.get(varName);
+                        return containerType.getProperties();
+                    }
+                    
+                    throw error(expr.getLine(), "No container found for " + screenName + "." + varName);
+                }
+                
+                // Check if this is .parent property access on a container (area)
+                if ("parent".equals(property)) {
+                    ConcurrentHashMap<String, com.eb.script.interpreter.screen.ScreenContainerType> containerTypes = 
+                        context.getScreenContainerTypes(screenName);
+                    
+                    if (containerTypes != null && containerTypes.containsKey(varName)) {
+                        com.eb.script.interpreter.screen.ScreenContainerType containerType = containerTypes.get(varName);
+                        String parent = containerType.getParent();
+                        return parent != null ? parent : "";
+                    }
+                    
+                    throw error(expr.getLine(), "No container found for " + screenName + "." + varName);
+                }
+                
+                // Check if this is .children property access on a container (area)
+                if ("children".equals(property)) {
+                    ConcurrentHashMap<String, com.eb.script.interpreter.screen.ScreenContainerType> containerTypes = 
+                        context.getScreenContainerTypes(screenName);
+                    
+                    if (containerTypes != null && containerTypes.containsKey(varName)) {
+                        com.eb.script.interpreter.screen.ScreenContainerType containerType = containerTypes.get(varName);
+                        return containerType.getChildren(DataType.STRING);
+                    }
+                    
+                    throw error(expr.getLine(), "No container found for " + screenName + "." + varName);
+                }
+                
+                // Check if this is .tree property access on a container (area)
+                if ("tree".equals(property)) {
+                    ConcurrentHashMap<String, com.eb.script.interpreter.screen.ScreenContainerType> containerTypes = 
+                        context.getScreenContainerTypes(screenName);
+                    
+                    if (containerTypes != null && containerTypes.containsKey(varName)) {
+                        com.eb.script.interpreter.screen.ScreenContainerType containerType = containerTypes.get(varName);
+                        return containerType.getTree();
+                    }
+                    
+                    throw error(expr.getLine(), "No container found for " + screenName + "." + varName);
+                }
+                
+                // Check if this is .events property access on a container (area)
+                if ("events".equals(property)) {
+                    ConcurrentHashMap<String, com.eb.script.interpreter.screen.ScreenContainerType> containerTypes = 
+                        context.getScreenContainerTypes(screenName);
+                    
+                    if (containerTypes != null && containerTypes.containsKey(varName)) {
+                        com.eb.script.interpreter.screen.ScreenContainerType containerType = containerTypes.get(varName);
+                        return containerType.getEvents();
+                    }
+                    
+                    throw error(expr.getLine(), "No container found for " + screenName + "." + varName);
+                }
+                
+                // Check if this is .snapshot property access on a container (area)
+                if ("snapshot".equals(property)) {
+                    ConcurrentHashMap<String, com.eb.script.interpreter.screen.ScreenContainerType> containerTypes = 
+                        context.getScreenContainerTypes(screenName);
+                    
+                    if (containerTypes != null && containerTypes.containsKey(varName)) {
+                        com.eb.script.interpreter.screen.ScreenContainerType containerType = containerTypes.get(varName);
+                        return containerType.getSnapshot();
+                    }
+                    
+                    throw error(expr.getLine(), "No container found for " + screenName + "." + varName);
+                }
+                
+                // Check if this is .nodes property access to list all areas (screenName.area.nodes)
+                if ("nodes".equals(property) && "area".equals(varName)) {
+                    ConcurrentHashMap<String, com.eb.script.interpreter.screen.ScreenContainerType> containerTypes = 
+                        context.getScreenContainerTypes(screenName);
+                    
+                    if (containerTypes != null) {
+                        // Return a list of all area names
+                        com.eb.script.arrays.ArrayDynamic nodesList = new com.eb.script.arrays.ArrayDynamic(DataType.STRING);
+                        for (String areaName : containerTypes.keySet()) {
+                            nodesList.add(areaName);
+                        }
+                        return nodesList;
+                    }
+                    
+                    return new com.eb.script.arrays.ArrayDynamic(DataType.STRING); // Empty list if no containers
                 }
             }
         }
