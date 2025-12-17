@@ -170,14 +170,85 @@ public class ScreenContainerType {
     
     /**
      * Get detailed help information about this container type.
-     * Includes description, supported properties, and usage examples.
+     * Reads help content from help-lookup.json resource file.
      * @return Help text for this container type
      */
+    @SuppressWarnings("unchecked")
     public String getHelp() {
         if (containerType == null) {
             return "Unknown container type";
         }
         
+        try {
+            // Load help-lookup.json from classpath
+            java.io.InputStream is = getClass().getClassLoader().getResourceAsStream("help-lookup.json");
+            if (is == null) {
+                return getFallbackHelp(); // Use fallback if file not found
+            }
+            
+            String jsonContent = new String(is.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+            is.close();
+            
+            // Parse JSON
+            java.util.Map<String, Object> lookup = (java.util.Map<String, Object>) com.eb.script.json.Json.parse(jsonContent);
+            java.util.Map<String, Object> containers = (java.util.Map<String, Object>) lookup.get("containers");
+            
+            if (containers == null || !containers.containsKey(containerType.toLowerCase())) {
+                return getFallbackHelp(); // Use fallback if container not found
+            }
+            
+            // Get container entry
+            java.util.Map<String, Object> entry = (java.util.Map<String, Object>) containers.get(containerType.toLowerCase());
+            
+            // Format help text
+            StringBuilder help = new StringBuilder();
+            help.append("═══════════════════════════════════════════════════════════\n");
+            help.append("Container Type: ").append(getFullTypeName()).append("\n");
+            help.append("═══════════════════════════════════════════════════════════\n\n");
+            
+            // Add description
+            String shortDesc = (String) entry.get("short_description");
+            String longHelp = (String) entry.get("long_help");
+            if (longHelp != null && !longHelp.isEmpty()) {
+                help.append("Description:\n");
+                help.append(longHelp).append("\n\n");
+            } else if (shortDesc != null && !shortDesc.isEmpty()) {
+                help.append("Description:\n");
+                help.append(shortDesc).append("\n\n");
+            }
+            
+            // Add supported properties
+            String properties = (String) entry.get("properties");
+            if (properties != null && !properties.isEmpty()) {
+                help.append("Supported Properties:\n");
+                String[] props = properties.split(",\\s*");
+                for (String prop : props) {
+                    help.append("  • ").append(prop).append("\n");
+                }
+                help.append("\n");
+            }
+            
+            // Add usage example
+            String example = (String) entry.get("example");
+            if (example != null && !example.isEmpty()) {
+                help.append("Example:\n");
+                help.append(example).append("\n");
+            }
+            
+            help.append("═══════════════════════════════════════════════════════════\n");
+            return help.toString();
+            
+        } catch (Exception ex) {
+            // If anything goes wrong, use fallback
+            return getFallbackHelp();
+        }
+    }
+    
+    /**
+     * Fallback help generation when help-lookup.json is not available.
+     * @return Basic help text for this container type
+     */
+    private String getFallbackHelp() {
         StringBuilder help = new StringBuilder();
         help.append("═══════════════════════════════════════════════════════════\n");
         help.append("Container Type: ").append(getFullTypeName()).append("\n");
