@@ -464,7 +464,9 @@ public class BuiltinsScreen {
                 // Check if a menu item with the same displayName already exists and remove it
                 javafx.scene.control.MenuItem existingItem = null;
                 for (javafx.scene.control.MenuItem item : parentMenu.getItems()) {
-                    if (item.getText().equals(finalDisplayName)) {
+                    // Skip items that don't have text (like SeparatorMenuItem)
+                    String itemText = item.getText();
+                    if (itemText != null && itemText.equals(finalDisplayName)) {
                         existingItem = item;
                         break;
                     }

@@ -4802,7 +4802,7 @@ public class ScreenFactory {
             "type", "mandatory", "case", "caseformat", "alignment", "pattern",
             "min", "max", "style", "screenname",
             // Text and label properties
-            "prompthelp", "prompt_help", "labeltext", "label_text",
+            "prompthelp", "prompt_help", "labeltext", "label_text", "text",
             "labeltextalignment", "label_text_alignment", "labelposition", "label_position",
             // Event handlers
             "onclick", "on_click", "onvalidate", "on_validate", "onchange", "on_change",
@@ -5054,7 +5054,10 @@ public class ScreenFactory {
         metadata.promptHelp = getStringValue(displayDef, "promptHelp", getStringValue(displayDef, "prompt_help", null));
         
         // Extract labelText (permanent label displayed before/above control - used for buttons and labels)
-        metadata.labelText = getStringValue(displayDef, "labelText", getStringValue(displayDef, "label_text", null));
+        // Support "text" as an alias for "labelText" for convenience
+        metadata.labelText = getStringValue(displayDef, "labelText", 
+                              getStringValue(displayDef, "label_text", 
+                              getStringValue(displayDef, "text", null)));
         
         // Extract labelText alignment
         metadata.labelTextAlignment = getStringValue(displayDef, "labelTextAlignment", getStringValue(displayDef, "label_text_alignment", null));
