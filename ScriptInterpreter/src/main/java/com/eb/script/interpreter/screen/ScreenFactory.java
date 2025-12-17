@@ -1472,19 +1472,56 @@ public class ScreenFactory {
         
         row.getChildren().addAll(iconLabel, nameLabel, countLabel);
         
-        // Build tooltip text with area details and JavaFX information
-        StringBuilder tooltipBuilder = new StringBuilder();
-        tooltipBuilder.append("Area: ").append(area.name);
-        tooltipBuilder.append("\nType: ").append(area.type != null ? area.type : "pane");
-        if (area.layout != null) tooltipBuilder.append("\nLayout: ").append(area.layout);
-        if (area.spacing != null) tooltipBuilder.append("\nSpacing: ").append(area.spacing);
-        if (area.padding != null) tooltipBuilder.append("\nPadding: ").append(area.padding);
-        if (area.groupBorder != null) tooltipBuilder.append("\nBorder: ").append(area.groupBorder);
-        if (area.style != null) tooltipBuilder.append("\nStyle: ").append(area.style);
-        if (itemCount > 0) tooltipBuilder.append("\nItems: ").append(itemCount);
-        if (childCount > 0) tooltipBuilder.append("\nChildren: ").append(childCount);
-        if (area.gainFocus != null) tooltipBuilder.append("\ngainFocus: ").append(area.gainFocus);
-        if (area.lostFocus != null) tooltipBuilder.append("\nlostFocus: ").append(area.lostFocus);
+        // Build area description text (used for both tooltip and clipboard)
+        String areaDescriptionText = buildAreaDescriptionText(area, itemCount, childCount, context, screenName);
+        
+        // Add tooltip to the row
+        javafx.scene.control.Tooltip areaTooltip = new javafx.scene.control.Tooltip(areaDescriptionText);
+        areaTooltip.setStyle("-fx-font-size: 14px;");
+        areaTooltip.setShowDelay(javafx.util.Duration.millis(500));
+        areaTooltip.setMaxWidth(DEBUG_TOOLTIP_MAX_WIDTH);
+        areaTooltip.setWrapText(true);
+        javafx.scene.control.Tooltip.install(row, areaTooltip);
+        
+        String originalStyle = "-fx-background-color: " + (depth % 2 == 0 ? "#f8f3e8" : "#f0ebd8") + ";";
+        row.setStyle(originalStyle);
+        makeRowClickable(row, areaDescriptionText, originalStyle);
+        
+        section.getChildren().add(row);
+        
+        // Recursively add child areas
+        if (area.childAreas != null) {
+            for (AreaDefinition childArea : area.childAreas) {
+                addAreaDefinitionToSection(section, childArea, depth + 1, context, screenName);
+            }
+        }
+    }
+    
+    /**
+     * Build a description text for an area including all properties and JavaFX details.
+     * Used for both tooltip and clipboard text.
+     * 
+     * @param area The area definition
+     * @param itemCount The number of items in the area
+     * @param childCount The number of child areas
+     * @param context The interpreter context for looking up JavaFX containers
+     * @param screenName The screen name for looking up JavaFX containers
+     * @return The formatted description text
+     */
+    private static String buildAreaDescriptionText(AreaDefinition area, int itemCount, int childCount, 
+                                                   InterpreterContext context, String screenName) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("Area: ").append(area.name);
+        builder.append("\nType: ").append(area.type != null ? area.type : "pane");
+        if (area.layout != null) builder.append("\nLayout: ").append(area.layout);
+        if (area.spacing != null) builder.append("\nSpacing: ").append(area.spacing);
+        if (area.padding != null) builder.append("\nPadding: ").append(area.padding);
+        if (area.groupBorder != null) builder.append("\nBorder: ").append(area.groupBorder);
+        if (area.style != null) builder.append("\nStyle: ").append(area.style);
+        if (itemCount > 0) builder.append("\nItems: ").append(itemCount);
+        if (childCount > 0) builder.append("\nChildren: ").append(childCount);
+        if (area.gainFocus != null) builder.append("\ngainFocus: ").append(area.gainFocus);
+        if (area.lostFocus != null) builder.append("\nlostFocus: ").append(area.lostFocus);
         
         // Add JavaFX container information if available
         if (context != null && screenName != null && area.name != null) {
@@ -1495,64 +1532,14 @@ public class ScreenFactory {
                 ScreenContainerType containerType = containerTypes.get(areaNameLower);
                 if (containerType != null && containerType.getJavaFXRegion() != null) {
                     // Add JavaFX container description
-                    tooltipBuilder.append("\n---\nJavaFX:\n");
+                    builder.append("\n---\nJavaFX:\n");
                     String javafxDesc = containerType.getJavaFXDescription();
-                    // Append the JavaFX description (already formatted by getJavaFXDescription)
-                    tooltipBuilder.append(javafxDesc);
+                    builder.append(javafxDesc);
                 }
             }
         }
         
-        // Add tooltip to the row
-        javafx.scene.control.Tooltip areaTooltip = new javafx.scene.control.Tooltip(tooltipBuilder.toString());
-        areaTooltip.setStyle("-fx-font-size: 14px;");
-        areaTooltip.setShowDelay(javafx.util.Duration.millis(500));
-        areaTooltip.setMaxWidth(DEBUG_TOOLTIP_MAX_WIDTH);
-        areaTooltip.setWrapText(true);
-        javafx.scene.control.Tooltip.install(row, areaTooltip);
-        
-        // Build clipboard text with all area details (same as tooltip for consistency)
-        StringBuilder clipboardBuilder = new StringBuilder();
-        clipboardBuilder.append("Area: ").append(area.name);
-        clipboardBuilder.append("\nType: ").append(area.type != null ? area.type : "pane");
-        if (area.layout != null) clipboardBuilder.append("\nLayout: ").append(area.layout);
-        if (area.spacing != null) clipboardBuilder.append("\nSpacing: ").append(area.spacing);
-        if (area.padding != null) clipboardBuilder.append("\nPadding: ").append(area.padding);
-        if (area.groupBorder != null) clipboardBuilder.append("\nBorder: ").append(area.groupBorder);
-        if (area.style != null) clipboardBuilder.append("\nStyle: ").append(area.style);
-        if (itemCount > 0) clipboardBuilder.append("\nItems: ").append(itemCount);
-        if (childCount > 0) clipboardBuilder.append("\nChildren: ").append(childCount);
-        if (area.gainFocus != null) clipboardBuilder.append("\ngainFocus: ").append(area.gainFocus);
-        if (area.lostFocus != null) clipboardBuilder.append("\nlostFocus: ").append(area.lostFocus);
-        
-        // Add JavaFX container information to clipboard text (same as tooltip)
-        if (context != null && screenName != null && area.name != null) {
-            java.util.concurrent.ConcurrentHashMap<String, ScreenContainerType> containerTypes = 
-                context.getScreenContainerTypes(screenName);
-            if (containerTypes != null) {
-                String areaNameLower = area.name.toLowerCase(java.util.Locale.ROOT);
-                ScreenContainerType containerType = containerTypes.get(areaNameLower);
-                if (containerType != null && containerType.getJavaFXRegion() != null) {
-                    // Add JavaFX container description to clipboard
-                    clipboardBuilder.append("\n---\nJavaFX:\n");
-                    String javafxDesc = containerType.getJavaFXDescription();
-                    clipboardBuilder.append(javafxDesc);
-                }
-            }
-        }
-        
-        String originalStyle = "-fx-background-color: " + (depth % 2 == 0 ? "#f8f3e8" : "#f0ebd8") + ";";
-        row.setStyle(originalStyle);
-        makeRowClickable(row, clipboardBuilder.toString(), originalStyle);
-        
-        section.getChildren().add(row);
-        
-        // Recursively add child areas
-        if (area.childAreas != null) {
-            for (AreaDefinition childArea : area.childAreas) {
-                addAreaDefinitionToSection(section, childArea, depth + 1, context, screenName);
-            }
-        }
+        return builder.toString();
     }
     
     /**
