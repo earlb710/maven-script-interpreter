@@ -68,13 +68,13 @@ timerUpdateCallback(timerName: string) {
         
         var timeText: string = minutesStr + ":" + secondsStr;
         
-        // Update the screen label using scr.setproperty
-        // This should update immediately when called from timer callback (fix applied)
-        call scr.setproperty("testTimerScreen.timerLabel", "text", timeText);
+        // Update the screen variable which is bound to the label via varRef
+        // This automatically updates the UI
+        testTimerScreen.timerDisplay = timeText;
         
         // Print every 5 seconds to show it's working
         if testTimerScreen.timerValue % 5 == 0 then {
-            print "Timer: " + timeText + " (updated via scr.setproperty)";
+            print "Timer: " + timeText + " (updated via screen variable)";
         }
     }
 }
