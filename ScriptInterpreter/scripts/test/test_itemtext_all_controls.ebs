@@ -5,13 +5,6 @@ screen testAllControlsScreen = {
     "title": "itemText Property - All Controls Test",
     "width": 600,
     "height": 700,
-    "vars": [
-        {
-            "name": "updatecount",
-            "type": "int",
-            "default": 0
-        }
-    ],
     "area": [
         {
             "name": "mainArea",
@@ -126,6 +119,9 @@ screen testAllControlsScreen = {
         }
     ]
 };
+
+// Declare updatecount as a global variable before functions
+var updatecount: int = 0;
 
 // Function to update all control texts
 updateAllTexts() {
