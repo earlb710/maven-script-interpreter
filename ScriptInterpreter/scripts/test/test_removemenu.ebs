@@ -25,7 +25,7 @@ screen testRemoveMenu = {
                 {
                     "type": "button",
                     "text": "Add Custom Items to Edit Menu",
-                    "onClick": "call scr.addMenu(\"testremovemenu\", \"Edit\", \"action1\", \"Custom Action 1\", \"println('Action 1');\"); call scr.addMenu(\"testremovemenu\", \"Edit\", \"action2\", \"Custom Action 2\", \"println('Action 2');\");"
+                    "onClick": "call scr.addMenu(\"testremovemenu\", \"Edit\", \"action1\", \"Custom Action 1\", \"call println('Action 1');\"); call scr.addMenu(\"testremovemenu\", \"Edit\", \"action2\", \"Custom Action 2\", \"call println('Action 2');\");"
                 },
                 {
                     "type": "button",
@@ -43,7 +43,7 @@ screen testRemoveMenu = {
                 {
                     "type": "button",
                     "text": "Add Tools Menu with Items",
-                    "onClick": "call scr.addMenu(\"testremovemenu\", \"Tools\", \"tool1\", \"Tool 1\", \"println('Tool 1');\"); call scr.addMenu(\"testremovemenu\", \"Tools\", \"tool2\", \"Tool 2\", \"println('Tool 2');\");"
+                    "onClick": "call scr.addMenu(\"testremovemenu\", \"Tools\", \"tool1\", \"Tool 1\", \"call println('Tool 1');\"); call scr.addMenu(\"testremovemenu\", \"Tools\", \"tool2\", \"Tool 2\", \"call println('Tool 2');\");"
                 },
                 {
                     "type": "button",
@@ -56,7 +56,7 @@ screen testRemoveMenu = {
                 {
                     "type": "button",
                     "text": "Add Nested Format Menu",
-                    "onClick": "call scr.addMenu(\"testremovemenu\", \"Edit.Format\", \"upper\", \"Uppercase\", \"println('Upper');\"); call scr.addMenu(\"testremovemenu\", \"Edit.Format\", \"lower\", \"Lowercase\", \"println('Lower');\");"
+                    "onClick": "call scr.addMenu(\"testremovemenu\", \"Edit.Format\", \"upper\", \"Uppercase\", \"call println('Upper');\"); call scr.addMenu(\"testremovemenu\", \"Edit.Format\", \"lower\", \"Lowercase\", \"call println('Lower');\");"
                 },
                 {
                     "type": "button",
@@ -75,21 +75,21 @@ screen testRemoveMenu = {
 
 show screen testRemoveMenu;
 
-println("Test screen created.");
-println("Click the buttons to test menu removal:");
-println("  1. Add custom items to Edit menu");
-println("  2. Remove individual items");
-println("  3. Add Tools menu with items");
-println("  4. Remove entire Tools menu");
-println("  5. Add nested Format submenu");
-println("  6. Remove items or entire submenu");
-println("");
-println("Direct examples:");
+call println("Test screen created.");
+call println("Click the buttons to test menu removal:");
+call println("  1. Add custom items to Edit menu");
+call println("  2. Remove individual items");
+call println("  3. Add Tools menu with items");
+call println("  4. Remove entire Tools menu");
+call println("  5. Add nested Format submenu");
+call println("  6. Remove items or entire submenu");
+call println("");
+call println("Direct examples:");
 
 // Add a custom Help menu
-call scr.addMenu("testremovemenu", "Help", "about", "About", "println('About dialog');");
-call scr.addMenu("testremovemenu", "Help", "docs", "Documentation", "println('Open docs');");
+call scr.addMenu("testremovemenu", "Help", "about", "About", "call println('About dialog');");
+call scr.addMenu("testremovemenu", "Help", "docs", "Documentation", "call println('Open docs');");
 
-println("Added Help menu with About and Documentation items");
-println("To remove About item: call scr.removeMenu(\"testremovemenu\", \"Help.About\");");
-println("To remove entire Help menu: call scr.removeMenu(\"testremovemenu\", \"Help\");");
+call println("Added Help menu with About and Documentation items");
+call println("To remove About item: call scr.removeMenu(\"testremovemenu\", \"Help.About\");");
+call println("To remove entire Help menu: call scr.removeMenu(\"testremovemenu\", \"Help\");");

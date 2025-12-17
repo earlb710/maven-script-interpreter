@@ -73,10 +73,10 @@ screen testWithoutMenu = {
 show screen testWithMenu;
 show screen testWithoutMenu;
 
-println("Test screens created:");
-println("1. 'Screen WITH Menu' - shows Edit menu (default behavior)");
-println("2. 'Screen WITHOUT Menu (Property)' - no menu bar (showMenu: false)");
-println("");
-println("Use the buttons in each screen to toggle menu visibility dynamically:");
-println("  - scr.showMenu(screenName) - shows the menu bar");
-println("  - scr.hideMenu(screenName) - hides the menu bar");
+call println("Test screens created:");
+call println("1. 'Screen WITH Menu' - shows Edit menu (default behavior)");
+call println("2. 'Screen WITHOUT Menu (Property)' - no menu bar (showMenu: false)");
+call println("");
+call println("Use the buttons in each screen to toggle menu visibility dynamically:");
+call println("  - scr.showMenu(screenName) - shows the menu bar");
+call println("  - scr.hideMenu(screenName) - hides the menu bar");

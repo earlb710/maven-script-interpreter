@@ -25,7 +25,7 @@ screen testEnableDisable = {
                 {
                     "type": "button",
                     "text": "Add Custom Items",
-                    "onClick": "call scr.addMenu(\"testenabledisable\", \"Edit\", \"save\", \"Save\", \"println('Save clicked');\"); call scr.addMenu(\"testenabledisable\", \"Edit\", \"saveAs\", \"Save As\", \"println('Save As clicked');\");"
+                    "onClick": "call scr.addMenu(\"testenabledisable\", \"Edit\", \"save\", \"Save\", \"call println('Save clicked');\"); call scr.addMenu(\"testenabledisable\", \"Edit\", \"saveAs\", \"Save As\", \"call println('Save As clicked');\");"
                 },
                 {
                     "type": "separator"
@@ -59,7 +59,7 @@ screen testEnableDisable = {
                 {
                     "type": "button",
                     "text": "Add Tools Menu",
-                    "onClick": "call scr.addMenu(\"testenabledisable\", \"Tools\", \"compile\", \"Compile\", \"println('Compile');\"); call scr.addMenu(\"testenabledisable\", \"Tools\", \"run\", \"Run\", \"println('Run');\");"
+                    "onClick": "call scr.addMenu(\"testenabledisable\", \"Tools\", \"compile\", \"Compile\", \"call println('Compile');\"); call scr.addMenu(\"testenabledisable\", \"Tools\", \"run\", \"Run\", \"call println('Run');\");"
                 },
                 {
                     "type": "button",
@@ -77,7 +77,7 @@ screen testEnableDisable = {
                 {
                     "type": "button",
                     "text": "Add Nested Format Menu",
-                    "onClick": "call scr.addMenu(\"testenabledisable\", \"Edit.Format\", \"upper\", \"Uppercase\", \"println('Upper');\"); call scr.addMenu(\"testenabledisable\", \"Edit.Format\", \"lower\", \"Lowercase\", \"println('Lower');\");"
+                    "onClick": "call scr.addMenu(\"testenabledisable\", \"Edit.Format\", \"upper\", \"Uppercase\", \"call println('Upper');\"); call scr.addMenu(\"testenabledisable\", \"Edit.Format\", \"lower\", \"Lowercase\", \"call println('Lower');\");"
                 },
                 {
                     "type": "button",
@@ -96,24 +96,24 @@ screen testEnableDisable = {
 
 show screen testEnableDisable;
 
-println("Test screen created.");
-println("Click buttons to test menu enable/disable:");
-println("  1. Add custom menu items");
-println("  2. Disable individual items (they become grayed out)");
-println("  3. Enable items (they become clickable again)");
-println("  4. Disable entire menus");
-println("  5. Enable entire menus");
-println("");
-println("Direct examples:");
+call println("Test screen created.");
+call println("Click buttons to test menu enable/disable:");
+call println("  1. Add custom menu items");
+call println("  2. Disable individual items (they become grayed out)");
+call println("  3. Enable items (they become clickable again)");
+call println("  4. Disable entire menus");
+call println("  5. Enable entire menus");
+call println("");
+call println("Direct examples:");
 
 // Add a Help menu with some items
-call scr.addMenu("testenabledisable", "Help", "about", "About", "println('About');");
-call scr.addMenu("testenabledisable", "Help", "docs", "Documentation", "println('Docs');");
+call scr.addMenu("testenabledisable", "Help", "about", "About", "call println('About');");
+call scr.addMenu("testenabledisable", "Help", "docs", "Documentation", "call println('Docs');");
 
-println("Added Help menu with About and Documentation items");
+call println("Added Help menu with About and Documentation items");
 
 // Disable the Documentation item
 call scr.disableMenu("testenabledisable", "Help.Documentation");
-println("Disabled Help > Documentation (should appear grayed out)");
-println("");
-println("To enable: call scr.enableMenu(\"testenabledisable\", \"Help.Documentation\");");
+call println("Disabled Help > Documentation (should appear grayed out)");
+call println("");
+call println("To enable: call scr.enableMenu(\"testenabledisable\", \"Help.Documentation\");");
