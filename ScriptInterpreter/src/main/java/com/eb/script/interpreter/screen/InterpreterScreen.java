@@ -259,12 +259,22 @@ public class InterpreterScreen {
             boolean showMenu = true; // default to true
             if (config.containsKey("showMenu")) {
                 Object showMenuValue = config.get("showMenu");
+                System.out.println("=== DEBUG [InterpreterScreen] Screen: " + stmt.name + " ===");
+                System.out.println("    showMenu key found in config");
+                System.out.println("    showMenuValue: " + showMenuValue);
+                System.out.println("    showMenuValue type: " + (showMenuValue != null ? showMenuValue.getClass().getName() : "null"));
                 if (showMenuValue instanceof Boolean) {
                     showMenu = (Boolean) showMenuValue;
+                    System.out.println("    Extracted as Boolean: " + showMenu);
                 } else if (showMenuValue != null) {
                     showMenu = Boolean.parseBoolean(showMenuValue.toString());
+                    System.out.println("    Parsed from string: " + showMenu);
                 }
+            } else {
+                System.out.println("=== DEBUG [InterpreterScreen] Screen: " + stmt.name + " ===");
+                System.out.println("    showMenu key NOT found in config, using default: " + showMenu);
             }
+            System.out.println("    FINAL showMenu value: " + showMenu);
             
             // Extract startup and cleanup inline code if present
             String startupCode = config.containsKey("startup") ? String.valueOf(config.get("startup")) : null;
@@ -580,6 +590,9 @@ public class InterpreterScreen {
                 gainFocusCode, lostFocusCode
             );
             
+            System.out.println("=== DEBUG [InterpreterScreen] ScreenConfig created for: " + stmt.name + " ===");
+            System.out.println("    ScreenConfig.showMenu = " + screenConfig.isShowMenu());
+            
             context.setScreenConfig(stmt.name, screenConfig);
             
             // Register the screen name as a JSON variable in the environment
@@ -770,6 +783,9 @@ public class InterpreterScreen {
             };
 
             // Create ScreenDefinition and use it to create the Stage
+            System.out.println("=== DEBUG [InterpreterScreen.createStageForScreenOnFxThread] Screen: " + qualifiedKey + " ===");
+            System.out.println("    config.isShowMenu() = " + config.isShowMenu());
+            
             ScreenDefinition screenDef = ScreenFactory.createScreenDefinition(
                     qualifiedKey,
                     config.getTitle(),
@@ -783,13 +799,22 @@ public class InterpreterScreen {
             );
             // Set showMenu property before creating the screen
             screenDef.setShowMenu(config.isShowMenu());
+            System.out.println("    screenDef.isShowMenu() after setShowMenu() = " + screenDef.isShowMenu());
+            
             stage = screenDef.createScreen();
+            System.out.println("    Stage created");
         } else {
             // Create simple ScreenDefinition without areas
+            System.out.println("=== DEBUG [InterpreterScreen.createStageForScreenOnFxThread] Screen without areas: " + qualifiedKey + " ===");
+            System.out.println("    config.isShowMenu() = " + config.isShowMenu());
+            
             ScreenDefinition screenDef = new ScreenDefinition(qualifiedKey, config.getTitle(), config.getWidth(), config.getHeight());
             // Set showMenu property before creating the screen
             screenDef.setShowMenu(config.isShowMenu());
+            System.out.println("    screenDef.isShowMenu() after setShowMenu() = " + screenDef.isShowMenu());
+            
             stage = screenDef.createScreen();
+            System.out.println("    Stage created");
         }
 
         // If this screen has a parent screen, set the owner relationship

@@ -108,8 +108,13 @@ public class ScreenDefinition {
      * Uses ScreenFactory if areas are defined, otherwise creates a simple stage.
      */
     private Stage createNewStage(String stageTitle) {
+        System.out.println("=== DEBUG [ScreenDefinition.createNewStage] Screen: " + screenName + " ===");
+        System.out.println("    this.showMenu = " + showMenu);
+        System.out.println("    Has areas: " + (areas != null && !areas.isEmpty()));
+        
         if (areas != null && !areas.isEmpty()) {
             // Use ScreenFactory to create complex screen with areas
+            System.out.println("    Calling ScreenFactory.createScreen with showMenu = " + showMenu);
             return ScreenFactory.createScreen(
                 screenName,
                 stageTitle,
