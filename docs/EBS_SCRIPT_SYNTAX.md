@@ -4347,6 +4347,29 @@ var exists = call scr.findScreen("screenName");
 var value = call scr.getProperty("screenName.itemName", "propertyName");
 call scr.setProperty("screenName.itemName", "propertyName", value);
 
+// Available item properties:
+// - "itemText": Text content for buttons, labels, and other text-based controls
+// - "editable": Whether the control can be edited (boolean)
+// - "disabled": Whether the control is disabled (boolean)
+// - "visible": Whether the control is visible (boolean)
+// - "tooltip": Tooltip text shown on hover (string)
+// - "textColor": Text color (e.g., "#FF0000", "red")
+// - "backgroundColor": Background color (e.g., "#FFFFFF", "white")
+// - "prefWidth", "prefHeight": Preferred size (string)
+// - "minWidth", "minHeight": Minimum size (string)
+// - "maxWidth", "maxHeight": Maximum size (string)
+// - "contentAlignment": Content alignment within control (left, center, right)
+// - "itemAlignment": Item alignment in container (left, center, right, top-left, etc.)
+
+// itemText property: Update text on buttons, labels, and text-based controls
+// Supported controls: Button, Label, Text, Hyperlink, ToggleButton, CheckBox, RadioButton
+call scr.setProperty("myScreen.statusButton", "itemText", "Processing...");
+call scr.setProperty("myScreen.messageLabel", "itemText", "Task complete!");
+
+// Example: Dynamic text updates with JSON
+var config: map = {"button": "Start", "status": "Ready"};
+call scr.setProperty("myScreen.actionButton", "itemText", call json.getstring(config, "button"));
+
 // Get list of all item names in a screen
 var itemList = call scr.getItemList("screenName");
 // Alias: scr.getScreenItemList also available
