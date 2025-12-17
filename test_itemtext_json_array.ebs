@@ -1,0 +1,243 @@
+// Test script: itemText property with JSON arrays and iteration
+// Demonstrates using JSON arrays and loops to update multiple controls
+
+print "=== itemText with JSON Arrays Test ===";
+print "";
+
+// Define control configurations as JSON array
+var controlsConfig: map = {
+    "controls": [
+        {"id": "btn1", "text": "Button One", "type": "button"},
+        {"id": "btn2", "text": "Button Two", "type": "button"},
+        {"id": "btn3", "text": "Button Three", "type": "button"},
+        {"id": "lbl1", "text": "Label One", "type": "label"},
+        {"id": "lbl2", "text": "Label Two", "type": "label"},
+        {"id": "txt1", "text": "Text Node One", "type": "text"}
+    ]
+};
+
+var updateCounter: int = 0;
+
+print "Loaded configuration for " + string.fromInt(call json.arraysize(controlsConfig, "controls")) + " controls";
+print "";
+
+// Define the screen with multiple controls
+screen testArrayScreen = {
+    "title": "itemText with JSON Arrays",
+    "width": 650,
+    "height": 700,
+    "vars": [],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "15",
+            "padding": "20",
+            "items": [
+                {
+                    "name": "titleLabel",
+                    "display": {
+                        "type": "label",
+                        "labelText": "itemText with JSON Arrays and Loops",
+                        "itemFontSize": "20px",
+                        "itemBold": true
+                    }
+                },
+                {
+                    "name": "descLabel",
+                    "display": {
+                        "type": "label",
+                        "labelText": "Using JSON arrays to manage multiple controls",
+                        "itemFontSize": "14px",
+                        "itemColor": "#666666"
+                    }
+                },
+                {
+                    "name": "separator1",
+                    "display": {
+                        "type": "separator"
+                    }
+                },
+                {
+                    "name": "btn1",
+                    "display": {
+                        "type": "button",
+                        "labelText": "Initial Button 1",
+                        "style": "-fx-min-width: 200px;"
+                    }
+                },
+                {
+                    "name": "btn2",
+                    "display": {
+                        "type": "button",
+                        "labelText": "Initial Button 2",
+                        "style": "-fx-min-width: 200px;"
+                    }
+                },
+                {
+                    "name": "btn3",
+                    "display": {
+                        "type": "button",
+                        "labelText": "Initial Button 3",
+                        "style": "-fx-min-width: 200px;"
+                    }
+                },
+                {
+                    "name": "separator2",
+                    "display": {
+                        "type": "separator"
+                    }
+                },
+                {
+                    "name": "lbl1",
+                    "display": {
+                        "type": "label",
+                        "labelText": "Initial Label 1",
+                        "itemFontSize": "14px"
+                    }
+                },
+                {
+                    "name": "lbl2",
+                    "display": {
+                        "type": "label",
+                        "labelText": "Initial Label 2",
+                        "itemFontSize": "14px"
+                    }
+                },
+                {
+                    "name": "txt1",
+                    "display": {
+                        "type": "text",
+                        "labelText": "Initial Text 1",
+                        "itemFontSize": "14px",
+                        "itemColor": "#0066cc"
+                    }
+                },
+                {
+                    "name": "separator3",
+                    "display": {
+                        "type": "separator"
+                    }
+                },
+                {
+                    "name": "applyArrayButton",
+                    "display": {
+                        "type": "button",
+                        "labelText": "Apply JSON Array Config",
+                        "onClick": "call applyArrayConfig();",
+                        "style": "-fx-min-width: 250px; -fx-min-height: 40px; -fx-background-color: #27ae60;"
+                    }
+                },
+                {
+                    "name": "incrementButton",
+                    "display": {
+                        "type": "button",
+                        "labelText": "Increment All Counters",
+                        "onClick": "call incrementCounters();",
+                        "style": "-fx-min-width: 250px; -fx-min-height: 40px; -fx-background-color: #2980b9;"
+                    }
+                },
+                {
+                    "name": "statusLabel",
+                    "display": {
+                        "type": "label",
+                        "labelText": "Ready",
+                        "itemFontSize": "14px",
+                        "itemBold": true,
+                        "itemColor": "#27ae60"
+                    }
+                }
+            ]
+        }
+    ]
+};
+
+// Function to apply configuration from JSON array
+applyArrayConfig() {
+    print "Applying JSON array configuration...";
+    
+    // Get the controls array from JSON
+    var controlsArray = call json.get(controlsConfig, "controls");
+    var arraySize = call json.arraysize(controlsConfig, "controls");
+    
+    print "Processing " + string.fromInt(arraySize) + " controls";
+    
+    // Iterate through array and update each control
+    var i: int = 0;
+    while i < arraySize {
+        // Get control configuration from array
+        var controlItem = call json.arrayget(controlsArray, i);
+        
+        // Extract properties using json.getstring
+        var controlId = call json.getstring(controlItem, "id");
+        var controlText = call json.getstring(controlItem, "text");
+        var controlType = call json.getstring(controlItem, "type");
+        
+        // Build the full control path
+        var controlPath = "testArrayScreen." + controlId;
+        
+        // Update the control text using itemText property
+        call scr.setProperty(controlPath, "itemText", controlText);
+        
+        print "  Updated " + controlType + " '" + controlId + "' to: " + controlText;
+        
+        i = i + 1;
+    }
+    
+    // Update status
+    call scr.setProperty("testArrayScreen.statusLabel", "itemText", "Configuration Applied ✓");
+    
+    print "All controls updated from JSON array!";
+}
+
+// Function to increment counters in all control texts
+incrementCounters() {
+    updateCounter = updateCounter + 1;
+    
+    print "Incrementing counters (Update #" + string.fromInt(updateCounter) + ")...";
+    
+    // Get the controls array
+    var controlsArray = call json.get(controlsConfig, "controls");
+    var arraySize = call json.arraysize(controlsConfig, "controls");
+    
+    // Update each control with counter
+    var i: int = 0;
+    while i < arraySize {
+        var controlItem = call json.arrayget(controlsArray, i);
+        var controlId = call json.getstring(controlItem, "id");
+        var baseText = call json.getstring(controlItem, "text");
+        
+        // Append counter to text
+        var newText = baseText + " [" + string.fromInt(updateCounter) + "]";
+        
+        // Update control
+        var controlPath = "testArrayScreen." + controlId;
+        call scr.setProperty(controlPath, "itemText", newText);
+        
+        i = i + 1;
+    }
+    
+    // Update status with counter
+    var statusText = "Updated " + string.fromInt(updateCounter) + " time";
+    if updateCounter > 1 then {
+        statusText = statusText + "s";
+    }
+    call scr.setProperty("testArrayScreen.statusLabel", "itemText", statusText);
+    
+    print "All " + string.fromInt(arraySize) + " controls incremented!";
+}
+
+// Show the screen
+show screen testArrayScreen;
+
+print "";
+print "Screen displayed - Test Actions:";
+print "1. Click 'Apply JSON Array Config' to load text from JSON array";
+print "2. Click 'Increment All Counters' to update all controls with counter";
+print "";
+print "This demonstrates:";
+print "  - Using JSON arrays to store control configurations";
+print "  - Iterating through arrays with loops";
+print "  - Using json.arrayget and json.getstring builtins";
+print "  - Dynamically building control paths";
+print "  - Updating multiple controls efficiently";
