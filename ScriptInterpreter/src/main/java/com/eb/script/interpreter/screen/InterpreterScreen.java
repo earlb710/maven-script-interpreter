@@ -230,12 +230,58 @@ public class InterpreterScreen {
             @SuppressWarnings("unchecked")
             Map<String, Object> config = (Map<String, Object>) spec;
 
+            // DEBUG: Print all keys in config
+            System.out.println("=== DEBUG [InterpreterScreen] Config keys for screen: " + stmt.name + " ===");
+            for (String key : config.keySet()) {
+                System.out.println("    Key: '" + key + "' -> Value type: " + (config.get(key) != null ? config.get(key).getClass().getSimpleName() : "null"));
+            }
+
             // Extract configuration properties with defaults
             String title = config.containsKey("title") ? String.valueOf(config.get("title")) : "Screen " + stmt.name;
             int width = config.containsKey("width") ? ((Number) config.get("width")).intValue() : 800;
             int height = config.containsKey("height") ? ((Number) config.get("height")).intValue() : 600;
-            boolean maximize = config.containsKey("maximize") && Boolean.TRUE.equals(config.get("maximize"));
-            boolean resizable = !config.containsKey("resizable") || Boolean.TRUE.equals(config.get("resizable")); // default true
+            
+            // Extract boolean properties with proper handling for Boolean objects and primitives
+            boolean maximize = false; // default to false
+            if (config.containsKey("maximize")) {
+                Object maximizeValue = config.get("maximize");
+                if (maximizeValue instanceof Boolean) {
+                    maximize = (Boolean) maximizeValue;
+                } else if (maximizeValue != null) {
+                    maximize = Boolean.parseBoolean(maximizeValue.toString());
+                }
+            }
+            
+            boolean resizable = true; // default to true
+            if (config.containsKey("resizable")) {
+                Object resizableValue = config.get("resizable");
+                if (resizableValue instanceof Boolean) {
+                    resizable = (Boolean) resizableValue;
+                } else if (resizableValue != null) {
+                    resizable = Boolean.parseBoolean(resizableValue.toString());
+                }
+            }
+            
+            boolean showMenu = true; // default to true
+            // All keys are stored lowercase in the config map
+            if (config.containsKey("showmenu")) {
+                Object showMenuValue = config.get("showmenu");
+                System.out.println("=== DEBUG [InterpreterScreen] Screen: " + stmt.name + " ===");
+                System.out.println("    showmenu key found in config");
+                System.out.println("    showMenuValue: " + showMenuValue);
+                System.out.println("    showMenuValue type: " + (showMenuValue != null ? showMenuValue.getClass().getName() : "null"));
+                if (showMenuValue instanceof Boolean) {
+                    showMenu = (Boolean) showMenuValue;
+                    System.out.println("    Extracted as Boolean: " + showMenu);
+                } else if (showMenuValue != null) {
+                    showMenu = Boolean.parseBoolean(showMenuValue.toString());
+                    System.out.println("    Parsed from string: " + showMenu);
+                }
+            } else {
+                System.out.println("=== DEBUG [InterpreterScreen] Screen: " + stmt.name + " ===");
+                System.out.println("    showmenu key NOT found in config, using default: " + showMenu);
+            }
+            System.out.println("    FINAL showMenu value: " + showMenu);
             
             // Extract startup and cleanup inline code if present
             String startupCode = config.containsKey("startup") ? String.valueOf(config.get("startup")) : null;
@@ -543,13 +589,16 @@ public class InterpreterScreen {
 
             // Store the screen configuration for lazy initialization
             ScreenConfig screenConfig = new ScreenConfig(
-                stmt.name, title, width, height, maximize, resizable,
+                stmt.name, title, width, height, maximize, resizable, showMenu,
                 screenVarMap, screenVarTypeMap,
                 varSetsMap, varItemsMap, areaItemsMap,
                 areas,
                 startupCode, cleanupCode,
                 gainFocusCode, lostFocusCode
             );
+            
+            System.out.println("=== DEBUG [InterpreterScreen] ScreenConfig created for: " + stmt.name + " ===");
+            System.out.println("    ScreenConfig.showMenu = " + screenConfig.isShowMenu());
             
             context.setScreenConfig(stmt.name, screenConfig);
             
@@ -741,6 +790,9 @@ public class InterpreterScreen {
             };
 
             // Create ScreenDefinition and use it to create the Stage
+            System.out.println("=== DEBUG [InterpreterScreen.createStageForScreenOnFxThread] Screen: " + qualifiedKey + " ===");
+            System.out.println("    config.isShowMenu() = " + config.isShowMenu());
+            
             ScreenDefinition screenDef = ScreenFactory.createScreenDefinition(
                     qualifiedKey,
                     config.getTitle(),
@@ -752,11 +804,24 @@ public class InterpreterScreen {
                     onClickHandler,
                     context
             );
+            // Set showMenu property before creating the screen
+            screenDef.setShowMenu(config.isShowMenu());
+            System.out.println("    screenDef.isShowMenu() after setShowMenu() = " + screenDef.isShowMenu());
+            
             stage = screenDef.createScreen();
+            System.out.println("    Stage created");
         } else {
             // Create simple ScreenDefinition without areas
+            System.out.println("=== DEBUG [InterpreterScreen.createStageForScreenOnFxThread] Screen without areas: " + qualifiedKey + " ===");
+            System.out.println("    config.isShowMenu() = " + config.isShowMenu());
+            
             ScreenDefinition screenDef = new ScreenDefinition(qualifiedKey, config.getTitle(), config.getWidth(), config.getHeight());
+            // Set showMenu property before creating the screen
+            screenDef.setShowMenu(config.isShowMenu());
+            System.out.println("    screenDef.isShowMenu() after setShowMenu() = " + screenDef.isShowMenu());
+            
             stage = screenDef.createScreen();
+            System.out.println("    Stage created");
         }
 
         // If this screen has a parent screen, set the owner relationship

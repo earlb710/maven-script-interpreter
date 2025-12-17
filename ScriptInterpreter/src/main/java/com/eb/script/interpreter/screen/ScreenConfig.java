@@ -17,6 +17,7 @@ public class ScreenConfig {
     private final int height;
     private final boolean maximize;
     private final boolean resizable;
+    private final boolean showMenu;
     
     // Storage for all screen data that needs to be preserved
     private final ConcurrentHashMap<String, Object> screenVars;
@@ -32,7 +33,7 @@ public class ScreenConfig {
     private final String gainFocusCode;
     private final String lostFocusCode;
     
-    public ScreenConfig(String screenName, String title, int width, int height, boolean maximize, boolean resizable,
+    public ScreenConfig(String screenName, String title, int width, int height, boolean maximize, boolean resizable, boolean showMenu,
                        ConcurrentHashMap<String, Object> screenVars,
                        ConcurrentHashMap<String, DataType> screenVarTypes,
                        Map<String, VarSet> varSets,
@@ -47,6 +48,7 @@ public class ScreenConfig {
         this.height = height;
         this.maximize = maximize;
         this.resizable = resizable;
+        this.showMenu = showMenu;
         this.screenVars = screenVars;
         this.screenVarTypes = screenVarTypes;
         this.varSets = varSets;
@@ -66,6 +68,7 @@ public class ScreenConfig {
     public int getHeight() { return height; }
     public boolean isMaximize() { return maximize; }
     public boolean isResizable() { return resizable; }
+    public boolean isShowMenu() { return showMenu; }
     public ConcurrentHashMap<String, Object> getScreenVars() { return screenVars; }
     public ConcurrentHashMap<String, DataType> getScreenVarTypes() { return screenVarTypes; }
     public Map<String, VarSet> getVarSets() { return varSets; }
