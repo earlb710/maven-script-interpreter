@@ -2903,6 +2903,50 @@ public class ScreenFactory {
     }
     
     /**
+     * Automatically show the debug panel on a newly shown screen if debug is already enabled elsewhere.
+     * This checks if the parent screen or any other screen has the debug panel visible,
+     * and if so, shows it on the new screen as well.
+     * 
+     * @param screenName The name of the newly shown screen
+     * @param context The interpreter context
+     */
+    public static void autoShowDebugPanelIfEnabled(String screenName, InterpreterContext context) {
+        if (context == null || screenName == null) {
+            return;
+        }
+        
+        boolean shouldShowDebug = false;
+        
+        // Check if debug mode is enabled for current thread
+        if (isDebugMode()) {
+            shouldShowDebug = true;
+        }
+        
+        // Check if parent screen has debug panel visible
+        if (!shouldShowDebug) {
+            String parentScreen = context.getScreenParent(screenName);
+            if (parentScreen != null) {
+                shouldShowDebug = screenDebugPanels.containsKey(parentScreen.toLowerCase());
+            }
+        }
+        
+        // Check if ANY screen has debug panel visible
+        // This ensures debug persists across screen transitions
+        if (!shouldShowDebug && !screenDebugPanels.isEmpty()) {
+            shouldShowDebug = true;
+        }
+        
+        // Show debug panel if it should be visible
+        if (shouldShowDebug) {
+            Platform.runLater(() -> {
+                toggleDebugPanel(screenName, context, true);
+                // Also set debug mode for this thread to keep state consistent
+                setDebugModeForThread(true);
+            });
+        }
+    }
+    
+    /**
      * Capture a screenshot of the specified screen using Ctrl+P shortcut.
      * Saves the screenshot to system temp directory with screen name and sequence number.
      * 
@@ -3350,12 +3394,8 @@ public class ScreenFactory {
         
         stage.setScene(scene);
         
-        // If debug mode is already enabled, automatically show the debug panel for this new screen
-        if (isDebugMode() && context != null) {
-            Platform.runLater(() -> {
-                toggleDebugPanel(screenName, context, true);
-            });
-        }
+        // Note: Auto-showing debug panel is handled in InterpreterScreen.java after the stage is fully shown
+        // See autoShowDebugPanelIfEnabled() method which is called from the screen show logic
 
         return stage;
     }

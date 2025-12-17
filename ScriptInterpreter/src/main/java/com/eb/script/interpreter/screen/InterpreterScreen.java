@@ -998,6 +998,10 @@ public class InterpreterScreen {
                     ScreenFactory.clearChangedItems(finalScreenKey);
                     // Also refresh the debug panel if it's open to show the correct state
                     ScreenFactory.refreshDebugPanelIfOpen(finalScreenKey, context);
+                    
+                    // Auto-show debug panel if it's enabled on parent or any other screen
+                    // This ensures debug panel automatically appears on child screens when debug is already active
+                    ScreenFactory.autoShowDebugPanelIfEnabled(finalScreenKey, context);
                 });
             };
             
