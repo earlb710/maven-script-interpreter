@@ -4,31 +4,35 @@
 This implementation adds two new alignment properties (`contentAlignment` and `itemAlignment`) to the EBS screen system, providing precise control over both content alignment within controls and item positioning within parent containers.
 
 ## Problem Statement
-Previously, there was a single `alignment` property that was used for item content alignment. The requirement was to:
-1. Keep `alignment` as is for backwards compatibility
-2. Add `contentAlignment` to explicitly control content alignment (same as current `alignment`)
-3. Add `itemAlignment` to control the alignment of items (and their HBox/VBox wrappers) within parent containers
+Previously, there was a single `alignment` property that was ambiguous - it controlled item content alignment but the architecture was unclear. The requirement was to:
+1. Add `contentAlignment` (in DisplayItem) to explicitly control content/text alignment within controls
+2. Add `itemAlignment` (in AreaItem) to control the alignment of items (and their HBox/VBox wrappers) within parent containers
+3. Remove the old `alignment` property completely to enforce clean architectural separation
 
 ## Implementation
 
-### New Properties
+### Properties
 
-#### 1. `contentAlignment`
+#### 1. `contentAlignment` (DisplayItem property)
+- **Location**: `DisplayItem` class (display/styling property)
 - **Purpose**: Controls text/content alignment within the control itself
 - **Usage**: Applied to TextField, TextArea, ComboBox, Spinner, etc.
 - **Values**: `"left"`, `"center"`, `"right"` (also accepts shortcuts: `"l"`, `"c"`, `"r"`)
-- **CSS Effect**: Sets `-fx-alignment` on the control
+- **Implementation**: Uses `TextField.setAlignment(Pos)` API for TextFields, CSS for other controls
 
 **Example:**
 ```json
 {
   "varRef": "userName",
-  "display": {"type": "textfield"},
-  "contentAlignment": "center"
+  "display": {
+    "type": "textfield",
+    "contentAlignment": "center"
+  }
 }
 ```
 
-#### 2. `itemAlignment`
+#### 2. `itemAlignment` (AreaItem property)
+- **Location**: `AreaItem` class (layout/positioning property)
 - **Purpose**: Controls positioning of the item (and its HBox/VBox wrapper) within the parent container
 - **Usage**: Affects how the entire item (including label wrapper) is positioned in its parent
 - **Values**: Any JavaFX Pos value (e.g., `"center"`, `"top-left"`, `"center-right"`, `"bottom-center"`)
@@ -47,39 +51,51 @@ Previously, there was a single `alignment` property that was used for item conte
 }
 ```
 
-#### 3. `alignment` (Deprecated but retained)
-- **Purpose**: Backwards compatibility
-- **Behavior**: 
-  - Used as fallback for `contentAlignment` if not specified
-  - Used as fallback for `itemAlignment` if not specified
-- **Recommendation**: New code should use `contentAlignment` and/or `itemAlignment` explicitly
+### Architecture
+
+This implementation enforces clean separation between display and layout concerns:
+
+- **DisplayItem**: Holds display/styling metadata (`contentAlignment`, `textColor`, `fontSize`, etc.)
+- **AreaItem**: Holds layout/positioning properties (`itemAlignment`, `margin`, `padding`, `colSpan`, etc.)
+
+The old ambiguous `alignment` property has been **completely removed** to prevent confusion.
 
 ### Files Modified
 
-1. **AreaItem.java**
-   - Added `contentAlignment` field
-   - Added `itemAlignment` field
-   - Kept `alignment` field with deprecation note
+1. **DisplayItem.java**
+   - Added `contentAlignment` field (display/styling property)
+   - Removed old `alignment` field to prevent confusion
    - Updated `toString()` method
 
-2. **BuiltinsScreen.java**
-   - Added `contentAlignment` to `setAreaItemProperty()` method
-   - Added `itemAlignment` to `setAreaItemProperty()` method
-   - Added `contentAlignment` to `getAreaItemProperty()` method
-   - Added `itemAlignment` to `getAreaItemProperty()` method
+2. **AreaItem.java**
+   - Added `itemAlignment` field (layout/positioning property)
+   - Removed old `alignment` field completely
+   - Updated `toString()` method
 
-3. **AreaItemFactory.java**
-   - Updated content alignment logic to prioritize `contentAlignment`
-   - Falls back to `alignment` for backwards compatibility
-   - Applies alignment to TextField, TextArea, ComboBox, and Spinner controls
+3. **BuiltinsScreen.java**
+   - Added `contentAlignment` to `setAreaItemProperty()` and `getAreaItemProperty()` methods
+   - Added `itemAlignment` to `setAreaItemProperty()` and `getAreaItemProperty()` methods
+   - Removed support for deprecated `alignment` property
 
-4. **ScreenFactory.java**
+4. **InterpreterScreen.java**
+   - Added parsing for `contentAlignment` from display definitions
+   - Added parsing for `itemAlignment` from item definitions
+   - Removed parsing for deprecated `alignment` property
+   - Support for multiple case variations (camelCase, snake_case, lowercase)
+
+5. **AreaItemFactory.java**
+   - Updated content alignment logic to use `contentAlignment` from DisplayItem
+   - Uses `TextField.setAlignment(Pos)` API for TextField controls
+   - Uses CSS for TextArea and ComboBox controls
+   - Removed fallback to deprecated `alignment` property
+
+6. **ScreenFactory.java**
    - Added `itemAlignment` support for StackPane containers
-   - Added `itemAlignment` support for GridPane containers
+   - Added `itemAlignment` support for GridPane containers  
    - Added `itemAlignment` support for VBox containers (wraps in HBox)
    - Added `itemAlignment` support for HBox containers (wraps in VBox)
    - Updated property parsing to recognize `contentAlignment` and `itemAlignment`
-   - Updated valid properties list to include snake_case variants
+   - Removed support for deprecated `alignment` property
 
 ### Container-Specific Implementation
 
@@ -208,13 +224,38 @@ call scr.setProperty("myScreen.myButton", "itemAlignment", "center-right");
 var itemAlign: string = scr.getProperty("myScreen.myButton", "itemAlignment");
 ```
 
-## Backwards Compatibility
+## Breaking Changes
 
-The implementation maintains full backwards compatibility:
+⚠️ **BREAKING**: This implementation is **NOT backwards compatible**:
 
-1. **Existing scripts continue to work**: Scripts using `alignment` will continue to function as before
-2. **Graceful fallback**: If `contentAlignment` is not specified, the system falls back to `alignment`
-3. **No breaking changes**: All existing functionality is preserved
+1. **Old `alignment` property removed**: Scripts using `alignment` must be updated
+2. **No fallback**: The system will not fall back to the old `alignment` property
+3. **Migration required**: Existing scripts must be updated to use:
+   - `contentAlignment` (in display definition) for text/content alignment
+   - `itemAlignment` (at item level) for item positioning in parent containers
+
+### Migration Guide
+
+**Before (old `alignment` property):**
+```json
+{
+  "varRef": "myField",
+  "display": {"type": "textfield"},
+  "alignment": "center"
+}
+```
+
+**After (new properties):**
+```json
+{
+  "varRef": "myField",
+  "display": {
+    "type": "textfield",
+    "contentAlignment": "center"
+  },
+  "itemAlignment": "center"
+}
+```
 
 ## Testing
 
