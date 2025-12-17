@@ -1,0 +1,78 @@
+// Test script to verify screen vars can be accessed directly in event code
+
+// Define a simple test screen with variables
+screen testScreen = {
+    "title": "Test Screen Vars Access",
+    "width": 400,
+    "height": 300,
+    "vars": [
+        {
+            "name": "counter",
+            "type": "int",
+            "default": 0,
+            "display": {
+                "type": "textfield",
+                "labelText": "Counter"
+            }
+        },
+        {
+            "name": "message",
+            "type": "string",
+            "default": "Hello",
+            "display": {
+                "type": "textfield",
+                "labelText": "Message"
+            }
+        },
+        {
+            "name": "btnIncrement",
+            "type": "string",
+            "display": {
+                "type": "button",
+                "text": "Increment Counter",
+                "onClick": "
+                    // Test direct access to screen var without qualification
+                    counter = counter + 1;
+                    println('Counter incremented to: ' + counter);
+                "
+            }
+        },
+        {
+            "name": "btnUpdate",
+            "type": "string",
+            "display": {
+                "type": "button",
+                "text": "Update Message",
+                "onClick": "
+                    // Test direct access to screen var without qualification
+                    message = 'Updated at ' + string.now();
+                    println('Message updated to: ' + message);
+                "
+            }
+        },
+        {
+            "name": "btnClose",
+            "type": "string",
+            "display": {
+                "type": "button",
+                "text": "Close",
+                "onClick": "close screen;"
+            }
+        }
+    ],
+    "startup": "
+        // Test direct access in startup code
+        counter = 10;
+        message = 'Initialized!';
+        println('Startup code: counter=' + counter + ', message=' + message);
+    "
+};
+
+// Show the screen
+show screen testScreen;
+
+println("Screen shown. Click buttons to test direct variable access.");
+println("Expected behavior:");
+println("  - Increment button should directly modify 'counter' variable");
+println("  - Update button should directly modify 'message' variable");
+println("  - No need to use 'testScreen.counter' or 'testScreen.message'");

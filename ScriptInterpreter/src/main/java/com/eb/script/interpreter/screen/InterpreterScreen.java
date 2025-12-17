@@ -3064,7 +3064,7 @@ public class InterpreterScreen {
         
         if (dispatcher != null && dispatcher.isRunning()) {
             // Use the dispatcher to execute on the screen thread
-            // The dispatcher will call the CodeExecutor which already pushes screen vars
+            // Note: The dispatcher calls the CodeExecutor which handles pushing/popping screen vars
             try {
                 dispatcher.dispatchSync(ebsCode);
             } catch (InterpreterError e) {
@@ -3072,6 +3072,7 @@ public class InterpreterScreen {
             }
         } else {
             // Fallback: execute directly if dispatcher is not available
+            // This handles the case where the screen thread isn't running yet or is unavailable
             try {
                 // Set the screen context before executing inline code
                 context.setCurrentScreen(screenName);
@@ -3132,7 +3133,10 @@ public class InterpreterScreen {
      * Pop screen variables from the environment scope.
      * This removes the scope that was added by pushScreenVarsToEnvironment to prevent scope leakage.
      * 
-     * @param screenName The name of the screen (not actually used since we just pop the scope)
+     * Note: screenName parameter is kept for API symmetry with pushScreenVarsToEnvironment
+     * and for potential future use (e.g., validation or logging).
+     * 
+     * @param screenName The name of the screen (kept for API consistency)
      */
     private void popScreenVarsFromEnvironment(String screenName) {
         // Pop the environment scope that contains the screen variables

@@ -215,7 +215,10 @@ public class BuiltinsThread {
      * Helper method to pop screen variables from the environment scope.
      * This removes the scope that was added by pushScreenVarsToEnvironment to prevent scope leakage.
      * 
-     * @param screenName The name of the screen (not actually used since we just pop the scope)
+     * Note: screenName parameter is kept for API symmetry with pushScreenVarsToEnvironment
+     * and for potential future use (e.g., validation or logging).
+     * 
+     * @param screenName The name of the screen (kept for API consistency)
      * @param context The interpreter context
      */
     private static void popScreenVarsFromEnvironment(String screenName, InterpreterContext context) {
