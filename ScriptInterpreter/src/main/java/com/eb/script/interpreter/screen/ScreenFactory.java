@@ -4891,7 +4891,7 @@ public class ScreenFactory {
             // promptHelp can be at item level (gets moved to displayItem)
             "prompthelp", "prompt_help",
             // Label properties (can be at item level for override/merge behavior)
-            "labeltext", "label_text", "labeltextalignment", "label_text_alignment",
+            "labeltext", "label_text", "text", "labeltextalignment", "label_text_alignment",
             "labelposition", "label_position",
             // Styling properties (can be at item level for override/merge behavior)
             "labelcolor", "label_color", "labelbackgroundcolor", "label_background_color",
