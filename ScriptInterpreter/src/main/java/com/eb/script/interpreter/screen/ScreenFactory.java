@@ -594,81 +594,9 @@ public class ScreenFactory {
     }
     
     /**
-     * Extracts the base screen name from a qualified screen name.
-     * For example, "startupdialog.chessscreen" becomes "chessscreen".
-     * If the name has no parent prefix, returns the name as-is.
-     * 
-     * @param qualifiedScreenName The qualified screen name (may contain parent prefix)
-     * @return The base screen name (the part after the last dot, or the whole name if no dot)
-     */
-    private static String getBaseScreenName(String qualifiedScreenName) {
-        if (qualifiedScreenName == null || qualifiedScreenName.isEmpty()) {
-            return qualifiedScreenName;
-        }
-        int lastDotIndex = qualifiedScreenName.lastIndexOf('.');
-        if (lastDotIndex >= 0 && lastDotIndex < qualifiedScreenName.length() - 1) {
-            return qualifiedScreenName.substring(lastDotIndex + 1);
-        }
-        return qualifiedScreenName;
-    }
-    
-    /**
-     * Gets screen data from context, trying both the qualified name and the base name.
-     * This is needed because child screens are stored under their base name,
-     * but may be referenced by their qualified name (parent.child).
-     * 
-     * @param context The interpreter context
-     * @param screenName The screen name (qualified or base)
-     * @param dataType The type of data to retrieve ("vars", "varTypes", "areaItems", or "areas")
-     * @return The screen data, or null if not found
-     */
-    private static Object getScreenDataSafe(InterpreterContext context, String screenName, String dataType) {
-        if (context == null || screenName == null) {
-            return null;
-        }
-        
-        Object data = null;
-        switch (dataType) {
-            case "vars":
-                data = context.getScreenVars(screenName);
-                break;
-            case "varTypes":
-                data = context.getScreenVarTypes(screenName);
-                break;
-            case "areaItems":
-                data = context.getScreenAreaItems(screenName);
-                break;
-            case "areas":
-                data = context.getScreenAreas(screenName);
-                break;
-        }
-        
-        // If not found with qualified name, try with base name
-        if (data == null && screenName.contains(".")) {
-            String baseName = getBaseScreenName(screenName);
-            switch (dataType) {
-                case "vars":
-                    data = context.getScreenVars(baseName);
-                    break;
-                case "varTypes":
-                    data = context.getScreenVarTypes(baseName);
-                    break;
-                case "areaItems":
-                    data = context.getScreenAreaItems(baseName);
-                    break;
-                case "areas":
-                    data = context.getScreenAreas(baseName);
-                    break;
-            }
-        }
-        
-        return data;
-    }
-    
-    /**
      * Create the debug panel showing all screen variables and their values.
      * 
-     * @param screenName The name of the screen (may be qualified with parent prefix)
+     * @param screenName The name of the screen
      * @param context The interpreter context
      * @return A ScrollPane containing the debug information
      */
@@ -716,16 +644,9 @@ public class ScreenFactory {
         });
         
         // Get screen variables and types for copy action
-        // Use safe getter to handle both qualified names (parent.child) and base names
-        @SuppressWarnings("unchecked")
-        java.util.concurrent.ConcurrentHashMap<String, Object> screenVars = 
-            (java.util.concurrent.ConcurrentHashMap<String, Object>) getScreenDataSafe(context, screenName, "vars");
-        @SuppressWarnings("unchecked")
-        java.util.concurrent.ConcurrentHashMap<String, DataType> screenVarTypes = 
-            (java.util.concurrent.ConcurrentHashMap<String, DataType>) getScreenDataSafe(context, screenName, "varTypes");
-        @SuppressWarnings("unchecked")
-        Map<String, AreaItem> screenAreaItems = 
-            (Map<String, AreaItem>) getScreenDataSafe(context, screenName, "areaItems");
+        java.util.concurrent.ConcurrentHashMap<String, Object> screenVars = context.getScreenVars(screenName);
+        java.util.concurrent.ConcurrentHashMap<String, DataType> screenVarTypes = context.getScreenVarTypes(screenName);
+        Map<String, AreaItem> screenAreaItems = context.getScreenAreaItems(screenName);
         
         copyButton.setOnAction(e -> {
             String clipboardText = formatAllForClipboard(screenName, screenVars, screenVarTypes, screenAreaItems, context);
@@ -1048,8 +969,7 @@ public class ScreenFactory {
             // Build a map from item name to area name by iterating through AreaDefinitions
             // This is needed because screenAreaItems doesn't always include area in the key
             Map<String, String> itemToAreaMap = new HashMap<>();
-            @SuppressWarnings("unchecked")
-            List<AreaDefinition> areas = (List<AreaDefinition>) getScreenDataSafe(context, screenName, "areas");
+            List<AreaDefinition> areas = context.getScreenAreas(screenName);
             if (areas != null) {
                 buildItemToAreaMap(areas, itemToAreaMap, "");
             }
@@ -1350,9 +1270,7 @@ public class ScreenFactory {
         areasHeader.setStyle("-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: #444;");
         areasSection.getChildren().add(areasHeader);
         
-        // Use safe getter to handle both qualified names (parent.child) and base names
-        @SuppressWarnings("unchecked")
-        List<AreaDefinition> screenAreas = (List<AreaDefinition>) getScreenDataSafe(context, screenName, "areas");
+        List<AreaDefinition> screenAreas = context.getScreenAreas(screenName);
         if (screenAreas != null && !screenAreas.isEmpty()) {
             for (AreaDefinition area : screenAreas) {
                 addAreaDefinitionToSection(areasSection, area, 0);
@@ -1798,9 +1716,7 @@ public class ScreenFactory {
             }
         } else if (item.varRef != null) {
             // Fallback to variable value if control not found
-            @SuppressWarnings("unchecked")
-            java.util.concurrent.ConcurrentHashMap<String, Object> screenVars = 
-                (java.util.concurrent.ConcurrentHashMap<String, Object>) getScreenDataSafe(context, screenName, "vars");
+            java.util.concurrent.ConcurrentHashMap<String, Object> screenVars = context.getScreenVars(screenName);
             if (screenVars != null) {
                 Object value = screenVars.get(item.varRef.toLowerCase());
                 if (value != null) {
@@ -2169,9 +2085,7 @@ public class ScreenFactory {
             }
         } else if (item.varRef != null) {
             // Fallback to variable value if control not found
-            @SuppressWarnings("unchecked")
-            java.util.concurrent.ConcurrentHashMap<String, Object> screenVars = 
-                (java.util.concurrent.ConcurrentHashMap<String, Object>) getScreenDataSafe(context, screenName, "vars");
+            java.util.concurrent.ConcurrentHashMap<String, Object> screenVars = context.getScreenVars(screenName);
             if (screenVars != null) {
                 Object value = screenVars.get(item.varRef.toLowerCase());
                 if (value != null) {
@@ -2356,8 +2270,7 @@ public class ScreenFactory {
         // Screen Areas section
         sb.append("\n📐 SCREEN AREAS\n");
         sb.append("-".repeat(40)).append("\n");
-        @SuppressWarnings("unchecked")
-        List<AreaDefinition> screenAreas = (List<AreaDefinition>) getScreenDataSafe(context, screenName, "areas");
+        List<AreaDefinition> screenAreas = context.getScreenAreas(screenName);
         if (screenAreas != null && !screenAreas.isEmpty()) {
             for (AreaDefinition area : screenAreas) {
                 formatAreaDefinitionForClipboard(sb, area, 0);
@@ -2903,51 +2816,6 @@ public class ScreenFactory {
     }
     
     /**
-     * Automatically show the debug panel on a newly shown screen if debug is already enabled elsewhere.
-     * This checks if the parent screen or any other screen has the debug panel visible,
-     * and if so, shows it on the new screen as well.
-     * 
-     * @param screenName The name of the newly shown screen
-     * @param context The interpreter context
-     */
-    public static void autoShowDebugPanelIfEnabled(String screenName, InterpreterContext context) {
-        if (context == null || screenName == null) {
-            return;
-        }
-        
-        boolean shouldShowDebug = false;
-        
-        // Check if debug mode is enabled for current thread
-        if (isDebugMode()) {
-            shouldShowDebug = true;
-        }
-        
-        // Check if parent screen has debug panel visible
-        if (!shouldShowDebug) {
-            String parentScreen = context.getScreenParent(screenName);
-            if (parentScreen != null) {
-                shouldShowDebug = screenDebugPanels.containsKey(parentScreen.toLowerCase());
-            }
-        }
-        
-        // Check if ANY screen has debug panel visible
-        // This ensures debug persists across screen transitions
-        if (!shouldShowDebug && !screenDebugPanels.isEmpty()) {
-            shouldShowDebug = true;
-        }
-        
-        // Show debug panel if it should be visible
-        // Use Util.runOnFx to ensure we're on the JavaFX Application Thread
-        if (shouldShowDebug) {
-            com.eb.util.Util.runOnFx(() -> {
-                toggleDebugPanel(screenName, context, true);
-                // Also set debug mode for this thread to keep state consistent
-                setDebugModeForThread(true);
-            });
-        }
-    }
-    
-    /**
      * Capture a screenshot of the specified screen using Ctrl+P shortcut.
      * Saves the screenshot to system temp directory with screen name and sequence number.
      * 
@@ -3394,9 +3262,6 @@ public class ScreenFactory {
         }
         
         stage.setScene(scene);
-        
-        // Note: Auto-showing debug panel is handled in InterpreterScreen.java after the stage is fully shown
-        // See autoShowDebugPanelIfEnabled() method which is called from the screen show logic
 
         return stage;
     }
