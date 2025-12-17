@@ -706,7 +706,8 @@ handleCellClick(x: int, y: int) {
                 playerName = "Black";
             }
             var moveEntry: string = playerName + ": " + moveNotation + "\n";
-            chessScreen.moveHistory = chessScreen.moveHistory + moveEntry;
+            // Update screen variable directly (onClick handlers can access screen vars without qualification)
+            moveHistory = moveHistory + moveEntry;
             print "Move added to history: " + moveEntry;
             
             // Clear indicators and selection
@@ -717,10 +718,12 @@ handleCellClick(x: int, y: int) {
             // Switch to next player
             if currentPlayer == WHITE then {
                 currentPlayer = BLACK;
-                chessScreen.statusMessage = "Black to move";
+                // Update screen variable directly (onClick handlers can access screen vars without qualification)
+                statusMessage = "Black to move";
             } else {
                 currentPlayer = WHITE;
-                chessScreen.statusMessage = "White to move";
+                // Update screen variable directly (onClick handlers can access screen vars without qualification)
+                statusMessage = "White to move";
             }
             call updateTimerColors();
             print "Switched to next player: " + currentPlayer;
@@ -868,8 +871,8 @@ timerCallback(timerName: string) {
             timerWhite = timerWhite - 1;
             var timerText: string = call formatTimerDecimal(timerWhite);
             
-            // Update screen variable which is bound to the label via varRef
-            chessScreen.whiteTimer = timerText;
+            // Update screen variable directly (timer callbacks can access screen vars without qualification)
+            whiteTimer = timerText;
             
             // Debug: Print every 10 deciseconds (1 second)
             if call modulo(timerWhite, 10) == 0 then {
@@ -882,8 +885,8 @@ timerCallback(timerName: string) {
             timerBlack = timerBlack - 1;
             var timerText: string = call formatTimerDecimal(timerBlack);
             
-            // Update screen variable which is bound to the label via varRef
-            chessScreen.blackTimer = timerText;
+            // Update screen variable directly (timer callbacks can access screen vars without qualification)
+            blackTimer = timerText;
             
             // Debug: Print every 10 deciseconds (1 second)
             if call modulo(timerBlack, 10) == 0 then {
