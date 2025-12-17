@@ -1728,10 +1728,6 @@ public class BuiltinsScreen {
         String propLower = propertyName.toLowerCase();
 
         switch (propLower) {
-            case "value", "text" -> {
-                // The "value" and "text" properties are handled by applyPropertyToControl
-                // but we accept them here without error to allow the JavaFX control update
-            }
             case "editable" -> {
                 if (value instanceof Boolean) {
                     item.editable = (Boolean) value;
@@ -1800,7 +1796,8 @@ public class BuiltinsScreen {
             case "alignment" ->
                 item.alignment = value != null ? String.valueOf(value).toLowerCase() : null;
             default ->
-                throw new InterpreterError("scr.setProperty: unknown property '" + propertyName + "'");
+                throw new InterpreterError("scr.setProperty: unknown property '" + propertyName + "'. " +
+                    "Note: 'text' and 'value' should be set via screen variables, not scr.setproperty.");
         }
     }
 
@@ -1863,22 +1860,6 @@ public class BuiltinsScreen {
         String propLower = propertyName.toLowerCase();
 
         switch (propLower) {
-            case "value", "text" -> {
-                // Set the text/value of the control
-                String textValue = value != null ? String.valueOf(value) : "";
-                if (control instanceof javafx.scene.control.TextField) {
-                    ((javafx.scene.control.TextField) control).setText(textValue);
-                } else if (control instanceof javafx.scene.control.TextArea) {
-                    ((javafx.scene.control.TextArea) control).setText(textValue);
-                } else if (control instanceof javafx.scene.web.WebView) {
-                    // For WebView, load the content as HTML
-                    ((javafx.scene.web.WebView) control).getEngine().loadContent(textValue);
-                } else if (control instanceof javafx.scene.control.Label) {
-                    ((javafx.scene.control.Label) control).setText(textValue);
-                } else if (control instanceof javafx.scene.control.Button) {
-                    ((javafx.scene.control.Button) control).setText(textValue);
-                }
-            }
             case "editable" -> {
                 if (value instanceof Boolean) {
                     boolean boolVal = (Boolean) value;
@@ -2011,6 +1992,13 @@ public class BuiltinsScreen {
                         }
                     }
                 }
+            }
+            default -> {
+                // Unknown property - throw an error
+                throw new RuntimeException("Unknown property '" + propertyName + "' for control. " +
+                    "Valid properties are: editable, disabled, visible, tooltip, textcolor, backgroundcolor, " +
+                    "prefwidth, prefheight, minwidth, minheight, maxwidth, maxheight. " +
+                    "Note: 'text' and 'value' should be set via screen variables, not scr.setproperty.");
             }
             // Note: Other properties like colspan, rowspan, hgrow, vgrow, margin, padding, alignment
             // are layout-specific and would require re-layouting the parent container to apply.
