@@ -1120,7 +1120,7 @@ handleStartGame() {
     timerWhite = timeInDeciseconds;
     timerBlack = timeInDeciseconds;
     
-    gameStarted = true;
+    // gameStarted will be set to true in screen startup handler
     
     // Close the startup dialog
     hide screen startupDialog;
@@ -1254,9 +1254,7 @@ handleStartGame() {
     show screen chessScreen;
     
     // Timer display is automatically updated via varRef binding to whiteTimer and blackTimer variables
-    
-    // Start the game timer (updates every 100ms = 0.1 seconds)
-    call thread.timerStart("chessTimer", 100, "timerCallback");
+    // Timer is started by screen startup handler which sets gameStarted = true
     
     print "";
     print "Chess screen is now displayed!";
@@ -1405,6 +1403,7 @@ screen chessScreen = {
     "title": "Chess Game",
     "width": 980,
     "height": 780,
+    "startup": "call thread.timerStart('chessTimer', 100, 'timerCallback'); gameStarted = true;",
     "cleanup": "call cleanupChessScreen();",
     "vars": [
         {"name": "whitetimer", "type": "string", "default": "10:00"},
