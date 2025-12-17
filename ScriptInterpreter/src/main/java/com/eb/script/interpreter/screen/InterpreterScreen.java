@@ -234,18 +234,34 @@ public class InterpreterScreen {
             String title = config.containsKey("title") ? String.valueOf(config.get("title")) : "Screen " + stmt.name;
             int width = config.containsKey("width") ? ((Number) config.get("width")).intValue() : 800;
             int height = config.containsKey("height") ? ((Number) config.get("height")).intValue() : 600;
-            boolean maximize = config.containsKey("maximize") && Boolean.TRUE.equals(config.get("maximize"));
-            boolean resizable = !config.containsKey("resizable") || Boolean.TRUE.equals(config.get("resizable")); // default true
             
-            // Extract showMenu with proper boolean handling
+            // Extract boolean properties with proper handling for Boolean objects and primitives
+            boolean maximize = false; // default to false
+            if (config.containsKey("maximize")) {
+                Object maximizeValue = config.get("maximize");
+                if (maximizeValue instanceof Boolean) {
+                    maximize = (Boolean) maximizeValue;
+                } else if (maximizeValue != null) {
+                    maximize = Boolean.parseBoolean(maximizeValue.toString());
+                }
+            }
+            
+            boolean resizable = true; // default to true
+            if (config.containsKey("resizable")) {
+                Object resizableValue = config.get("resizable");
+                if (resizableValue instanceof Boolean) {
+                    resizable = (Boolean) resizableValue;
+                } else if (resizableValue != null) {
+                    resizable = Boolean.parseBoolean(resizableValue.toString());
+                }
+            }
+            
             boolean showMenu = true; // default to true
             if (config.containsKey("showMenu")) {
                 Object showMenuValue = config.get("showMenu");
-                // Handle both Boolean objects and boolean primitives
                 if (showMenuValue instanceof Boolean) {
                     showMenu = (Boolean) showMenuValue;
                 } else if (showMenuValue != null) {
-                    // Convert string representation if needed
                     showMenu = Boolean.parseBoolean(showMenuValue.toString());
                 }
             }
