@@ -2937,12 +2937,12 @@ public class ScreenFactory {
         }
         
         // Show debug panel if it should be visible
+        // Note: This method is called from within Platform.runLater() in InterpreterScreen,
+        // so we can call toggleDebugPanel directly without another Platform.runLater()
         if (shouldShowDebug) {
-            Platform.runLater(() -> {
-                toggleDebugPanel(screenName, context, true);
-                // Also set debug mode for this thread to keep state consistent
-                setDebugModeForThread(true);
-            });
+            toggleDebugPanel(screenName, context, true);
+            // Also set debug mode for this thread to keep state consistent
+            setDebugModeForThread(true);
         }
     }
     
