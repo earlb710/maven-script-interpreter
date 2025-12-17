@@ -817,6 +817,81 @@ tableView.refresh();  // Force re-render
 3. State changes update the data model, then call `tableView.refresh()`
 4. Use chained `Platform.runLater()` calls when multiple async operations must complete before final state
 
+### Thread-Safe JavaFX Updates with Util.runOnFx()
+
+All JavaFX UI updates must happen on the JavaFX Application Thread. Instead of manually checking the thread with `Platform.runLater()`, use the utility function `com.eb.util.Util.runOnFx()` for consistent, thread-safe execution.
+
+**Function Signature:**
+```java
+public static void runOnFx(Runnable r)
+```
+
+**Behavior:**
+- If already on JavaFX thread: executes the Runnable immediately
+- If not on JavaFX thread: uses `Platform.runLater()` to queue execution on JavaFX thread
+- Prevents nested `Platform.runLater()` calls that can cause UI update delays
+
+**Usage Examples:**
+
+```java
+import com.eb.util.Util;
+
+// ❌ DON'T: Manual Platform.runLater() (may cause nested queuing issues)
+Platform.runLater(() -> {
+    label.setText("Updated");
+});
+
+// ✅ DO: Use Util.runOnFx() instead
+Util.runOnFx(() -> {
+    label.setText("Updated");
+});
+
+// ✅ DO: Use for screen variable refresh callbacks
+context.getScreenRefreshCallbacks().put(screenName, () -> {
+    Util.runOnFx(() -> refreshBoundControls(controls, vars));
+});
+
+// ✅ DO: Use for control property updates
+Util.runOnFx(() -> {
+    control.setDisable(false);
+    control.setVisible(true);
+});
+```
+
+**Why This Matters:**
+
+Timer callbacks and other background operations already run on the JavaFX thread via `Platform.runLater()`. If UI update code unconditionally wraps operations in another `Platform.runLater()`, it creates nested queuing:
+
+```java
+// Timer callback runs on JavaFX thread
+Platform.runLater(() -> {
+    // Inside callback, update UI
+    Platform.runLater(() -> {  // ❌ Nested! Update is queued instead of immediate
+        label.setText("Timer: " + time);
+    });
+});
+```
+
+Using `Util.runOnFx()` prevents this issue:
+
+```java
+// Timer callback runs on JavaFX thread
+Platform.runLater(() -> {
+    // Inside callback, update UI
+    Util.runOnFx(() -> {  // ✅ Executes immediately (already on FX thread)
+        label.setText("Timer: " + time);
+    });
+});
+```
+
+**When to Use:**
+- Timer callbacks that update UI
+- Screen variable refresh operations
+- Any code that might be called from both JavaFX and non-JavaFX threads
+- Replace all `Platform.runLater()` calls with `Util.runOnFx()` for consistency
+
+**Location:** `com.eb.util.Util.java` (line 729)
+
 ## Java Requirements
 
 - Java 21 or higher

@@ -1,0 +1,105 @@
+// Test script to verify timer screen updates work correctly
+// This script creates a simple screen with a label that updates via a timer callback
+
+print "=== Timer Screen Update Test ===";
+print "";
+
+// Define screen with JSON syntax
+screen testTimerScreen = {
+    "title": "Timer Screen Update Test",
+    "width": 400,
+    "height": 300,
+    "vars": [
+        {"name": "timerValue", "type": "int", "default": 0},
+        {"name": "timerRunning", "type": "bool", "default": false},
+        {"name": "timerDisplay", "type": "string", "default": "00:00"},
+        {"name": "startBtn", "type": "string", "default": ""},
+        {"name": "stopBtn", "type": "string", "default": ""}
+    ],
+    "area": [
+        {
+            "name": "main",
+            "type": "VBox",
+            "properties": {"alignment": "center", "spacing": 20, "padding": 20},
+            "items": [
+                {
+                    "name": "timerLabel",
+                    "type": "label",
+                    "varRef": "timerDisplay",
+                    "text": "00:00"
+                },
+                {
+                    "name": "startButton",
+                    "type": "button",
+                    "varRef": "startBtn",
+                    "text": "Start Timer",
+                    "onClick": "startTimerTest"
+                },
+                {
+                    "name": "stopButton",
+                    "type": "button",
+                    "varRef": "stopBtn",
+                    "text": "Stop Timer",
+                    "onClick": "stopTimerTest"
+                }
+            ]
+        }
+    ]
+};
+
+// Timer callback that updates the screen label
+timerUpdateCallback(timerName: string) {
+    if testTimerScreen.timerRunning then {
+        testTimerScreen.timerValue = testTimerScreen.timerValue + 1;
+        
+        // Format timer value as MM:SS using % operator
+        var minutes: int = testTimerScreen.timerValue / 60;
+        var seconds: int = testTimerScreen.timerValue % 60;
+        
+        var minutesStr: string = call str.toString(minutes);
+        if minutes < 10 then {
+            minutesStr = "0" + minutesStr;
+        }
+        
+        var secondsStr: string = call str.toString(seconds);
+        if seconds < 10 then {
+            secondsStr = "0" + secondsStr;
+        }
+        
+        var timeText: string = minutesStr + ":" + secondsStr;
+        
+        // Update the screen variable which is bound to the label via varRef
+        // This automatically updates the UI
+        testTimerScreen.timerDisplay = timeText;
+        
+        // Print every 5 seconds to show it's working
+        if testTimerScreen.timerValue % 5 == 0 then {
+            print "Timer: " + timeText + " (updated via screen variable)";
+        }
+    }
+}
+
+startTimerTest() {
+    if !testTimerScreen.timerRunning then {
+        testTimerScreen.timerRunning = true;
+        testTimerScreen.timerValue = 0;
+        print "Starting timer...";
+        call thread.timerStart("testTimer", 1000, "timerUpdateCallback");
+    }
+}
+
+stopTimerTest() {
+    if testTimerScreen.timerRunning then {
+        testTimerScreen.timerRunning = false;
+        print "Stopping timer...";
+        call thread.timerStop("testTimer");
+    }
+}
+
+// Show the screen
+show screen testTimerScreen;
+
+print "Timer screen test ready!";
+print "Click 'Start Timer' to begin, 'Stop Timer' to end.";
+print "The timer label should update smoothly every second.";
+print "";

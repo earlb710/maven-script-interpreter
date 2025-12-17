@@ -3188,10 +3188,9 @@ public class ScreenFactory {
 
             // Register refresh callback that refreshes all bound controls
             context.getScreenRefreshCallbacks().put(lowerScreenName, () -> {
-                // Use Platform.runLater to ensure UI updates happen on JavaFX Application Thread
-                Platform.runLater(() -> {
-                    refreshBoundControls(allBoundControls, screenVars);
-                });
+                // Execute immediately if already on JavaFX thread, otherwise queue it
+                // This prevents nested Platform.runLater() calls when called from timer callbacks
+                com.eb.util.Util.runOnFx(() -> refreshBoundControls(allBoundControls, screenVars));
             });
         }
 
