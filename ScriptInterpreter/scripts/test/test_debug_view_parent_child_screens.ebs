@@ -1,0 +1,227 @@
+// Test Script: Debug View with Parent-Child Screens
+// Purpose: Verify debug view state is tracked per-screen when one screen opens another
+// Usage: Run this script and follow the on-screen instructions
+//
+// This script tests:
+// 1. Opening debug view on parent screen
+// 2. Parent screen opening a child screen
+// 3. Debug view state is independent between parent and child screens
+// 4. Pressing Ctrl+D once on child screen opens debug view (not twice)
+
+// Parent screen that will open a child screen
+screen parentScreen = {
+    "title": "Parent Screen - Debug View Test",
+    "width": 600,
+    "height": 400,
+    "vars": [
+        {
+            "name": "parentData",
+            "type": "string",
+            "default": "Parent Screen Data",
+            "display": {
+                "type": "textfield",
+                "labelText": "Parent Data:"
+            }
+        },
+        {
+            "name": "parentCounter",
+            "type": "int",
+            "default": 0,
+            "display": {
+                "type": "textfield",
+                "labelText": "Parent Counter:"
+            }
+        },
+        {
+            "name": "openChildBtn",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "button",
+                "labelText": "Open Child Screen",
+                "onClick": "show screen childScreen;"
+            }
+        },
+        {
+            "name": "incrementParentBtn",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "button",
+                "labelText": "Increment Parent Counter",
+                "onClick": "parentScreen.parentCounter = parentScreen.parentCounter + 1;"
+            }
+        },
+        {
+            "name": "parentInstructions",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "label",
+                "labelText": "Instructions: Press Ctrl+D to open debug view, then click 'Open Child Screen' button"
+            }
+        }
+    ]
+};
+
+// Child screen that is opened by parent screen
+screen childScreen = {
+    "title": "Child Screen - Debug View Test",
+    "width": 600,
+    "height": 400,
+    "vars": [
+        {
+            "name": "childData",
+            "type": "string",
+            "default": "Child Screen Data",
+            "display": {
+                "type": "textfield",
+                "labelText": "Child Data:"
+            }
+        },
+        {
+            "name": "childCounter",
+            "type": "int",
+            "default": 100,
+            "display": {
+                "type": "textfield",
+                "labelText": "Child Counter:"
+            }
+        },
+        {
+            "name": "incrementChildBtn",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "button",
+                "labelText": "Increment Child Counter",
+                "onClick": "childScreen.childCounter = childScreen.childCounter + 1;"
+            }
+        },
+        {
+            "name": "childInstructions",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "label",
+                "labelText": "Instructions: Press Ctrl+D ONCE to open debug view on this child screen"
+            }
+        }
+    ]
+};
+
+// Print test information
+print "";
+print "=================================================================";
+print "PARENT-CHILD SCREEN DEBUG VIEW TEST";
+print "=================================================================";
+print "";
+print "This script tests that debug view state is tracked per-screen";
+print "when one screen opens another screen.";
+print "";
+print "The bug this tests:";
+print "  - After opening debug view on parent screen";
+print "  - Opening a child screen";
+print "  - Pressing Ctrl+D on child screen should open debug view";
+print "  - Previously required pressing Ctrl+D TWICE (bug)";
+print "  - Now should work with ONE press (fixed)";
+print "";
+print "=================================================================";
+print "TEST INSTRUCTIONS:";
+print "=================================================================";
+print "";
+print "Step 1: Open debug view on parent screen";
+print "  - Focus on the parent screen window";
+print "  - Press Ctrl+D";
+print "  - Verify debug panel opens on the right side";
+print "  - Note the parent screen data in debug panel";
+print "";
+print "Step 2: Open child screen while parent debug is open";
+print "  - Click 'Open Child Screen' button on parent screen";
+print "  - Child screen window opens";
+print "  - Note: Parent screen still has debug view open";
+print "";
+print "Step 3: Open debug view on child screen";
+print "  - Focus on the child screen window";
+print "  - Press Ctrl+D ONCE (not twice!)";
+print "  - EXPECTED: Debug panel opens immediately on child screen";
+print "  - EXPECTED: Child screen debug shows child data (not parent)";
+print "  - EXPECTED: Parent screen debug still shows parent data";
+print "";
+print "Step 4: Toggle debug views independently";
+print "  - Close debug view on child screen (Ctrl+D or close button)";
+print "  - Verify parent debug view is still open";
+print "  - Reopen debug view on child screen (Ctrl+D)";
+print "  - Verify it opens with ONE press";
+print "  - Close debug view on parent screen";
+print "  - Verify child debug view is still open";
+print "";
+print "Step 5: Test copy button independence";
+print "  - With both debug views open";
+print "  - Click copy button on parent debug panel";
+print "  - Verify only parent copy button shows checkmark";
+print "  - Click copy button on child debug panel";
+print "  - Verify only child copy button shows checkmark";
+print "";
+print "=================================================================";
+print "EXPECTED RESULTS:";
+print "=================================================================";
+print "";
+print "✓ Parent debug view opens with first Ctrl+D";
+print "✓ Child screen opens successfully from parent";
+print "✓ Child debug view opens with FIRST Ctrl+D (not second!)";
+print "✓ Both debug views can be open simultaneously";
+print "✓ Parent debug shows parent screen variables";
+print "✓ Child debug shows child screen variables";
+print "✓ Closing one debug view doesn't affect the other";
+print "✓ Copy button works independently on each screen";
+print "";
+print "❌ FAILS if child debug requires TWO Ctrl+D presses";
+print "❌ FAILS if child debug shows parent data";
+print "❌ FAILS if closing one debug closes the other";
+print "";
+print "=================================================================";
+print "";
+print "Press Enter to open the parent screen...";
+
+// Wait for user to be ready
+var ready: string = readln();
+
+// Open parent screen
+print "Opening Parent Screen...";
+show screen parentScreen;
+
+print "";
+print "=================================================================";
+print "PARENT SCREEN OPENED!";
+print "=================================================================";
+print "";
+print "Follow the test instructions above.";
+print "";
+print "Key points to verify:";
+print "1. Open debug on parent (Ctrl+D)";
+print "2. Click 'Open Child Screen' button";
+print "3. Press Ctrl+D ONCE on child - should open debug immediately";
+print "4. Both screens should have independent debug panels";
+print "";
+print "Press Enter when done testing...";
+
+// Wait for user to complete testing
+var done: string = readln();
+
+print "";
+print "=================================================================";
+print "TEST COMPLETE";
+print "=================================================================";
+print "";
+print "Expected behavior verified:";
+print "1. Debug view state is tracked per-screen (not per-thread)";
+print "2. Child screen debug opens with ONE Ctrl+D press";
+print "3. Parent and child debug views are independent";
+print "4. Data shown in each debug panel is screen-specific";
+print "";
+print "If you had to press Ctrl+D TWICE on the child screen,";
+print "the bug still exists and needs further investigation.";
+print "";
+print "Test script finished.";
+print "";
