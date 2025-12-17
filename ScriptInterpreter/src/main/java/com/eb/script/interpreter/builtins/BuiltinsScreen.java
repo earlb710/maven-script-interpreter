@@ -1795,8 +1795,6 @@ public class BuiltinsScreen {
             }
             case "itemalignment" ->
                 item.itemAlignment = value != null ? String.valueOf(value).toLowerCase() : null;
-            case "alignment" ->
-                item.alignment = value != null ? String.valueOf(value).toLowerCase() : null;
             default ->
                 throw new InterpreterError("scr.setProperty: unknown property '" + propertyName + "'");
         }
@@ -1850,8 +1848,6 @@ public class BuiltinsScreen {
                 item.displayItem != null ? item.displayItem.contentAlignment : null;
             case "itemalignment" ->
                 item.itemAlignment;
-            case "alignment" ->
-                item.alignment;
             default ->
                 throw new InterpreterError("scr.getProperty: unknown property '" + propertyName + "'");
         };

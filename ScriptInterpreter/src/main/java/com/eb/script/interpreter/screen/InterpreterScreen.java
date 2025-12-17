@@ -2672,10 +2672,6 @@ public class InterpreterScreen {
                             item.maxHeight = String.valueOf(itemDef.get("max_height"));
                         }
 
-                        if (itemDef.containsKey("alignment")) {
-                            item.alignment = String.valueOf(itemDef.get("alignment")).toLowerCase();
-                        }
-                        
                         // Parse contentAlignment (with snake_case support)
                         // ContentAlignment is a display property, so set it on DisplayItem
                         if (itemDef.containsKey("contentAlignment") || itemDef.containsKey("content_alignment") || itemDef.containsKey("contentalignment")) {

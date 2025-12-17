@@ -63,9 +63,6 @@ public class AreaItem {
     // Item alignment - controls alignment of the item (and its HBox/VBox wrapper) in the parent container
     // This affects how the item is positioned within its parent layout (e.g., "center", "top-left", "center-right")
     public String itemAlignment;
-    // Deprecated: Old alignment property kept for backwards compatibility.
-    // If set, will be used as fallback for contentAlignment (from DisplayItem) if contentAlignment is not set.
-    public String alignment;
     // onValidate event handler - EBS code to validate item value, expects return true/false
     public String onValidate;
     // onChange event handler - EBS code to execute whenever the item value changes
@@ -98,7 +95,6 @@ public class AreaItem {
                 + ", prefWidth='" + prefWidth + '\''
                 + ", prefHeight='" + prefHeight + '\''
                 + ", itemAlignment='" + itemAlignment + '\''
-                + ", alignment='" + alignment + '\''
                 + '}';
     }
 }

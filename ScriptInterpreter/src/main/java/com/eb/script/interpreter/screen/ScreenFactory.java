@@ -4148,17 +4148,12 @@ public class ScreenFactory {
             }
             
             // Apply itemAlignment if specified (controls positioning within parent container)
-            // Use itemAlignment if available, otherwise fall back to alignment for backwards compatibility
-            String alignmentValue = item.itemAlignment != null && !item.itemAlignment.isEmpty() 
-                ? item.itemAlignment 
-                : item.alignment;
-            
-            if (alignmentValue != null && !alignmentValue.isEmpty()) {
+            if (item.itemAlignment != null && !item.itemAlignment.isEmpty()) {
                 // For items in VBox, we need to wrap them in an HBox to support horizontal alignment
                 // Only do this if the item isn't already a wrapper with alignment
                 if (control.getProperties().get("alignmentApplied") == null) {
                     try {
-                        Pos pos = parseAlignment(alignmentValue);
+                        Pos pos = parseAlignment(item.itemAlignment);
                         // Extract just the horizontal part of the alignment for VBox items
                         // VBox items align horizontally: LEFT, CENTER, RIGHT
                         Pos hAlignment;
@@ -4219,17 +4214,12 @@ public class ScreenFactory {
             }
             
             // Apply itemAlignment if specified (controls positioning within parent container)
-            // Use itemAlignment if available, otherwise fall back to alignment for backwards compatibility
-            String alignmentValue = item.itemAlignment != null && !item.itemAlignment.isEmpty() 
-                ? item.itemAlignment 
-                : item.alignment;
-            
-            if (alignmentValue != null && !alignmentValue.isEmpty()) {
+            if (item.itemAlignment != null && !item.itemAlignment.isEmpty()) {
                 // For items in HBox, we need to wrap them in a VBox to support vertical alignment
                 // Only do this if the item isn't already a wrapper with alignment
                 if (control.getProperties().get("alignmentApplied") == null) {
                     try {
-                        Pos pos = parseAlignment(alignmentValue);
+                        Pos pos = parseAlignment(item.itemAlignment);
                         // Extract just the vertical part of the alignment for HBox items
                         // HBox items align vertically: TOP, CENTER, BOTTOM
                         Pos vAlignment;
@@ -4375,14 +4365,9 @@ public class ScreenFactory {
             }
             
             // Apply itemAlignment if specified (controls positioning within grid cell)
-            // Use itemAlignment if available, otherwise fall back to alignment for backwards compatibility
-            String alignmentValue = item.itemAlignment != null && !item.itemAlignment.isEmpty() 
-                ? item.itemAlignment 
-                : item.alignment;
-            
-            if (alignmentValue != null && !alignmentValue.isEmpty()) {
+            if (item.itemAlignment != null && !item.itemAlignment.isEmpty()) {
                 try {
-                    Pos pos = parseAlignment(alignmentValue);
+                    Pos pos = parseAlignment(item.itemAlignment);
                     GridPane.setHalignment(control, pos.getHpos());
                     GridPane.setValignment(control, pos.getVpos());
                 } catch (IllegalArgumentException e) {
@@ -4420,14 +4405,9 @@ public class ScreenFactory {
             stackPane.getChildren().add(control);
 
             // Apply itemAlignment if specified (controls positioning within parent container)
-            // Use itemAlignment if available, otherwise fall back to alignment for backwards compatibility
-            String alignmentValue = item.itemAlignment != null && !item.itemAlignment.isEmpty() 
-                ? item.itemAlignment 
-                : item.alignment;
-            
-            if (alignmentValue != null && !alignmentValue.isEmpty()) {
+            if (item.itemAlignment != null && !item.itemAlignment.isEmpty()) {
                 try {
-                    Pos pos = parseAlignment(alignmentValue);
+                    Pos pos = parseAlignment(item.itemAlignment);
                     StackPane.setAlignment(control, pos);
                 } catch (IllegalArgumentException e) {
                     // Ignore invalid values
@@ -4997,13 +4977,9 @@ public class ScreenFactory {
      */
     private static AreaItem parseAreaItem(Map<String, Object> itemDef, String screenName) {
         AreaItem item = new AreaItem();
-        
-        System.err.println("[PARSE DEBUG] parseAreaItem called");
-        System.err.println("[PARSE DEBUG] itemDef keys: " + (itemDef != null ? itemDef.keySet() : "null"));
 
         // Extract item properties
         item.name = getStringValue(itemDef, "name", null);
-        System.err.println("[PARSE DEBUG] item.name = " + item.name);
         // Support both "sequence" and "seq" for compactness
         item.sequence = getIntValue(itemDef, "sequence", getIntValue(itemDef, "seq", 0));
         item.varRef = getStringValue(itemDef, "varRef", getStringValue(itemDef, "var_ref", null));
@@ -5061,7 +5037,6 @@ public class ScreenFactory {
         item.maxHeight = getStringValue(itemDef, "maxHeight", getStringValue(itemDef, "max_height", null));
         
         // ContentAlignment is a display property, so set it on DisplayItem
-        System.err.println("[PARSE DEBUG] About to parse contentAlignment from itemDef");
         String contentAlignment = getStringValue(itemDef, "contentAlignment", getStringValue(itemDef, "content_alignment", null));
         if (contentAlignment != null) {
             if (item.displayItem == null) {
@@ -5069,16 +5044,9 @@ public class ScreenFactory {
             }
             item.displayItem.contentAlignment = contentAlignment;
         }
-        System.err.println("[PARSE DEBUG] After parsing: item.displayItem.contentAlignment = " + 
-            (item.displayItem != null ? item.displayItem.contentAlignment : "null (no displayItem)"));
         
         // ItemAlignment is a layout property, so set it on AreaItem
         item.itemAlignment = getStringValue(itemDef, "itemAlignment", getStringValue(itemDef, "item_alignment", null));
-        System.err.println("[PARSE DEBUG] After parsing: item.itemAlignment = " + item.itemAlignment);
-        
-        // Backwards compatibility: alignment property stays on AreaItem as fallback
-        item.alignment = getStringValue(itemDef, "alignment", null);
-        System.err.println("[PARSE DEBUG] After parsing: item.alignment = " + item.alignment);
         
         // Event handlers
         item.onValidate = getStringValue(itemDef, "onValidate", getStringValue(itemDef, "on_validate", null));
@@ -5106,9 +5074,7 @@ public class ScreenFactory {
 
         metadata.mandatory = getBooleanValue(displayDef, "mandatory", false);
         metadata.caseFormat = getStringValue(displayDef, "case", null);
-        // Support both old 'alignment' and new 'contentAlignment' keys
-        metadata.contentAlignment = getStringValue(displayDef, "contentAlignment", 
-                                    getStringValue(displayDef, "alignment", null));
+        metadata.contentAlignment = getStringValue(displayDef, "contentAlignment", null);
         metadata.pattern = getStringValue(displayDef, "pattern", null);
 
         // Min and max can be various types
@@ -5322,40 +5288,22 @@ public class ScreenFactory {
 
     // Helper methods for safe value extraction from Maps
     private static String getStringValue(Map<String, Object> map, String key, String defaultValue) {
-        // Debug: Print map keys when looking for contentAlignment or itemAlignment
-        if (key.equalsIgnoreCase("contentAlignment") || key.equalsIgnoreCase("itemAlignment")) {
-            System.err.println("[KEY LOOKUP DEBUG] Looking for key: '" + key + "'");
-            System.err.println("[KEY LOOKUP DEBUG] Map keys: " + map.keySet());
-        }
-        
         // Try lowercase key first (standard behavior)
         if (map.containsKey(key.toLowerCase())) {
             Object value = map.get(key.toLowerCase());
-            if (key.equalsIgnoreCase("contentAlignment") || key.equalsIgnoreCase("itemAlignment")) {
-                System.err.println("[KEY LOOKUP DEBUG] Found via lowercase: '" + key.toLowerCase() + "' = " + value);
-            }
             return value != null ? String.valueOf(value) : defaultValue;
         }
         // Try exact key as fallback
         if (map.containsKey(key)) {
             Object value = map.get(key);
-            if (key.equalsIgnoreCase("contentAlignment") || key.equalsIgnoreCase("itemAlignment")) {
-                System.err.println("[KEY LOOKUP DEBUG] Found via exact match: '" + key + "' = " + value);
-            }
             return value != null ? String.valueOf(value) : defaultValue;
         }
         // Try case-insensitive search through all keys as last resort
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             if (entry.getKey().equalsIgnoreCase(key)) {
                 Object value = entry.getValue();
-                if (key.equalsIgnoreCase("contentAlignment") || key.equalsIgnoreCase("itemAlignment")) {
-                    System.err.println("[KEY LOOKUP DEBUG] Found via case-insensitive: '" + entry.getKey() + "' = " + value);
-                }
                 return value != null ? String.valueOf(value) : defaultValue;
             }
-        }
-        if (key.equalsIgnoreCase("contentAlignment") || key.equalsIgnoreCase("itemAlignment")) {
-            System.err.println("[KEY LOOKUP DEBUG] NOT FOUND! Returning default: " + defaultValue);
         }
         return defaultValue;
     }
@@ -6164,7 +6112,6 @@ public class ScreenFactory {
             item.displayItem.contentAlignment = template.displayItem.contentAlignment;
         }
         item.itemAlignment = template.itemAlignment;
-        item.alignment = template.alignment;
         item.onValidate = template.onValidate;
         item.onChange = template.onChange;
         

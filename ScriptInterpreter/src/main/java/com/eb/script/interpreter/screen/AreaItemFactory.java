@@ -461,23 +461,11 @@ public class AreaItemFactory {
         }
 
         // Apply control text alignment (for the content inside the control)
-        // Use contentAlignment from metadata (DisplayItem), with fallback to item.alignment for backwards compatibility
+        // Use contentAlignment from metadata (DisplayItem)
         String contentAlignmentValue = null;
-        System.err.println("[ALIGNMENT DEBUG] Checking alignment for control type: " + control.getClass().getSimpleName());
-        System.err.println("[ALIGNMENT DEBUG] item: " + (item != null ? "not null" : "null"));
-        System.err.println("[ALIGNMENT DEBUG] item.name: " + (item != null ? item.name : "null"));
-        System.err.println("[ALIGNMENT DEBUG] metadata: " + (metadata != null ? "not null" : "null"));
-        System.err.println("[ALIGNMENT DEBUG] metadata.contentAlignment: " + (metadata != null ? metadata.contentAlignment : "null"));
-        System.err.println("[ALIGNMENT DEBUG] item.alignment (fallback): " + (item != null ? item.alignment : "null"));
-        
         if (metadata != null && metadata.contentAlignment != null && !metadata.contentAlignment.isEmpty()) {
             contentAlignmentValue = metadata.contentAlignment;
-        } else if (item != null && item.alignment != null && !item.alignment.isEmpty()) {
-            // Backwards compatibility: use item.alignment if metadata.contentAlignment is not set
-            contentAlignmentValue = item.alignment;
         }
-        System.err.println("[ALIGNMENT DEBUG] Final contentAlignmentValue: " + contentAlignmentValue);
-        System.err.println("[ALIGNMENT DEBUG] Will apply alignment: " + (contentAlignmentValue != null && !contentAlignmentValue.isEmpty()));
         
         if (contentAlignmentValue != null && !contentAlignmentValue.isEmpty()) {
             String alignment = contentAlignmentValue.toLowerCase();
