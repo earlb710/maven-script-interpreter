@@ -1,0 +1,171 @@
+// Test script for direct screen variable access in thread.timer callbacks
+// Tests that timer callbacks can access screen vars directly
+
+println("=== Test: Direct Screen Variable Access in Timer Callbacks ===");
+println("Testing that thread.timer callbacks can access screen vars directly");
+println("");
+
+string timerName = "counterTimer";
+
+// Timer callback function that accesses screen vars directly
+timerCallback(string tName) {
+    // Test direct access to screen variables without qualification
+    counter = counter + 1;
+    
+    // Update the message with timestamp
+    message = "Timer tick #" + counter + " at " + string.now();
+    
+    println("Timer callback: counter=" + counter + ", message=" + message);
+}
+
+// Define a test screen with timer controls
+screen timerTestScreen = {
+    "title": "Timer Variable Access Test",
+    "width": 500,
+    "height": 350,
+    "vars": [
+        {
+            "name": "counter",
+            "type": "int",
+            "default": 0,
+            "display": {
+                "type": "textfield",
+                "labelText": "Counter:",
+                "promptHelp": "Updates automatically via timer"
+            }
+        },
+        {
+            "name": "message",
+            "type": "string",
+            "default": "Not started",
+            "display": {
+                "type": "textfield",
+                "labelText": "Message:",
+                "promptHelp": "Timer status message"
+            }
+        },
+        {
+            "name": "timerInterval",
+            "type": "int",
+            "default": 1000,
+            "display": {
+                "type": "spinner",
+                "labelText": "Interval (ms):",
+                "min": 100,
+                "max": 5000
+            }
+        },
+        {
+            "name": "btnStart",
+            "type": "string",
+            "display": {
+                "type": "button",
+                "labelText": "Start Timer",
+                "onClick": "
+                    if (thread.timerIsRunning(timerName)) {
+                        println('Timer already running');
+                    } else {
+                        thread.timerStart(timerName, timerInterval, 'timerCallback');
+                        message = 'Timer started';
+                        println('Timer started with interval: ' + timerInterval + 'ms');
+                    }
+                "
+            }
+        },
+        {
+            "name": "btnStop",
+            "type": "string",
+            "display": {
+                "type": "button",
+                "labelText": "Stop Timer",
+                "onClick": "
+                    if (thread.timerIsRunning(timerName)) {
+                        thread.timerStop(timerName);
+                        message = 'Timer stopped';
+                        println('Timer stopped at count: ' + counter);
+                    } else {
+                        println('Timer is not running');
+                    }
+                "
+            }
+        },
+        {
+            "name": "btnReset",
+            "type": "string",
+            "display": {
+                "type": "button",
+                "labelText": "Reset Counter",
+                "onClick": "
+                    counter = 0;
+                    message = 'Counter reset';
+                    println('Counter reset to 0');
+                "
+            }
+        },
+        {
+            "name": "btnCheckStatus",
+            "type": "string",
+            "display": {
+                "type": "button",
+                "labelText": "Check Status",
+                "onClick": "
+                    var isRunning = thread.timerIsRunning(timerName);
+                    var status = 'Timer is ' + (isRunning ? 'running' : 'stopped');
+                    println(status);
+                    println('Current counter: ' + counter);
+                    println('Current message: ' + message);
+                "
+            }
+        },
+        {
+            "name": "btnClose",
+            "type": "string",
+            "display": {
+                "type": "button",
+                "labelText": "Close",
+                "onClick": "
+                    // Stop timer before closing
+                    if (thread.timerIsRunning(timerName)) {
+                        thread.timerStop(timerName);
+                        println('Timer stopped before closing');
+                    }
+                    close screen;
+                "
+            }
+        }
+    ],
+    "startup": "
+        // Initialize variables in startup
+        counter = 0;
+        message = 'Ready to start';
+        println('Startup: Screen initialized');
+    ",
+    "cleanup": "
+        // Stop timer on cleanup
+        if (thread.timerIsRunning(timerName)) {
+            thread.timerStop(timerName);
+            println('Cleanup: Timer stopped');
+        }
+        println('Cleanup: Final counter value: ' + counter);
+    "
+};
+
+// Show the screen
+show screen timerTestScreen;
+
+println("");
+println("Screen displayed. Instructions:");
+println("1. Click 'Start Timer' - timer will increment counter every second");
+println("2. Watch the counter and message fields update automatically");
+println("3. Click 'Stop Timer' - timer stops updating");
+println("4. Click 'Reset Counter' - resets counter to 0");
+println("5. Adjust 'Interval' spinner and restart timer to change update speed");
+println("6. Click 'Check Status' - displays current timer state and values");
+println("7. Click 'Close' - stops timer and closes screen");
+println("");
+println("Expected behavior:");
+println("  - Timer callback accesses 'counter' and 'message' directly (no prefix)");
+println("  - Counter increments automatically when timer is running");
+println("  - Message updates with timestamp on each timer tick");
+println("  - All button handlers can access and modify variables directly");
+println("  - Cleanup code stops the timer and displays final counter value");

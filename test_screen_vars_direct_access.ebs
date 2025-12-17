@@ -1,0 +1,148 @@
+// Test script for direct screen variable access in event handlers
+// Tests that screen variables can be accessed without qualified notation
+
+println("=== Test: Direct Screen Variable Access ===");
+println("Testing that event handlers can access screen vars directly");
+println("");
+
+// Define a test screen with various controls and event handlers
+screen testScreen = {
+    "title": "Screen Variable Access Test",
+    "width": 500,
+    "height": 400,
+    "vars": [
+        {
+            "name": "counter",
+            "type": "int",
+            "default": 0,
+            "display": {
+                "type": "textfield",
+                "labelText": "Counter:",
+                "promptHelp": "Current counter value"
+            }
+        },
+        {
+            "name": "message",
+            "type": "string",
+            "default": "Hello",
+            "display": {
+                "type": "textfield",
+                "labelText": "Message:",
+                "promptHelp": "Current message"
+            }
+        },
+        {
+            "name": "multiplier",
+            "type": "int",
+            "default": 2,
+            "display": {
+                "type": "spinner",
+                "labelText": "Multiplier:",
+                "min": 1,
+                "max": 10,
+                "onChange": "counter = counter * multiplier; println('Counter multiplied by ' + multiplier);"
+            }
+        },
+        {
+            "name": "isEnabled",
+            "type": "bool",
+            "default": true,
+            "display": {
+                "type": "checkbox",
+                "labelText": "Enable Features",
+                "onChange": "println('Feature enabled: ' + isEnabled);"
+            }
+        },
+        {
+            "name": "btnIncrement",
+            "type": "string",
+            "display": {
+                "type": "button",
+                "labelText": "Increment Counter",
+                "onClick": "counter = counter + 1; println('Counter incremented to: ' + counter);"
+            }
+        },
+        {
+            "name": "btnUpdateMessage",
+            "type": "string",
+            "display": {
+                "type": "button",
+                "labelText": "Update Message",
+                "onClick": "message = 'Updated at ' + string.now(); println('Message: ' + message);"
+            }
+        },
+        {
+            "name": "btnReset",
+            "type": "string",
+            "display": {
+                "type": "button",
+                "labelText": "Reset All",
+                "onClick": "counter = 0; message = 'Reset'; multiplier = 2; isEnabled = true; println('All values reset');"
+            }
+        },
+        {
+            "name": "btnTest",
+            "type": "string",
+            "display": {
+                "type": "button",
+                "labelText": "Run Test",
+                "onClick": "
+                    // Test direct variable access and manipulation
+                    var oldCounter = counter;
+                    counter = counter + 10;
+                    println('Test: counter changed from ' + oldCounter + ' to ' + counter);
+                    
+                    message = 'Test completed at ' + string.now();
+                    println('Test: message updated to: ' + message);
+                    
+                    println('Test: multiplier = ' + multiplier);
+                    println('Test: isEnabled = ' + isEnabled);
+                    println('Test passed: All variables accessed directly!');
+                "
+            }
+        },
+        {
+            "name": "btnClose",
+            "type": "string",
+            "display": {
+                "type": "button",
+                "labelText": "Close",
+                "onClick": "println('Closing screen...'); close screen;"
+            }
+        }
+    ],
+    "startup": "
+        // Test direct access in startup code
+        println('Startup: Initializing screen variables...');
+        counter = 5;
+        message = 'Initialized!';
+        multiplier = 3;
+        isEnabled = true;
+        println('Startup: counter=' + counter + ', message=' + message + ', multiplier=' + multiplier);
+    ",
+    "cleanup": "
+        // Test direct access in cleanup code
+        println('Cleanup: Final values - counter=' + counter + ', message=' + message);
+        println('Cleanup: Screen closing');
+    "
+};
+
+// Show the screen
+show screen testScreen;
+
+println("");
+println("Screen displayed. Instructions:");
+println("1. Click 'Increment Counter' - should increase counter by 1");
+println("2. Click 'Update Message' - should set message to current timestamp");
+println("3. Change 'Multiplier' spinner - should multiply counter by new value");
+println("4. Toggle 'Enable Features' - should log the state change");
+println("5. Click 'Reset All' - should reset all values");
+println("6. Click 'Run Test' - should perform comprehensive variable access test");
+println("7. Click 'Close' - should close the screen");
+println("");
+println("Expected behavior:");
+println("  - All event handlers access variables directly (no 'testScreen.' prefix)");
+println("  - Counter, message, multiplier values update in real-time");
+println("  - Console output confirms variable values");
+println("  - Startup code initializes variables");
+println("  - Cleanup code displays final values");
