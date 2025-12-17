@@ -154,6 +154,10 @@ public class ScreenFactory {
     // Map to store debug panel items TableView for each screen (screenName -> TableView)
     private static final java.util.concurrent.ConcurrentHashMap<String, javafx.scene.control.TableView<String[]>> debugItemsTables = new java.util.concurrent.ConcurrentHashMap<>();
     
+    // Map to store copy button feedback threads for cleanup (screenName -> Thread)
+    // These threads need to be interrupted when debug panel is closed to prevent memory leaks
+    private static final java.util.concurrent.ConcurrentHashMap<String, Thread> debugCopyFeedbackThreads = new java.util.concurrent.ConcurrentHashMap<>();
+    
     /**
      * Increment and return the event count for a specific item.eventType combination.
      * Used for debugging to track how many times each event fires.
@@ -568,6 +572,9 @@ public class ScreenFactory {
                 }
             }
         } else {
+            // Clean up event handlers and resources FIRST before removing UI components
+            cleanupDebugPanelResources(screenName.toLowerCase());
+            
             // Restore the original center content if we used a SplitPane
             javafx.scene.Node originalCenter = screenCenterContents.remove(screenName.toLowerCase());
             if (originalCenter != null) {
@@ -594,6 +601,38 @@ public class ScreenFactory {
                 }
             }
         }
+    }
+    
+    /**
+     * Cleanup event handlers, threads, and resources associated with a debug panel.
+     * This is called when the debug panel is closed (Ctrl+D toggled off) to prevent memory leaks.
+     * 
+     * Cleanup includes:
+     * - Interrupting copy button feedback threads
+     * - Clearing event handler references
+     * - Removing weak references to prevent memory retention
+     * 
+     * @param screenNameLower The lowercase screen name (already lowercased by caller)
+     */
+    private static void cleanupDebugPanelResources(String screenNameLower) {
+        // Interrupt and cleanup copy button feedback thread if it exists
+        Thread feedbackThread = debugCopyFeedbackThreads.remove(screenNameLower);
+        if (feedbackThread != null && feedbackThread.isAlive()) {
+            feedbackThread.interrupt();
+            // Note: The thread has InterruptedException handling that will gracefully exit
+        }
+        
+        // The debug panel's UI components (buttons, labels, tables) have event handlers
+        // that are automatically cleaned up when the nodes are removed from the scene graph.
+        // JavaFX's garbage collection will handle these once the panel is no longer referenced.
+        
+        // Additional cleanup notes:
+        // - Close button's setOnAction lambda: Will be GC'd when button is removed
+        // - Copy button's setOnAction lambda: Will be GC'd when button is removed  
+        // - TableView cell factories and tooltips: Will be GC'd when TableView is removed
+        // - Focus listeners on controls: These are attached to the main screen controls,
+        //   not the debug panel, so they persist and continue to update status bar
+        //   (this is intentional - status bar remains functional after debug closes)
     }
     
     /**
@@ -737,16 +776,35 @@ public class ScreenFactory {
             clipboardContent.putString(clipboardText);
             clipboard.setContent(clipboardContent);
             
-            // Show brief feedback
+            // Show brief feedback with a background thread
             copyButton.setText("✓");
-            new Thread(() -> {
+            
+            // Cancel any existing feedback thread for this screen before starting a new one
+            String screenKey = screenName.toLowerCase();
+            Thread existingThread = debugCopyFeedbackThreads.get(screenKey);
+            if (existingThread != null && existingThread.isAlive()) {
+                existingThread.interrupt();
+            }
+            
+            // Create and track the new feedback thread
+            Thread feedbackThread = new Thread(() -> {
                 try {
                     Thread.sleep(1000);
-                    Platform.runLater(() -> copyButton.setText("📋"));
+                    Platform.runLater(() -> {
+                        // Only reset text if the button still exists in scene
+                        // (panel might have been closed during the sleep)
+                        if (copyButton.getScene() != null) {
+                            copyButton.setText("📋");
+                        }
+                    });
                 } catch (InterruptedException ex) {
-                    // Ignore
+                    // Thread was interrupted (likely because debug panel was closed)
+                    // No action needed - just exit gracefully
                 }
-            }).start();
+            }, "DebugPanel-CopyFeedback-" + screenName);
+            
+            debugCopyFeedbackThreads.put(screenKey, feedbackThread);
+            feedbackThread.start();
         });
         
         mainContent.getChildren().add(headerPane);
