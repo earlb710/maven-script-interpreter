@@ -508,7 +508,6 @@ public class AreaItemFactory {
                     // Use programmatic API for TextField (more reliable than CSS)
                     TextField textField = (TextField) control;
                     textField.setAlignment(pos);
-                    System.err.println("[ALIGNMENT DEBUG] TextField alignment set to: " + pos + " for value: " + contentAlignmentValue);
                 } else if (control instanceof TextArea || control instanceof ComboBox) {
                     // TextArea and ComboBox don't have setAlignment, use CSS
                     String currentStyle = control.getStyle();
