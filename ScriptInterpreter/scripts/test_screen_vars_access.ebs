@@ -33,7 +33,7 @@ screen testScreen = {
                 "onClick": "
                     // Test direct access to screen var without qualification
                     counter = counter + 1;
-                    println('Counter incremented to: ' + counter);
+                    print 'Counter incremented to: ' + counter;
                 "
             }
         },
@@ -46,7 +46,7 @@ screen testScreen = {
                 "onClick": "
                     // Test direct access to screen var without qualification
                     message = 'Updated at ' + call date.format(call date.now(), 'yyyy-MM-dd HH:mm:ss');
-                    println('Message updated to: ' + message);
+                    print 'Message updated to: ' + message;
                 "
             }
         },
@@ -64,15 +64,15 @@ screen testScreen = {
         // Test direct access in startup code
         counter = 10;
         message = 'Initialized!';
-        println('Startup code: counter=' + counter + ', message=' + message);
+        print 'Startup code: counter=' + counter + ', message=' + message;
     "
 };
 
 // Show the screen
 show screen testScreen;
 
-println("Screen shown. Click buttons to test direct variable access.");
-println("Expected behavior:");
-println("  - Increment button should directly modify 'counter' variable");
-println("  - Update button should directly modify 'message' variable");
-println("  - No need to use 'testScreen.counter' or 'testScreen.message'");
+print "Screen shown. Click buttons to test direct variable access.";
+print "Expected behavior:";
+print "  - Increment button should directly modify 'counter' variable";
+print "  - Update button should directly modify 'message' variable";
+print "  - No need to use 'testScreen.counter' or 'testScreen.message'";
