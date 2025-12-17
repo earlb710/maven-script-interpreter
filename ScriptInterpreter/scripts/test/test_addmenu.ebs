@@ -22,17 +22,17 @@ screen testAddMenu = {
                 {
                     "type": "button",
                     "text": "Add Menu Item to Edit",
-                    "onClick": "call scr.addMenu(\"testaddmenu\", \"Edit\", \"customAction\", \"Custom Action\", \"call println('Custom action executed!');\");"
+                    "onClick": "call scr.addMenu(\"testaddmenu\", \"Edit\", \"customAction\", \"Custom Action\", \"print 'Custom action executed!';\");"
                 },
                 {
                     "type": "button",
                     "text": "Add Tools Menu",
-                    "onClick": "call scr.addMenu(\"testaddmenu\", \"Tools\", \"myTool\", \"My Tool\", \"call println('My tool executed!');\");"
+                    "onClick": "call scr.addMenu(\"testaddmenu\", \"Tools\", \"myTool\", \"My Tool\", \"print 'My tool executed!';\");"
                 },
                 {
                     "type": "button",
                     "text": "Add Nested Format Menu",
-                    "onClick": "call scr.addMenu(\"testaddmenu\", \"Edit.Format\", \"uppercase\", \"Convert to Uppercase\", \"call println('Convert to uppercase!');\");"
+                    "onClick": "call scr.addMenu(\"testaddmenu\", \"Edit.Format\", \"uppercase\", \"Convert to Uppercase\", \"print 'Convert to uppercase!';\");"
                 }
             ]
         }
@@ -41,15 +41,15 @@ screen testAddMenu = {
 
 show screen testAddMenu;
 
-call println("Test screen created.");
-call println("Click the buttons to dynamically add menu items:");
-call println("  1. 'Add Menu Item to Edit' - adds item to existing Edit menu");
-call println("  2. 'Add Tools Menu' - creates new top-level Tools menu");
-call println("  3. 'Add Nested Format Menu' - creates Edit > Format > Convert to Uppercase");
-call println("");
-call println("You can also add menu items directly:");
+print "Test screen created.";
+print "Click the buttons to dynamically add menu items:";
+print "  1. 'Add Menu Item to Edit' - adds item to existing Edit menu";
+print "  2. 'Add Tools Menu' - creates new top-level Tools menu";
+print "  3. 'Add Nested Format Menu' - creates Edit > Format > Convert to Uppercase";
+print "";
+print "You can also add menu items directly:";
 
 // Example: Add a custom menu item to a new Help menu
-call scr.addMenu("testaddmenu", "Help", "about", "About", "call println('About dialog would go here');");
+call scr.addMenu("testaddmenu", "Help", "about", "About", "print 'About dialog would go here';");
 
-call println("Added 'About' item to Help menu");
+print "Added 'About' item to Help menu";

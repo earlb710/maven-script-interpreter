@@ -461,6 +461,18 @@ public class BuiltinsScreen {
                     parentMenu = foundSubMenu;
                 }
                 
+                // Check if a menu item with the same displayName already exists and remove it
+                javafx.scene.control.MenuItem existingItem = null;
+                for (javafx.scene.control.MenuItem item : parentMenu.getItems()) {
+                    if (item.getText().equals(finalDisplayName)) {
+                        existingItem = item;
+                        break;
+                    }
+                }
+                if (existingItem != null) {
+                    parentMenu.getItems().remove(existingItem);
+                }
+                
                 // Create the menu item
                 javafx.scene.control.MenuItem menuItem = new javafx.scene.control.MenuItem(finalDisplayName);
                 
