@@ -14,6 +14,10 @@ public class ScreenContainerType {
     
     private final String containerType;  // e.g., "hbox", "vbox", "gridpane"
     private Region javafxRegion;  // Reference to the actual JavaFX container
+    private String screenName;  // Screen this container belongs to
+    private String areaName;  // This area's name
+    private String parentAreaName;  // Parent area name (null if root)
+    private java.util.List<String> childAreaNames;  // Child area names
     
     /**
      * Create a new ScreenContainerType
@@ -22,6 +26,7 @@ public class ScreenContainerType {
     public ScreenContainerType(String containerType) {
         this.containerType = containerType != null ? containerType.toLowerCase() : null;
         this.javafxRegion = null;
+        this.childAreaNames = new java.util.ArrayList<>();
     }
     
     /**
@@ -32,6 +37,7 @@ public class ScreenContainerType {
     public ScreenContainerType(String containerType, Region javafxRegion) {
         this.containerType = containerType != null ? containerType.toLowerCase() : null;
         this.javafxRegion = javafxRegion;
+        this.childAreaNames = new java.util.ArrayList<>();
     }
     
     /**
@@ -59,6 +65,64 @@ public class ScreenContainerType {
     }
     
     /**
+     * Set the screen name this container belongs to
+     */
+    public void setScreenName(String screenName) {
+        this.screenName = screenName;
+    }
+    
+    /**
+     * Get the screen name this container belongs to
+     */
+    public String getScreenName() {
+        return screenName;
+    }
+    
+    /**
+     * Set this area's name
+     */
+    public void setAreaName(String areaName) {
+        this.areaName = areaName;
+    }
+    
+    /**
+     * Get this area's name
+     */
+    public String getAreaName() {
+        return areaName;
+    }
+    
+    /**
+     * Set the parent area name
+     */
+    public void setParentAreaName(String parentAreaName) {
+        this.parentAreaName = parentAreaName;
+    }
+    
+    /**
+     * Get the parent area name
+     */
+    public String getParentAreaName() {
+        return parentAreaName;
+    }
+    
+    /**
+     * Add a child area name
+     */
+    public void addChildAreaName(String childAreaName) {
+        if (childAreaName != null && !childAreaNames.contains(childAreaName)) {
+            childAreaNames.add(childAreaName);
+        }
+    }
+    
+    /**
+     * Get the list of child area names
+     */
+    public java.util.List<String> getChildAreaNames() {
+        return new java.util.ArrayList<>(childAreaNames);
+    }
+    
+    /**
      * Get the full type name in "Screen.container" format
      * @return The full type name (always "Screen.container")
      */
@@ -68,7 +132,7 @@ public class ScreenContainerType {
     
     /**
      * Get a description of the JavaFX container including type, size, style, etc.
-     * This is the .javafx property that lists all major attributes.
+     * This now includes all properties from .properties as well.
      * @return String description of the JavaFX container
      */
     public String getJavaFXDescription() {
@@ -76,96 +140,8 @@ public class ScreenContainerType {
             return "JavaFX Container: null";
         }
         
-        StringBuilder desc = new StringBuilder();
-        desc.append("JavaFX Container Description:\n");
-        desc.append("  Container Type: ").append(containerType != null ? containerType : "unknown").append("\n");
-        desc.append("  JavaFX Class: ").append(javafxRegion.getClass().getSimpleName()).append("\n");
-        
-        // Size information
-        desc.append("  Width: ").append(String.format("%.2f", javafxRegion.getWidth())).append("\n");
-        desc.append("  Height: ").append(String.format("%.2f", javafxRegion.getHeight())).append("\n");
-        desc.append("  Min Width: ").append(String.format("%.2f", javafxRegion.getMinWidth())).append("\n");
-        desc.append("  Min Height: ").append(String.format("%.2f", javafxRegion.getMinHeight())).append("\n");
-        desc.append("  Pref Width: ").append(String.format("%.2f", javafxRegion.getPrefWidth())).append("\n");
-        desc.append("  Pref Height: ").append(String.format("%.2f", javafxRegion.getPrefHeight())).append("\n");
-        desc.append("  Max Width: ").append(String.format("%.2f", javafxRegion.getMaxWidth())).append("\n");
-        desc.append("  Max Height: ").append(String.format("%.2f", javafxRegion.getMaxHeight())).append("\n");
-        
-        // Position
-        desc.append("  X: ").append(String.format("%.2f", javafxRegion.getLayoutX())).append("\n");
-        desc.append("  Y: ").append(String.format("%.2f", javafxRegion.getLayoutY())).append("\n");
-        
-        // Padding
-        javafx.geometry.Insets padding = javafxRegion.getPadding();
-        if (padding != null) {
-            desc.append("  Padding: ").append(String.format("%.0f %.0f %.0f %.0f", 
-                padding.getTop(), padding.getRight(), padding.getBottom(), padding.getLeft())).append("\n");
-        }
-        
-        // Container-specific properties
-        if (javafxRegion instanceof HBox) {
-            HBox hbox = (HBox) javafxRegion;
-            desc.append("  Spacing: ").append(String.format("%.2f", hbox.getSpacing())).append("\n");
-            desc.append("  Alignment: ").append(hbox.getAlignment()).append("\n");
-        } else if (javafxRegion instanceof VBox) {
-            VBox vbox = (VBox) javafxRegion;
-            desc.append("  Spacing: ").append(String.format("%.2f", vbox.getSpacing())).append("\n");
-            desc.append("  Alignment: ").append(vbox.getAlignment()).append("\n");
-        } else if (javafxRegion instanceof GridPane) {
-            GridPane gridPane = (GridPane) javafxRegion;
-            desc.append("  HGap: ").append(String.format("%.2f", gridPane.getHgap())).append("\n");
-            desc.append("  VGap: ").append(String.format("%.2f", gridPane.getVgap())).append("\n");
-            desc.append("  Alignment: ").append(gridPane.getAlignment()).append("\n");
-        } else if (javafxRegion instanceof FlowPane) {
-            FlowPane flowPane = (FlowPane) javafxRegion;
-            desc.append("  HGap: ").append(String.format("%.2f", flowPane.getHgap())).append("\n");
-            desc.append("  VGap: ").append(String.format("%.2f", flowPane.getVgap())).append("\n");
-            desc.append("  Alignment: ").append(flowPane.getAlignment()).append("\n");
-            desc.append("  Orientation: ").append(flowPane.getOrientation()).append("\n");
-        } else if (javafxRegion instanceof BorderPane) {
-            BorderPane borderPane = (BorderPane) javafxRegion;
-            desc.append("  Has Top: ").append(borderPane.getTop() != null).append("\n");
-            desc.append("  Has Bottom: ").append(borderPane.getBottom() != null).append("\n");
-            desc.append("  Has Left: ").append(borderPane.getLeft() != null).append("\n");
-            desc.append("  Has Right: ").append(borderPane.getRight() != null).append("\n");
-            desc.append("  Has Center: ").append(borderPane.getCenter() != null).append("\n");
-        } else if (javafxRegion instanceof TilePane) {
-            TilePane tilePane = (TilePane) javafxRegion;
-            desc.append("  HGap: ").append(String.format("%.2f", tilePane.getHgap())).append("\n");
-            desc.append("  VGap: ").append(String.format("%.2f", tilePane.getVgap())).append("\n");
-            desc.append("  Orientation: ").append(tilePane.getOrientation()).append("\n");
-            desc.append("  Pref Columns: ").append(tilePane.getPrefColumns()).append("\n");
-            desc.append("  Pref Rows: ").append(tilePane.getPrefRows()).append("\n");
-        }
-        
-        // Style
-        String style = javafxRegion.getStyle();
-        if (style != null && !style.isEmpty()) {
-            desc.append("  Style: ").append(style).append("\n");
-        }
-        
-        // Style classes
-        if (!javafxRegion.getStyleClass().isEmpty()) {
-            desc.append("  Style Classes: ").append(String.join(", ", javafxRegion.getStyleClass())).append("\n");
-        }
-        
-        // Visibility
-        desc.append("  Visible: ").append(javafxRegion.isVisible()).append("\n");
-        desc.append("  Managed: ").append(javafxRegion.isManaged()).append("\n");
-        desc.append("  Disabled: ").append(javafxRegion.isDisabled()).append("\n");
-        
-        // ID
-        String id = javafxRegion.getId();
-        if (id != null && !id.isEmpty()) {
-            desc.append("  ID: ").append(id).append("\n");
-        }
-        
-        // Child count
-        if (javafxRegion instanceof Pane) {
-            desc.append("  Children Count: ").append(((Pane) javafxRegion).getChildren().size()).append("\n");
-        }
-        
-        return desc.toString();
+        // Use getProperties() to include all properties
+        return getProperties();
     }
     
     /**
@@ -411,6 +387,253 @@ public class ScreenContainerType {
                 """;
             default -> "See documentation for " + type + " container usage examples.";
         };
+    }
+    
+    /**
+     * Get all runtime properties of this container as a formatted string.
+     * This includes all settable properties with their current values.
+     * @return String description of all properties
+     */
+    public String getProperties() {
+        if (javafxRegion == null) {
+            return "Container not initialized";
+        }
+        
+        StringBuilder props = new StringBuilder();
+        props.append("Container Properties:\n");
+        props.append("  type: ").append(containerType != null ? containerType : "unknown").append("\n");
+        props.append("  class: ").append(javafxRegion.getClass().getSimpleName()).append("\n");
+        
+        // Size properties
+        props.append("  width: ").append(String.format("%.2f", javafxRegion.getWidth())).append("\n");
+        props.append("  height: ").append(String.format("%.2f", javafxRegion.getHeight())).append("\n");
+        props.append("  minWidth: ").append(String.format("%.2f", javafxRegion.getMinWidth())).append("\n");
+        props.append("  minHeight: ").append(String.format("%.2f", javafxRegion.getMinHeight())).append("\n");
+        props.append("  prefWidth: ").append(String.format("%.2f", javafxRegion.getPrefWidth())).append("\n");
+        props.append("  prefHeight: ").append(String.format("%.2f", javafxRegion.getPrefHeight())).append("\n");
+        props.append("  maxWidth: ").append(String.format("%.2f", javafxRegion.getMaxWidth())).append("\n");
+        props.append("  maxHeight: ").append(String.format("%.2f", javafxRegion.getMaxHeight())).append("\n");
+        
+        // Position
+        props.append("  x: ").append(String.format("%.2f", javafxRegion.getLayoutX())).append("\n");
+        props.append("  y: ").append(String.format("%.2f", javafxRegion.getLayoutY())).append("\n");
+        
+        // Padding
+        javafx.geometry.Insets padding = javafxRegion.getPadding();
+        if (padding != null) {
+            props.append("  padding: ").append(String.format("%.0f %.0f %.0f %.0f", 
+                padding.getTop(), padding.getRight(), padding.getBottom(), padding.getLeft())).append("\n");
+        }
+        
+        // Container-specific properties
+        if (javafxRegion instanceof HBox hbox) {
+            props.append("  spacing: ").append(String.format("%.2f", hbox.getSpacing())).append("\n");
+            props.append("  alignment: ").append(hbox.getAlignment()).append("\n");
+        } else if (javafxRegion instanceof VBox vbox) {
+            props.append("  spacing: ").append(String.format("%.2f", vbox.getSpacing())).append("\n");
+            props.append("  alignment: ").append(vbox.getAlignment()).append("\n");
+        } else if (javafxRegion instanceof GridPane gridPane) {
+            props.append("  hgap: ").append(String.format("%.2f", gridPane.getHgap())).append("\n");
+            props.append("  vgap: ").append(String.format("%.2f", gridPane.getVgap())).append("\n");
+            props.append("  alignment: ").append(gridPane.getAlignment()).append("\n");
+        } else if (javafxRegion instanceof FlowPane flowPane) {
+            props.append("  hgap: ").append(String.format("%.2f", flowPane.getHgap())).append("\n");
+            props.append("  vgap: ").append(String.format("%.2f", flowPane.getVgap())).append("\n");
+            props.append("  alignment: ").append(flowPane.getAlignment()).append("\n");
+            props.append("  orientation: ").append(flowPane.getOrientation()).append("\n");
+        } else if (javafxRegion instanceof TilePane tilePane) {
+            props.append("  hgap: ").append(String.format("%.2f", tilePane.getHgap())).append("\n");
+            props.append("  vgap: ").append(String.format("%.2f", tilePane.getVgap())).append("\n");
+            props.append("  orientation: ").append(tilePane.getOrientation()).append("\n");
+            props.append("  prefColumns: ").append(tilePane.getPrefColumns()).append("\n");
+            props.append("  prefRows: ").append(tilePane.getPrefRows()).append("\n");
+        }
+        
+        // Style
+        String style = javafxRegion.getStyle();
+        if (style != null && !style.isEmpty()) {
+            props.append("  style: ").append(style).append("\n");
+        }
+        
+        // Style classes
+        if (!javafxRegion.getStyleClass().isEmpty()) {
+            props.append("  styleClass: ").append(String.join(", ", javafxRegion.getStyleClass())).append("\n");
+        }
+        
+        // State
+        props.append("  visible: ").append(javafxRegion.isVisible()).append("\n");
+        props.append("  managed: ").append(javafxRegion.isManaged()).append("\n");
+        props.append("  disabled: ").append(javafxRegion.isDisabled()).append("\n");
+        
+        // ID
+        String id = javafxRegion.getId();
+        if (id != null && !id.isEmpty()) {
+            props.append("  id: ").append(id).append("\n");
+        }
+        
+        return props.toString();
+    }
+    
+    /**
+     * Get the parent area name for this container.
+     * @return Parent area name, or null if this is a root container
+     */
+    public String getParent() {
+        return parentAreaName;
+    }
+    
+    /**
+     * Get the list of child area names.
+     * @return ArrayDynamic containing child area names
+     */
+    public com.eb.script.arrays.ArrayDynamic getChildren(com.eb.script.token.DataType dataType) {
+        com.eb.script.arrays.ArrayDynamic children = new com.eb.script.arrays.ArrayDynamic(dataType);
+        for (String childName : childAreaNames) {
+            children.add(childName);
+        }
+        return children;
+    }
+    
+    /**
+     * Get the full hierarchy tree starting from this container.
+     * @return String representation of the hierarchy tree
+     */
+    public String getTree() {
+        return buildTree("", true);
+    }
+    
+    /**
+     * Recursively build the tree structure.
+     * @param indent Current indentation level
+     * @param isLast Whether this is the last child
+     * @return Tree structure as a string
+     */
+    private String buildTree(String indent, boolean isLast) {
+        StringBuilder tree = new StringBuilder();
+        tree.append(indent);
+        tree.append(isLast ? "└── " : "├── ");
+        tree.append(areaName != null ? areaName : "unnamed");
+        tree.append(" (").append(containerType != null ? containerType : "unknown").append(")\n");
+        
+        // Note: We can't recursively get children here without context
+        // This will be handled in the Interpreter with context access
+        for (int i = 0; i < childAreaNames.size(); i++) {
+            String childName = childAreaNames.get(i);
+            boolean childIsLast = (i == childAreaNames.size() - 1);
+            tree.append(indent).append(isLast ? "    " : "│   ");
+            tree.append(childIsLast ? "└── " : "├── ");
+            tree.append(childName).append("\n");
+        }
+        
+        return tree.toString();
+    }
+    
+    /**
+     * Get event handlers attached to this container.
+     * @return String description of event handlers
+     */
+    public String getEvents() {
+        if (javafxRegion == null) {
+            return "Container not initialized";
+        }
+        
+        StringBuilder events = new StringBuilder();
+        events.append("Event Handlers:\n");
+        
+        // Check for mouse events
+        if (javafxRegion.getOnMouseClicked() != null) {
+            events.append("  onMouseClicked: registered\n");
+        }
+        if (javafxRegion.getOnMousePressed() != null) {
+            events.append("  onMousePressed: registered\n");
+        }
+        if (javafxRegion.getOnMouseReleased() != null) {
+            events.append("  onMouseReleased: registered\n");
+        }
+        if (javafxRegion.getOnMouseEntered() != null) {
+            events.append("  onMouseEntered: registered\n");
+        }
+        if (javafxRegion.getOnMouseExited() != null) {
+            events.append("  onMouseExited: registered\n");
+        }
+        
+        // Check for key events
+        if (javafxRegion.getOnKeyPressed() != null) {
+            events.append("  onKeyPressed: registered\n");
+        }
+        if (javafxRegion.getOnKeyReleased() != null) {
+            events.append("  onKeyReleased: registered\n");
+        }
+        if (javafxRegion.getOnKeyTyped() != null) {
+            events.append("  onKeyTyped: registered\n");
+        }
+        
+        // Check for focus events (these are on Node, not Region specifically)
+        // We can access them via the focusedProperty
+        if (javafxRegion.focusedProperty() != null) {
+            events.append("  focus tracking: available\n");
+        }
+        
+        if (events.toString().equals("Event Handlers:\n")) {
+            events.append("  No event handlers registered\n");
+        }
+        
+        return events.toString();
+    }
+    
+    /**
+     * Capture a snapshot of the container.
+     * @return Base64-encoded PNG image data
+     */
+    public String getSnapshot() {
+        if (javafxRegion == null) {
+            return "Container not initialized";
+        }
+        
+        try {
+            // Must run on JavaFX Application Thread
+            final java.util.concurrent.atomic.AtomicReference<String> result = 
+                new java.util.concurrent.atomic.AtomicReference<>("");
+            
+            if (javafx.application.Platform.isFxApplicationThread()) {
+                result.set(captureSnapshot());
+            } else {
+                final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
+                javafx.application.Platform.runLater(() -> {
+                    result.set(captureSnapshot());
+                    latch.countDown();
+                });
+                latch.await();
+            }
+            
+            return result.get();
+        } catch (Exception e) {
+            return "Error capturing snapshot: " + e.getMessage();
+        }
+    }
+    
+    /**
+     * Internal method to capture snapshot (must be called on JavaFX thread).
+     */
+    private String captureSnapshot() {
+        try {
+            javafx.scene.image.WritableImage image = javafxRegion.snapshot(null, null);
+            java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+            javax.imageio.ImageIO.write(javafx.embed.swing.SwingFXUtils.fromFXImage(image, null), "png", baos);
+            byte[] imageBytes = baos.toByteArray();
+            String base64 = java.util.Base64.getEncoder().encodeToString(imageBytes);
+            
+            // Also copy to clipboard
+            javafx.scene.image.Image fxImage = image;
+            javafx.scene.input.Clipboard clipboard = javafx.scene.input.Clipboard.getSystemClipboard();
+            javafx.scene.input.ClipboardContent content = new javafx.scene.input.ClipboardContent();
+            content.putImage(fxImage);
+            clipboard.setContent(content);
+            
+            return "Snapshot captured (" + imageBytes.length + " bytes) and copied to clipboard.\nBase64: " + base64.substring(0, Math.min(100, base64.length())) + "...";
+        } catch (Exception e) {
+            return "Error: " + e.getMessage();
+        }
     }
     
     @Override

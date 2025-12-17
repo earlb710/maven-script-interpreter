@@ -3500,6 +3500,18 @@ public class ScreenFactory {
                 String containerTypeName = areaDef.areaType.toString().toLowerCase();
                 com.eb.script.interpreter.screen.ScreenContainerType containerType = 
                     new com.eb.script.interpreter.screen.ScreenContainerType(containerTypeName, container);
+                containerType.setScreenName(screenName);
+                containerType.setAreaName(areaDef.name);
+                
+                // Set child area names if they exist
+                if (areaDef.childAreas != null && !areaDef.childAreas.isEmpty()) {
+                    for (AreaDefinition childArea : areaDef.childAreas) {
+                        if (childArea.name != null) {
+                            containerType.addChildAreaName(childArea.name);
+                        }
+                    }
+                }
+                
                 containerTypes.put(areaNameLower, containerType);
             }
         }
@@ -3922,6 +3934,19 @@ public class ScreenFactory {
                 } else {
                     // Normal nested area handling
                     Region childContainer = createAreaWithItems(childArea, screenName, context, screenVars, varTypes, onClickHandler, boundControls);
+                    
+                    // Set parent relationship for the child container
+                    if (childArea.name != null && areaDef.name != null) {
+                        java.util.concurrent.ConcurrentHashMap<String, com.eb.script.interpreter.screen.ScreenContainerType> containerTypes = 
+                            context.getScreenContainerTypes(screenName);
+                        if (containerTypes != null) {
+                            String childAreaNameLower = childArea.name.toLowerCase(java.util.Locale.ROOT);
+                            com.eb.script.interpreter.screen.ScreenContainerType childContainerType = containerTypes.get(childAreaNameLower);
+                            if (childContainerType != null) {
+                                childContainerType.setParentAreaName(areaDef.name);
+                            }
+                        }
+                    }
                     
                     // Add the child container to the parent container
                     // Treat child areas as regular nodes
