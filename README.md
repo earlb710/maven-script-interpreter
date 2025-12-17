@@ -549,6 +549,12 @@ show screen myWindow;
   - Example: `"default": $myVar` references the script variable `myVar`
   - With quotes (`"$myVar"`), it's treated as a literal string
   - See [EBS_SCRIPT_SYNTAX.md](docs/EBS_SCRIPT_SYNTAX.md) for details
+- **Variable Sets**: Organize screen variables into named groups with visibility control
+  - Group related variables (e.g., "PersonalInfo", "ContactInfo")
+  - Control visibility with `hiddenind` property ("Y" for internal, "N" for visible)
+  - Access using three-part notation: `screen.setName.varName`
+  - Backward compatible with legacy flat "vars" format
+  - See [Variable Sets](#variable-sets-in-screens) section and [VARIABLE_SETS_MIGRATION.md](docs/VARIABLE_SETS_MIGRATION.md) for details
 
 ### Dynamic Screen Values with `$variable`
 
@@ -592,6 +598,97 @@ show screen profileScreen;
 - With quotes (`"$variable"`), it's a literal string, not a reference
 - Variables must exist in scope when the screen is defined
 - Works with any data type (string, int, bool, arrays, JSON objects, etc.)
+
+### Variable Sets in Screens
+
+**New in Version 1.0**: Screen variables can be organized into named "sets" for better structure and visibility control.
+
+#### What are Sets?
+
+Instead of defining all variables in a flat `"vars"` array, you can group them into logical sets with meaningful names. Each set can be marked as visible or hidden from the UI.
+
+#### Basic Example
+
+```javascript
+screen userProfile = {
+    "title": "User Profile",
+    "width": 800,
+    "height": 600,
+    "sets": [
+        {
+            "setname": "PersonalInfo",
+            "hiddenind": "N",
+            "vars": [
+                {"name": "firstName", "type": "string", "default": "John"},
+                {"name": "lastName", "type": "string", "default": "Doe"},
+                {"name": "age", "type": "int", "default": 30}
+            ]
+        },
+        {
+            "setname": "ContactInfo",
+            "hiddenind": "N",
+            "vars": [
+                {"name": "email", "type": "string", "default": "john@example.com"},
+                {"name": "phone", "type": "string", "default": "555-1234"}
+            ]
+        },
+        {
+            "setname": "Internal",
+            "hiddenind": "Y",
+            "vars": [
+                {"name": "userId", "type": "int", "default": 0},
+                {"name": "sessionToken", "type": "string", "default": ""}
+            ]
+        }
+    ]
+};
+
+// Access variables using three-part notation: screen.setName.varName
+print userProfile.PersonalInfo.firstName;  // "John"
+print userProfile.ContactInfo.email;       // "john@example.com"
+
+// Modify variables
+userProfile.PersonalInfo.firstName = "Jane";
+userProfile.ContactInfo.email = "jane@example.com";
+
+// Internal variables are accessible but hidden from UI
+userProfile.Internal.userId = 12345;
+```
+
+#### Set Properties
+
+| Property | Description | Values |
+|----------|-------------|--------|
+| `setname` | Name of the variable set | Any string |
+| `hiddenind` | Visibility indicator | `"N"` = visible, `"Y"` = hidden |
+| `vars` | Array of variable definitions | Same format as legacy `"vars"` |
+
+#### Benefits
+
+- **Organization**: Group related variables (PersonalInfo, ContactInfo, Settings)
+- **Visibility Control**: Hide internal state variables from UI
+- **Clear Access**: Three-part notation shows variable ownership
+- **Backward Compatible**: Legacy flat `"vars"` still works
+
+#### Backward Compatibility
+
+The traditional format still works. Legacy screens automatically create a "default" set:
+
+```javascript
+screen legacyScreen = {
+    "vars": [
+        {"name": "username", "type": "string"}
+    ]
+};
+
+// Access as: legacyScreen.default.username
+// Or use shorthand: legacyScreen.username
+```
+
+For more details, see:
+- [EBS_SCRIPT_SYNTAX.md - Variable Sets](docs/EBS_SCRIPT_SYNTAX.md#variable-sets)
+- [VARIABLE_SETS_MIGRATION.md](docs/VARIABLE_SETS_MIGRATION.md)
+- [VARIABLE_SETS_VISUAL_GUIDE.md](docs/VARIABLE_SETS_VISUAL_GUIDE.md)
 
 ### Console Commands
 

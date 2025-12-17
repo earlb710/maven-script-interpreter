@@ -2146,6 +2146,271 @@ screen dynamicScreen = {
 
 **Note:** Use `$variable` without quotes to reference script variables. With quotes (`"$variable"`), it's treated as a literal string. See the [JSON Variable References](#variable-references-in-json-variable) section for more details.
 
+### Variable Sets
+
+**New in Version 1.0**: Screen variables can now be organized into named "sets" for better organization and visibility control. This is an enhancement to the traditional flat "vars" array structure.
+
+#### What are Variable Sets?
+
+Variable sets allow you to group related screen variables together with a meaningful name and control their visibility. Instead of defining all variables in a flat "vars" array, you can organize them into logical groups called "sets".
+
+**Benefits:**
+- **Better Organization**: Group related variables (e.g., "PersonalInfo", "ContactInfo", "Settings")
+- **Visibility Control**: Mark entire sets as internal/hidden from UI using `hiddenind` or `scope`
+- **Clear Structure**: Three-part notation (`screen.setName.varName`) makes variable ownership explicit
+- **Backward Compatible**: Legacy "vars" format still works (automatically creates a "default" set)
+
+#### Sets Format
+
+Use the `"sets"` property instead of `"vars"` to define variable sets:
+
+```javascript
+screen myScreen = {
+    "title": "User Profile",
+    "width": 800,
+    "height": 600,
+    "sets": [
+        {
+            "setname": "PersonalInfo",
+            "hiddenind": "N",
+            "vars": [
+                {
+                    "name": "firstName",
+                    "type": "string",
+                    "default": "John",
+                    "display": {"type": "textfield", "labelText": "First Name"}
+                },
+                {
+                    "name": "lastName",
+                    "type": "string",
+                    "default": "Doe",
+                    "display": {"type": "textfield", "labelText": "Last Name"}
+                },
+                {
+                    "name": "age",
+                    "type": "int",
+                    "default": 30,
+                    "display": {"type": "spinner", "min": 0, "max": 120, "labelText": "Age"}
+                }
+            ]
+        },
+        {
+            "setname": "ContactInfo",
+            "hiddenind": "N",
+            "vars": [
+                {
+                    "name": "email",
+                    "type": "string",
+                    "default": "",
+                    "display": {"type": "textfield", "labelText": "Email"}
+                },
+                {
+                    "name": "phone",
+                    "type": "string",
+                    "default": "",
+                    "display": {"type": "textfield", "labelText": "Phone"}
+                }
+            ]
+        },
+        {
+            "setname": "Internal",
+            "hiddenind": "Y",
+            "vars": [
+                {
+                    "name": "userId",
+                    "type": "int",
+                    "default": 0
+                },
+                {
+                    "name": "sessionToken",
+                    "type": "string",
+                    "default": ""
+                }
+            ]
+        }
+    ]
+};
+```
+
+#### Set Properties
+
+Each set has the following properties:
+
+| Property | Required | Description | Valid Values |
+|----------|----------|-------------|--------------|
+| `setname` | Yes | Name of the variable set | Any string (stored as lowercase internally) |
+| `hiddenind` | No | Visibility indicator | `"N"` = visible (default), `"Y"` = hidden from UI |
+| `scope` | No | Alternative to hiddenind with more options | `"visible"`, `"internal"`, `"in"`, `"out"`, `"inout"` |
+| `vars` | Yes | Array of variable definitions | Same format as legacy "vars" array |
+
+**Note:** Both `hiddenind` and `scope` control visibility. Use `hiddenind` for simple visible/hidden control, or `scope` for more fine-grained parameter direction control. See [VARIABLE_SETS_VISUAL_GUIDE.md](VARIABLE_SETS_VISUAL_GUIDE.md) for details on `scope` values.
+
+#### Accessing Variables in Sets
+
+Variables in sets use **three-part notation**: `screen.setName.varName`
+
+```javascript
+// Access variables
+print myScreen.PersonalInfo.firstName;  // "John"
+print myScreen.PersonalInfo.age;        // 30
+print myScreen.ContactInfo.email;       // ""
+
+// Modify variables
+myScreen.PersonalInfo.firstName = "Jane";
+myScreen.PersonalInfo.age = 25;
+myScreen.ContactInfo.email = "jane@example.com";
+
+// Even internal (hidden) variables are accessible programmatically
+myScreen.Internal.userId = 12345;
+myScreen.Internal.sessionToken = "abc-xyz-123";
+```
+
+The three-part notation makes the variable organization explicit and avoids naming conflicts between sets.
+
+#### Backward Compatibility with Legacy Format
+
+The traditional flat "vars" format is still fully supported:
+
+```javascript
+screen legacyScreen = {
+    "title": "Legacy Format",
+    "vars": [
+        {"name": "username", "type": "string", "default": ""},
+        {"name": "age", "type": "int", "default": 18}
+    ]
+};
+```
+
+When using the legacy format, variables are automatically placed in a set named `"default"` with `hiddenind="N"`:
+
+```javascript
+// Access legacy format variables using either notation:
+print legacyScreen.default.username;  // Three-part notation
+print legacyScreen.username;          // Two-part notation (backward compatible)
+
+// Both work the same way
+legacyScreen.default.username = "alice";
+legacyScreen.username = "bob";
+```
+
+#### When to Use Sets vs. Legacy Format
+
+**Use Variable Sets (`"sets"`) when:**
+- You have many variables and want to organize them logically
+- You need internal/hidden variables for state management
+- You want clear separation between different groups of data
+- You're building complex forms with multiple sections
+
+**Use Legacy Format (`"vars"`) when:**
+- You have a simple screen with few variables
+- All variables are visible and don't need grouping
+- You prefer a flatter, simpler structure
+
+#### Complete Example: User Registration Form
+
+```javascript
+screen registrationForm = {
+    "title": "User Registration",
+    "width": 900,
+    "height": 700,
+    "sets": [
+        {
+            "setname": "AccountInfo",
+            "hiddenind": "N",
+            "vars": [
+                {
+                    "name": "username",
+                    "type": "string",
+                    "default": "",
+                    "display": {
+                        "type": "textfield",
+                        "labelText": "Username:",
+                        "maxLength": 20,
+                        "mandatory": true
+                    }
+                },
+                {
+                    "name": "password",
+                    "type": "string",
+                    "default": "",
+                    "display": {
+                        "type": "passwordfield",
+                        "labelText": "Password:",
+                        "mandatory": true
+                    }
+                }
+            ]
+        },
+        {
+            "setname": "PersonalDetails",
+            "hiddenind": "N",
+            "vars": [
+                {
+                    "name": "fullName",
+                    "type": "string",
+                    "default": "",
+                    "display": {"type": "textfield", "labelText": "Full Name:"}
+                },
+                {
+                    "name": "email",
+                    "type": "string",
+                    "default": "",
+                    "display": {"type": "textfield", "labelText": "Email:"}
+                },
+                {
+                    "name": "birthDate",
+                    "type": "string",
+                    "default": "",
+                    "display": {"type": "datepicker", "labelText": "Birth Date:"}
+                }
+            ]
+        },
+        {
+            "setname": "InternalData",
+            "hiddenind": "Y",
+            "vars": [
+                {
+                    "name": "registrationId",
+                    "type": "int",
+                    "default": 0
+                },
+                {
+                    "name": "createdTimestamp",
+                    "type": "string",
+                    "default": ""
+                },
+                {
+                    "name": "ipAddress",
+                    "type": "string",
+                    "default": ""
+                }
+            ]
+        }
+    ]
+};
+
+show screen registrationForm;
+
+// Access account info
+print "Username: " + registrationForm.AccountInfo.username;
+
+// Access personal details
+print "Name: " + registrationForm.PersonalDetails.fullName;
+print "Email: " + registrationForm.PersonalDetails.email;
+
+// Access internal data (hidden from UI but accessible in code)
+registrationForm.InternalData.registrationId = 12345;
+registrationForm.InternalData.createdTimestamp = call date.format(call date.now(), "yyyy-MM-dd HH:mm:ss");
+```
+
+#### See Also
+
+For more detailed information about variable sets:
+- [VARIABLE_SETS_MIGRATION.md](VARIABLE_SETS_MIGRATION.md) - Migration guide from legacy format
+- [VARIABLE_SETS_VISUAL_GUIDE.md](VARIABLE_SETS_VISUAL_GUIDE.md) - Visual guide with data flow diagrams
+- [VARSET_API.md](VARSET_API.md) - API reference for VarSet and Var classes
+- [VARIABLE_SETS_IMPLEMENTATION_SUMMARY.md](VARIABLE_SETS_IMPLEMENTATION_SUMMARY.md) - Implementation details
+
 #### Screen with Multiple Controls
 ```javascript
 screen formScreen = {
