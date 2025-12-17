@@ -130,6 +130,11 @@ public class BuiltinsThread {
                     if (currentScreen != null) {
                         context.setCurrentScreen(currentScreen);
                     }
+                    
+                    // Push screen variables to environment if this timer is associated with a screen
+                    if (currentScreen != null) {
+                        pushScreenVarsToEnvironment(currentScreen, context);
+                    }
 
                     try {
                         // Get the main interpreter that has access to the script's functions
@@ -149,6 +154,10 @@ public class BuiltinsThread {
                         // Execute the call statement using the main interpreter
                         mainInterpreter.visitCallStatement(callStmt);
                     } finally {
+                        // Pop screen variables from environment if they were pushed
+                        if (currentScreen != null) {
+                            popScreenVarsFromEnvironment(currentScreen, context);
+                        }
                         if (currentScreen != null) {
                             context.clearCurrentScreen();
                         }
@@ -163,6 +172,61 @@ public class BuiltinsThread {
                 }
             });
         };
+    }
+    
+    /**
+     * Helper method to push screen variables into the environment scope.
+     * This allows timer callbacks to access screen variables directly by name.
+     * Creates a new scope with screen variables defined in it.
+     * 
+     * @param screenName The name of the screen whose variables should be pushed
+     * @param context The interpreter context
+     */
+    private static void pushScreenVarsToEnvironment(String screenName, InterpreterContext context) {
+        // Get screen variables
+        java.util.concurrent.ConcurrentHashMap<String, Object> screenVarMap = context.getScreenVars(screenName);
+        if (screenVarMap == null) {
+            return;
+        }
+        
+        // Get the main interpreter's environment
+        Interpreter mainInterpreter = context.getMainInterpreter();
+        if (mainInterpreter == null) {
+            return;
+        }
+        
+        // Push a new environment scope
+        mainInterpreter.environment().pushEnvironmentValues();
+        
+        // Add each screen variable to the new scope
+        for (Map.Entry<String, Object> entry : screenVarMap.entrySet()) {
+            String varName = entry.getKey();
+            Object value = entry.getValue();
+            
+            // Convert NULL_SENTINEL back to null for environment
+            Object envValue = (value == com.eb.script.interpreter.InterpreterArray.NULL_SENTINEL) ? null : value;
+            
+            // Define variable in the new scope
+            mainInterpreter.environment().getEnvironmentValues().define(varName, envValue);
+        }
+    }
+    
+    /**
+     * Helper method to pop screen variables from the environment scope.
+     * This removes the scope that was added by pushScreenVarsToEnvironment to prevent scope leakage.
+     * 
+     * @param screenName The name of the screen (not actually used since we just pop the scope)
+     * @param context The interpreter context
+     */
+    private static void popScreenVarsFromEnvironment(String screenName, InterpreterContext context) {
+        // Get the main interpreter's environment
+        Interpreter mainInterpreter = context.getMainInterpreter();
+        if (mainInterpreter == null) {
+            return;
+        }
+        
+        // Pop the environment scope that contains the screen variables
+        mainInterpreter.environment().popEnvironmentValues();
     }
 
     // --- Individual builtin implementations ---
