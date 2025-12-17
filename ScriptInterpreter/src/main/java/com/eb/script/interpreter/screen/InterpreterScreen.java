@@ -759,6 +759,8 @@ public class InterpreterScreen {
         } else {
             // Create simple ScreenDefinition without areas
             ScreenDefinition screenDef = new ScreenDefinition(qualifiedKey, config.getTitle(), config.getWidth(), config.getHeight());
+            // Set showMenu property before creating the screen
+            screenDef.setShowMenu(config.isShowMenu());
             stage = screenDef.createScreen();
         }
 
