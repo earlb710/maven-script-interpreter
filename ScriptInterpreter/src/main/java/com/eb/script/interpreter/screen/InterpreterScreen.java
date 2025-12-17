@@ -230,6 +230,12 @@ public class InterpreterScreen {
             @SuppressWarnings("unchecked")
             Map<String, Object> config = (Map<String, Object>) spec;
 
+            // DEBUG: Print all keys in config
+            System.out.println("=== DEBUG [InterpreterScreen] Config keys for screen: " + stmt.name + " ===");
+            for (String key : config.keySet()) {
+                System.out.println("    Key: '" + key + "' -> Value type: " + (config.get(key) != null ? config.get(key).getClass().getSimpleName() : "null"));
+            }
+
             // Extract configuration properties with defaults
             String title = config.containsKey("title") ? String.valueOf(config.get("title")) : "Screen " + stmt.name;
             int width = config.containsKey("width") ? ((Number) config.get("width")).intValue() : 800;
