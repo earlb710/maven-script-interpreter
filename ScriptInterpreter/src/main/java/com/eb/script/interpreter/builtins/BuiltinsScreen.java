@@ -1789,8 +1789,15 @@ public class BuiltinsScreen {
                 item.maxWidth = value != null ? String.valueOf(value) : null;
             case "maxheight" ->
                 item.maxHeight = value != null ? String.valueOf(value) : null;
-            case "alignment" ->
-                item.alignment = value != null ? String.valueOf(value).toLowerCase() : null;
+            case "contentalignment" -> {
+                // ContentAlignment is a display property, so set it on DisplayItem
+                if (item.displayItem == null) {
+                    item.displayItem = new DisplayItem();
+                }
+                item.displayItem.contentAlignment = value != null ? String.valueOf(value).toLowerCase() : null;
+            }
+            case "itemalignment" ->
+                item.itemAlignment = value != null ? String.valueOf(value).toLowerCase() : null;
             default ->
                 throw new InterpreterError("scr.setProperty: unknown property '" + propertyName + "'. " +
                     "Note: 'text' and 'value' should be set via screen variables, not scr.setproperty.");
@@ -1841,8 +1848,10 @@ public class BuiltinsScreen {
                 item.maxWidth;
             case "maxheight" ->
                 item.maxHeight;
-            case "alignment" ->
-                item.alignment;
+            case "contentalignment" ->
+                item.displayItem != null ? item.displayItem.contentAlignment : null;
+            case "itemalignment" ->
+                item.itemAlignment;
             default ->
                 throw new InterpreterError("scr.getProperty: unknown property '" + propertyName + "'");
         };

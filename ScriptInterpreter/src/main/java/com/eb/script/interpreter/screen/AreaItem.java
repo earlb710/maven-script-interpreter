@@ -60,8 +60,9 @@ public class AreaItem {
     public String maxWidth;
     // Maximum height
     public String maxHeight;
-    // Alignment within parent (e.g., "center", "top-left")
-    public String alignment;
+    // Item alignment - controls alignment of the item (and its HBox/VBox wrapper) in the parent container
+    // This affects how the item is positioned within its parent layout (e.g., "center", "top-left", "center-right")
+    public String itemAlignment;
     // onValidate event handler - EBS code to validate item value, expects return true/false
     public String onValidate;
     // onChange event handler - EBS code to execute whenever the item value changes
@@ -93,7 +94,7 @@ public class AreaItem {
                 + ", padding='" + padding + '\''
                 + ", prefWidth='" + prefWidth + '\''
                 + ", prefHeight='" + prefHeight + '\''
-                + ", alignment='" + alignment + '\''
+                + ", itemAlignment='" + itemAlignment + '\''
                 + '}';
     }
 }

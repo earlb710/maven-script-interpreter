@@ -4206,6 +4206,50 @@ public class ScreenFactory {
             if (vgrowPriority != null) {
                 VBox.setVgrow(control, vgrowPriority);
             }
+            
+            // Apply itemAlignment if specified (controls positioning within parent container)
+            if (item.itemAlignment != null && !item.itemAlignment.isEmpty()) {
+                // For items in VBox, we need to wrap them in an HBox to support horizontal alignment
+                // Only do this if the item isn't already a wrapper with alignment
+                if (control.getProperties().get("alignmentApplied") == null) {
+                    try {
+                        Pos pos = parseAlignment(item.itemAlignment);
+                        // Extract just the horizontal part of the alignment for VBox items
+                        // VBox items align horizontally: LEFT, CENTER, RIGHT
+                        Pos hAlignment;
+                        if (pos.toString().contains("LEFT")) {
+                            hAlignment = Pos.CENTER_LEFT;
+                        } else if (pos.toString().contains("RIGHT")) {
+                            hAlignment = Pos.CENTER_RIGHT;
+                        } else {
+                            hAlignment = Pos.CENTER;
+                        }
+                        
+                        // Remove the control we just added
+                        vbox.getChildren().remove(control);
+                        
+                        // Wrap in HBox with alignment
+                        HBox alignmentWrapper = new HBox(control);
+                        alignmentWrapper.setAlignment(hAlignment);
+                        alignmentWrapper.setPickOnBounds(false);
+                        alignmentWrapper.getProperties().put("alignmentApplied", true);
+                        
+                        // Transfer growth properties to wrapper
+                        if (vgrowPriority != null) {
+                            VBox.setVgrow(alignmentWrapper, vgrowPriority);
+                        }
+                        if (control.getProperties().containsKey("hgrowPriority")) {
+                            Priority hgrowPriority = (Priority) control.getProperties().get("hgrowPriority");
+                            HBox.setHgrow(control, hgrowPriority);
+                        }
+                        
+                        // Add the wrapper instead
+                        vbox.getChildren().add(alignmentWrapper);
+                    } catch (IllegalArgumentException e) {
+                        // Ignore invalid alignment values
+                    }
+                }
+            }
 
         } else if (container instanceof HBox) {
             HBox hbox = (HBox) container;
@@ -4227,6 +4271,50 @@ public class ScreenFactory {
             // Apply hgrow priority to the control in the HBox
             if (hgrowPriority != null) {
                 HBox.setHgrow(control, hgrowPriority);
+            }
+            
+            // Apply itemAlignment if specified (controls positioning within parent container)
+            if (item.itemAlignment != null && !item.itemAlignment.isEmpty()) {
+                // For items in HBox, we need to wrap them in a VBox to support vertical alignment
+                // Only do this if the item isn't already a wrapper with alignment
+                if (control.getProperties().get("alignmentApplied") == null) {
+                    try {
+                        Pos pos = parseAlignment(item.itemAlignment);
+                        // Extract just the vertical part of the alignment for HBox items
+                        // HBox items align vertically: TOP, CENTER, BOTTOM
+                        Pos vAlignment;
+                        if (pos.toString().contains("TOP")) {
+                            vAlignment = Pos.TOP_CENTER;
+                        } else if (pos.toString().contains("BOTTOM")) {
+                            vAlignment = Pos.BOTTOM_CENTER;
+                        } else {
+                            vAlignment = Pos.CENTER;
+                        }
+                        
+                        // Remove the control we just added
+                        hbox.getChildren().remove(control);
+                        
+                        // Wrap in VBox with alignment
+                        VBox alignmentWrapper = new VBox(control);
+                        alignmentWrapper.setAlignment(vAlignment);
+                        alignmentWrapper.setPickOnBounds(false);
+                        alignmentWrapper.getProperties().put("alignmentApplied", true);
+                        
+                        // Transfer growth properties to wrapper
+                        if (hgrowPriority != null) {
+                            HBox.setHgrow(alignmentWrapper, hgrowPriority);
+                        }
+                        if (control.getProperties().containsKey("vgrowPriority")) {
+                            Priority vgrowPriority = (Priority) control.getProperties().get("vgrowPriority");
+                            VBox.setVgrow(control, vgrowPriority);
+                        }
+                        
+                        // Add the wrapper instead
+                        hbox.getChildren().add(alignmentWrapper);
+                    } catch (IllegalArgumentException e) {
+                        // Ignore invalid alignment values
+                    }
+                }
             }
 
         } else if (container instanceof GridPane) {
@@ -4335,6 +4423,17 @@ public class ScreenFactory {
             if (vgrowPriority != null) {
                 GridPane.setVgrow(control, vgrowPriority);
             }
+            
+            // Apply itemAlignment if specified (controls positioning within grid cell)
+            if (item.itemAlignment != null && !item.itemAlignment.isEmpty()) {
+                try {
+                    Pos pos = parseAlignment(item.itemAlignment);
+                    GridPane.setHalignment(control, pos.getHpos());
+                    GridPane.setValignment(control, pos.getVpos());
+                } catch (IllegalArgumentException e) {
+                    // Ignore invalid values
+                }
+            }
 
         } else if (container instanceof BorderPane) {
             BorderPane borderPane = (BorderPane) container;
@@ -4365,10 +4464,10 @@ public class ScreenFactory {
             StackPane stackPane = (StackPane) container;
             stackPane.getChildren().add(control);
 
-            // Apply alignment if specified
-            if (item.alignment != null && !item.alignment.isEmpty()) {
+            // Apply itemAlignment if specified (controls positioning within parent container)
+            if (item.itemAlignment != null && !item.itemAlignment.isEmpty()) {
                 try {
-                    Pos pos = parseAlignment(item.alignment);
+                    Pos pos = parseAlignment(item.itemAlignment);
                     StackPane.setAlignment(control, pos);
                 } catch (IllegalArgumentException e) {
                     // Ignore invalid values
@@ -4876,7 +4975,7 @@ public class ScreenFactory {
             "prefwidth", "pref_width", "prefheight", "pref_height",
             "minwidth", "min_width", "minheight", "min_height",
             "maxwidth", "max_width", "maxheight", "max_height",
-            "alignment",
+            "contentalignment", "content_alignment", "itemalignment", "item_alignment", "alignment",
             // Event handlers (can be at item or display level)
             "onvalidate", "on_validate", "onchange", "on_change",
             // Data source
@@ -5000,7 +5099,18 @@ public class ScreenFactory {
         item.minHeight = getStringValue(itemDef, "minHeight", getStringValue(itemDef, "min_height", null));
         item.maxWidth = getStringValue(itemDef, "maxWidth", getStringValue(itemDef, "max_width", null));
         item.maxHeight = getStringValue(itemDef, "maxHeight", getStringValue(itemDef, "max_height", null));
-        item.alignment = getStringValue(itemDef, "alignment", null);
+        
+        // ContentAlignment is a display property, so set it on DisplayItem
+        String contentAlignment = getStringValue(itemDef, "contentAlignment", getStringValue(itemDef, "content_alignment", null));
+        if (contentAlignment != null) {
+            if (item.displayItem == null) {
+                item.displayItem = new DisplayItem();
+            }
+            item.displayItem.contentAlignment = contentAlignment;
+        }
+        
+        // ItemAlignment is a layout property, so set it on AreaItem
+        item.itemAlignment = getStringValue(itemDef, "itemAlignment", getStringValue(itemDef, "item_alignment", null));
         
         // Event handlers
         item.onValidate = getStringValue(itemDef, "onValidate", getStringValue(itemDef, "on_validate", null));
@@ -5028,7 +5138,7 @@ public class ScreenFactory {
 
         metadata.mandatory = getBooleanValue(displayDef, "mandatory", false);
         metadata.caseFormat = getStringValue(displayDef, "case", null);
-        metadata.alignment = getStringValue(displayDef, "alignment", null);
+        metadata.contentAlignment = getStringValue(displayDef, "contentAlignment", null);
         metadata.pattern = getStringValue(displayDef, "pattern", null);
 
         // Min and max can be various types
@@ -5131,7 +5241,7 @@ public class ScreenFactory {
         merged.max = base.max;
         merged.style = base.style;
         merged.screenName = base.screenName;
-        merged.alignment = base.alignment;
+        merged.contentAlignment = base.contentAlignment;
         merged.pattern = base.pattern;
         merged.promptHelp = base.promptHelp;
         merged.labelText = base.labelText;
@@ -5171,7 +5281,7 @@ public class ScreenFactory {
         if (overlay.max != null) merged.max = overlay.max;
         if (overlay.style != null) merged.style = overlay.style;
         if (overlay.screenName != null) merged.screenName = overlay.screenName;
-        if (overlay.alignment != null) merged.alignment = overlay.alignment;
+        if (overlay.contentAlignment != null) merged.contentAlignment = overlay.contentAlignment;
         if (overlay.pattern != null) merged.pattern = overlay.pattern;
         if (overlay.promptHelp != null) merged.promptHelp = overlay.promptHelp;
         if (overlay.labelText != null) merged.labelText = overlay.labelText;
@@ -5245,14 +5355,28 @@ public class ScreenFactory {
 
     // Helper methods for safe value extraction from Maps
     private static String getStringValue(Map<String, Object> map, String key, String defaultValue) {
+        // Try lowercase key first (standard behavior)
         if (map.containsKey(key.toLowerCase())) {
             Object value = map.get(key.toLowerCase());
             return value != null ? String.valueOf(value) : defaultValue;
+        }
+        // Try exact key as fallback
+        if (map.containsKey(key)) {
+            Object value = map.get(key);
+            return value != null ? String.valueOf(value) : defaultValue;
+        }
+        // Try case-insensitive search through all keys as last resort
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            if (entry.getKey().equalsIgnoreCase(key)) {
+                Object value = entry.getValue();
+                return value != null ? String.valueOf(value) : defaultValue;
+            }
         }
         return defaultValue;
     }
 
     private static double getNumberValue(Map<String, Object> map, String key, double defaultValue) {
+        // Try lowercase key first (standard behavior)
         if (map.containsKey(key.toLowerCase())) {
             Object value = map.get(key.toLowerCase());
             if (value instanceof Number) {
@@ -5264,10 +5388,37 @@ public class ScreenFactory {
                 return defaultValue;
             }
         }
+        // Try exact key as fallback
+        if (map.containsKey(key)) {
+            Object value = map.get(key);
+            if (value instanceof Number) {
+                return ((Number) value).doubleValue();
+            }
+            try {
+                return Double.parseDouble(String.valueOf(value));
+            } catch (NumberFormatException e) {
+                return defaultValue;
+            }
+        }
+        // Try case-insensitive search as last resort
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            if (entry.getKey().equalsIgnoreCase(key)) {
+                Object value = entry.getValue();
+                if (value instanceof Number) {
+                    return ((Number) value).doubleValue();
+                }
+                try {
+                    return Double.parseDouble(String.valueOf(value));
+                } catch (NumberFormatException e) {
+                    return defaultValue;
+                }
+            }
+        }
         return defaultValue;
     }
 
     private static Integer getIntValue(Map<String, Object> map, String key, Integer defaultValue) {
+        // Try lowercase key first (standard behavior)
         if (map.containsKey(key.toLowerCase())) {
             Object value = map.get(key.toLowerCase());
             if (value instanceof Number) {
@@ -5277,6 +5428,32 @@ public class ScreenFactory {
                 return Integer.parseInt(String.valueOf(value));
             } catch (NumberFormatException e) {
                 return defaultValue;
+            }
+        }
+        // Try exact key as fallback
+        if (map.containsKey(key)) {
+            Object value = map.get(key);
+            if (value instanceof Number) {
+                return ((Number) value).intValue();
+            }
+            try {
+                return Integer.parseInt(String.valueOf(value));
+            } catch (NumberFormatException e) {
+                return defaultValue;
+            }
+        }
+        // Try case-insensitive search as last resort
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            if (entry.getKey().equalsIgnoreCase(key)) {
+                Object value = entry.getValue();
+                if (value instanceof Number) {
+                    return ((Number) value).intValue();
+                }
+                try {
+                    return Integer.parseInt(String.valueOf(value));
+                } catch (NumberFormatException e) {
+                    return defaultValue;
+                }
             }
         }
         return defaultValue;
@@ -5999,7 +6176,14 @@ public class ScreenFactory {
         item.minHeight = template.minHeight;
         item.maxWidth = template.maxWidth;
         item.maxHeight = template.maxHeight;
-        item.alignment = template.alignment;
+        // contentAlignment is now in DisplayItem, not AreaItem
+        if (template.displayItem != null && template.displayItem.contentAlignment != null) {
+            if (item.displayItem == null) {
+                item.displayItem = new DisplayItem();
+            }
+            item.displayItem.contentAlignment = template.displayItem.contentAlignment;
+        }
+        item.itemAlignment = template.itemAlignment;
         item.onValidate = template.onValidate;
         item.onChange = template.onChange;
         
@@ -6109,7 +6293,7 @@ public class ScreenFactory {
         clone.max = source.max;
         clone.style = source.style;
         clone.screenName = source.screenName;
-        clone.alignment = source.alignment;
+        clone.contentAlignment = source.contentAlignment;
         clone.pattern = source.pattern;
         clone.promptHelp = source.promptHelp;
         clone.labelText = source.labelText;

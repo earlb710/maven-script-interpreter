@@ -1,0 +1,207 @@
+// Example: Comprehensive demonstration of contentAlignment and itemAlignment properties
+// This example shows how to use the new alignment properties for precise control
+// over content alignment within controls and item positioning in parent containers.
+
+print("Alignment Properties Example");
+print("===========================");
+
+// Example 1: Content alignment in various controls
+print("");
+print("Example 1: Content Alignment");
+print("-----------------------------");
+
+screen contentAlignmentDemo = {
+    "title": "Content Alignment Demo",
+    "width": 500,
+    "height": 300,
+    "vars": [
+        {
+            "name": "leftField",
+            "type": "string",
+            "default": "Left aligned text",
+            "display": {
+                "type": "textfield",
+                "labelText": "Left Content:"
+            }
+        },
+        {
+            "name": "centerField",
+            "type": "string",
+            "default": "Center aligned text",
+            "display": {
+                "type": "textfield",
+                "labelText": "Center Content:"
+            }
+        },
+        {
+            "name": "rightField",
+            "type": "string",
+            "default": "Right aligned text",
+            "display": {
+                "type": "textfield",
+                "labelText": "Right Content:"
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "10",
+            "padding": "20",
+            "items": [
+                {
+                    "name": "leftItem",
+                    "varRef": "leftField",
+                    "contentAlignment": "left",
+                    "prefWidth": "300"
+                },
+                {
+                    "name": "centerItem",
+                    "varRef": "centerField",
+                    "contentAlignment": "center",
+                    "prefWidth": "300"
+                },
+                {
+                    "name": "rightItem",
+                    "varRef": "rightField",
+                    "contentAlignment": "right",
+                    "prefWidth": "300"
+                }
+            ]
+        }
+    ]
+};
+
+print("Screen 'contentAlignmentDemo' created");
+print("Use: show screen contentAlignmentDemo; (in interactive console)");
+
+// Example 2: Item alignment in GridPane
+print("");
+print("Example 2: Item Alignment in GridPane");
+print("--------------------------------------");
+
+screen gridAlignmentDemo = {
+    "title": "Grid Alignment Demo",
+    "width": 500,
+    "height": 400,
+    "vars": [
+        {"name": "topLeft", "type": "string", "default": "TL", "display": {"type": "textfield"}},
+        {"name": "topCenter", "type": "string", "default": "TC", "display": {"type": "textfield"}},
+        {"name": "topRight", "type": "string", "default": "TR", "display": {"type": "textfield"}},
+        {"name": "centerLeft", "type": "string", "default": "CL", "display": {"type": "textfield"}},
+        {"name": "center", "type": "string", "default": "C", "display": {"type": "textfield"}},
+        {"name": "centerRight", "type": "string", "default": "CR", "display": {"type": "textfield"}},
+        {"name": "bottomLeft", "type": "string", "default": "BL", "display": {"type": "textfield"}},
+        {"name": "bottomCenter", "type": "string", "default": "BC", "display": {"type": "textfield"}},
+        {"name": "bottomRight", "type": "string", "default": "BR", "display": {"type": "textfield"}}
+    ],
+    "area": [
+        {
+            "name": "gridArea",
+            "type": "gridpane",
+            "spacing": "10",
+            "padding": "20",
+            "items": [
+                {"name": "tlField", "varRef": "topLeft", "layoutPos": "0,0", "itemAlignment": "top-left"},
+                {"name": "tcField", "varRef": "topCenter", "layoutPos": "0,1", "itemAlignment": "top-center"},
+                {"name": "trField", "varRef": "topRight", "layoutPos": "0,2", "itemAlignment": "top-right"},
+                {"name": "clField", "varRef": "centerLeft", "layoutPos": "1,0", "itemAlignment": "center-left"},
+                {"name": "cField", "varRef": "center", "layoutPos": "1,1", "itemAlignment": "center"},
+                {"name": "crField", "varRef": "centerRight", "layoutPos": "1,2", "itemAlignment": "center-right"},
+                {"name": "blField", "varRef": "bottomLeft", "layoutPos": "2,0", "itemAlignment": "bottom-left"},
+                {"name": "bcField", "varRef": "bottomCenter", "layoutPos": "2,1", "itemAlignment": "bottom-center"},
+                {"name": "brField", "varRef": "bottomRight", "layoutPos": "2,2", "itemAlignment": "bottom-right"}
+            ]
+        }
+    ]
+};
+
+print("Screen 'gridAlignmentDemo' created");
+print("Use: show screen gridAlignmentDemo; (in interactive console)");
+
+// Example 3: Item alignment in VBox
+print("");
+print("Example 3: Item Alignment in VBox");
+print("----------------------------------");
+
+screen vboxAlignmentDemo = {
+    "title": "VBox Alignment Demo",
+    "width": 500,
+    "height": 300,
+    "vars": [
+        {
+            "name": "leftItem",
+            "type": "string",
+            "default": "Left aligned item",
+            "display": {
+                "type": "textfield",
+                "labelText": "Left aligned:"
+            }
+        },
+        {
+            "name": "centerItem",
+            "type": "string",
+            "default": "Center aligned item",
+            "display": {
+                "type": "textfield",
+                "labelText": "Center aligned:"
+            }
+        },
+        {
+            "name": "rightItem",
+            "type": "string",
+            "default": "Right aligned item",
+            "display": {
+                "type": "textfield",
+                "labelText": "Right aligned:"
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "vboxArea",
+            "type": "vbox",
+            "spacing": "10",
+            "padding": "20",
+            "items": [
+                {
+                    "name": "leftField",
+                    "varRef": "leftItem",
+                    "itemAlignment": "center-left",
+                    "prefWidth": "200"
+                },
+                {
+                    "name": "centerField",
+                    "varRef": "centerItem",
+                    "itemAlignment": "center",
+                    "prefWidth": "200"
+                },
+                {
+                    "name": "rightField",
+                    "varRef": "rightItem",
+                    "itemAlignment": "center-right",
+                    "prefWidth": "200"
+                }
+            ]
+        }
+    ]
+};
+
+print("Screen 'vboxAlignmentDemo' created");
+print("Use: show screen vboxAlignmentDemo; (in interactive console)");
+
+// Example 4: Runtime property changes
+print("");
+print("All examples completed!");
+print("");
+print("To view the demonstrations in the interactive console:");
+print("1. call scr.showScreen('contentAlignmentDemo', 'Content Alignment Demo', 500, 300);");
+print("2. call scr.showScreen('gridAlignmentDemo', 'Grid Alignment Demo', 500, 400);");
+print("3. call scr.showScreen('vboxAlignmentDemo', 'VBox Alignment Demo', 500, 300);");
+print("");
+print("Example 4: Runtime Property Changes (use in interactive console after showing screens):");
+print("  call scr.setProperty(\"contentalignmentdemo.leftField\", \"contentAlignment\", \"center\");");
+print("  var align1: string = scr.getProperty(\"contentalignmentdemo.centerField\", \"contentAlignment\");");
+print("  call scr.setProperty(\"vboxalignmentdemo.leftItem\", \"itemAlignment\", \"center\");");
+print("  var align2: string = scr.getProperty(\"vboxalignmentdemo.centerItem\", \"itemAlignment\");");

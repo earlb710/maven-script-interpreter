@@ -430,15 +430,15 @@ public class InterpreterScreen {
                                 varDisplayItem.labelText = varDisplayItem.labelText + ":";
                             }
                             
-                            // Set default alignment based on control type and variable type if not specified
-                            if (varDisplayItem.alignment == null || varDisplayItem.alignment.isEmpty()) {
+                            // Set default contentAlignment based on control type and variable type if not specified
+                            if (varDisplayItem.contentAlignment == null || varDisplayItem.contentAlignment.isEmpty()) {
                                 // Numeric fields should be right-aligned by default
                                 // String fields (including TextField with string type) should be left-aligned
                                 if (isNumericControl(varDisplayItem.itemType, varType)) {
-                                    varDisplayItem.alignment = "right";
+                                    varDisplayItem.contentAlignment = "right";
                                 } else {
                                     // Explicitly set left alignment for string/text fields
-                                    varDisplayItem.alignment = "left";
+                                    varDisplayItem.contentAlignment = "left";
                                 }
                             }
                             
@@ -1693,7 +1693,7 @@ public class InterpreterScreen {
             "prefwidth", "pref_width", "prefheight", "pref_height",
             "minwidth", "min_width", "minheight", "min_height",
             "maxwidth", "max_width", "maxheight", "max_height",
-            "alignment",
+            "contentalignment", "content_alignment", "itemalignment", "item_alignment", "alignment",
             // Styling
             "style",
             // Event handlers (should be at item level, not in display object)
@@ -1801,7 +1801,10 @@ public class InterpreterScreen {
         }
 
         if (displayDef.containsKey("alignment")) {
-            metadata.alignment = String.valueOf(displayDef.get("alignment")).toLowerCase();
+            metadata.contentAlignment = String.valueOf(displayDef.get("alignment")).toLowerCase();
+        }
+        if (displayDef.containsKey("contentAlignment")) {
+            metadata.contentAlignment = String.valueOf(displayDef.get("contentAlignment")).toLowerCase();
         }
 
         if (displayDef.containsKey("pattern")) {
@@ -2709,8 +2712,28 @@ public class InterpreterScreen {
                             item.maxHeight = String.valueOf(itemDef.get("max_height"));
                         }
 
-                        if (itemDef.containsKey("alignment")) {
-                            item.alignment = String.valueOf(itemDef.get("alignment")).toLowerCase();
+                        // Parse contentAlignment (with snake_case support)
+                        // ContentAlignment is a display property, so set it on DisplayItem
+                        if (itemDef.containsKey("contentAlignment") || itemDef.containsKey("content_alignment") || itemDef.containsKey("contentalignment")) {
+                            if (item.displayItem == null) {
+                                item.displayItem = new DisplayItem();
+                            }
+                            if (itemDef.containsKey("contentAlignment")) {
+                                item.displayItem.contentAlignment = String.valueOf(itemDef.get("contentAlignment")).toLowerCase();
+                            } else if (itemDef.containsKey("content_alignment")) {
+                                item.displayItem.contentAlignment = String.valueOf(itemDef.get("content_alignment")).toLowerCase();
+                            } else if (itemDef.containsKey("contentalignment")) {
+                                item.displayItem.contentAlignment = String.valueOf(itemDef.get("contentalignment")).toLowerCase();
+                            }
+                        }
+                        
+                        // Parse itemAlignment (with snake_case support)
+                        if (itemDef.containsKey("itemAlignment")) {
+                            item.itemAlignment = String.valueOf(itemDef.get("itemAlignment")).toLowerCase();
+                        } else if (itemDef.containsKey("item_alignment")) {
+                            item.itemAlignment = String.valueOf(itemDef.get("item_alignment")).toLowerCase();
+                        } else if (itemDef.containsKey("itemalignment")) {
+                            item.itemAlignment = String.valueOf(itemDef.get("itemalignment")).toLowerCase();
                         }
                         
                         // Event handlers

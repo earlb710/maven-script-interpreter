@@ -565,7 +565,9 @@ The `AreaItem` class defines individual UI elements within an area, including th
 
 | Property | Type | Description | Values |
 |----------|------|-------------|--------|
-| `alignment` | String | Alignment within parent | "center", "top-left", "bottom-right" |
+| `itemAlignment` | String | Item alignment within parent container | "center", "top-left", "center-right", "bottom-right" |
+
+**Note**: The `itemAlignment` property controls how the item (and its label wrapper if present) is positioned within its parent container. This is a layout property that affects the item's placement in StackPane, GridPane, HBox, or VBox containers.
 
 ### Event Handlers
 
@@ -704,10 +706,12 @@ The `DisplayMetadata` class defines the display properties and behavior for UI i
 | `max` | Object | Maximum value constraint | 100, "2024-12-31" |
 | `style` | String | CSS style string | "-fx-font-size: 14px;" |
 | `screenName` | String | Associated screen name | "LoginScreen" |
-| `alignment` | String | Text/content alignment | "left", "center", "right" |
+| `contentAlignment` | String | Text/content alignment within control | "left", "center", "right" |
 | `pattern` | String | Regex validation pattern | "^[a-zA-Z0-9]+$" |
 | `onValidate` | String | Inline EBS code for validation | "return age >= 18;" |
 | `onChange` | String | Inline EBS code executed on value change | "call updateTotal();" |
+
+**Note**: The `contentAlignment` property is a display/styling property defined in the `display` object. It controls how text or content is aligned within the control itself (e.g., left-aligned, centered, or right-aligned text in a TextField).
 
 ### Event Handler Properties
 
@@ -892,7 +896,7 @@ vars: [{
     display: {
         type: "textfield",
         mandatory: true,
-        alignment: "left",
+        contentAlignment: "left",
         pattern: "^[a-zA-Z0-9_]{3,20}$",
         style: "-fx-font-size: 14px;"
     }
@@ -909,7 +913,7 @@ vars: [{
     type: "string",
     display: {
         type: "labeltext",
-        alignment: "center",
+        contentAlignment: "center",
         style: "-fx-font-size: 18px; -fx-font-weight: bold;"
     }
 }]
@@ -940,7 +944,8 @@ Some properties can be specified in both DisplayMetadata and AreaItem. Understan
 |-------------------|----------------|----------|-------|
 | **Control Type** | `itemType`, `type` | `displayMetadata.itemType` | Can be overridden per item |
 | **Validation** | `mandatory`, `pattern`, `min`, `max` | - | Defined at variable level |
-| **Text Formatting** | `caseFormat`, `alignment` | `alignment` | AreaItem alignment affects layout positioning |
+| **Content Alignment** | `contentAlignment` | - | Text alignment within control (display property) |
+| **Layout Positioning** | - | `itemAlignment` | Item positioning in parent container (layout property) |
 | **Styling** | `style`, `cssClass` | - | Base styling from DisplayMetadata |
 | **Colors** | - | `textColor`, `backgroundColor` | Item-specific colors |
 | **Behavior** | - | `editable`, `disabled`, `visible` | Runtime state control |
@@ -957,7 +962,7 @@ screen "UserForm" {
             type: "textfield",
             mandatory: true,
             pattern: "^[\\w.-]+@[\\w.-]+\\.[a-z]{2,}$",
-            alignment: "left"
+            contentAlignment: "left"
         }
     }],
     area: [{
@@ -966,7 +971,8 @@ screen "UserForm" {
         items: [{
             // Uses all DisplayMetadata from "email" variable
             varRef: "email",
-            sequence: 1
+            sequence: 1,
+            itemAlignment: "center"
         }, {
             // Overrides DisplayMetadata - shows as passwordfield instead
             varRef: "email",
@@ -1091,7 +1097,7 @@ screen "FormScreen" {
 screen "DashboardScreen" {
     vars: [{
         name: "title",
-        display: { type: "labeltext", alignment: "center" }
+        display: { type: "labeltext", contentAlignment: "center" }
     }, {
         name: "statusMessage",
         display: { type: "text" }
@@ -1107,7 +1113,7 @@ screen "DashboardScreen" {
         items: [{
             varRef: "title",
             hgrow: "ALWAYS",
-            alignment: "center",
+            itemAlignment: "center",
             textColor: "#333333"
         }]
     }, {
@@ -1197,7 +1203,7 @@ screen "InfoScreen" {
             varRef: "welcomeText",
             sequence: 1,
             textColor: "#1976d2",
-            alignment: "center",
+            itemAlignment: "center",
             style: "-fx-font-size: 24px; -fx-font-weight: bold;"
         }, {
             varRef: "separator",
@@ -1255,7 +1261,8 @@ screen "InfoScreen" {
 
 - Use `sequence` for ordering items within any container
 - Use `layoutPos` for precise positioning in grids and border panes
-- Use `alignment` for fine-tuning placement within containers
+- Use `contentAlignment` (in display) for text alignment within controls
+- Use `itemAlignment` (at item level) for item placement within parent containers
 
 ### 4. Responsive Design
 

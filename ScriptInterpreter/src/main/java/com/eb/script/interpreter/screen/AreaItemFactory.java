@@ -507,8 +507,14 @@ public class AreaItemFactory {
         }
 
         // Apply control text alignment (for the content inside the control)
-        if (metadata != null && metadata.alignment != null && !metadata.alignment.isEmpty()) {
-            String alignment = metadata.alignment.toLowerCase();
+        // Use contentAlignment from metadata (DisplayItem)
+        String contentAlignmentValue = null;
+        if (metadata != null && metadata.contentAlignment != null && !metadata.contentAlignment.isEmpty()) {
+            contentAlignmentValue = metadata.contentAlignment;
+        }
+        
+        if (contentAlignmentValue != null && !contentAlignmentValue.isEmpty()) {
+            String alignment = contentAlignmentValue.toLowerCase();
             String alignmentStyle = "";
             
             switch (alignment) {
@@ -527,12 +533,46 @@ public class AreaItemFactory {
             }
             
             if (!alignmentStyle.isEmpty()) {
-                if (control instanceof TextField || control instanceof TextArea || control instanceof ComboBox) {
-                    control.setStyle(control.getStyle() + " " + alignmentStyle);
+                // Convert alignment string to JavaFX Pos enum
+                javafx.geometry.Pos pos = null;
+                switch (alignment) {
+                    case "l":
+                    case "left":
+                        pos = javafx.geometry.Pos.CENTER_LEFT;
+                        break;
+                    case "c":
+                    case "center":
+                        pos = javafx.geometry.Pos.CENTER;
+                        break;
+                    case "r":
+                    case "right":
+                        pos = javafx.geometry.Pos.CENTER_RIGHT;
+                        break;
+                }
+                
+                if (control instanceof TextField) {
+                    // Use programmatic API for TextField (more reliable than CSS)
+                    TextField textField = (TextField) control;
+                    textField.setAlignment(pos);
+                } else if (control instanceof TextArea || control instanceof ComboBox) {
+                    // TextArea and ComboBox don't have setAlignment, use CSS
+                    String currentStyle = control.getStyle();
+                    String newStyle;
+                    if (currentStyle == null || currentStyle.isEmpty()) {
+                        newStyle = alignmentStyle;
+                    } else {
+                        newStyle = currentStyle + " " + alignmentStyle;
+                    }
+                    control.setStyle(newStyle);
                 } else if (control instanceof Spinner) {
                     // For Spinner, we need to access the internal TextField
                     Spinner<?> spinner = (Spinner<?>) control;
-                    spinner.setStyle(control.getStyle() + " " + alignmentStyle);
+                    String currentStyle = spinner.getStyle();
+                    if (currentStyle == null || currentStyle.isEmpty()) {
+                        spinner.setStyle(alignmentStyle);
+                    } else {
+                        spinner.setStyle(currentStyle + " " + alignmentStyle);
+                    }
                     // Also try to set on the editor if accessible
                     if (spinner.getEditor() != null) {
                         spinner.getEditor().setStyle(alignmentStyle);
