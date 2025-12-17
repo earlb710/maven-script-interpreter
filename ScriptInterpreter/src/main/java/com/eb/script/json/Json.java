@@ -192,9 +192,10 @@ public final class Json {
                         throw error("Invalid escape '\\" + e + "'");
                 }
             } else {
-                // Control chars are not allowed unescaped in JSON strings
-                if (c >= 0 && c < 0x20) {
-                    throw error("Unescaped control character in string");
+                // Allow newlines (LF=0x0A, CR=0x0D) and tab (0x09) for multi-line inline code in screen definitions
+                // Reject other control characters (0x00-0x08, 0x0B-0x0C, 0x0E-0x1F) for safety
+                if (c >= 0 && c < 0x20 && c != 0x0A && c != 0x0D && c != 0x09) {
+                    throw error("Unescaped control character in string (char code: 0x" + Integer.toHexString(c) + ")");
                 }
                 sb.append(c);
             }
