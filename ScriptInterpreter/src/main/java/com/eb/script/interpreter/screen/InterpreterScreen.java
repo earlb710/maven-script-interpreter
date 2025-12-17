@@ -14,7 +14,6 @@ import com.eb.script.RuntimeContext;
 import com.eb.script.interpreter.Interpreter;
 import com.eb.script.interpreter.InterpreterContext;
 import com.eb.script.interpreter.InterpreterError;
-import com.eb.script.interpreter.InterpreterArray;
 import com.eb.script.interpreter.builtins.BuiltinsThread;
 import javafx.application.Platform;
 import javafx.stage.Stage;
@@ -71,8 +70,6 @@ public class InterpreterScreen {
             try {
                 // Set the screen context before executing code
                 context.setCurrentScreen(screenName);
-                // Push screen variables to environment so they can be accessed directly by name
-                pushScreenVarsToEnvironment(screenName);
                 try {
                     // Parse and execute the EBS code
                     RuntimeContext codeContext = com.eb.script.parser.Parser.parse("inline_" + screenName, ebsCode);
@@ -86,8 +83,6 @@ public class InterpreterScreen {
                     // Catch return statement and extract the value
                     return rs.value;
                 } finally {
-                    // Pop screen variables from environment to prevent scope leakage
-                    popScreenVarsFromEnvironment(screenName);
                     // Always clear the screen context after execution to prevent context leakage
                     context.clearCurrentScreen();
                 }
@@ -721,8 +716,6 @@ public class InterpreterScreen {
                         // Set the screen context before executing code
                         // This allows inline code to use screen statements like "close screen;" or "hide screen;"
                         context.setCurrentScreen(qualifiedKey);
-                        // Push screen variables to environment so they can be accessed directly by name
-                        pushScreenVarsToEnvironment(qualifiedKey);
                         try {
                             // Parse and execute the EBS code
                             RuntimeContext clickContext = com.eb.script.parser.Parser.parse("inline_" + qualifiedKey, ebsCode);
@@ -736,8 +729,6 @@ public class InterpreterScreen {
                             // Catch return statement and extract the value
                             return returnValue ? rs.value : null;
                         } finally {
-                            // Pop screen variables from environment to prevent scope leakage
-                            popScreenVarsFromEnvironment(qualifiedKey);
                             // Always clear the screen context after execution to prevent context leakage
                             context.clearCurrentScreen();
                         }
@@ -3064,7 +3055,6 @@ public class InterpreterScreen {
         
         if (dispatcher != null && dispatcher.isRunning()) {
             // Use the dispatcher to execute on the screen thread
-            // Note: The dispatcher calls the CodeExecutor which handles pushing/popping screen vars
             try {
                 dispatcher.dispatchSync(ebsCode);
             } catch (InterpreterError e) {
@@ -3072,12 +3062,9 @@ public class InterpreterScreen {
             }
         } else {
             // Fallback: execute directly if dispatcher is not available
-            // This handles the case where the screen thread isn't running yet or is unavailable
             try {
                 // Set the screen context before executing inline code
                 context.setCurrentScreen(screenName);
-                // Push screen variables to environment so they can be accessed directly by name
-                pushScreenVarsToEnvironment(screenName);
                 try {
                     // Parse and execute the EBS code
                     RuntimeContext eventContext = com.eb.script.parser.Parser.parse(eventType + "_" + screenName, ebsCode);
@@ -3086,8 +3073,6 @@ public class InterpreterScreen {
                         interpreter.acceptStatement(s);
                     }
                 } finally {
-                    // Pop screen variables from environment to prevent scope leakage
-                    popScreenVarsFromEnvironment(screenName);
                     // Always clear the screen context after execution to prevent context leakage
                     context.clearCurrentScreen();
                 }
@@ -3097,50 +3082,6 @@ public class InterpreterScreen {
                 throw new InterpreterError("IO error executing " + eventType + " code: " + e.getMessage());
             }
         }
-    }
-    
-    /**
-     * Push screen variables into the environment scope.
-     * This allows event code to access screen variables directly by name instead of using qualified notation.
-     * Creates a new scope with screen variables defined in it.
-     * 
-     * @param screenName The name of the screen whose variables should be pushed
-     */
-    private void pushScreenVarsToEnvironment(String screenName) {
-        // Get screen variables
-        ConcurrentHashMap<String, Object> screenVarMap = context.getScreenVars(screenName);
-        if (screenVarMap == null) {
-            return;
-        }
-        
-        // Push a new environment scope
-        interpreter.environment().pushEnvironmentValues();
-        
-        // Add each screen variable to the new scope
-        for (Map.Entry<String, Object> entry : screenVarMap.entrySet()) {
-            String varName = entry.getKey();
-            Object value = entry.getValue();
-            
-            // Convert NULL_SENTINEL back to null for environment
-            Object envValue = (value == InterpreterArray.NULL_SENTINEL) ? null : value;
-            
-            // Define variable in the new scope
-            interpreter.environment().getEnvironmentValues().define(varName, envValue);
-        }
-    }
-    
-    /**
-     * Pop screen variables from the environment scope.
-     * This removes the scope that was added by pushScreenVarsToEnvironment to prevent scope leakage.
-     * 
-     * Note: screenName parameter is kept for API symmetry with pushScreenVarsToEnvironment
-     * and for potential future use (e.g., validation or logging).
-     * 
-     * @param screenName The name of the screen (kept for API consistency)
-     */
-    private void popScreenVarsFromEnvironment(String screenName) {
-        // Pop the environment scope that contains the screen variables
-        interpreter.environment().popEnvironmentValues();
     }
     
     /**
