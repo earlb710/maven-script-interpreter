@@ -2177,7 +2177,8 @@ public class ScreenFactory {
         if (context != null && screenName != null && varRef != null && !varRef.isEmpty()) {
             java.util.concurrent.ConcurrentHashMap<String, ScreenComponentType> componentTypes = context.getScreenComponentTypes(screenName);
             if (componentTypes != null) {
-                ScreenComponentType componentType = componentTypes.get(varRef);
+                // Use lowercase for lookup since keys are stored in lowercase
+                ScreenComponentType componentType = componentTypes.get(varRef.toLowerCase(java.util.Locale.ROOT));
                 if (componentType != null && componentType.getJavaFXNode() != null) {
                     // Add JavaFX component description
                     if (info.length() > 0) {
