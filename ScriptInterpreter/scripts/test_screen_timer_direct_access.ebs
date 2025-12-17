@@ -5,10 +5,10 @@ print "=== Test: Direct Screen Variable Access in Timer Callbacks ===";
 print "Testing that thread.timer callbacks can access screen vars directly";
 print "";
 
-string timerName = "counterTimer";
+var timerName: string = "counterTimer";
 
 // Timer callback function that accesses screen vars directly
-timerCallback(string tName) {
+timerCallback(tName: string) {
     // Test direct access to screen variables without qualification
     counter = counter + 1;
     
