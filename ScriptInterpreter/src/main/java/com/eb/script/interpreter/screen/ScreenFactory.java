@@ -2937,12 +2937,13 @@ public class ScreenFactory {
         }
         
         // Show debug panel if it should be visible
-        // Note: This method is called from within Platform.runLater() in InterpreterScreen,
-        // so we can call toggleDebugPanel directly without another Platform.runLater()
+        // Use Util.runOnFx to ensure we're on the JavaFX Application Thread
         if (shouldShowDebug) {
-            toggleDebugPanel(screenName, context, true);
-            // Also set debug mode for this thread to keep state consistent
-            setDebugModeForThread(true);
+            com.eb.util.Util.runOnFx(() -> {
+                toggleDebugPanel(screenName, context, true);
+                // Also set debug mode for this thread to keep state consistent
+                setDebugModeForThread(true);
+            });
         }
     }
     
