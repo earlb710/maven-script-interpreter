@@ -630,7 +630,7 @@ The `onChange` property allows you to specify inline EBS code that executes when
 {
     "varRef": "quantity",
     "sequence": 1,
-    "onChange": "total = quantity * unitPrice; call screen.setProperty('myScreen.totalLabel', 'text', string(total));"
+    "onChange": "total = quantity * unitPrice; call scr.setProperty('myScreen.totalLabel', 'itemText', string(total));"
 }
 ```
 
