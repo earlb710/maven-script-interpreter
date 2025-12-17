@@ -4997,9 +4997,13 @@ public class ScreenFactory {
      */
     private static AreaItem parseAreaItem(Map<String, Object> itemDef, String screenName) {
         AreaItem item = new AreaItem();
+        
+        System.err.println("[PARSE DEBUG] parseAreaItem called");
+        System.err.println("[PARSE DEBUG] itemDef keys: " + (itemDef != null ? itemDef.keySet() : "null"));
 
         // Extract item properties
         item.name = getStringValue(itemDef, "name", null);
+        System.err.println("[PARSE DEBUG] item.name = " + item.name);
         // Support both "sequence" and "seq" for compactness
         item.sequence = getIntValue(itemDef, "sequence", getIntValue(itemDef, "seq", 0));
         item.varRef = getStringValue(itemDef, "varRef", getStringValue(itemDef, "var_ref", null));
@@ -5055,9 +5059,13 @@ public class ScreenFactory {
         item.minHeight = getStringValue(itemDef, "minHeight", getStringValue(itemDef, "min_height", null));
         item.maxWidth = getStringValue(itemDef, "maxWidth", getStringValue(itemDef, "max_width", null));
         item.maxHeight = getStringValue(itemDef, "maxHeight", getStringValue(itemDef, "max_height", null));
+        System.err.println("[PARSE DEBUG] About to parse contentAlignment from itemDef");
         item.contentAlignment = getStringValue(itemDef, "contentAlignment", getStringValue(itemDef, "content_alignment", null));
+        System.err.println("[PARSE DEBUG] After parsing: item.contentAlignment = " + item.contentAlignment);
         item.itemAlignment = getStringValue(itemDef, "itemAlignment", getStringValue(itemDef, "item_alignment", null));
+        System.err.println("[PARSE DEBUG] After parsing: item.itemAlignment = " + item.itemAlignment);
         item.alignment = getStringValue(itemDef, "alignment", null);
+        System.err.println("[PARSE DEBUG] After parsing: item.alignment = " + item.alignment);
         
         // Event handlers
         item.onValidate = getStringValue(itemDef, "onValidate", getStringValue(itemDef, "on_validate", null));
