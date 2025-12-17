@@ -1,0 +1,107 @@
+// Test script for itemText property on buttons and labels
+// This script tests the new itemText property that allows dynamic text updates
+
+screen testItemTextScreen = {
+    "title": "Button and Label itemText Test",
+    "width": 500,
+    "height": 400,
+    "vars": [
+        {
+            "name": "counter",
+            "type": "int",
+            "default": 0
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "15",
+            "padding": "20",
+            "items": [
+                {
+                    "name": "titleLabel",
+                    "display": {
+                        "type": "label",
+                        "labelText": "Testing itemText Property",
+                        "itemFontSize": "20px",
+                        "itemBold": true
+                    }
+                },
+                {
+                    "name": "statusLabel",
+                    "display": {
+                        "type": "label",
+                        "labelText": "Status: Ready",
+                        "itemFontSize": "16px",
+                        "itemColor": "#0066cc"
+                    }
+                },
+                {
+                    "name": "counterLabel",
+                    "display": {
+                        "type": "label",
+                        "labelText": "Counter: 0",
+                        "itemFontSize": "14px"
+                    }
+                },
+                {
+                    "name": "updateButton",
+                    "display": {
+                        "type": "button",
+                        "labelText": "Click to Update Text",
+                        "onClick": "call updateTexts();",
+                        "style": "-fx-min-width: 200px; -fx-min-height: 40px;"
+                    }
+                },
+                {
+                    "name": "resetButton",
+                    "display": {
+                        "type": "button",
+                        "labelText": "Reset",
+                        "onClick": "call resetTexts();",
+                        "style": "-fx-min-width: 200px; -fx-min-height: 40px; -fx-background-color: #cc6600;"
+                    }
+                }
+            ]
+        }
+    ]
+};
+
+// Function to update all text items
+updateTexts() {
+    // Increment counter
+    counter = counter + 1;
+    
+    // Update status label using itemText property
+    call scr.setProperty("testItemTextScreen.statusLabel", "itemText", "Status: Button clicked!");
+    
+    // Update counter label using itemText property
+    var counterText: string = "Counter: " + string(counter);
+    call scr.setProperty("testItemTextScreen.counterLabel", "itemText", counterText);
+    
+    // Update button text using itemText property
+    call scr.setProperty("testItemTextScreen.updateButton", "itemText", "Click Again! (Count: " + string(counter) + ")");
+    
+    print "Text updated successfully - Counter: " + string(counter);
+}
+
+// Function to reset all text items
+resetTexts() {
+    counter = 0;
+    
+    // Reset all labels and button text using itemText property
+    call scr.setProperty("testItemTextScreen.statusLabel", "itemText", "Status: Reset");
+    call scr.setProperty("testItemTextScreen.counterLabel", "itemText", "Counter: 0");
+    call scr.setProperty("testItemTextScreen.updateButton", "itemText", "Click to Update Text");
+    
+    print "Text reset successfully";
+}
+
+// Show the screen
+show screen testItemTextScreen;
+
+// Print instructions
+print "Test script loaded successfully!";
+print "Click the 'Click to Update Text' button to test the itemText property";
+print "The status label, counter label, and button text should all update dynamically";

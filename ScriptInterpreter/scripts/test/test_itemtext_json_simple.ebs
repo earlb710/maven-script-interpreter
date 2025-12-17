@@ -1,0 +1,226 @@
+// Test script: itemText property with JSON configuration
+// Demonstrates using JSON to configure and update control text dynamically
+
+print "=== itemText with JSON Configuration Test ===";
+print "";
+
+// Define text configuration in JSON
+var textConfig: map = {
+    "button": "Click to Start",
+    "label": "Status: Waiting",
+    "text": "Information: Ready",
+    "hyperlink": "Learn More",
+    "toggle": "Toggle: OFF",
+    "checkbox": "Enable Feature",
+    "radio": "Option A"
+};
+
+print "Initial text configuration loaded from JSON";
+print "Button text: " + call json.getstring(textConfig, "button");
+print "Label text: " + call json.getstring(textConfig, "label");
+print "";
+
+// Define the screen
+screen testJsonScreen = {
+    "title": "itemText with JSON Test",
+    "width": 600,
+    "height": 650,
+    "vars": [],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "15",
+            "padding": "20",
+            "items": [
+                {
+                    "name": "titleLabel",
+                    "display": {
+                        "type": "label",
+                        "labelText": "itemText with JSON Configuration",
+                        "itemFontSize": "20px",
+                        "itemBold": true
+                    }
+                },
+                {
+                    "name": "infoLabel",
+                    "display": {
+                        "type": "label",
+                        "labelText": "Using JSON to manage control text",
+                        "itemFontSize": "14px",
+                        "itemColor": "#666666"
+                    }
+                },
+                {
+                    "name": "separator1",
+                    "display": {
+                        "type": "separator"
+                    }
+                },
+                {
+                    "name": "myButton",
+                    "display": {
+                        "type": "button",
+                        "labelText": "Initial Button",
+                        "style": "-fx-min-width: 200px;"
+                    }
+                },
+                {
+                    "name": "myLabel",
+                    "display": {
+                        "type": "label",
+                        "labelText": "Initial Label",
+                        "itemFontSize": "14px"
+                    }
+                },
+                {
+                    "name": "myText",
+                    "display": {
+                        "type": "text",
+                        "labelText": "Initial Text",
+                        "itemFontSize": "14px",
+                        "itemColor": "#0066cc"
+                    }
+                },
+                {
+                    "name": "myHyperlink",
+                    "display": {
+                        "type": "hyperlink",
+                        "labelText": "Initial Link"
+                    }
+                },
+                {
+                    "name": "myToggle",
+                    "display": {
+                        "type": "togglebutton",
+                        "labelText": "Initial Toggle",
+                        "style": "-fx-min-width: 200px;"
+                    }
+                },
+                {
+                    "name": "myCheckbox",
+                    "display": {
+                        "type": "checkbox",
+                        "labelText": "Initial Checkbox"
+                    }
+                },
+                {
+                    "name": "myRadio",
+                    "display": {
+                        "type": "radiobutton",
+                        "labelText": "Initial Radio"
+                    }
+                },
+                {
+                    "name": "separator2",
+                    "display": {
+                        "type": "separator"
+                    }
+                },
+                {
+                    "name": "applyButton",
+                    "display": {
+                        "type": "button",
+                        "labelText": "Apply JSON Config",
+                        "onClick": "call applyJsonConfig();",
+                        "style": "-fx-min-width: 200px; -fx-min-height: 40px; -fx-background-color: #27ae60;"
+                    }
+                },
+                {
+                    "name": "updateButton",
+                    "display": {
+                        "type": "button",
+                        "labelText": "Update with New JSON",
+                        "onClick": "call updateWithNewJson();",
+                        "style": "-fx-min-width: 200px; -fx-min-height: 40px; -fx-background-color: #2980b9;"
+                    }
+                },
+                {
+                    "name": "resetButton",
+                    "display": {
+                        "type": "button",
+                        "labelText": "Reset to Initial",
+                        "onClick": "call resetToInitial();",
+                        "style": "-fx-min-width: 200px; -fx-min-height: 40px; -fx-background-color: #cc6600;"
+                    }
+                }
+            ]
+        }
+    ]
+};
+
+// Function to apply JSON configuration to all controls
+applyJsonConfig() {
+    print "Applying JSON configuration...";
+    
+    // Get text values from JSON and apply using scr.setProperty
+    var buttonText = call json.getstring(textConfig, "button");
+    var labelText = call json.getstring(textConfig, "label");
+    var textText = call json.getstring(textConfig, "text");
+    var linkText = call json.getstring(textConfig, "hyperlink");
+    var toggleText = call json.getstring(textConfig, "toggle");
+    var checkboxText = call json.getstring(textConfig, "checkbox");
+    var radioText = call json.getstring(textConfig, "radio");
+    
+    // Apply to controls using itemText property
+    call scr.setProperty("testJsonScreen.myButton", "itemText", buttonText);
+    call scr.setProperty("testJsonScreen.myLabel", "itemText", labelText);
+    call scr.setProperty("testJsonScreen.myText", "itemText", textText);
+    call scr.setProperty("testJsonScreen.myHyperlink", "itemText", linkText);
+    call scr.setProperty("testJsonScreen.myToggle", "itemText", toggleText);
+    call scr.setProperty("testJsonScreen.myCheckbox", "itemText", checkboxText);
+    call scr.setProperty("testJsonScreen.myRadio", "itemText", radioText);
+    
+    print "JSON configuration applied successfully!";
+}
+
+// Function to update with new JSON values
+updateWithNewJson() {
+    print "Creating new JSON configuration...";
+    
+    // Create new configuration with different values
+    var newConfig: map = {
+        "button": "Processing...",
+        "label": "Status: Active",
+        "text": "Information: Processing",
+        "hyperlink": "View Details",
+        "toggle": "Toggle: ON",
+        "checkbox": "Feature Enabled",
+        "radio": "Option B"
+    };
+    
+    // Apply new configuration
+    call scr.setProperty("testJsonScreen.myButton", "itemText", call json.getstring(newConfig, "button"));
+    call scr.setProperty("testJsonScreen.myLabel", "itemText", call json.getstring(newConfig, "label"));
+    call scr.setProperty("testJsonScreen.myText", "itemText", call json.getstring(newConfig, "text"));
+    call scr.setProperty("testJsonScreen.myHyperlink", "itemText", call json.getstring(newConfig, "hyperlink"));
+    call scr.setProperty("testJsonScreen.myToggle", "itemText", call json.getstring(newConfig, "toggle"));
+    call scr.setProperty("testJsonScreen.myCheckbox", "itemText", call json.getstring(newConfig, "checkbox"));
+    call scr.setProperty("testJsonScreen.myRadio", "itemText", call json.getstring(newConfig, "radio"));
+    
+    print "New JSON configuration applied!";
+}
+
+// Function to reset to initial text
+resetToInitial() {
+    print "Resetting to initial text...";
+    
+    call scr.setProperty("testJsonScreen.myButton", "itemText", "Reset Button");
+    call scr.setProperty("testJsonScreen.myLabel", "itemText", "Reset Label");
+    call scr.setProperty("testJsonScreen.myText", "itemText", "Reset Text");
+    call scr.setProperty("testJsonScreen.myHyperlink", "itemText", "Reset Link");
+    call scr.setProperty("testJsonScreen.myToggle", "itemText", "Reset Toggle");
+    call scr.setProperty("testJsonScreen.myCheckbox", "itemText", "Reset Checkbox");
+    call scr.setProperty("testJsonScreen.myRadio", "itemText", "Reset Radio");
+    
+    print "All controls reset!";
+}
+
+// Show the screen
+show screen testJsonScreen;
+
+print "";
+print "Screen displayed - Test Actions:";
+print "1. Click 'Apply JSON Config' to apply initial JSON configuration";
+print "2. Click 'Update with New JSON' to apply different JSON values";
+print "3. Click 'Reset to Initial' to reset all text";

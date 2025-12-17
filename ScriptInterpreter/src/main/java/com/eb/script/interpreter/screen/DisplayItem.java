@@ -37,6 +37,8 @@ public class DisplayItem {
     String promptHelp;
     // Label text displayed before/above the control
     String labelText;
+    // Item text - the actual displayed text for buttons and labels (can be updated dynamically via scr.setProperty)
+    public String itemText;
     // Label text alignment: "left", "center", "right"
     String labelTextAlignment;
     // Label position relative to control: "left", "right", "top", "bottom"

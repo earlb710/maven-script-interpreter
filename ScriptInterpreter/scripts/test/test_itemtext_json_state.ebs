@@ -1,0 +1,276 @@
+// Test script: itemText property with JSON state management
+// Demonstrates using JSON to manage application state and control text
+
+print "=== itemText with JSON State Management Test ===";
+print "";
+
+// Application state managed with JSON
+var appState: map = {
+    "mode": "idle",
+    "taskCount": 0,
+    "isProcessing": false,
+    "lastUpdate": "Never"
+};
+
+// Text templates for different states
+var stateTexts: map = {
+    "idle": {
+        "status": "Status: Idle",
+        "button": "Start Processing",
+        "info": "Ready to begin",
+        "mode": "Mode: Idle"
+    },
+    "processing": {
+        "status": "Status: Processing",
+        "button": "Stop Processing",
+        "info": "Working on tasks...",
+        "mode": "Mode: Active"
+    },
+    "completed": {
+        "status": "Status: Completed",
+        "button": "Reset",
+        "info": "All tasks finished",
+        "mode": "Mode: Done"
+    }
+};
+
+print "Application state initialized";
+print "Current mode: " + call json.getstring(appState, "mode");
+print "";
+
+// Define the screen
+screen stateScreen = {
+    "title": "itemText with State Management",
+    "width": 700,
+    "height": 650,
+    "vars": [],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "15",
+            "padding": "20",
+            "items": [
+                {
+                    "name": "titleLabel",
+                    "display": {
+                        "type": "label",
+                        "labelText": "State Management with JSON",
+                        "itemFontSize": "20px",
+                        "itemBold": true
+                    }
+                },
+                {
+                    "name": "descLabel",
+                    "display": {
+                        "type": "label",
+                        "labelText": "Using JSON to manage application state and update UI",
+                        "itemFontSize": "14px",
+                        "itemColor": "#666666"
+                    }
+                },
+                {
+                    "name": "separator1",
+                    "display": {
+                        "type": "separator"
+                    }
+                },
+                {
+                    "name": "modeLabel",
+                    "display": {
+                        "type": "label",
+                        "labelText": "Mode: Initializing",
+                        "itemFontSize": "16px",
+                        "itemBold": true,
+                        "itemColor": "#2980b9"
+                    }
+                },
+                {
+                    "name": "statusLabel",
+                    "display": {
+                        "type": "label",
+                        "labelText": "Status: Starting",
+                        "itemFontSize": "14px"
+                    }
+                },
+                {
+                    "name": "infoText",
+                    "display": {
+                        "type": "text",
+                        "labelText": "Information will appear here",
+                        "itemFontSize": "13px",
+                        "itemColor": "#666666"
+                    }
+                },
+                {
+                    "name": "taskCountLabel",
+                    "display": {
+                        "type": "label",
+                        "labelText": "Tasks Completed: 0",
+                        "itemFontSize": "14px"
+                    }
+                },
+                {
+                    "name": "lastUpdateLabel",
+                    "display": {
+                        "type": "label",
+                        "labelText": "Last Update: Never",
+                        "itemFontSize": "12px",
+                        "itemColor": "#999999"
+                    }
+                },
+                {
+                    "name": "separator2",
+                    "display": {
+                        "type": "separator"
+                    }
+                },
+                {
+                    "name": "actionButton",
+                    "display": {
+                        "type": "button",
+                        "labelText": "Start Application",
+                        "onClick": "call handleAction();",
+                        "style": "-fx-min-width: 200px; -fx-min-height: 40px; -fx-background-color: #27ae60;"
+                    }
+                },
+                {
+                    "name": "taskButton",
+                    "display": {
+                        "type": "button",
+                        "labelText": "Complete Task",
+                        "onClick": "call completeTask();",
+                        "style": "-fx-min-width: 200px; -fx-min-height: 40px; -fx-background-color: #3498db;"
+                    }
+                },
+                {
+                    "name": "showStateButton",
+                    "display": {
+                        "type": "button",
+                        "labelText": "Show Current State (Console)",
+                        "onClick": "call showState();",
+                        "style": "-fx-min-width: 200px; -fx-min-height: 40px; -fx-background-color: #95a5a6;"
+                    }
+                }
+            ]
+        }
+    ]
+};
+
+// Function to update UI based on current state
+updateUI() {
+    var currentMode = call json.getstring(appState, "mode");
+    print "Updating UI for mode: " + currentMode;
+    
+    // Get text templates for current mode
+    var modeTexts = call json.get(stateTexts, currentMode);
+    
+    // Update all UI elements using itemText property
+    var statusText = call json.getstring(modeTexts, "status");
+    var buttonText = call json.getstring(modeTexts, "button");
+    var infoText = call json.getstring(modeTexts, "info");
+    var modeText = call json.getstring(modeTexts, "mode");
+    
+    call scr.setProperty("stateScreen.statusLabel", "itemText", statusText);
+    call scr.setProperty("stateScreen.actionButton", "itemText", buttonText);
+    call scr.setProperty("stateScreen.infoText", "itemText", infoText);
+    call scr.setProperty("stateScreen.modeLabel", "itemText", modeText);
+    
+    // Update task count
+    var taskCount = call json.getint(appState, "taskCount");
+    var taskCountText = "Tasks Completed: " + string(taskCount);
+    call scr.setProperty("stateScreen.taskCountLabel", "itemText", taskCountText);
+    
+    // Update last update time
+    var lastUpdate = call json.getstring(appState, "lastUpdate");
+    var updateText = "Last Update: " + lastUpdate;
+    call scr.setProperty("stateScreen.lastUpdateLabel", "itemText", updateText);
+    
+    print "UI updated successfully";
+}
+
+// Function to handle main action button (state machine)
+handleAction() {
+    var currentMode = call json.getstring(appState, "mode");
+    
+    if currentMode == "idle" then {
+        // Transition to processing
+        call json.set(appState, "mode", "processing");
+        call json.set(appState, "isProcessing", true);
+        call json.set(appState, "lastUpdate", "Started processing");
+        print "State changed: idle -> processing";
+    } else if currentMode == "processing" then {
+        // Transition to completed
+        call json.set(appState, "mode", "completed");
+        call json.set(appState, "isProcessing", false);
+        call json.set(appState, "lastUpdate", "Processing stopped");
+        print "State changed: processing -> completed";
+    } else if currentMode == "completed" then {
+        // Transition back to idle (reset)
+        call json.set(appState, "mode", "idle");
+        call json.set(appState, "taskCount", 0);
+        call json.set(appState, "isProcessing", false);
+        call json.set(appState, "lastUpdate", "Reset to idle");
+        print "State changed: completed -> idle (reset)";
+    }
+    
+    // Update UI to reflect new state
+    call updateUI();
+}
+
+// Function to complete a task (increments counter)
+completeTask() {
+    var isProcessing = call json.getbool(appState, "isProcessing");
+    
+    if isProcessing then {
+        // Increment task count
+        var currentCount = call json.getint(appState, "taskCount");
+        var newCount = currentCount + 1;
+        call json.set(appState, "taskCount", newCount);
+        
+        // Update last update
+        var updateMsg = "Task #" + string(newCount) + " completed";
+        call json.set(appState, "lastUpdate", updateMsg);
+        
+        print "Task completed: " + updateMsg;
+        
+        // Update UI
+        call updateUI();
+    } else {
+        print "Cannot complete task - not in processing mode";
+        call scr.setProperty("stateScreen.infoText", "itemText", "Start processing first!");
+    }
+}
+
+// Function to show current state in console
+showState() {
+    print "";
+    print "=== Current Application State ===";
+    print "Mode: " + call json.getstring(appState, "mode");
+    print "Task Count: " + string(call json.getint(appState, "taskCount"));
+    print "Is Processing: " + string.fromBool(call json.getbool(appState, "isProcessing"));
+    print "Last Update: " + call json.getstring(appState, "lastUpdate");
+    print "=================================";
+    print "";
+}
+
+// Show the screen
+show screen stateScreen;
+
+// Initialize UI with idle state
+call updateUI();
+
+print "";
+print "Screen displayed - Test Actions:";
+print "1. Click 'Start Application' to begin (idle -> processing)";
+print "2. Click 'Complete Task' to increment task counter (only in processing mode)";
+print "3. Click 'Start Application' again to finish (processing -> completed)";
+print "4. Click 'Start Application' once more to reset (completed -> idle)";
+print "5. Click 'Show Current State' to see JSON state in console";
+print "";
+print "This demonstrates:";
+print "  - State machine pattern with JSON";
+print "  - Dynamic UI updates based on state";
+print "  - Using json.get, json.set, json.getstring, json.getint, json.getbool";
+print "  - Maintaining application state in JSON structure";
+print "  - State-driven text updates with itemText property";

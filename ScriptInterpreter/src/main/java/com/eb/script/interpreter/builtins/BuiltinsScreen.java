@@ -2501,6 +2501,13 @@ public class BuiltinsScreen {
             }
             case "itemalignment" ->
                 item.itemAlignment = value != null ? String.valueOf(value).toLowerCase() : null;
+            case "itemtext" -> {
+                // ItemText is a display property for buttons and labels, so set it on DisplayItem
+                if (item.displayItem == null) {
+                    item.displayItem = new DisplayItem();
+                }
+                item.displayItem.itemText = value != null ? String.valueOf(value) : null;
+            }
             default ->
                 throw new InterpreterError("scr.setProperty: unknown property '" + propertyName + "'. " +
                     "Note: 'text' and 'value' should be set via screen variables, not scr.setproperty.");
@@ -2555,6 +2562,8 @@ public class BuiltinsScreen {
                 item.displayItem != null ? item.displayItem.contentAlignment : null;
             case "itemalignment" ->
                 item.itemAlignment;
+            case "itemtext" ->
+                item.displayItem != null ? item.displayItem.itemText : null;
             default ->
                 throw new InterpreterError("scr.getProperty: unknown property '" + propertyName + "'");
         };
@@ -2701,11 +2710,31 @@ public class BuiltinsScreen {
                     }
                 }
             }
+            case "itemtext" -> {
+                // ItemText property for controls with text - updates the displayed text
+                String textValue = value != null ? String.valueOf(value) : "";
+                if (control instanceof javafx.scene.control.Button) {
+                    ((javafx.scene.control.Button) control).setText(textValue);
+                } else if (control instanceof javafx.scene.control.Label) {
+                    ((javafx.scene.control.Label) control).setText(textValue);
+                } else if (control instanceof javafx.scene.text.Text) {
+                    // Text node (not a Control subclass)
+                    ((javafx.scene.text.Text) control).setText(textValue);
+                } else if (control instanceof javafx.scene.control.Hyperlink) {
+                    ((javafx.scene.control.Hyperlink) control).setText(textValue);
+                } else if (control instanceof javafx.scene.control.ToggleButton) {
+                    ((javafx.scene.control.ToggleButton) control).setText(textValue);
+                } else if (control instanceof javafx.scene.control.CheckBox) {
+                    ((javafx.scene.control.CheckBox) control).setText(textValue);
+                } else if (control instanceof javafx.scene.control.RadioButton) {
+                    ((javafx.scene.control.RadioButton) control).setText(textValue);
+                }
+            }
             default -> {
                 // Unknown property - throw an error
                 throw new RuntimeException("Unknown property '" + propertyName + "' for control. " +
                     "Valid properties are: editable, disabled, visible, tooltip, textcolor, backgroundcolor, " +
-                    "prefwidth, prefheight, minwidth, minheight, maxwidth, maxheight. " +
+                    "prefwidth, prefheight, minwidth, minheight, maxwidth, maxheight, itemtext. " +
                     "Note: 'text' and 'value' should be set via screen variables, not scr.setproperty.");
             }
             // Note: Other properties like colspan, rowspan, hgrow, vgrow, margin, padding, alignment

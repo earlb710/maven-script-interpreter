@@ -524,6 +524,11 @@ show screen myWindow;
 - Assign to variables via `screen_name.var_name = value` (e.g., `myWindow.counter = 10`)
 - Variable assignments do not trigger screen display
 - Multiple screens can be created and managed independently
+- **Dynamic Text Updates**: Use `itemText` property to update button, label, and text-based control text at runtime
+  - Supported controls: Button, Label, Text, Hyperlink, ToggleButton, CheckBox, RadioButton
+  - Update via `scr.setProperty("screenName.itemName", "itemText", "New Text")`
+  - Works with JSON configuration for batch updates
+  - See test scripts: `test_itemtext_json_simple.ebs`, `test_itemtext_json_array.ebs`, `test_itemtext_json_state.ebs`
 - **Container Alignment**: Control positioning of child elements within areas using the `alignment` property
   - Supports 17 alignment values: `left`, `right`, `center`, `top-left`, `top-center`, etc.
   - Works with HBox, VBox, StackPane, FlowPane, and TilePane containers

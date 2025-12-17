@@ -493,7 +493,7 @@ public class AreaItemFactory {
             }
         }
         
-        // Apply label text for labels and buttons (actual displayed text)
+        // Apply label text for controls with text display (actual displayed text)
         if (metadata != null && metadata.labelText != null && !metadata.labelText.isEmpty()) {
             if (control instanceof Label) {
                 Label label = (Label) control;
@@ -503,6 +503,16 @@ public class AreaItemFactory {
                 applyPromptTextStyling(label, metadata);
             } else if (control instanceof Button) {
                 ((Button) control).setText(metadata.labelText);
+            } else if (control instanceof javafx.scene.text.Text) {
+                ((javafx.scene.text.Text) control).setText(metadata.labelText);
+            } else if (control instanceof javafx.scene.control.Hyperlink) {
+                ((javafx.scene.control.Hyperlink) control).setText(metadata.labelText);
+            } else if (control instanceof javafx.scene.control.ToggleButton) {
+                ((javafx.scene.control.ToggleButton) control).setText(metadata.labelText);
+            } else if (control instanceof javafx.scene.control.CheckBox) {
+                ((javafx.scene.control.CheckBox) control).setText(metadata.labelText);
+            } else if (control instanceof javafx.scene.control.RadioButton) {
+                ((javafx.scene.control.RadioButton) control).setText(metadata.labelText);
             }
         }
 
