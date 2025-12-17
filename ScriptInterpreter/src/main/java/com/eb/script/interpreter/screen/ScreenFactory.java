@@ -1423,7 +1423,7 @@ public class ScreenFactory {
         List<AreaDefinition> screenAreas = (List<AreaDefinition>) getScreenDataSafe(context, screenName, "areas");
         if (screenAreas != null && !screenAreas.isEmpty()) {
             for (AreaDefinition area : screenAreas) {
-                addAreaDefinitionToSection(areasSection, area, 0);
+                addAreaDefinitionToSection(areasSection, area, 0, context, screenName);
             }
         } else {
             javafx.scene.control.Label noAreasLabel = new javafx.scene.control.Label("No areas defined");
@@ -1437,12 +1437,15 @@ public class ScreenFactory {
     /**
      * Recursively add area definitions to the section with indentation for hierarchy.
      * Clicking on a row copies the area details to clipboard.
+     * Hovering over a row shows a tooltip with area properties and JavaFX details.
      * 
      * @param section The VBox to add the area to
      * @param area The area definition
      * @param depth The indentation depth
+     * @param context The interpreter context for looking up JavaFX containers
+     * @param screenName The screen name for looking up JavaFX containers
      */
-    private static void addAreaDefinitionToSection(VBox section, AreaDefinition area, int depth) {
+    private static void addAreaDefinitionToSection(VBox section, AreaDefinition area, int depth, InterpreterContext context, String screenName) {
         HBox row = new HBox(3);
         row.setAlignment(Pos.CENTER_LEFT);
         row.setPadding(new Insets(2, 5, 2, 5 + (depth * DEBUG_AREA_INDENT_PIXELS)));
@@ -1469,7 +1472,46 @@ public class ScreenFactory {
         
         row.getChildren().addAll(iconLabel, nameLabel, countLabel);
         
-        // Build clipboard text with all area details
+        // Build tooltip text with area details and JavaFX information
+        StringBuilder tooltipBuilder = new StringBuilder();
+        tooltipBuilder.append("Area: ").append(area.name);
+        tooltipBuilder.append("\nType: ").append(area.type != null ? area.type : "pane");
+        if (area.layout != null) tooltipBuilder.append("\nLayout: ").append(area.layout);
+        if (area.spacing != null) tooltipBuilder.append("\nSpacing: ").append(area.spacing);
+        if (area.padding != null) tooltipBuilder.append("\nPadding: ").append(area.padding);
+        if (area.groupBorder != null) tooltipBuilder.append("\nBorder: ").append(area.groupBorder);
+        if (area.style != null) tooltipBuilder.append("\nStyle: ").append(area.style);
+        if (itemCount > 0) tooltipBuilder.append("\nItems: ").append(itemCount);
+        if (childCount > 0) tooltipBuilder.append("\nChildren: ").append(childCount);
+        if (area.gainFocus != null) tooltipBuilder.append("\ngainFocus: ").append(area.gainFocus);
+        if (area.lostFocus != null) tooltipBuilder.append("\nlostFocus: ").append(area.lostFocus);
+        
+        // Add JavaFX container information if available
+        if (context != null && screenName != null && area.name != null) {
+            java.util.concurrent.ConcurrentHashMap<String, ScreenContainerType> containerTypes = 
+                context.getScreenContainerTypes(screenName);
+            if (containerTypes != null) {
+                String areaNameLower = area.name.toLowerCase(java.util.Locale.ROOT);
+                ScreenContainerType containerType = containerTypes.get(areaNameLower);
+                if (containerType != null && containerType.getJavaFXRegion() != null) {
+                    // Add JavaFX container description
+                    tooltipBuilder.append("\n---\nJavaFX:\n");
+                    String javafxDesc = containerType.getJavaFXDescription();
+                    // Append the JavaFX description (already formatted by getJavaFXDescription)
+                    tooltipBuilder.append(javafxDesc);
+                }
+            }
+        }
+        
+        // Add tooltip to the row
+        javafx.scene.control.Tooltip areaTooltip = new javafx.scene.control.Tooltip(tooltipBuilder.toString());
+        areaTooltip.setStyle("-fx-font-size: 14px;");
+        areaTooltip.setShowDelay(javafx.util.Duration.millis(500));
+        areaTooltip.setMaxWidth(DEBUG_TOOLTIP_MAX_WIDTH);
+        areaTooltip.setWrapText(true);
+        javafx.scene.control.Tooltip.install(row, areaTooltip);
+        
+        // Build clipboard text with all area details (same as tooltip for consistency)
         StringBuilder clipboardBuilder = new StringBuilder();
         clipboardBuilder.append("Area: ").append(area.name);
         clipboardBuilder.append("\nType: ").append(area.type != null ? area.type : "pane");
@@ -1492,7 +1534,7 @@ public class ScreenFactory {
         // Recursively add child areas
         if (area.childAreas != null) {
             for (AreaDefinition childArea : area.childAreas) {
-                addAreaDefinitionToSection(section, childArea, depth + 1);
+                addAreaDefinitionToSection(section, childArea, depth + 1, context, screenName);
             }
         }
     }
