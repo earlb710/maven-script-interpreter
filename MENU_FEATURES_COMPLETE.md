@@ -54,6 +54,20 @@ Add custom menu items dynamically with callback execution.
 - Executes callbacks on screen thread via dispatcher
 - Returns true on success
 
+### 5. Builtin: `scr.removeMenu(screenName, menuPath)`
+Remove menus or menu items dynamically.
+
+**Parameters:**
+- `screenName` (string, required): Name of the target screen
+- `menuPath` (string, required): Menu path using dot notation
+  - Examples: `"Tools"` (removes entire menu), `"Edit.customAction"` (removes specific item)
+
+**Features:**
+- Can remove entire top-level menus
+- Can remove specific menu items from any level
+- Supports nested submenus via dot notation
+- Returns true on success
+
 **Examples:**
 
 ```ebs
@@ -159,7 +173,7 @@ if isAdmin then {
 }
 ```
 
-### 3. Add Application-Specific Menus
+### 3. Add and Remove Application-Specific Menus
 ```ebs
 // Add custom menus for your application
 call scr.addMenu("app", "File.Recent", "file1", "document1.txt", 
@@ -168,6 +182,12 @@ call scr.addMenu("app", "Edit.Format", "indent", "Increase Indent",
     "call increaseIndent();");
 call scr.addMenu("app", "View.Zoom", "zoomIn", "Zoom In",
     "call zoom(1.25);");
+
+// Remove a menu item
+call scr.removeMenu("app", "File.Recent.document1.txt");
+
+// Remove entire submenu
+call scr.removeMenu("app", "Edit.Format");
 ```
 
 ### 4. Context-Sensitive Menus
@@ -210,6 +230,7 @@ foreach tool in availableTools do {
 Test scripts available:
 1. `ScriptInterpreter/scripts/test/test_menu_visibility.ebs` - Show/hide functionality
 2. `ScriptInterpreter/scripts/test/test_addmenu.ebs` - Custom menu items
+3. `ScriptInterpreter/scripts/test/test_removemenu.ebs` - Remove menu items
 
 ## Documentation
 
@@ -225,6 +246,7 @@ Test scripts available:
 | `scr.showMenu` | screenName? | bool | Shows menu bar |
 | `scr.hideMenu` | screenName? | bool | Hides menu bar |
 | `scr.addMenu` | screenName, parentPath, name, displayName, callback | bool | Adds custom menu item |
+| `scr.removeMenu` | screenName, menuPath | bool | Removes menu or menu item |
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|

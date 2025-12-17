@@ -505,6 +505,150 @@ public class BuiltinsScreen {
     }
 
     /**
+     * scr.removeMenu(screenName, menuPath) -> BOOL
+     * Removes a menu or menu item from a screen's menu bar.
+     * 
+     * @param screenName The name of the screen
+     * @param menuPath The menu path separated with dots (e.g., "Edit.customAction" or "Tools")
+     * @return true on success
+     */
+    public static Object screenRemoveMenu(InterpreterContext context, Object[] args) throws InterpreterError {
+        String screenName = (String) args[0];
+        String menuPath = (String) args[1];
+
+        // Validate parameters
+        if (screenName == null || screenName.isEmpty()) {
+            throw new InterpreterError("scr.removeMenu: screenName parameter cannot be null or empty");
+        }
+        if (menuPath == null || menuPath.isEmpty()) {
+            throw new InterpreterError("scr.removeMenu: menuPath parameter cannot be null or empty");
+        }
+        
+        // Normalize screen name to lowercase
+        screenName = screenName.toLowerCase();
+
+        // Check if screen exists
+        if (!context.getScreens().containsKey(screenName)) {
+            throw new InterpreterError("scr.removeMenu: Screen '" + screenName + "' does not exist or has not been shown yet.");
+        }
+
+        final String finalScreenName = screenName;
+        final String finalMenuPath = menuPath;
+
+        // Remove the menu item on JavaFX Application Thread
+        javafx.application.Platform.runLater(() -> {
+            try {
+                // Get the MenuBar for this screen
+                javafx.scene.control.MenuBar menuBar = com.eb.script.interpreter.screen.ScreenFactory.getScreenMenuBar(finalScreenName);
+                
+                if (menuBar == null) {
+                    if (context.getOutput() != null) {
+                        context.getOutput().printlnError("Menu bar not found for screen '" + finalScreenName + "'.");
+                    }
+                    return;
+                }
+
+                // Parse the menu path (e.g., "Edit.customAction" or "Tools")
+                String[] pathParts = finalMenuPath.split("\\.");
+                
+                if (pathParts.length == 1) {
+                    // Remove a top-level menu
+                    String menuName = pathParts[0];
+                    javafx.scene.control.Menu menuToRemove = null;
+                    
+                    for (javafx.scene.control.Menu menu : menuBar.getMenus()) {
+                        if (menu.getText().equals(menuName)) {
+                            menuToRemove = menu;
+                            break;
+                        }
+                    }
+                    
+                    if (menuToRemove != null) {
+                        menuBar.getMenus().remove(menuToRemove);
+                        if (context.getOutput() != null) {
+                            context.getOutput().printlnOk("Menu '" + menuName + "' removed from screen '" + finalScreenName + "'");
+                        }
+                    } else {
+                        if (context.getOutput() != null) {
+                            context.getOutput().printlnWarn("Menu '" + menuName + "' not found in screen '" + finalScreenName + "'");
+                        }
+                    }
+                } else {
+                    // Remove a menu item from a nested menu
+                    javafx.scene.control.Menu parentMenu = null;
+                    
+                    // Navigate to the parent menu
+                    for (javafx.scene.control.Menu topMenu : menuBar.getMenus()) {
+                        if (topMenu.getText().equals(pathParts[0])) {
+                            parentMenu = topMenu;
+                            break;
+                        }
+                    }
+                    
+                    if (parentMenu == null) {
+                        if (context.getOutput() != null) {
+                            context.getOutput().printlnWarn("Parent menu '" + pathParts[0] + "' not found in screen '" + finalScreenName + "'");
+                        }
+                        return;
+                    }
+                    
+                    // Navigate through nested menus to find the parent of the item to remove
+                    for (int i = 1; i < pathParts.length - 1; i++) {
+                        String menuName = pathParts[i];
+                        javafx.scene.control.Menu foundSubMenu = null;
+                        
+                        for (javafx.scene.control.MenuItem item : parentMenu.getItems()) {
+                            if (item instanceof javafx.scene.control.Menu && item.getText().equals(menuName)) {
+                                foundSubMenu = (javafx.scene.control.Menu) item;
+                                break;
+                            }
+                        }
+                        
+                        if (foundSubMenu == null) {
+                            if (context.getOutput() != null) {
+                                context.getOutput().printlnWarn("Submenu '" + menuName + "' not found in path '" + finalMenuPath + "'");
+                            }
+                            return;
+                        }
+                        
+                        parentMenu = foundSubMenu;
+                    }
+                    
+                    // Remove the final item
+                    String itemName = pathParts[pathParts.length - 1];
+                    javafx.scene.control.MenuItem itemToRemove = null;
+                    
+                    for (javafx.scene.control.MenuItem item : parentMenu.getItems()) {
+                        if (item.getText().equals(itemName)) {
+                            itemToRemove = item;
+                            break;
+                        }
+                    }
+                    
+                    if (itemToRemove != null) {
+                        parentMenu.getItems().remove(itemToRemove);
+                        if (context.getOutput() != null) {
+                            context.getOutput().printlnOk("Menu item '" + itemName + "' removed from '" + finalMenuPath + "' in screen '" + finalScreenName + "'");
+                        }
+                    } else {
+                        if (context.getOutput() != null) {
+                            context.getOutput().printlnWarn("Menu item '" + itemName + "' not found in path '" + finalMenuPath + "'");
+                        }
+                    }
+                }
+                
+            } catch (Exception e) {
+                if (context.getOutput() != null) {
+                    context.getOutput().printlnError("Error removing menu item from screen '" + finalScreenName + "': " + e.getMessage());
+                }
+                e.printStackTrace();
+            }
+        });
+
+        return true;
+    }
+
+    /**
      * scr.findScreen(screenName) -> BOOL
      * Checks if a screen has been defined.
      * Returns true if the screen exists in any of these states:

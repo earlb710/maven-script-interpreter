@@ -4304,6 +4304,23 @@
       "example": "<b>// Add to existing Edit menu</b><br><b>call</b> <b>scr.addMenu</b>(screenName=\"myScreen\", parentPath=\"Edit\", name=\"customAction\", displayName=\"Custom Action\", callback=\"println('Custom action executed');\");<br><br><b>// Create new top-level menu with item</b><br><b>call</b> <b>scr.addMenu</b>(screenName=\"myScreen\", parentPath=\"Tools\", name=\"myTool\", displayName=\"My Tool\", callback=\"call myToolFunction();\");<br><br><b>// Add to nested submenu (creates if needed)</b><br><b>call</b> <b>scr.addMenu</b>(screenName=\"myScreen\", parentPath=\"Edit.Format\", name=\"uppercase\", displayName=\"Convert to Uppercase\", callback=\"call convertToUpper();\");"
     },
     {
+      "function": "scr.removeMenu",
+      "short_description": "Removes a menu or menu item from a screen",
+      "long_help": "Dynamically removes a menu or menu item from a screen's menu bar. The menu path uses dot notation to specify the menu hierarchy (e.g., \"Tools\" to remove entire Tools menu, or \"Edit.customAction\" to remove a specific item from Edit menu). Returns true on success.",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string"
+        },
+        {
+          "name": "menuPath",
+          "type": "string"
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>// Remove a menu item</b><br><b>call</b> <b>scr.removeMenu</b>(screenName=\"myScreen\", menuPath=\"Edit.customAction\");<br><br><b>// Remove an entire top-level menu</b><br><b>call</b> <b>scr.removeMenu</b>(screenName=\"myScreen\", menuPath=\"Tools\");<br><br><b>// Remove from nested submenu</b><br><b>call</b> <b>scr.removeMenu</b>(screenName=\"myScreen\", menuPath=\"Edit.Format.uppercase\");"
+    },
+    {
       "function": "scr.snapshot",
       "short_description": "Takes screenshot of screen",
       "long_help": "Captures a screenshot of the specified screen (or current screen if not specified) and returns it as an image.",

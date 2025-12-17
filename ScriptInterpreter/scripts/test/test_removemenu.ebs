@@ -1,0 +1,95 @@
+// Test script for scr.removeMenu builtin function
+
+// Create a simple screen with menu
+screen testRemoveMenu = {
+    "name": "testRemoveMenu",
+    "title": "Test Remove Menu Items",
+    "width": 700,
+    "height": 500,
+    "area": [
+        {
+            "name": "main",
+            "type": "vbox",
+            "items": [
+                {
+                    "type": "label",
+                    "text": "This screen demonstrates menu item removal."
+                },
+                {
+                    "type": "label",
+                    "text": "Use the buttons to add and remove menu items dynamically."
+                },
+                {
+                    "type": "separator"
+                },
+                {
+                    "type": "button",
+                    "text": "Add Custom Items to Edit Menu",
+                    "onClick": "call scr.addMenu(\"testremovemenu\", \"Edit\", \"action1\", \"Custom Action 1\", \"println('Action 1');\"); call scr.addMenu(\"testremovemenu\", \"Edit\", \"action2\", \"Custom Action 2\", \"println('Action 2');\");"
+                },
+                {
+                    "type": "button",
+                    "text": "Remove Custom Action 1",
+                    "onClick": "call scr.removeMenu(\"testremovemenu\", \"Edit.Custom Action 1\");"
+                },
+                {
+                    "type": "button",
+                    "text": "Remove Custom Action 2",
+                    "onClick": "call scr.removeMenu(\"testremovemenu\", \"Edit.Custom Action 2\");"
+                },
+                {
+                    "type": "separator"
+                },
+                {
+                    "type": "button",
+                    "text": "Add Tools Menu with Items",
+                    "onClick": "call scr.addMenu(\"testremovemenu\", \"Tools\", \"tool1\", \"Tool 1\", \"println('Tool 1');\"); call scr.addMenu(\"testremovemenu\", \"Tools\", \"tool2\", \"Tool 2\", \"println('Tool 2');\");"
+                },
+                {
+                    "type": "button",
+                    "text": "Remove Entire Tools Menu",
+                    "onClick": "call scr.removeMenu(\"testremovemenu\", \"Tools\");"
+                },
+                {
+                    "type": "separator"
+                },
+                {
+                    "type": "button",
+                    "text": "Add Nested Format Menu",
+                    "onClick": "call scr.addMenu(\"testremovemenu\", \"Edit.Format\", \"upper\", \"Uppercase\", \"println('Upper');\"); call scr.addMenu(\"testremovemenu\", \"Edit.Format\", \"lower\", \"Lowercase\", \"println('Lower');\");"
+                },
+                {
+                    "type": "button",
+                    "text": "Remove Uppercase Item",
+                    "onClick": "call scr.removeMenu(\"testremovemenu\", \"Edit.Format.Uppercase\");"
+                },
+                {
+                    "type": "button",
+                    "text": "Remove Format Submenu",
+                    "onClick": "call scr.removeMenu(\"testremovemenu\", \"Edit.Format\");"
+                }
+            ]
+        }
+    ]
+};
+
+show screen testRemoveMenu;
+
+println("Test screen created.");
+println("Click the buttons to test menu removal:");
+println("  1. Add custom items to Edit menu");
+println("  2. Remove individual items");
+println("  3. Add Tools menu with items");
+println("  4. Remove entire Tools menu");
+println("  5. Add nested Format submenu");
+println("  6. Remove items or entire submenu");
+println("");
+println("Direct examples:");
+
+// Add a custom Help menu
+call scr.addMenu("testremovemenu", "Help", "about", "About", "println('About dialog');");
+call scr.addMenu("testremovemenu", "Help", "docs", "Documentation", "println('Open docs');");
+
+println("Added Help menu with About and Documentation items");
+println("To remove About item: call scr.removeMenu(\"testremovemenu\", \"Help.About\");");
+println("To remove entire Help menu: call scr.removeMenu(\"testremovemenu\", \"Help\");");

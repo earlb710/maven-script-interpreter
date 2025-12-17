@@ -142,6 +142,25 @@ call scr.addMenu("myScreen", "Edit.Format", "uppercase", "Convert to Uppercase",
     "call convertToUpper();");
 ```
 
+### scr.removeMenu(screenName, menuPath)
+
+Removes a menu or menu item from a screen's menu bar dynamically.
+
+**Parameters:**
+- `screenName` - The name of the screen
+- `menuPath` - Menu path using dot notation (e.g., "Tools" or "Edit.customAction")
+
+```ebs
+// Remove a menu item
+call scr.removeMenu("myScreen", "Edit.customAction");
+
+// Remove an entire top-level menu
+call scr.removeMenu("myScreen", "Tools");
+
+// Remove from nested submenu
+call scr.removeMenu("myScreen", "Edit.Format.uppercase");
+```
+
 ### Example: Toggle Menu with Buttons
 
 ```ebs
