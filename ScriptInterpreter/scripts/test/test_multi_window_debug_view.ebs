@@ -278,7 +278,7 @@ print "";
 print "Press Enter to open the test screens...";
 
 // Wait for user to be ready
-var ready: string = readln();
+//var ready: string = readln();
 
 // Open all three test screens
 print "Opening Test Screen 1...";
@@ -307,7 +307,7 @@ print "";
 print "Press Enter when done testing...";
 
 // Wait for user to complete testing
-var done: string = readln();
+//var done: string = readln();
 
 print "";
 print "=================================================================";
