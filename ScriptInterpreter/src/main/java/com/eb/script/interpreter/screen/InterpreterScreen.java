@@ -1001,7 +1001,8 @@ public class InterpreterScreen {
                     
                     // Auto-show debug panel if it's enabled on parent or any other screen
                     // This ensures debug panel automatically appears on child screens when debug is already active
-                    ScreenFactory.autoShowDebugPanelIfEnabled(finalScreenKey, context);
+                    // DISABLED: Causing freezes - user can manually toggle debug with Ctrl+D on each screen
+                    // ScreenFactory.autoShowDebugPanelIfEnabled(finalScreenKey, context);
                 });
             };
             
