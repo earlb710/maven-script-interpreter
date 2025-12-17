@@ -464,16 +464,23 @@ public class ScreenFactory {
     }
     
     /**
-     * Toggle debug mode on or off for the current thread.
+     * Toggle debug mode on or off for a specific screen.
+     * Checks the current state of the debug panel for this screen (not thread-local state).
      * 
      * @param screenName The name of the screen (optional, for status bar message)
      * @param context The interpreter context (optional, for status bar access)
      */
     private static void toggleDebugMode(String screenName, InterpreterContext context) {
-        boolean newDebugMode = !debugMode.get();
-        debugMode.set(newDebugMode);
+        if (screenName == null) {
+            return;
+        }
         
-        String message = "DEBUG MODE: " + (newDebugMode ? "ENABLED" : "DISABLED") + " (Thread: " + Thread.currentThread().getName() + ")";
+        // Check if debug panel is currently shown for THIS screen (not thread state)
+        String screenKey = screenName.toLowerCase();
+        boolean currentlyShown = screenDebugPanels.containsKey(screenKey);
+        boolean newDebugMode = !currentlyShown;
+        
+        String message = "DEBUG MODE: " + (newDebugMode ? "ENABLED" : "DISABLED") + " for screen '" + screenName + "'";
         
         // Print to console
         System.out.println("=".repeat(80));
@@ -481,7 +488,7 @@ public class ScreenFactory {
         System.out.println("=".repeat(80));
         
         // Show message in status bar if available
-        if (context != null && screenName != null) {
+        if (context != null) {
             com.eb.ui.ebs.StatusBar statusBar = context.getScreenStatusBars().get(screenName);
             if (statusBar != null) {
                 Platform.runLater(() -> {
