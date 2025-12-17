@@ -28,8 +28,9 @@ public class DisplayItem {
     String style;
     // Associated screen name
     String screenName;
-    // Text/content alignment (e.g., "left", "center", "right")
-    String alignment;
+    // Content alignment - controls text/content alignment within the control itself (e.g., "left", "center", "right")
+    // This is for the content inside the control (text alignment in TextField, etc.)
+    public String contentAlignment;
     // Regex pattern for validation (useful for text inputs)
     public String pattern;
     // Placeholder text for text inputs (hint shown in empty field)
@@ -168,7 +169,7 @@ public class DisplayItem {
                ", min=" + min +
                ", max=" + max +
                ", style='" + style + '\'' +
-               ", alignment='" + alignment + '\'' +
+               ", contentAlignment='" + contentAlignment + '\'' +
                ", pattern='" + pattern + '\'' +
                ", promptHelp='" + promptHelp + '\'' +
                ", options=" + options +

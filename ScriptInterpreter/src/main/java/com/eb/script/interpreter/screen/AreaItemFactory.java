@@ -461,23 +461,20 @@ public class AreaItemFactory {
         }
 
         // Apply control text alignment (for the content inside the control)
-        // Use contentAlignment from item if available, otherwise fall back to alignment from metadata for backwards compatibility
+        // Use contentAlignment from metadata (DisplayItem), with fallback to item.alignment for backwards compatibility
         String contentAlignmentValue = null;
         System.err.println("[ALIGNMENT DEBUG] Checking alignment for control type: " + control.getClass().getSimpleName());
         System.err.println("[ALIGNMENT DEBUG] item: " + (item != null ? "not null" : "null"));
         System.err.println("[ALIGNMENT DEBUG] item.name: " + (item != null ? item.name : "null"));
-        System.err.println("[ALIGNMENT DEBUG] item.contentAlignment: " + (item != null ? item.contentAlignment : "null"));
-        System.err.println("[ALIGNMENT DEBUG] item.alignment: " + (item != null ? item.alignment : "null"));
         System.err.println("[ALIGNMENT DEBUG] metadata: " + (metadata != null ? "not null" : "null"));
-        System.err.println("[ALIGNMENT DEBUG] metadata.alignment: " + (metadata != null ? metadata.alignment : "null"));
-        if (item != null && item.contentAlignment != null && !item.contentAlignment.isEmpty()) {
-            contentAlignmentValue = item.contentAlignment;
+        System.err.println("[ALIGNMENT DEBUG] metadata.contentAlignment: " + (metadata != null ? metadata.contentAlignment : "null"));
+        System.err.println("[ALIGNMENT DEBUG] item.alignment (fallback): " + (item != null ? item.alignment : "null"));
+        
+        if (metadata != null && metadata.contentAlignment != null && !metadata.contentAlignment.isEmpty()) {
+            contentAlignmentValue = metadata.contentAlignment;
         } else if (item != null && item.alignment != null && !item.alignment.isEmpty()) {
-            // Backwards compatibility: use alignment if contentAlignment is not set
+            // Backwards compatibility: use item.alignment if metadata.contentAlignment is not set
             contentAlignmentValue = item.alignment;
-        } else if (metadata != null && metadata.alignment != null && !metadata.alignment.isEmpty()) {
-            // Fall back to metadata alignment
-            contentAlignmentValue = metadata.alignment;
         }
         System.err.println("[ALIGNMENT DEBUG] Final contentAlignmentValue: " + contentAlignmentValue);
         System.err.println("[ALIGNMENT DEBUG] Will apply alignment: " + (contentAlignmentValue != null && !contentAlignmentValue.isEmpty()));

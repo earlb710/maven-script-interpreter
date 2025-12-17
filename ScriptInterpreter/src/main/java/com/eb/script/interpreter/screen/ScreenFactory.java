@@ -5059,11 +5059,24 @@ public class ScreenFactory {
         item.minHeight = getStringValue(itemDef, "minHeight", getStringValue(itemDef, "min_height", null));
         item.maxWidth = getStringValue(itemDef, "maxWidth", getStringValue(itemDef, "max_width", null));
         item.maxHeight = getStringValue(itemDef, "maxHeight", getStringValue(itemDef, "max_height", null));
+        
+        // ContentAlignment is a display property, so set it on DisplayItem
         System.err.println("[PARSE DEBUG] About to parse contentAlignment from itemDef");
-        item.contentAlignment = getStringValue(itemDef, "contentAlignment", getStringValue(itemDef, "content_alignment", null));
-        System.err.println("[PARSE DEBUG] After parsing: item.contentAlignment = " + item.contentAlignment);
+        String contentAlignment = getStringValue(itemDef, "contentAlignment", getStringValue(itemDef, "content_alignment", null));
+        if (contentAlignment != null) {
+            if (item.displayItem == null) {
+                item.displayItem = new DisplayItem();
+            }
+            item.displayItem.contentAlignment = contentAlignment;
+        }
+        System.err.println("[PARSE DEBUG] After parsing: item.displayItem.contentAlignment = " + 
+            (item.displayItem != null ? item.displayItem.contentAlignment : "null (no displayItem)"));
+        
+        // ItemAlignment is a layout property, so set it on AreaItem
         item.itemAlignment = getStringValue(itemDef, "itemAlignment", getStringValue(itemDef, "item_alignment", null));
         System.err.println("[PARSE DEBUG] After parsing: item.itemAlignment = " + item.itemAlignment);
+        
+        // Backwards compatibility: alignment property stays on AreaItem as fallback
         item.alignment = getStringValue(itemDef, "alignment", null);
         System.err.println("[PARSE DEBUG] After parsing: item.alignment = " + item.alignment);
         
@@ -5093,7 +5106,9 @@ public class ScreenFactory {
 
         metadata.mandatory = getBooleanValue(displayDef, "mandatory", false);
         metadata.caseFormat = getStringValue(displayDef, "case", null);
-        metadata.alignment = getStringValue(displayDef, "alignment", null);
+        // Support both old 'alignment' and new 'contentAlignment' keys
+        metadata.contentAlignment = getStringValue(displayDef, "contentAlignment", 
+                                    getStringValue(displayDef, "alignment", null));
         metadata.pattern = getStringValue(displayDef, "pattern", null);
 
         // Min and max can be various types
@@ -5195,7 +5210,7 @@ public class ScreenFactory {
         merged.max = base.max;
         merged.style = base.style;
         merged.screenName = base.screenName;
-        merged.alignment = base.alignment;
+        merged.contentAlignment = base.contentAlignment;
         merged.pattern = base.pattern;
         merged.promptHelp = base.promptHelp;
         merged.labelText = base.labelText;
@@ -5234,7 +5249,7 @@ public class ScreenFactory {
         if (overlay.max != null) merged.max = overlay.max;
         if (overlay.style != null) merged.style = overlay.style;
         if (overlay.screenName != null) merged.screenName = overlay.screenName;
-        if (overlay.alignment != null) merged.alignment = overlay.alignment;
+        if (overlay.contentAlignment != null) merged.contentAlignment = overlay.contentAlignment;
         if (overlay.pattern != null) merged.pattern = overlay.pattern;
         if (overlay.promptHelp != null) merged.promptHelp = overlay.promptHelp;
         if (overlay.labelText != null) merged.labelText = overlay.labelText;
@@ -6141,7 +6156,13 @@ public class ScreenFactory {
         item.minHeight = template.minHeight;
         item.maxWidth = template.maxWidth;
         item.maxHeight = template.maxHeight;
-        item.contentAlignment = template.contentAlignment;
+        // contentAlignment is now in DisplayItem, not AreaItem
+        if (template.displayItem != null && template.displayItem.contentAlignment != null) {
+            if (item.displayItem == null) {
+                item.displayItem = new DisplayItem();
+            }
+            item.displayItem.contentAlignment = template.displayItem.contentAlignment;
+        }
         item.itemAlignment = template.itemAlignment;
         item.alignment = template.alignment;
         item.onValidate = template.onValidate;
@@ -6253,7 +6274,7 @@ public class ScreenFactory {
         clone.max = source.max;
         clone.style = source.style;
         clone.screenName = source.screenName;
-        clone.alignment = source.alignment;
+        clone.contentAlignment = source.contentAlignment;
         clone.pattern = source.pattern;
         clone.promptHelp = source.promptHelp;
         clone.labelText = source.labelText;

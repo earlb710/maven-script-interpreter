@@ -430,15 +430,15 @@ public class InterpreterScreen {
                                 varDisplayItem.labelText = varDisplayItem.labelText + ":";
                             }
                             
-                            // Set default alignment based on control type and variable type if not specified
-                            if (varDisplayItem.alignment == null || varDisplayItem.alignment.isEmpty()) {
+                            // Set default contentAlignment based on control type and variable type if not specified
+                            if (varDisplayItem.contentAlignment == null || varDisplayItem.contentAlignment.isEmpty()) {
                                 // Numeric fields should be right-aligned by default
                                 // String fields (including TextField with string type) should be left-aligned
                                 if (isNumericControl(varDisplayItem.itemType, varType)) {
-                                    varDisplayItem.alignment = "right";
+                                    varDisplayItem.contentAlignment = "right";
                                 } else {
                                     // Explicitly set left alignment for string/text fields
-                                    varDisplayItem.alignment = "left";
+                                    varDisplayItem.contentAlignment = "left";
                                 }
                             }
                             
@@ -1797,7 +1797,10 @@ public class InterpreterScreen {
         }
 
         if (displayDef.containsKey("alignment")) {
-            metadata.alignment = String.valueOf(displayDef.get("alignment")).toLowerCase();
+            metadata.contentAlignment = String.valueOf(displayDef.get("alignment")).toLowerCase();
+        }
+        if (displayDef.containsKey("contentAlignment")) {
+            metadata.contentAlignment = String.valueOf(displayDef.get("contentAlignment")).toLowerCase();
         }
 
         if (displayDef.containsKey("pattern")) {
@@ -2674,12 +2677,18 @@ public class InterpreterScreen {
                         }
                         
                         // Parse contentAlignment (with snake_case support)
-                        if (itemDef.containsKey("contentAlignment")) {
-                            item.contentAlignment = String.valueOf(itemDef.get("contentAlignment")).toLowerCase();
-                        } else if (itemDef.containsKey("content_alignment")) {
-                            item.contentAlignment = String.valueOf(itemDef.get("content_alignment")).toLowerCase();
-                        } else if (itemDef.containsKey("contentalignment")) {
-                            item.contentAlignment = String.valueOf(itemDef.get("contentalignment")).toLowerCase();
+                        // ContentAlignment is a display property, so set it on DisplayItem
+                        if (itemDef.containsKey("contentAlignment") || itemDef.containsKey("content_alignment") || itemDef.containsKey("contentalignment")) {
+                            if (item.displayItem == null) {
+                                item.displayItem = new DisplayItem();
+                            }
+                            if (itemDef.containsKey("contentAlignment")) {
+                                item.displayItem.contentAlignment = String.valueOf(itemDef.get("contentAlignment")).toLowerCase();
+                            } else if (itemDef.containsKey("content_alignment")) {
+                                item.displayItem.contentAlignment = String.valueOf(itemDef.get("content_alignment")).toLowerCase();
+                            } else if (itemDef.containsKey("contentalignment")) {
+                                item.displayItem.contentAlignment = String.valueOf(itemDef.get("contentalignment")).toLowerCase();
+                            }
                         }
                         
                         // Parse itemAlignment (with snake_case support)
