@@ -68,7 +68,7 @@ screen testScreen = {
             "display": {
                 "type": "button",
                 "labelText": "Update Message",
-                "onClick": "message = 'Updated at ' + string.now(); println('Message: ' + message);"
+                "onClick": "message = 'Updated at ' + call date.format(call date.now(), 'yyyy-MM-dd HH:mm:ss'); println('Message: ' + message);"
             }
         },
         {
@@ -92,7 +92,7 @@ screen testScreen = {
                     counter = counter + 10;
                     println('Test: counter changed from ' + oldCounter + ' to ' + counter);
                     
-                    message = 'Test completed at ' + string.now();
+                    message = 'Test completed at ' + call date.format(call date.now(), 'yyyy-MM-dd HH:mm:ss');
                     println('Test: message updated to: ' + message);
                     
                     println('Test: multiplier = ' + multiplier);

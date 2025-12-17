@@ -45,7 +45,7 @@ screen testScreen = {
                 "text": "Update Message",
                 "onClick": "
                     // Test direct access to screen var without qualification
-                    message = 'Updated at ' + string.now();
+                    message = 'Updated at ' + call date.format(call date.now(), 'yyyy-MM-dd HH:mm:ss');
                     println('Message updated to: ' + message);
                 "
             }

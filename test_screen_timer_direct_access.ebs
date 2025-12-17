@@ -13,7 +13,7 @@ timerCallback(string tName) {
     counter = counter + 1;
     
     // Update the message with timestamp
-    message = "Timer tick #" + counter + " at " + string.now();
+    message = "Timer tick #" + counter + " at " + call date.format(call date.now(), "HH:mm:ss");
     
     println("Timer callback: counter=" + counter + ", message=" + message);
 }
