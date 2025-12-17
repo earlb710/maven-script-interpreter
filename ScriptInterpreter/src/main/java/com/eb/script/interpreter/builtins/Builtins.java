@@ -1035,6 +1035,16 @@ public final class Builtins {
                 newParam("menuPath", DataType.STRING, true) // required; menu path (e.g., "Edit.customAction" or "Tools")
         ));
         addBuiltin(info(
+                "scr.enableMenu", DataType.BOOL,
+                newParam("screenName", DataType.STRING, true), // required; screen name
+                newParam("menuPath", DataType.STRING, true) // required; menu path (e.g., "Edit.customAction" or "Tools")
+        ));
+        addBuiltin(info(
+                "scr.disableMenu", DataType.BOOL,
+                newParam("screenName", DataType.STRING, true), // required; screen name
+                newParam("menuPath", DataType.STRING, true) // required; menu path (e.g., "Edit.customAction" or "Tools")
+        ));
+        addBuiltin(info(
                 "scr.setStatus", DataType.BOOL,
                 newParam("screenName", DataType.STRING, true), // required; screen name
                 newParam("status", DataType.STRING, true) // required; status: "clean", "changed", or "error"
@@ -2245,6 +2255,8 @@ public final class Builtins {
             case "scr.hidemenu" -> BuiltinsScreen.screenHideMenu(context, args);
             case "scr.addmenu" -> BuiltinsScreen.screenAddMenu(context, args);
             case "scr.removemenu" -> BuiltinsScreen.screenRemoveMenu(context, args);
+            case "scr.enablemenu" -> BuiltinsScreen.screenEnableMenu(context, args);
+            case "scr.disablemenu" -> BuiltinsScreen.screenDisableMenu(context, args);
             case "scr.setstatus" -> BuiltinsScreen.screenSetStatus(context, args);
             case "scr.getstatus" -> BuiltinsScreen.screenGetStatus(context, args);
             case "scr.seterror" -> BuiltinsScreen.screenSetError(context, args);

@@ -1,0 +1,119 @@
+// Test script for scr.enableMenu and scr.disableMenu builtin functions
+
+// Create a screen with menu and buttons to test enable/disable
+screen testEnableDisable = {
+    "name": "testEnableDisable",
+    "title": "Test Enable/Disable Menu Items",
+    "width": 700,
+    "height": 550,
+    "area": [
+        {
+            "name": "main",
+            "type": "vbox",
+            "items": [
+                {
+                    "type": "label",
+                    "text": "This screen demonstrates enabling and disabling menu items."
+                },
+                {
+                    "type": "label",
+                    "text": "Disabled items appear grayed out and cannot be clicked."
+                },
+                {
+                    "type": "separator"
+                },
+                {
+                    "type": "button",
+                    "text": "Add Custom Items",
+                    "onClick": "call scr.addMenu(\"testenabledisable\", \"Edit\", \"save\", \"Save\", \"println('Save clicked');\"); call scr.addMenu(\"testenabledisable\", \"Edit\", \"saveAs\", \"Save As\", \"println('Save As clicked');\");"
+                },
+                {
+                    "type": "separator"
+                },
+                {
+                    "type": "button",
+                    "text": "Disable Save",
+                    "onClick": "call scr.disableMenu(\"testenabledisable\", \"Edit.Save\");"
+                },
+                {
+                    "type": "button",
+                    "text": "Enable Save",
+                    "onClick": "call scr.enableMenu(\"testenabledisable\", \"Edit.Save\");"
+                },
+                {
+                    "type": "separator"
+                },
+                {
+                    "type": "button",
+                    "text": "Disable Entire Edit Menu",
+                    "onClick": "call scr.disableMenu(\"testenabledisable\", \"Edit\");"
+                },
+                {
+                    "type": "button",
+                    "text": "Enable Entire Edit Menu",
+                    "onClick": "call scr.enableMenu(\"testenabledisable\", \"Edit\");"
+                },
+                {
+                    "type": "separator"
+                },
+                {
+                    "type": "button",
+                    "text": "Add Tools Menu",
+                    "onClick": "call scr.addMenu(\"testenabledisable\", \"Tools\", \"compile\", \"Compile\", \"println('Compile');\"); call scr.addMenu(\"testenabledisable\", \"Tools\", \"run\", \"Run\", \"println('Run');\");"
+                },
+                {
+                    "type": "button",
+                    "text": "Disable Tools Menu",
+                    "onClick": "call scr.disableMenu(\"testenabledisable\", \"Tools\");"
+                },
+                {
+                    "type": "button",
+                    "text": "Enable Tools Menu",
+                    "onClick": "call scr.enableMenu(\"testenabledisable\", \"Tools\");"
+                },
+                {
+                    "type": "separator"
+                },
+                {
+                    "type": "button",
+                    "text": "Add Nested Format Menu",
+                    "onClick": "call scr.addMenu(\"testenabledisable\", \"Edit.Format\", \"upper\", \"Uppercase\", \"println('Upper');\"); call scr.addMenu(\"testenabledisable\", \"Edit.Format\", \"lower\", \"Lowercase\", \"println('Lower');\");"
+                },
+                {
+                    "type": "button",
+                    "text": "Disable Uppercase",
+                    "onClick": "call scr.disableMenu(\"testenabledisable\", \"Edit.Format.Uppercase\");"
+                },
+                {
+                    "type": "button",
+                    "text": "Enable Uppercase",
+                    "onClick": "call scr.enableMenu(\"testenabledisable\", \"Edit.Format.Uppercase\");"
+                }
+            ]
+        }
+    ]
+};
+
+show screen testEnableDisable;
+
+println("Test screen created.");
+println("Click buttons to test menu enable/disable:");
+println("  1. Add custom menu items");
+println("  2. Disable individual items (they become grayed out)");
+println("  3. Enable items (they become clickable again)");
+println("  4. Disable entire menus");
+println("  5. Enable entire menus");
+println("");
+println("Direct examples:");
+
+// Add a Help menu with some items
+call scr.addMenu("testenabledisable", "Help", "about", "About", "println('About');");
+call scr.addMenu("testenabledisable", "Help", "docs", "Documentation", "println('Docs');");
+
+println("Added Help menu with About and Documentation items");
+
+// Disable the Documentation item
+call scr.disableMenu("testenabledisable", "Help.Documentation");
+println("Disabled Help > Documentation (should appear grayed out)");
+println("");
+println("To enable: call scr.enableMenu(\"testenabledisable\", \"Help.Documentation\");");

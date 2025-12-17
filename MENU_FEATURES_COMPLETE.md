@@ -68,6 +68,35 @@ Remove menus or menu items dynamically.
 - Supports nested submenus via dot notation
 - Returns true on success
 
+### 6. Builtin: `scr.enableMenu(screenName, menuPath)`
+Enable menus or menu items, making them clickable.
+
+**Parameters:**
+- `screenName` (string, required): Name of the target screen
+- `menuPath` (string, required): Menu path using dot notation
+  - Examples: `"Tools"` (enables entire menu), `"Edit.Save"` (enables specific item)
+
+**Features:**
+- Can enable entire top-level menus
+- Can enable specific menu items at any level
+- Supports nested submenus via dot notation
+- Returns true on success
+
+### 7. Builtin: `scr.disableMenu(screenName, menuPath)`
+Disable menus or menu items, making them unclickable and grayed out.
+
+**Parameters:**
+- `screenName` (string, required): Name of the target screen
+- `menuPath` (string, required): Menu path using dot notation
+  - Examples: `"Tools"` (disables entire menu), `"Edit.Save"` (disables specific item)
+
+**Features:**
+- Can disable entire top-level menus
+- Can disable specific menu items at any level
+- Supports nested submenus via dot notation
+- Useful for context-sensitive menu states
+- Returns true on success
+
 **Examples:**
 
 ```ebs
@@ -190,13 +219,21 @@ call scr.removeMenu("app", "File.Recent.document1.txt");
 call scr.removeMenu("app", "Edit.Format");
 ```
 
-### 4. Context-Sensitive Menus
+### 4. Context-Sensitive Menus with Enable/Disable
 ```ebs
-// Add/remove menu items based on context
+// Enable/disable menus based on document state
 if documentOpen then {
-    call scr.addMenu("editor", "File", "close", "Close Document",
-        "call closeDocument();");
+    call scr.enableMenu("editor", "File.Save");
+    call scr.enableMenu("editor", "File.Close");
+} else {
+    call scr.disableMenu("editor", "File.Save");
+    call scr.disableMenu("editor", "File.Close");
 }
+
+// Disable during processing
+call scr.disableMenu("app", "Tools");
+// ... perform long operation ...
+call scr.enableMenu("app", "Tools");
 ```
 
 ### 5. Dynamic Tool Menus
@@ -231,6 +268,7 @@ Test scripts available:
 1. `ScriptInterpreter/scripts/test/test_menu_visibility.ebs` - Show/hide functionality
 2. `ScriptInterpreter/scripts/test/test_addmenu.ebs` - Custom menu items
 3. `ScriptInterpreter/scripts/test/test_removemenu.ebs` - Remove menu items
+4. `ScriptInterpreter/scripts/test/test_enabledisablemenu.ebs` - Enable/disable menu items
 
 ## Documentation
 
@@ -247,6 +285,8 @@ Test scripts available:
 | `scr.hideMenu` | screenName? | bool | Hides menu bar |
 | `scr.addMenu` | screenName, parentPath, name, displayName, callback | bool | Adds custom menu item |
 | `scr.removeMenu` | screenName, menuPath | bool | Removes menu or menu item |
+| `scr.enableMenu` | screenName, menuPath | bool | Enables menu or menu item |
+| `scr.disableMenu` | screenName, menuPath | bool | Disables menu or menu item |
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|

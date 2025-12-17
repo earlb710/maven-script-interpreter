@@ -161,6 +161,46 @@ call scr.removeMenu("myScreen", "Tools");
 call scr.removeMenu("myScreen", "Edit.Format.uppercase");
 ```
 
+### scr.enableMenu(screenName, menuPath)
+
+Enables a menu or menu item, making it clickable.
+
+**Parameters:**
+- `screenName` - The name of the screen
+- `menuPath` - Menu path using dot notation
+
+```ebs
+// Enable a menu item
+call scr.enableMenu("myScreen", "Edit.Save");
+
+// Enable an entire menu
+call scr.enableMenu("myScreen", "Tools");
+
+// Enable nested item
+call scr.enableMenu("myScreen", "Edit.Format.Uppercase");
+```
+
+### scr.disableMenu(screenName, menuPath)
+
+Disables a menu or menu item, making it unclickable and grayed out.
+
+**Parameters:**
+- `screenName` - The name of the screen
+- `menuPath` - Menu path using dot notation
+
+```ebs
+// Disable a menu item
+call scr.disableMenu("myScreen", "Edit.Save");
+
+// Disable an entire menu
+call scr.disableMenu("myScreen", "Tools");
+
+// Context-sensitive disabling
+if !documentOpen then {
+    call scr.disableMenu("editor", "File.Save");
+}
+```
+
 ### Example: Toggle Menu with Buttons
 
 ```ebs

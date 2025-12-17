@@ -110,6 +110,76 @@ call scr.removeMenu("myScreen", "Edit.Format.Convert to Uppercase");
 call scr.removeMenu("myScreen", "Edit.Format");
 ```
 
+### `scr.enableMenu(screenName, menuPath)`
+Enables a menu or menu item, making it clickable.
+
+**Parameters:**
+- `screenName` (string, required) - Target screen name
+- `menuPath` (string, required) - Menu path using dot notation
+  - For top-level menu: `"Tools"` (enables entire menu)
+  - For menu item: `"Edit.Save"` (enables specific item)
+  - For nested item: `"Edit.Format.Uppercase"` (enables in submenu)
+
+**Returns:** boolean (true on success)
+
+**Examples:**
+```ebs
+// Enable a menu item
+call scr.enableMenu("myScreen", "Edit.Save");
+
+// Enable entire top-level menu
+call scr.enableMenu("myScreen", "Tools");
+
+// Enable nested item
+call scr.enableMenu("myScreen", "Edit.Format.Uppercase");
+
+// Enable based on state
+if documentModified then {
+    call scr.enableMenu("editor", "File.Save");
+}
+```
+
+### `scr.disableMenu(screenName, menuPath)`
+Disables a menu or menu item, making it unclickable and grayed out.
+
+**Parameters:**
+- `screenName` (string, required) - Target screen name
+- `menuPath` (string, required) - Menu path using dot notation
+  - For top-level menu: `"Tools"` (disables entire menu)
+  - For menu item: `"Edit.Save"` (disables specific item)
+  - For nested item: `"Edit.Format.Uppercase"` (disables in submenu)
+
+**Returns:** boolean (true on success)
+
+**Use Cases:**
+- Prevent actions when conditions aren't met
+- Show what's available but not currently applicable
+- Provide visual feedback about application state
+- Disable during long operations to prevent duplicate actions
+
+**Examples:**
+```ebs
+// Disable a menu item
+call scr.disableMenu("myScreen", "Edit.Save");
+
+// Disable entire top-level menu
+call scr.disableMenu("myScreen", "Tools");
+
+// Disable nested item
+call scr.disableMenu("myScreen", "Edit.Format.Uppercase");
+
+// Context-sensitive disabling
+if !documentOpen then {
+    call scr.disableMenu("editor", "File.Save");
+    call scr.disableMenu("editor", "File.Close");
+}
+
+// Disable during processing
+call scr.disableMenu("app", "Tools.Process");
+// ... perform long operation ...
+call scr.enableMenu("app", "Tools.Process");
+```
+
 ## Complete Workflow Example
 
 ```ebs
@@ -141,6 +211,12 @@ call scr.addMenu("editor", "Tools", "prefs", "Preferences...",
     "call showPreferences();");
 call scr.addMenu("editor", "Tools.Advanced", "cache", "Clear Cache",
     "call clearCache();");
+
+// Disable Save until document is modified
+call scr.disableMenu("editor", "File.Save");
+
+// Enable Save when document is modified
+call scr.enableMenu("editor", "File.Save");
 
 // Remove a menu item when no longer needed
 call scr.removeMenu("editor", "Edit.Format.Lowercase");

@@ -4321,6 +4321,40 @@
       "example": "<b>// Remove a menu item</b><br><b>call</b> <b>scr.removeMenu</b>(screenName=\"myScreen\", menuPath=\"Edit.customAction\");<br><br><b>// Remove an entire top-level menu</b><br><b>call</b> <b>scr.removeMenu</b>(screenName=\"myScreen\", menuPath=\"Tools\");<br><br><b>// Remove from nested submenu</b><br><b>call</b> <b>scr.removeMenu</b>(screenName=\"myScreen\", menuPath=\"Edit.Format.uppercase\");"
     },
     {
+      "function": "scr.enableMenu",
+      "short_description": "Enables a menu or menu item",
+      "long_help": "Enables a menu or menu item, making it clickable. The menu path uses dot notation to specify the menu hierarchy (e.g., \"Tools\" to enable entire Tools menu, or \"Edit.customAction\" to enable a specific item). Returns true on success.",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string"
+        },
+        {
+          "name": "menuPath",
+          "type": "string"
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>// Enable a menu item</b><br><b>call</b> <b>scr.enableMenu</b>(screenName=\"myScreen\", menuPath=\"Edit.Save\");<br><br><b>// Enable an entire menu</b><br><b>call</b> <b>scr.enableMenu</b>(screenName=\"myScreen\", menuPath=\"Tools\");<br><br><b>// Enable nested item</b><br><b>call</b> <b>scr.enableMenu</b>(screenName=\"myScreen\", menuPath=\"Edit.Format.Uppercase\");"
+    },
+    {
+      "function": "scr.disableMenu",
+      "short_description": "Disables a menu or menu item",
+      "long_help": "Disables a menu or menu item, making it unclickable and grayed out. The menu path uses dot notation to specify the menu hierarchy (e.g., \"Tools\" to disable entire Tools menu, or \"Edit.customAction\" to disable a specific item). Useful for context-sensitive menu states. Returns true on success.",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string"
+        },
+        {
+          "name": "menuPath",
+          "type": "string"
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>// Disable a menu item</b><br><b>call</b> <b>scr.disableMenu</b>(screenName=\"myScreen\", menuPath=\"Edit.Save\");<br><br><b>// Disable an entire menu</b><br><b>call</b> <b>scr.disableMenu</b>(screenName=\"myScreen\", menuPath=\"Tools\");<br><br><b>// Context-sensitive: disable when no document</b><br><b>if</b> !documentOpen <b>then</b> {<br>&nbsp;&nbsp;<b>call</b> <b>scr.disableMenu</b>(screenName=\"editor\", menuPath=\"File.Save\");<br>}"
+    },
+    {
       "function": "scr.snapshot",
       "short_description": "Takes screenshot of screen",
       "long_help": "Captures a screenshot of the specified screen (or current screen if not specified) and returns it as an image.",
