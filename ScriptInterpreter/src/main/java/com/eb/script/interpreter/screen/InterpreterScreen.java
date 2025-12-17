@@ -263,13 +263,11 @@ public class InterpreterScreen {
             }
             
             boolean showMenu = true; // default to true
-            // Check for both "showMenu" and "showmenu" (case-insensitive)
-            String showMenuKey = config.containsKey("showMenu") ? "showMenu" : 
-                                 config.containsKey("showmenu") ? "showmenu" : null;
-            if (showMenuKey != null) {
-                Object showMenuValue = config.get(showMenuKey);
+            // All keys are stored lowercase in the config map
+            if (config.containsKey("showmenu")) {
+                Object showMenuValue = config.get("showmenu");
                 System.out.println("=== DEBUG [InterpreterScreen] Screen: " + stmt.name + " ===");
-                System.out.println("    showMenu key found in config as: '" + showMenuKey + "'");
+                System.out.println("    showmenu key found in config");
                 System.out.println("    showMenuValue: " + showMenuValue);
                 System.out.println("    showMenuValue type: " + (showMenuValue != null ? showMenuValue.getClass().getName() : "null"));
                 if (showMenuValue instanceof Boolean) {
@@ -281,7 +279,7 @@ public class InterpreterScreen {
                 }
             } else {
                 System.out.println("=== DEBUG [InterpreterScreen] Screen: " + stmt.name + " ===");
-                System.out.println("    showMenu key NOT found in config, using default: " + showMenu);
+                System.out.println("    showmenu key NOT found in config, using default: " + showMenu);
             }
             System.out.println("    FINAL showMenu value: " + showMenu);
             
