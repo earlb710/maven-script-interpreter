@@ -86,19 +86,7 @@ screen testScreen = {
             "display": {
                 "type": "button",
                 "labelText": "Run Test",
-                "onClick": "
-                    // Test direct variable access and manipulation
-                    var oldCounter = counter;
-                    counter = counter + 10;
-                    print 'Test: counter changed from ' + oldCounter + ' to ' + counter;
-                    
-                    message = 'Test completed at ' + call date.format(call date.now(), 'yyyy-MM-dd HH:mm:ss');
-                    print 'Test: message updated to: ' + message;
-                    
-                    print 'Test: multiplier = ' + multiplier;
-                    print 'Test: isEnabled = ' + isEnabled;
-                    print 'Test passed: All variables accessed directly!';
-                "
+                "onClick": "var oldCounter = counter; counter = counter + 10; print 'Test: counter changed from ' + oldCounter + ' to ' + counter; message = 'Test completed at ' + call date.format(call date.now(), 'yyyy-MM-dd HH:mm:ss'); print 'Test: message updated to: ' + message; print 'Test: multiplier = ' + multiplier; print 'Test: isEnabled = ' + isEnabled; print 'Test passed: All variables accessed directly!';"
             }
         },
         {
@@ -111,20 +99,8 @@ screen testScreen = {
             }
         }
     ],
-    "startup": "
-        // Test direct access in startup code
-        print 'Startup: Initializing screen variables...';
-        counter = 5;
-        message = 'Initialized!';
-        multiplier = 3;
-        isEnabled = true;
-        print 'Startup: counter=' + counter + ', message=' + message + ', multiplier=' + multiplier;
-    ",
-    "cleanup": "
-        // Test direct access in cleanup code
-        print 'Cleanup: Final values - counter=' + counter + ', message=' + message;
-        print 'Cleanup: Screen closing';
-    "
+    "startup": "print 'Startup: Initializing screen variables...'; counter = 5; message = 'Initialized!'; multiplier = 3; isEnabled = true; print 'Startup: counter=' + counter + ', message=' + message + ', multiplier=' + multiplier;",
+    "cleanup": "print 'Cleanup: Final values - counter=' + counter + ', message=' + message; print 'Cleanup: Screen closing';"
 };
 
 // Show the screen

@@ -30,11 +30,7 @@ screen testScreen = {
             "display": {
                 "type": "button",
                 "text": "Increment Counter",
-                "onClick": "
-                    // Test direct access to screen var without qualification
-                    counter = counter + 1;
-                    print 'Counter incremented to: ' + counter;
-                "
+                "onClick": "counter = counter + 1; print 'Counter incremented to: ' + counter;"
             }
         },
         {
@@ -43,11 +39,7 @@ screen testScreen = {
             "display": {
                 "type": "button",
                 "text": "Update Message",
-                "onClick": "
-                    // Test direct access to screen var without qualification
-                    message = 'Updated at ' + call date.format(call date.now(), 'yyyy-MM-dd HH:mm:ss');
-                    print 'Message updated to: ' + message;
-                "
+                "onClick": "message = 'Updated at ' + call date.format(call date.now(), 'yyyy-MM-dd HH:mm:ss'); print 'Message updated to: ' + message;"
             }
         },
         {
@@ -60,12 +52,7 @@ screen testScreen = {
             }
         }
     ],
-    "startup": "
-        // Test direct access in startup code
-        counter = 10;
-        message = 'Initialized!';
-        print 'Startup code: counter=' + counter + ', message=' + message;
-    "
+    "startup": "counter = 10; message = 'Initialized!'; print 'Startup code: counter=' + counter + ', message=' + message;"
 };
 
 // Show the screen
