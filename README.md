@@ -9,7 +9,7 @@ A powerful script interpreter for the EBS (Earl Bosch Script) language, featurin
 - **Bitmap Type**: Define named bit fields within a byte (8-bit) for compact storage of flags and small values
 - **Intmap Type**: Define named bit fields within an integer (32-bit) for storing larger bit-packed data structures
 - **typeof Operator**: Get the type of any variable or expression at runtime (e.g., `typeof a` returns `"string"`)
-- **Screen Component Types**: Type tracking for JavaFX screen components with `typeof` returning "Screen.Xxx" format and `.javafx` property for component introspection
+- **Screen Component Types**: Type tracking for JavaFX screen components with `typeof` returning "Screen.Xxx" format and comprehensive introspection properties (`.javafx`, `.properties`, `.children`, `.parent`, `.tree`, `.events`, `.snapshot`) for both components and containers
 - **Exception Handling**: Robust error handling with `try-exceptions-when` syntax to catch specific or any errors
 - **Interactive Console**: JavaFX-based IDE with rich text editing
 - **Syntax Highlighting**: Color-coded syntax for better readability
@@ -661,6 +661,10 @@ The debug panel is divided into two sections with an adjustable divider:
   - `jfxType:` - The JavaFX control type (TEXTFIELD, CHECKBOX, etc.)
   - `varRef:` - The linked variable reference
   - `layout:` - The layout position
+  - **Area:** - The parent container/area path (NEW)
+  - **Container Info:** - Complete JavaFX properties of the parent container (NEW)
+    - Container type, dimensions, position, spacing, alignment, style, state
+    - Provides immediate insight into layout properties without manual querying
 
 #### Copy to Clipboard
 Click the 📋 button in the panel header to copy all variables and screen items to clipboard. The format includes:

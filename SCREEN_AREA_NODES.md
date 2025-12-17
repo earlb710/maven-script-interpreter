@@ -39,22 +39,108 @@ print myScreen.myArea.help;
 
 ### `.javafx` Property
 
-Access JavaFX container details at runtime:
+Access complete JavaFX container state at runtime (includes all `.properties`):
 
 ```javascript
 show screen myScreen;
 print myScreen.myArea.javafx;
 ```
 
-**Returns**: Detailed JavaFX description including:
+**Returns**: Comprehensive JavaFX description including:
 - Container type name (e.g., HBox, VBox, GridPane)
 - Dimensions (width, height, min/max/pref sizes)
 - Position (X, Y coordinates)
 - Spacing and alignment settings
 - Style information (CSS styles, style classes)
 - Visibility and state (visible, managed, disabled)
-- Child count (for Pane containers)
 - Container-specific properties (e.g., gaps for GridPane, orientation for FlowPane)
+
+### `.properties` Property
+
+Get all runtime property values:
+
+```javascript
+show screen myScreen;
+print myScreen.myArea.properties;
+```
+
+**Returns**: Comprehensive property listing with current values:
+- Type and class information
+- All size properties (width, height, min/max/pref)
+- Position (x, y)
+- Padding
+- Container-specific properties (spacing, alignment, gaps, orientation)
+- Style information
+- State (visible, managed, disabled)
+
+### `.children` Property
+
+Get list of immediate child area names:
+
+```javascript
+show screen myScreen;
+var children = myScreen.myArea.children;
+
+// Iterate through children
+for (i = 0; i < call array.length(children); i = i + 1) {
+    print "Child: " + children[i];
+}
+```
+
+**Returns**: `ArrayDynamic` containing names of immediate child areas.
+
+### `.parent` Property
+
+Get the parent area name:
+
+```javascript
+show screen myScreen;
+var parentName = myScreen.childArea.parent;
+print "Parent area: " + parentName;
+```
+
+**Returns**: Parent area name as a string, or empty string if this is a root container.
+
+### `.tree` Property
+
+Get hierarchical tree structure:
+
+```javascript
+show screen myScreen;
+print myScreen.myArea.tree;
+```
+
+**Returns**: Formatted tree structure showing the container and all its children:
+```
+└── myArea (hbox)
+    ├── childArea1
+    └── childArea2
+```
+
+### `.events` Property
+
+List all registered event handlers:
+
+```javascript
+show screen myScreen;
+print myScreen.myArea.events;
+```
+
+**Returns**: List of registered event handlers including:
+- Mouse events (onMouseClicked, onMousePressed, onMouseReleased, onMouseEntered, onMouseExited)
+- Key events (onKeyPressed, onKeyReleased, onKeyTyped)
+- Focus tracking
+
+### `.snapshot` Property
+
+Capture container as image and copy to clipboard:
+
+```javascript
+show screen myScreen;
+print myScreen.myArea.snapshot;
+```
+
+**Returns**: Confirmation message with snapshot details. The PNG image is automatically copied to the system clipboard for easy pasting into other applications.
 
 ## Supported Container Types
 
@@ -217,13 +303,42 @@ for (i = 0; i < call array.length(allAreas); i = i + 1) {
 - The `.javafx` property requires the screen to be shown (not just defined)
 - All three properties work on any named area in the screen definition
 
+## Debug View Integration
+
+The debug panel (opened with Ctrl+D) now includes container information in tooltips:
+
+### Enhanced Tooltips
+
+When hovering over items in the debug panel:
+- **Area path** is displayed showing which container the item belongs to
+- **Container Info** section shows complete JavaFX properties of the parent container
+  - Container type and JavaFX class
+  - Current dimensions and size constraints
+  - Position, padding, spacing
+  - Alignment settings
+  - Style information
+  - Container state (visible, managed, disabled)
+  - Container-specific properties (gaps, orientation, etc.)
+
+### Benefits
+- Immediate access to container properties without manual querying
+- Quick debugging of layout issues
+- Understanding container hierarchy at a glance
+- Same information is copied to clipboard when clicking items
+
+### Usage
+1. Open debug panel with Ctrl+D
+2. Hover over any item in the debug table
+3. View area path and container properties in the tooltip
+4. Click item to copy all information to clipboard
+
 ## Integration with Existing Features
 
 This feature complements existing screen functionality:
 
 - **scr.getAreaProperty()** - Get specific property values
 - **scr.setAreaProperty()** - Modify properties at runtime
-- **Debug Panel (Ctrl+D)** - Visual inspection of screen state
+- **Debug Panel (Ctrl+D)** - Visual inspection with enhanced tooltips
 - **Screen Definitions** - Define areas with rich metadata
 
 ## See Also

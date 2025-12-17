@@ -11,8 +11,22 @@ var areas = myScreen.area.nodes;
 // Get help for a container
 print myScreen.myArea.help;
 
-// Get JavaFX runtime details
+// Get complete JavaFX runtime details (includes all properties)
 print myScreen.myArea.javafx;
+
+// Get all runtime properties
+print myScreen.myArea.properties;
+
+// Get hierarchy information
+var children = myScreen.myArea.children;  // List of child area names
+var parent = myScreen.childArea.parent;   // Parent area name
+print myScreen.myArea.tree;               // Tree structure
+
+// Get event handlers
+print myScreen.myArea.events;
+
+// Capture snapshot (copies to clipboard)
+print myScreen.myArea.snapshot;
 ```
 
 ## Common Properties (All Containers)
@@ -204,7 +218,9 @@ The `padding` property accepts various formats:
 
 ## Getting Runtime Information
 
-Use the `.javafx` property to get detailed runtime information:
+### Complete JavaFX State (`.javafx`)
+
+Use the `.javafx` property to get complete runtime state (includes all `.properties`):
 
 ```javascript
 show screen myScreen;
@@ -219,8 +235,66 @@ This returns:
 - Padding and spacing values
 - Alignment settings
 - Style information
+- State (visible, managed, disabled)
 - Child count (for Pane containers)
 - Container-specific properties
+
+### All Properties (`.properties`)
+
+Get all runtime property values:
+
+```javascript
+print myScreen.myArea.properties;
+```
+
+Returns the same comprehensive information as `.javafx`.
+
+### Hierarchy Information
+
+**Children** - Get immediate child areas:
+```javascript
+var children = myScreen.myArea.children;
+```
+
+**Parent** - Get parent area name:
+```javascript
+var parent = myScreen.childArea.parent;
+```
+
+**Tree** - Get full hierarchy tree:
+```javascript
+print myScreen.myArea.tree;
+```
+
+### Event Handlers (`.events`)
+
+List registered event handlers:
+```javascript
+print myScreen.myArea.events;
+```
+
+Shows:
+- Mouse events (click, press, release, enter, exit)
+- Key events (press, release, typed)
+- Focus tracking
+
+### Visual Snapshot (`.snapshot`)
+
+Capture container as image:
+```javascript
+print myScreen.myArea.snapshot;
+```
+
+- Captures PNG image
+- Automatically copies to system clipboard
+- Returns confirmation message
+
+## Debug View Integration
+
+The debug panel (Ctrl+D) now shows container JavaFX information in tooltips:
+- Hover over items to see parent container properties
+- Complete JavaFX state displayed
+- Click items to copy information including container details
 
 ## See Also
 
