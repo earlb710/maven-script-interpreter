@@ -1525,6 +1525,22 @@ public class ScreenFactory {
         if (area.gainFocus != null) clipboardBuilder.append("\ngainFocus: ").append(area.gainFocus);
         if (area.lostFocus != null) clipboardBuilder.append("\nlostFocus: ").append(area.lostFocus);
         
+        // Add JavaFX container information to clipboard text (same as tooltip)
+        if (context != null && screenName != null && area.name != null) {
+            java.util.concurrent.ConcurrentHashMap<String, ScreenContainerType> containerTypes = 
+                context.getScreenContainerTypes(screenName);
+            if (containerTypes != null) {
+                String areaNameLower = area.name.toLowerCase(java.util.Locale.ROOT);
+                ScreenContainerType containerType = containerTypes.get(areaNameLower);
+                if (containerType != null && containerType.getJavaFXRegion() != null) {
+                    // Add JavaFX container description to clipboard
+                    clipboardBuilder.append("\n---\nJavaFX:\n");
+                    String javafxDesc = containerType.getJavaFXDescription();
+                    clipboardBuilder.append(javafxDesc);
+                }
+            }
+        }
+        
         String originalStyle = "-fx-background-color: " + (depth % 2 == 0 ? "#f8f3e8" : "#f0ebd8") + ";";
         row.setStyle(originalStyle);
         makeRowClickable(row, clipboardBuilder.toString(), originalStyle);
