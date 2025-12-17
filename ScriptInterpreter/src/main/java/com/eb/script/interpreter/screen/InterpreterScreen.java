@@ -236,7 +236,19 @@ public class InterpreterScreen {
             int height = config.containsKey("height") ? ((Number) config.get("height")).intValue() : 600;
             boolean maximize = config.containsKey("maximize") && Boolean.TRUE.equals(config.get("maximize"));
             boolean resizable = !config.containsKey("resizable") || Boolean.TRUE.equals(config.get("resizable")); // default true
-            boolean showMenu = !config.containsKey("showMenu") || Boolean.TRUE.equals(config.get("showMenu")); // default true
+            
+            // Extract showMenu with proper boolean handling
+            boolean showMenu = true; // default to true
+            if (config.containsKey("showMenu")) {
+                Object showMenuValue = config.get("showMenu");
+                // Handle both Boolean objects and boolean primitives
+                if (showMenuValue instanceof Boolean) {
+                    showMenu = (Boolean) showMenuValue;
+                } else if (showMenuValue != null) {
+                    // Convert string representation if needed
+                    showMenu = Boolean.parseBoolean(showMenuValue.toString());
+                }
+            }
             
             // Extract startup and cleanup inline code if present
             String startupCode = config.containsKey("startup") ? String.valueOf(config.get("startup")) : null;
