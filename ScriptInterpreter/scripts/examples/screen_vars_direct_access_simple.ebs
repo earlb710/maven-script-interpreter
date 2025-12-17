@@ -1,0 +1,76 @@
+// ============================================================================
+// screen_vars_direct_access_simple.ebs
+// ============================================================================
+// Simple example demonstrating direct variable access in screen event handlers
+// 
+// With direct access, screen variables can be referenced by name in event
+// handlers (onClick, onChange, etc.) without needing the "screenName.varName"
+// qualified notation.
+// ============================================================================
+
+print "=== Screen Variable Direct Access - Simple Example ===";
+print "";
+
+// Define a simple counter screen
+screen counterScreen = {
+    "title": "Simple Counter Example",
+    "width": 400,
+    "height": 250,
+    "vars": [
+        {
+            "name": "counter",
+            "type": "int",
+            "default": 0,
+            "display": {
+                "type": "textfield",
+                "labelText": "Counter Value:",
+                "promptHelp": "Current count"
+            }
+        },
+        {
+            "name": "btnIncrement",
+            "type": "string",
+            "display": {
+                "type": "button",
+                "labelText": "Increment",
+                "onClick": "counter = counter + 1;"
+            }
+        },
+        {
+            "name": "btnDecrement",
+            "type": "string",
+            "display": {
+                "type": "button",
+                "labelText": "Decrement",
+                "onClick": "counter = counter - 1;"
+            }
+        },
+        {
+            "name": "btnReset",
+            "type": "string",
+            "display": {
+                "type": "button",
+                "labelText": "Reset",
+                "onClick": "counter = 0;"
+            }
+        },
+        {
+            "name": "btnClose",
+            "type": "string",
+            "display": {
+                "type": "button",
+                "labelText": "Close",
+                "onClick": "close screen;"
+            }
+        }
+    ],
+    "startup": "counter = 0; print 'Counter initialized';"
+};
+
+// Show the screen
+show screen counterScreen;
+
+print "";
+print "Screen displayed.";
+print "Notice how the onClick handlers access 'counter' directly";
+print "without needing 'counterScreen.counter' notation.";

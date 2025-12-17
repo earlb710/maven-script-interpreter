@@ -1,0 +1,112 @@
+// ============================================================================
+// screen_vars_timer_callback.ebs
+// ============================================================================
+// Example demonstrating direct variable access in thread.timer callbacks
+// 
+// Timer callbacks can now access screen variables directly by name without
+// needing the "screenName.varName" qualified notation.
+// ============================================================================
+
+print "=== Screen Variable Direct Access in Timer Callbacks ===";
+print "";
+
+var timerName: string = "updateTimer";
+
+// Timer callback function that updates screen variables directly
+updateCallback(tName: string) {
+    // Direct access to screen variables - no qualification needed!
+    counter = counter + 1;
+    message = "Updated " + counter + " times at " + call date.format(call date.now(), "HH:mm:ss");
+}
+
+// Define a screen with auto-updating display
+screen autoUpdateScreen = {
+    "title": "Auto-Update Timer Demo",
+    "width": 500,
+    "height": 300,
+    "vars": [
+        {
+            "name": "counter",
+            "type": "int",
+            "default": 0,
+            "display": {
+                "type": "textfield",
+                "labelText": "Update Count:",
+                "promptHelp": "Number of timer updates"
+            }
+        },
+        {
+            "name": "message",
+            "type": "string",
+            "default": "Not started",
+            "display": {
+                "type": "textfield",
+                "labelText": "Status:",
+                "promptHelp": "Last update time"
+            }
+        },
+        {
+            "name": "interval",
+            "type": "int",
+            "default": 1000,
+            "display": {
+                "type": "spinner",
+                "labelText": "Update Interval (ms):",
+                "min": 100,
+                "max": 5000
+            }
+        },
+        {
+            "name": "btnStart",
+            "type": "string",
+            "display": {
+                "type": "button",
+                "labelText": "Start Updates",
+                "onClick": "if (call thread.timerIsRunning(timerName)) { print 'Timer already running'; } else { call thread.timerStart(timerName, interval, 'updateCallback'); message = 'Timer started'; print 'Auto-updates started'; }"
+            }
+        },
+        {
+            "name": "btnStop",
+            "type": "string",
+            "display": {
+                "type": "button",
+                "labelText": "Stop Updates",
+                "onClick": "if (call thread.timerIsRunning(timerName)) { call thread.timerStop(timerName); message = 'Timer stopped'; print 'Auto-updates stopped'; } else { print 'Timer not running'; }"
+            }
+        },
+        {
+            "name": "btnReset",
+            "type": "string",
+            "display": {
+                "type": "button",
+                "labelText": "Reset Counter",
+                "onClick": "counter = 0; message = 'Counter reset';"
+            }
+        },
+        {
+            "name": "btnClose",
+            "type": "string",
+            "display": {
+                "type": "button",
+                "labelText": "Close",
+                "onClick": "if (call thread.timerIsRunning(timerName)) { call thread.timerStop(timerName); } close screen;"
+            }
+        }
+    ],
+    "startup": "counter = 0; message = 'Ready to start'; print 'Auto-update screen initialized';",
+    "cleanup": "if (call thread.timerIsRunning(timerName)) { call thread.timerStop(timerName); print 'Timer stopped on cleanup'; } print 'Final count: ' + counter;"
+};
+
+// Show the screen
+show screen autoUpdateScreen;
+
+print "";
+print "Auto-update demo displayed.";
+print "";
+print "Key features:";
+print "  1. Timer callback accesses 'counter' and 'message' directly";
+print "  2. No need for 'autoUpdateScreen.counter' notation in callback";
+print "  3. Event handlers also use direct access";
+print "  4. Cleanup code properly stops timer using direct variable access";
+print "";
+print "Click 'Start Updates' to see the timer update screen variables!";

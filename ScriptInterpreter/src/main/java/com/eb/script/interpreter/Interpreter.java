@@ -123,6 +123,10 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         return context.isEchoOn();
     }
 
+    public ConcurrentHashMap<String, Object> getScreenVars(String screenName) {
+        return context.getScreenVars(screenName);
+    }
+    
     public void setDbAdapter(DbAdapter adapter) {
         context.setDb(adapter);
     }
@@ -885,6 +889,32 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             }
         }
 
+        // If we're executing in a screen context, check screen vars first for simple variable names
+        String currentScreen = context.getCurrentScreen();
+        if (currentScreen != null && firstDot < 0) {
+            // Simple variable name (no dots) and we're in a screen context
+            ConcurrentHashMap<String, Object> screenVarMap = context.getScreenVars(currentScreen);
+            if (screenVarMap != null) {
+                // Check if variable exists in screenVarMap or screenVarTypes
+                ConcurrentHashMap<String, DataType> screenVarTypes = context.getScreenVarTypes(currentScreen);
+                boolean varExists = screenVarMap.containsKey(name) || 
+                                   (screenVarTypes != null && screenVarTypes.containsKey(name));
+                if (varExists) {
+                    // Variable exists in screen vars
+                    // ConcurrentHashMap doesn't allow null values, so use NULL_SENTINEL for nulls
+                    if (value != null) {
+                        screenVarMap.put(name, value);
+                    } else {
+                        // Use NULL_SENTINEL to represent null so UI refresh can detect the change
+                        screenVarMap.put(name, InterpreterArray.NULL_SENTINEL);
+                    }
+                    // Trigger screen refresh to update UI controls
+                    context.triggerScreenRefresh(currentScreen);
+                    return;
+                }
+            }
+        }
+
         // Fall back to regular environment variable assignment
         // But first check if this variable has a recordType for validation
         RecordType recordType = environment().getEnvironmentValues().getRecordType(stmt.name);
@@ -1202,6 +1232,19 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                 return (value == InterpreterArray.NULL_SENTINEL) ? null : value;
             }
             // If not a screen variable, fall through to check regular environment variables
+        }
+
+        // If we're executing in a screen context, check screen vars first for simple variable names
+        String currentScreen = context.getCurrentScreen();
+        if (currentScreen != null && firstDot < 0) {
+            // Simple variable name (no dots) and we're in a screen context
+            ConcurrentHashMap<String, Object> screenVarMap = context.getScreenVars(currentScreen);
+            if (screenVarMap != null && screenVarMap.containsKey(name)) {
+                // Found in screen vars
+                Object value = screenVarMap.get(name);
+                // Convert NULL_SENTINEL back to null
+                return (value == InterpreterArray.NULL_SENTINEL) ? null : value;
+            }
         }
 
         // Fall back to regular environment variable

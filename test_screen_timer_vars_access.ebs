@@ -1,0 +1,83 @@
+// Test script to verify screen vars can be accessed in thread.timer callbacks
+
+string timerName = "counterTimer";
+
+// Timer callback function that should be able to access screen vars directly
+timerCallback(string tName) {
+    // Test direct access to screen var without qualification
+    counter = counter + 1;
+    println('Timer callback: counter=' + counter);
+}
+
+// Define a test screen with a counter variable
+screen timerTestScreen = {
+    "title": "Test Timer Screen Vars Access",
+    "width": 400,
+    "height": 200,
+    "vars": [
+        {
+            "name": "counter",
+            "type": "int",
+            "default": 0,
+            "display": {
+                "type": "textfield",
+                "labelText": "Counter (updates via timer)"
+            }
+        },
+        {
+            "name": "btnStart",
+            "type": "string",
+            "display": {
+                "type": "button",
+                "text": "Start Timer",
+                "onClick": "
+                    // Start a timer that increments the counter
+                    thread.timerStart(timerName, 1000, 'timerCallback');
+                    println('Timer started');
+                "
+            }
+        },
+        {
+            "name": "btnStop",
+            "type": "string",
+            "display": {
+                "type": "button",
+                "text": "Stop Timer",
+                "onClick": "
+                    thread.timerStop(timerName);
+                    println('Timer stopped');
+                "
+            }
+        },
+        {
+            "name": "btnClose",
+            "type": "string",
+            "display": {
+                "type": "button",
+                "text": "Close",
+                "onClick": "
+                    // Stop timer before closing
+                    if (thread.timerIsRunning(timerName)) {
+                        thread.timerStop(timerName);
+                    }
+                    close screen;
+                "
+            }
+        }
+    ],
+    "cleanup": "
+        // Stop timer on cleanup
+        if (thread.timerIsRunning(timerName)) {
+            thread.timerStop(timerName);
+            println('Cleanup: Timer stopped');
+        }
+    "
+};
+
+// Show the screen
+show screen timerTestScreen;
+
+println("Screen shown. Click 'Start Timer' to test direct variable access in timer callback.");
+println("Expected behavior:");
+println("  - Timer callback should directly modify 'counter' variable every second");
+println("  - No need to use 'timerTestScreen.counter' in the callback");

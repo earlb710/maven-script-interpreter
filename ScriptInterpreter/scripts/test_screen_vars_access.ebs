@@ -1,0 +1,65 @@
+// Test script to verify screen vars can be accessed directly in event code
+
+// Define a simple test screen with variables
+screen testScreen = {
+    "title": "Test Screen Vars Access",
+    "width": 400,
+    "height": 300,
+    "vars": [
+        {
+            "name": "counter",
+            "type": "int",
+            "default": 0,
+            "display": {
+                "type": "textfield",
+                "labelText": "Counter"
+            }
+        },
+        {
+            "name": "message",
+            "type": "string",
+            "default": "Hello",
+            "display": {
+                "type": "textfield",
+                "labelText": "Message"
+            }
+        },
+        {
+            "name": "btnIncrement",
+            "type": "string",
+            "display": {
+                "type": "button",
+                "text": "Increment Counter",
+                "onClick": "counter = counter + 1; print 'Counter incremented to: ' + counter;"
+            }
+        },
+        {
+            "name": "btnUpdate",
+            "type": "string",
+            "display": {
+                "type": "button",
+                "text": "Update Message",
+                "onClick": "message = 'Updated at ' + call date.format(call date.now(), 'yyyy-MM-dd HH:mm:ss'); print 'Message updated to: ' + message;"
+            }
+        },
+        {
+            "name": "btnClose",
+            "type": "string",
+            "display": {
+                "type": "button",
+                "text": "Close",
+                "onClick": "close screen;"
+            }
+        }
+    ],
+    "startup": "counter = 10; message = 'Initialized!'; print 'Startup code: counter=' + counter + ', message=' + message;"
+};
+
+// Show the screen
+show screen testScreen;
+
+print "Screen shown. Click buttons to test direct variable access.";
+print "Expected behavior:";
+print "  - Increment button should directly modify 'counter' variable";
+print "  - Update button should directly modify 'message' variable";
+print "  - No need to use 'testScreen.counter' or 'testScreen.message'";

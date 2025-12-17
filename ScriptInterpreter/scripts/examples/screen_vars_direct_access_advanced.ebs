@@ -1,0 +1,138 @@
+// ============================================================================
+// screen_vars_direct_access_advanced.ebs
+// ============================================================================
+// Advanced example demonstrating direct variable access in screen event handlers
+// 
+// Shows:
+// - Direct access in onClick handlers
+// - Direct access in onChange handlers
+// - Direct access with conditional logic
+// - Direct access in startup/cleanup code
+// - Backward compatibility with qualified notation
+// ============================================================================
+
+print "=== Screen Variable Direct Access - Advanced Example ===";
+print "";
+
+// Define an advanced form screen
+screen calculatorScreen = {
+    "title": "Calculator - Direct Variable Access Demo",
+    "width": 500,
+    "height": 400,
+    "vars": [
+        {
+            "name": "operand1",
+            "type": "double",
+            "default": 0.0,
+            "display": {
+                "type": "textfield",
+                "labelText": "First Number:",
+                "promptHelp": "Enter first number",
+                "onChange": "result = operand1 + operand2;"
+            }
+        },
+        {
+            "name": "operand2",
+            "type": "double",
+            "default": 0.0,
+            "display": {
+                "type": "textfield",
+                "labelText": "Second Number:",
+                "promptHelp": "Enter second number",
+                "onChange": "result = operand1 + operand2;"
+            }
+        },
+        {
+            "name": "result",
+            "type": "double",
+            "default": 0.0,
+            "display": {
+                "type": "textfield",
+                "labelText": "Result:",
+                "promptHelp": "Calculation result"
+            }
+        },
+        {
+            "name": "operation",
+            "type": "string",
+            "default": "add",
+            "display": {
+                "type": "combobox",
+                "labelText": "Operation:",
+                "options": ["add", "subtract", "multiply", "divide"]
+            }
+        },
+        {
+            "name": "btnCalculate",
+            "type": "string",
+            "display": {
+                "type": "button",
+                "labelText": "Calculate",
+                "onClick": "if (operation == 'add') { result = operand1 + operand2; } else if (operation == 'subtract') { result = operand1 - operand2; } else if (operation == 'multiply') { result = operand1 * operand2; } else if (operation == 'divide') { if (operand2 != 0) { result = operand1 / operand2; } else { result = 0.0; print 'Error: Division by zero'; } }"
+            }
+        },
+        {
+            "name": "btnClear",
+            "type": "string",
+            "display": {
+                "type": "button",
+                "labelText": "Clear All",
+                "onClick": "operand1 = 0.0; operand2 = 0.0; result = 0.0; operation = 'add';"
+            }
+        },
+        {
+            "name": "btnSwap",
+            "type": "string",
+            "display": {
+                "type": "button",
+                "labelText": "Swap Operands",
+                "onClick": "var temp = operand1; operand1 = operand2; operand2 = temp; result = operand1 + operand2;"
+            }
+        },
+        {
+            "name": "history",
+            "type": "string",
+            "default": "History: (empty)",
+            "display": {
+                "type": "textarea",
+                "labelText": "Calculation History:",
+                "height": 3
+            }
+        },
+        {
+            "name": "btnAddToHistory",
+            "type": "string",
+            "display": {
+                "type": "button",
+                "labelText": "Add to History",
+                "onClick": "history = history + '\n' + operand1 + ' ' + operation + ' ' + operand2 + ' = ' + result;"
+            }
+        },
+        {
+            "name": "btnClose",
+            "type": "string",
+            "display": {
+                "type": "button",
+                "labelText": "Close",
+                "onClick": "close screen;"
+            }
+        }
+    ],
+    "startup": "operand1 = 10.0; operand2 = 5.0; result = 15.0; print 'Calculator initialized with sample values';",
+    "cleanup": "print 'Final result was: ' + result;"
+};
+
+// Show the screen
+show screen calculatorScreen;
+
+print "";
+print "Advanced calculator demo displayed.";
+print "";
+print "Key features demonstrated:";
+print "  1. Direct variable access in onClick handlers (e.g., 'operand1 = 0.0')";
+print "  2. Direct variable access in onChange handlers (auto-calculation)";
+print "  3. Complex logic with direct access (conditional calculations)";
+print "  4. Direct access in startup code (initialization)";
+print "  5. Direct access in cleanup code (logging final state)";
+print "";
+print "Try changing values and clicking Calculate to see direct access in action!";
