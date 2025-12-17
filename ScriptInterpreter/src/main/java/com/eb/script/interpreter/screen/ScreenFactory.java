@@ -124,6 +124,9 @@ public class ScreenFactory {
     // Map to store the root BorderPane for each screen (screenName -> BorderPane) for debug panel toggling
     private static final java.util.concurrent.ConcurrentHashMap<String, BorderPane> screenRootPanes = new java.util.concurrent.ConcurrentHashMap<>();
     
+    // Map to store the MenuBar for each screen (screenName -> MenuBar) for dynamic menu manipulation
+    private static final java.util.concurrent.ConcurrentHashMap<String, javafx.scene.control.MenuBar> screenMenuBars = new java.util.concurrent.ConcurrentHashMap<>();
+    
     // Map to store original window widths before debug panel expansion (screenName -> originalWidth)
     private static final java.util.concurrent.ConcurrentHashMap<String, Double> screenOriginalWidths = new java.util.concurrent.ConcurrentHashMap<>();
     
@@ -3087,7 +3090,7 @@ public class ScreenFactory {
     public static Stage createScreen(String screenName, String title, double width, double height,
             List<AreaDefinition> areas,
             InterpreterContext context) {
-        return createScreen(screenName, title, width, height, areas, null, null, null, context);
+        return createScreen(screenName, title, width, height, areas, null, null, null, context, true);
     }
 
     /**
@@ -3109,7 +3112,7 @@ public class ScreenFactory {
             List<AreaDefinition> areas,
             java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
             InterpreterContext context) {
-        return createScreen(screenName, title, width, height, areas, screenVars, null, null, context);
+        return createScreen(screenName, title, width, height, areas, screenVars, null, null, context, true);
     }
 
     /**
@@ -3137,6 +3140,36 @@ public class ScreenFactory {
             java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
             OnClickHandler onClickHandler,
             InterpreterContext context) {
+        return createScreen(screenName, title, width, height, areas, screenVars, varTypes, onClickHandler, context, true);
+    }
+
+    /**
+     * Creates a complete JavaFX window/screen from area definitions with
+     * variable binding, onClick handlers, and optional menu bar. This method creates containers,
+     * adds items, applies layout properties, sets up two-way data binding, and
+     * configures button onClick handlers.
+     *
+     * @param screenName The name of the screen
+     * @param title The window title
+     * @param width The window width
+     * @param height The window height
+     * @param areas List of AreaDefinitions containing containers and items
+     * @param screenVars The ConcurrentHashMap containing screen variables for
+     * two-way binding (can be null)
+     * @param varTypes The ConcurrentHashMap containing screen variable types
+     * for proper type conversion (can be null)
+     * @param onClickHandler Handler for button onClick events (can be null)
+     * @param context InterpreterContext for accessing display metadata
+     * @param showMenu If true, adds a menu bar at the top; if false, omits the menu bar
+     * @return A Stage representing the complete window
+     */
+    public static Stage createScreen(String screenName, String title, double width, double height,
+            List<AreaDefinition> areas,
+            java.util.concurrent.ConcurrentHashMap<String, Object> screenVars,
+            java.util.concurrent.ConcurrentHashMap<String, DataType> varTypes,
+            OnClickHandler onClickHandler,
+            InterpreterContext context,
+            boolean showMenu) {
         // Log debug mode state at the start of createScreen for troubleshooting
         if (isDebugMode()) {
             System.out.println("\n[DEBUG] createScreen() called with debug mode ENABLED");
@@ -3206,12 +3239,17 @@ public class ScreenFactory {
         // Add focus listeners to all bound controls to update status bar
         setupStatusBarUpdates(allBoundControls, statusBar, context, screenName);
         
-        // Create menu bar for the screen
-        javafx.scene.control.MenuBar menuBar = createScreenMenuBar(stage);
-        
-        // Wrap in BorderPane to add menu bar at top and status bar at bottom
+        // Wrap in BorderPane to add optional menu bar at top and status bar at bottom
         BorderPane screenRoot = new BorderPane();
-        screenRoot.setTop(menuBar);
+        
+        // Only add menu bar if showMenu is true
+        if (showMenu) {
+            javafx.scene.control.MenuBar menuBar = createScreenMenuBar(stage);
+            screenRoot.setTop(menuBar);
+            // Store the MenuBar reference for dynamic menu manipulation
+            screenMenuBars.put(screenName.toLowerCase(), menuBar);
+        }
+        
         screenRoot.setCenter(scrollPane);
         screenRoot.setBottom(statusBar);
         
@@ -3319,7 +3357,7 @@ public class ScreenFactory {
     /**
      * Create a menu bar for screen windows with Edit menu containing Copy/Cut/Paste/Undo/Redo/Close items
      */
-    private static javafx.scene.control.MenuBar createScreenMenuBar(Stage stage) {
+    public static javafx.scene.control.MenuBar createScreenMenuBar(Stage stage) {
         javafx.scene.control.MenuBar menuBar = new javafx.scene.control.MenuBar();
         
         // Create Edit menu
@@ -3424,6 +3462,34 @@ public class ScreenFactory {
         menuBar.getMenus().add(editMenu);
         
         return menuBar;
+    }
+
+    /**
+     * Gets the root BorderPane for a screen by name.
+     * This allows external code to manipulate the screen layout, such as adding/removing the menu bar.
+     * 
+     * @param screenName The name of the screen (case-insensitive)
+     * @return The BorderPane root of the screen, or null if not found
+     */
+    public static BorderPane getScreenRootPane(String screenName) {
+        if (screenName == null) {
+            return null;
+        }
+        return screenRootPanes.get(screenName.toLowerCase());
+    }
+
+    /**
+     * Gets the MenuBar for a screen by name.
+     * This allows external code to manipulate the menu dynamically, such as adding custom menu items.
+     * 
+     * @param screenName The name of the screen (case-insensitive)
+     * @return The MenuBar of the screen, or null if not found or if menu is not shown
+     */
+    public static javafx.scene.control.MenuBar getScreenMenuBar(String screenName) {
+        if (screenName == null) {
+            return null;
+        }
+        return screenMenuBars.get(screenName.toLowerCase());
     }
 
     /**
@@ -4744,6 +4810,7 @@ public class ScreenFactory {
         String title = getStringValue(screenDef, "title", screenName);
         double width = getNumberValue(screenDef, "width", 800.0);
         double height = getNumberValue(screenDef, "height", 600.0);
+        boolean showMenu = getBooleanValue(screenDef, "showMenu", true); // Default to true
 
         // Parse variables and build metadata map
         Map<String, DisplayItem> metadataMap = new HashMap<>();
@@ -4795,7 +4862,7 @@ public class ScreenFactory {
             tempContext.getDisplayItem().put(screenName + "." + entry.getKey(), entry.getValue());
         }
 
-        return createScreen(screenName, title, width, height, areas, tempContext);
+        return createScreen(screenName, title, width, height, areas, null, null, null, tempContext, showMenu);
     }
 
     /**
@@ -4894,7 +4961,7 @@ public class ScreenFactory {
             "type", "mandatory", "case", "caseformat", "alignment", "pattern",
             "min", "max", "style", "screenname",
             // Text and label properties
-            "prompthelp", "prompt_help", "labeltext", "label_text",
+            "prompthelp", "prompt_help", "labeltext", "label_text", "text",
             "labeltextalignment", "label_text_alignment", "labelposition", "label_position",
             // Event handlers
             "onclick", "on_click", "onvalidate", "on_validate", "onchange", "on_change",
@@ -4983,7 +5050,7 @@ public class ScreenFactory {
             // promptHelp can be at item level (gets moved to displayItem)
             "prompthelp", "prompt_help",
             // Label properties (can be at item level for override/merge behavior)
-            "labeltext", "label_text", "labeltextalignment", "label_text_alignment",
+            "labeltext", "label_text", "text", "labeltextalignment", "label_text_alignment",
             "labelposition", "label_position",
             // Styling properties (can be at item level for override/merge behavior)
             "labelcolor", "label_color", "labelbackgroundcolor", "label_background_color",
@@ -5157,7 +5224,10 @@ public class ScreenFactory {
         metadata.promptHelp = getStringValue(displayDef, "promptHelp", getStringValue(displayDef, "prompt_help", null));
         
         // Extract labelText (permanent label displayed before/above control - used for buttons and labels)
-        metadata.labelText = getStringValue(displayDef, "labelText", getStringValue(displayDef, "label_text", null));
+        // Support "text" as an alias for "labelText" for convenience
+        metadata.labelText = getStringValue(displayDef, "labelText", 
+                              getStringValue(displayDef, "label_text", 
+                              getStringValue(displayDef, "text", null)));
         
         // Extract labelText alignment
         metadata.labelTextAlignment = getStringValue(displayDef, "labelTextAlignment", getStringValue(displayDef, "label_text_alignment", null));

@@ -1,0 +1,82 @@
+// Test script for menu visibility property and builtin functions
+
+// Test 1: Screen with menu (default behavior)
+screen testWithMenu = {
+    "name": "testWithMenu",
+    "title": "Screen WITH Menu",
+    "width": 600,
+    "height": 400,
+    "area": [
+        {
+            "name": "main",
+            "type": "vbox",
+            "items": [
+                {
+                    "type": "label",
+                    "text": "This screen shows the menu bar at the top."
+                },
+                {
+                    "type": "label",
+                    "text": "You should see 'Edit' menu with Cut, Copy, Paste, etc."
+                },
+                {
+                    "type": "button",
+                    "text": "Hide Menu",
+                    "onClick": "call scr.hideMenu(\"testWithMenu\");"
+                },
+                {
+                    "type": "button",
+                    "text": "Show Menu",
+                    "onClick": "call scr.showMenu(\"testWithMenu\");"
+                }
+            ]
+        }
+    ]
+};
+
+// Test 2: Screen without menu (using showMenu property)
+screen testWithoutMenu = {
+    "name": "testWithoutMenu",
+    "title": "Screen WITHOUT Menu (Property)",
+    "width": 600,
+    "height": 400,
+    "showMenu": false,
+    "area": [
+        {
+            "name": "main",
+            "type": "vbox",
+            "items": [
+                {
+                    "type": "label",
+                    "text": "This screen has NO menu bar (set via showMenu: false property)."
+                },
+                {
+                    "type": "label",
+                    "text": "Use the buttons below to toggle menu visibility."
+                },
+                {
+                    "type": "button",
+                    "text": "Show Menu",
+                    "onClick": "call scr.showMenu(\"testWithoutMenu\");"
+                },
+                {
+                    "type": "button",
+                    "text": "Hide Menu",
+                    "onClick": "call scr.hideMenu(\"testWithoutMenu\");"
+                }
+            ]
+        }
+    ]
+};
+
+// Show both screens for comparison
+show screen testWithMenu;
+show screen testWithoutMenu;
+
+print "Test screens created:";
+print "1. 'Screen WITH Menu' - shows Edit menu (default behavior)";
+print "2. 'Screen WITHOUT Menu (Property)' - no menu bar (showMenu: false)";
+print "";
+print "Use the buttons in each screen to toggle menu visibility dynamically:";
+print "  - scr.showMenu(screenName) - shows the menu bar";
+print "  - scr.hideMenu(screenName) - hides the menu bar";

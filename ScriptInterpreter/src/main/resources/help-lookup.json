@@ -164,8 +164,8 @@
     {
       "keyword": "screen",
       "short_description": "Creates a UI window",
-      "long_help": "The 'screen' keyword creates a new JavaFX window (Stage) with properties specified in JSON format. Supports title, width, height, maximize, vars, and area properties. Variables can have display metadata with input types: textfield, textarea, passwordfield, checkbox, radiobutton, togglebutton, combobox, choicebox, listview, spinner, slider, datepicker, colorpicker, button, label, hyperlink, imageview, mediaview, webview, progressbar, progressindicator. Areas support container types: pane, stackpane, anchorpane, borderpane, flowpane, gridpane, hbox, vbox, tilepane, scrollpane, splitpane, tabpane, tab, accordion, titledpane, group, region, canvas. All types have default styling. Screen variables have component types accessible via typeof (e.g., typeof myScreen.field returns 'Screen.Textfield'). Type declarations support screen.xxx syntax (e.g., var x : screen.textfield). Canvas uses screen.canvas type. Access JavaFX component details via .javafx property (e.g., myScreen.field.javafx). Color properties available for complete customization: labelColor/label_color (label text color), labelBackgroundColor/label_background_color (label background color), textColor/text_color or itemColor/item_color (item text color), backgroundColor/background_color (item background color at item level). All color properties support camelCase and snake_case naming.",
-      "example": "screen myWindow = {title:\"My App\", width:800, height:600, vars:[{name:\"userName\", type:\"string\", default:\"\", display:{type:\"textfield\", mandatory:true, labelText:\"Name:\", labelColor:\"#FF0000\", labelBackgroundColor:\"#FFFF00\", textColor:\"#0000FF\"}}], area:[{name:\"mainArea\", type:\"vbox\", layout:\"vbox\", items:[{name:\"userField\", sequence:1, relativePos:\"top\", varRef:\"userName\", backgroundColor:\"#F0F0F0\"}]}]};\n\n// Screen component types\nprint typeof myWindow.userName;  // Screen.Textfield\nvar field : screen.textfield = myWindow.userName;\nprint myWindow.userName.javafx;  // JavaFX details"
+      "long_help": "The 'screen' keyword creates a new JavaFX window (Stage) with properties specified in JSON format. Supports title, width, height, maximize, showMenu, vars, and area properties. The showMenu property (boolean, default: true) controls whether the Edit menu bar is shown at the top of the screen. Variables can have display metadata with input types: textfield, textarea, passwordfield, checkbox, radiobutton, togglebutton, combobox, choicebox, listview, spinner, slider, datepicker, colorpicker, button, label, hyperlink, imageview, mediaview, webview, progressbar, progressindicator. Areas support container types: pane, stackpane, anchorpane, borderpane, flowpane, gridpane, hbox, vbox, tilepane, scrollpane, splitpane, tabpane, tab, accordion, titledpane, group, region, canvas. All types have default styling. Screen variables have component types accessible via typeof (e.g., typeof myScreen.field returns 'Screen.Textfield'). Type declarations support screen.xxx syntax (e.g., var x : screen.textfield). Canvas uses screen.canvas type. Access JavaFX component details via .javafx property (e.g., myScreen.field.javafx). Color properties available for complete customization: labelColor/label_color (label text color), labelBackgroundColor/label_background_color (label background color), textColor/text_color or itemColor/item_color (item text color), backgroundColor/background_color (item background color at item level). All color properties support camelCase and snake_case naming.",
+      "example": "screen myWindow = {title:\"My App\", width:800, height:600, showMenu:false, vars:[{name:\"userName\", type:\"string\", default:\"\", display:{type:\"textfield\", mandatory:true, labelText:\"Name:\", labelColor:\"#FF0000\", labelBackgroundColor:\"#FFFF00\", textColor:\"#0000FF\"}}], area:[{name:\"mainArea\", type:\"vbox\", layout:\"vbox\", items:[{name:\"userField\", sequence:1, relativePos:\"top\", varRef:\"userName\", backgroundColor:\"#F0F0F0\"}]}]};\n\n// Screen component types\nprint typeof myWindow.userName;  // Screen.Textfield\nvar field : screen.textfield = myWindow.userName;\nprint myWindow.userName.javafx;  // JavaFX details"
     },
     {
       "keyword": "null",
@@ -4245,6 +4245,114 @@
       ],
       "return_type": "bool",
       "example": "<b>call</b> <b>scr.showScreen</b>(screenName=\"myScreen\");<br><br>// Or from within a screen event handler:<br><b>call</b> <b>scr.showScreen</b>();"
+    },
+    {
+      "function": "scr.showMenu",
+      "short_description": "Shows the menu bar on a screen",
+      "long_help": "Makes the menu bar visible at the top of a screen window. The menu bar contains Edit menu with Cut, Copy, Paste, Undo, Redo, and Close options. If no screen name is provided, operates on the current screen context (when called from within screen event handlers). Returns true on success.",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string",
+          "optional": true
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>call</b> <b>scr.showMenu</b>(screenName=\"myScreen\");<br><br>// Or from within a screen event handler:<br><b>call</b> <b>scr.showMenu</b>();"
+    },
+    {
+      "function": "scr.hideMenu",
+      "short_description": "Hides the menu bar on a screen",
+      "long_help": "Hides the menu bar at the top of a screen window, providing more vertical space for content. If no screen name is provided, operates on the current screen context (when called from within screen event handlers). Returns true on success.",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string",
+          "optional": true
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>call</b> <b>scr.hideMenu</b>(screenName=\"myScreen\");<br><br>// Or from within a screen event handler:<br><b>call</b> <b>scr.hideMenu</b>();<br><br>// Toggle menu visibility<br><b>call</b> <b>scr.hideMenu</b>();<br>// ... do work ...<br><b>call</b> <b>scr.showMenu</b>();"
+    },
+    {
+      "function": "scr.addMenu",
+      "short_description": "Adds a custom menu item to a screen",
+      "long_help": "Dynamically adds a menu item to a screen's menu bar. The parent path uses dot notation to specify the menu hierarchy (e.g., \"Edit\" for top-level menu, or \"Edit.Format\" for a submenu under Edit). If parent menus don't exist, they will be created automatically. The callback is executed when the menu item is clicked. Returns true on success.",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string"
+        },
+        {
+          "name": "parentPath",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "displayName",
+          "type": "string"
+        },
+        {
+          "name": "callback",
+          "type": "string"
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>// Add to existing Edit menu</b><br><b>call</b> <b>scr.addMenu</b>(screenName=\"myScreen\", parentPath=\"Edit\", name=\"customAction\", displayName=\"Custom Action\", callback=\"println('Custom action executed');\");<br><br><b>// Create new top-level menu with item</b><br><b>call</b> <b>scr.addMenu</b>(screenName=\"myScreen\", parentPath=\"Tools\", name=\"myTool\", displayName=\"My Tool\", callback=\"call myToolFunction();\");<br><br><b>// Add to nested submenu (creates if needed)</b><br><b>call</b> <b>scr.addMenu</b>(screenName=\"myScreen\", parentPath=\"Edit.Format\", name=\"uppercase\", displayName=\"Convert to Uppercase\", callback=\"call convertToUpper();\");"
+    },
+    {
+      "function": "scr.removeMenu",
+      "short_description": "Removes a menu or menu item from a screen",
+      "long_help": "Dynamically removes a menu or menu item from a screen's menu bar. The menu path uses dot notation to specify the menu hierarchy (e.g., \"Tools\" to remove entire Tools menu, or \"Edit.customAction\" to remove a specific item from Edit menu). Returns true on success.",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string"
+        },
+        {
+          "name": "menuPath",
+          "type": "string"
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>// Remove a menu item</b><br><b>call</b> <b>scr.removeMenu</b>(screenName=\"myScreen\", menuPath=\"Edit.customAction\");<br><br><b>// Remove an entire top-level menu</b><br><b>call</b> <b>scr.removeMenu</b>(screenName=\"myScreen\", menuPath=\"Tools\");<br><br><b>// Remove from nested submenu</b><br><b>call</b> <b>scr.removeMenu</b>(screenName=\"myScreen\", menuPath=\"Edit.Format.uppercase\");"
+    },
+    {
+      "function": "scr.enableMenu",
+      "short_description": "Enables a menu or menu item",
+      "long_help": "Enables a menu or menu item, making it clickable. The menu path uses dot notation to specify the menu hierarchy (e.g., \"Tools\" to enable entire Tools menu, or \"Edit.customAction\" to enable a specific item). Returns true on success.",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string"
+        },
+        {
+          "name": "menuPath",
+          "type": "string"
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>// Enable a menu item</b><br><b>call</b> <b>scr.enableMenu</b>(screenName=\"myScreen\", menuPath=\"Edit.Save\");<br><br><b>// Enable an entire menu</b><br><b>call</b> <b>scr.enableMenu</b>(screenName=\"myScreen\", menuPath=\"Tools\");<br><br><b>// Enable nested item</b><br><b>call</b> <b>scr.enableMenu</b>(screenName=\"myScreen\", menuPath=\"Edit.Format.Uppercase\");"
+    },
+    {
+      "function": "scr.disableMenu",
+      "short_description": "Disables a menu or menu item",
+      "long_help": "Disables a menu or menu item, making it unclickable and grayed out. The menu path uses dot notation to specify the menu hierarchy (e.g., \"Tools\" to disable entire Tools menu, or \"Edit.customAction\" to disable a specific item). Useful for context-sensitive menu states. Returns true on success.",
+      "parameters": [
+        {
+          "name": "screenName",
+          "type": "string"
+        },
+        {
+          "name": "menuPath",
+          "type": "string"
+        }
+      ],
+      "return_type": "bool",
+      "example": "<b>// Disable a menu item</b><br><b>call</b> <b>scr.disableMenu</b>(screenName=\"myScreen\", menuPath=\"Edit.Save\");<br><br><b>// Disable an entire menu</b><br><b>call</b> <b>scr.disableMenu</b>(screenName=\"myScreen\", menuPath=\"Tools\");<br><br><b>// Context-sensitive: disable when no document</b><br><b>if</b> !documentOpen <b>then</b> {<br>&nbsp;&nbsp;<b>call</b> <b>scr.disableMenu</b>(screenName=\"editor\", menuPath=\"File.Save\");<br>}"
     },
     {
       "function": "scr.snapshot",
