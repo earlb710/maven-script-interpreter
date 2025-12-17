@@ -464,7 +464,12 @@ public class AreaItemFactory {
         // Use contentAlignment from item if available, otherwise fall back to alignment from metadata for backwards compatibility
         String contentAlignmentValue = null;
         System.err.println("[ALIGNMENT DEBUG] Checking alignment for control type: " + control.getClass().getSimpleName());
+        System.err.println("[ALIGNMENT DEBUG] item: " + (item != null ? "not null" : "null"));
+        System.err.println("[ALIGNMENT DEBUG] item.name: " + (item != null ? item.name : "null"));
         System.err.println("[ALIGNMENT DEBUG] item.contentAlignment: " + (item != null ? item.contentAlignment : "null"));
+        System.err.println("[ALIGNMENT DEBUG] item.alignment: " + (item != null ? item.alignment : "null"));
+        System.err.println("[ALIGNMENT DEBUG] metadata: " + (metadata != null ? "not null" : "null"));
+        System.err.println("[ALIGNMENT DEBUG] metadata.alignment: " + (metadata != null ? metadata.alignment : "null"));
         if (item != null && item.contentAlignment != null && !item.contentAlignment.isEmpty()) {
             contentAlignmentValue = item.contentAlignment;
         } else if (item != null && item.alignment != null && !item.alignment.isEmpty()) {
