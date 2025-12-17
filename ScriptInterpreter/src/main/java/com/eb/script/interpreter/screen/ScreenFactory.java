@@ -3349,6 +3349,13 @@ public class ScreenFactory {
         }
         
         stage.setScene(scene);
+        
+        // If debug mode is already enabled, automatically show the debug panel for this new screen
+        if (isDebugMode() && context != null) {
+            Platform.runLater(() -> {
+                toggleDebugPanel(screenName, context, true);
+            });
+        }
 
         return stage;
     }
