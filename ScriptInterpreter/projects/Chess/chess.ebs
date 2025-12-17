@@ -1407,12 +1407,12 @@ screen chessScreen = {
     "height": 780,
     "cleanup": "call cleanupChessScreen();",
     "vars": [
-        {"name": "whiteTimer", "type": "string", "default": "10:00"},
-        {"name": "blackTimer", "type": "string", "default": "10:00"},
-        {"name": "whiteLabelText", "type": "string", "default": "\u2654 White:"},
-        {"name": "blackLabelText", "type": "string", "default": "\u265A Black:"},
-        {"name": "statusMessage", "type": "string", "default": "White to move"},
-        {"name": "moveHistory", "type": "string", "default": "Game started.\nWhite's turn.\n"},
+        {"name": "whitetimer", "type": "string", "default": "10:00"},
+        {"name": "blacktimer", "type": "string", "default": "10:00"},
+        {"name": "whitelabeltext", "type": "string", "default": "\u2654 White:"},
+        {"name": "blacklabeltext", "type": "string", "default": "\u265A Black:"},
+        {"name": "statusmessage", "type": "string", "default": "White to move"},
+        {"name": "movehistory", "type": "string", "default": "Game started.\nWhite's turn.\n"},
         {"name": "b00", "type": "imagedata"},
         {"name": "b01", "type": "imagedata"},
         {"name": "b02", "type": "imagedata"},
@@ -1624,11 +1624,11 @@ screen chessScreen = {
                     "padding": "10",
                     "style": "-fx-background-color: $COLOR_BG_TIMER; -fx-background-radius: 5; -fx-alignment: center; -fx-border-style: solid inside, solid inside; -fx-border-width: 1, 1; -fx-border-insets: 0, 1; -fx-border-color: #ffffff #b6b6b6 #7f7f7f #e6e6e6, #f4f4f4 #cccccc #6a6a6a #f0f0f0; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 4, 0.0, 0, 1);",
                     "items": [
-                        {"name": "whiteLabelTimer", "varRef": "whiteLabelText", "textColor": "$COLOR_LABEL_ACTIVE", "display": {"type": "label", "labelFontSize": "18px"}},
-                        {"name": "whiteTimerField", "varRef": "whiteTimer", "textColor": "$COLOR_TIMER_ACTIVE", "display": {"type": "label", "labelText": "10:00.0", "labelFontSize": "24px", "labelBold": true}},
+                        {"name": "whiteLabelTimer", "varRef": "whitelabeltext", "textColor": "$COLOR_LABEL_ACTIVE", "display": {"type": "label", "labelFontSize": "18px"}},
+                        {"name": "whiteTimerField", "varRef": "whitetimer", "textColor": "$COLOR_TIMER_ACTIVE", "display": {"type": "label", "labelText": "10:00.0", "labelFontSize": "24px", "labelBold": true}},
                         {"name": "spacerLabel", "textColor": "$COLOR_TEXT_SEPARATOR", "display": {"type": "label", "labelText": "     |     ", "labelFontSize": "24px"}},
-                        {"name": "blackLabelTimer", "varRef": "blackLabelText", "textColor": "$COLOR_LABEL_INACTIVE", "display": {"type": "label", "labelFontSize": "18px"}},
-                        {"name": "blackTimerField", "varRef": "blackTimer", "textColor": "$COLOR_TIMER_INACTIVE", "display": {"type": "label", "labelText": "10:00.0", "labelFontSize": "24px", "labelBold": true}}
+                        {"name": "blackLabelTimer", "varRef": "blacklabeltext", "textColor": "$COLOR_LABEL_INACTIVE", "display": {"type": "label", "labelFontSize": "18px"}},
+                        {"name": "blackTimerField", "varRef": "blacktimer", "textColor": "$COLOR_TIMER_INACTIVE", "display": {"type": "label", "labelText": "10:00.0", "labelFontSize": "24px", "labelBold": true}}
                     ]
                 },
                 {
@@ -1918,7 +1918,7 @@ screen chessScreen = {
                             "padding": "0",
                             "disableLabelAlignment": true,
                             "items": [
-                                {"name": "moveHistoryText", "varRef": "moveHistory", "editable": false, "display": {"type": "textarea", "wrapText": true, "height": 30, "style": "-fx-control-inner-background: $COLOR_MOVE_HISTORY_BG; -fx-text-fill: $COLOR_MOVE_HISTORY_TEXT; -fx-font-family: 'Courier New'; -fx-font-size: 14px; -fx-border-color: #555555; -fx-border-width: 1;"}, "labelPos": "top"}
+                                {"name": "moveHistoryText", "varRef": "movehistory", "editable": false, "display": {"type": "textarea", "wrapText": true, "height": 30, "style": "-fx-control-inner-background: $COLOR_MOVE_HISTORY_BG; -fx-text-fill: $COLOR_MOVE_HISTORY_TEXT; -fx-font-family: 'Courier New'; -fx-font-size: 14px; -fx-border-color: #555555; -fx-border-width: 1;"}, "labelPos": "top"}
                             ]
                         }
                     ]
@@ -1932,7 +1932,7 @@ screen chessScreen = {
                     "padding": "10",
                     "style": "-fx-background-color: #3c3c3c; -fx-background-radius: 5;",
                     "items": [
-                        {"name": "statusLabel", "varRef": "statusMessage", "display": {"type": "label", "labelColor": "$COLOR_BUTTON_NEW_GAME", "labelFontSize": "16px", "labelBold": true}}
+                        {"name": "statusLabel", "varRef": "statusmessage", "display": {"type": "label", "labelColor": "$COLOR_BUTTON_NEW_GAME", "labelFontSize": "16px", "labelBold": true}}
                     ]
                 },
                 {
