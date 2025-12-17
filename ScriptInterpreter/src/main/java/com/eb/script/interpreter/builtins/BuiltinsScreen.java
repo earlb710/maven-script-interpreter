@@ -2008,12 +2008,23 @@ public class BuiltinsScreen {
                 }
             }
             case "itemtext" -> {
-                // ItemText property for buttons and labels - updates the displayed text
+                // ItemText property for controls with text - updates the displayed text
                 String textValue = value != null ? String.valueOf(value) : "";
                 if (control instanceof javafx.scene.control.Button) {
                     ((javafx.scene.control.Button) control).setText(textValue);
                 } else if (control instanceof javafx.scene.control.Label) {
                     ((javafx.scene.control.Label) control).setText(textValue);
+                } else if (control instanceof javafx.scene.text.Text) {
+                    // Text node (not a Control subclass)
+                    ((javafx.scene.text.Text) control).setText(textValue);
+                } else if (control instanceof javafx.scene.control.Hyperlink) {
+                    ((javafx.scene.control.Hyperlink) control).setText(textValue);
+                } else if (control instanceof javafx.scene.control.ToggleButton) {
+                    ((javafx.scene.control.ToggleButton) control).setText(textValue);
+                } else if (control instanceof javafx.scene.control.CheckBox) {
+                    ((javafx.scene.control.CheckBox) control).setText(textValue);
+                } else if (control instanceof javafx.scene.control.RadioButton) {
+                    ((javafx.scene.control.RadioButton) control).setText(textValue);
                 }
             }
             default -> {

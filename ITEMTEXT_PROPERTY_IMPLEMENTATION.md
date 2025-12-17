@@ -1,12 +1,22 @@
 # itemText Property Implementation
 
 ## Overview
-This document describes the implementation of the new `itemText` property for button and label items in the EBS scripting language. This property allows dynamic updating of button and label text at runtime using the `scr.setProperty()` builtin function.
+This document describes the implementation of the new `itemText` property for controls with text display in the EBS scripting language. This property allows dynamic updating of control text at runtime using the `scr.setProperty()` builtin function.
+
+## Supported Controls
+The `itemText` property works with the following JavaFX control types:
+- **Button** - Standard clickable buttons
+- **Label** - Static text labels
+- **Text** - javafx.scene.text.Text nodes
+- **Hyperlink** - Clickable hyperlink controls
+- **ToggleButton** - Toggle-state buttons
+- **CheckBox** - Checkbox controls (updates the text label)
+- **RadioButton** - Radio button controls (updates the text label)
 
 ## Problem Statement
-Previously, the `text` and `value` properties were available but were intentionally removed with the guidance that text should be set via screen variables. However, for buttons and labels that don't have associated screen variables, there was no way to dynamically update their displayed text.
+Previously, the `text` and `value` properties were available but were intentionally removed with the guidance that text should be set via screen variables. However, for display controls (buttons, labels, text, etc.) that don't have associated screen variables, there was no way to dynamically update their displayed text.
 
-The `labelText` property in `DisplayItem` is used for initial text during screen creation, but there was no mechanism to update this text dynamically after the screen is shown. This implementation adds the `itemText` property to enable dynamic text updates for buttons and labels.
+The `labelText` property in `DisplayItem` is used for initial text during screen creation, but there was no mechanism to update this text dynamically after the screen is shown. This implementation adds the `itemText` property to enable dynamic text updates for all text-based display controls.
 
 ## Implementation Details
 
@@ -44,15 +54,25 @@ case "itemtext" ->
 ```
 
 #### applyPropertyToControl Method
-Added application of the itemText property to JavaFX Button and Label controls:
+Added application of the itemText property to JavaFX controls with text:
 ```java
 case "itemtext" -> {
-    // ItemText property for buttons and labels - updates the displayed text
+    // ItemText property for controls with text - updates the displayed text
     String textValue = value != null ? String.valueOf(value) : "";
     if (control instanceof javafx.scene.control.Button) {
         ((javafx.scene.control.Button) control).setText(textValue);
     } else if (control instanceof javafx.scene.control.Label) {
         ((javafx.scene.control.Label) control).setText(textValue);
+    } else if (control instanceof javafx.scene.text.Text) {
+        ((javafx.scene.text.Text) control).setText(textValue);
+    } else if (control instanceof javafx.scene.control.Hyperlink) {
+        ((javafx.scene.control.Hyperlink) control).setText(textValue);
+    } else if (control instanceof javafx.scene.control.ToggleButton) {
+        ((javafx.scene.control.ToggleButton) control).setText(textValue);
+    } else if (control instanceof javafx.scene.control.CheckBox) {
+        ((javafx.scene.control.CheckBox) control).setText(textValue);
+    } else if (control instanceof javafx.scene.control.RadioButton) {
+        ((javafx.scene.control.RadioButton) control).setText(textValue);
     }
 }
 ```
@@ -149,6 +169,24 @@ screen myScreen = {
 show screen myScreen;
 ```
 
+### Using with Other Control Types
+```ebs
+// Update Text node
+call scr.setProperty("myScreen.textNode", "itemText", "Updated Text Content");
+
+// Update Hyperlink
+call scr.setProperty("myScreen.linkControl", "itemText", "Click Here Now");
+
+// Update ToggleButton
+call scr.setProperty("myScreen.toggleBtn", "itemText", "Toggle: ON");
+
+// Update CheckBox label
+call scr.setProperty("myScreen.checkBox", "itemText", "Option Enabled");
+
+// Update RadioButton label
+call scr.setProperty("myScreen.radioBtn", "itemText", "Selected Option");
+```
+
 ## Notes
 
 ### Relationship with labelText
@@ -163,19 +201,21 @@ The property name `itemText` was chosen to:
 3. Clearly indicate it applies to the item itself (button or label text)
 
 ### Limitations
-- The `itemText` property only applies to Button and Label controls
-- For other controls with text (TextFields, TextAreas), use screen variables or the `editable` property with variable binding
+- The `itemText` property applies to display controls with text (Button, Label, Text, Hyperlink, ToggleButton, CheckBox, RadioButton)
+- For input controls with text (TextFields, TextAreas, PasswordFields), use screen variables or the `editable` property with variable binding
+- For selection controls (ComboBox, ChoiceBox), use `options` or `optionsMap` properties
 - The property updates the JavaFX control's text property directly on the UI thread
 
 ## Testing
 Test scripts are provided:
-- `test_itemtext_property.ebs` - Comprehensive interactive test with buttons and labels
+- `test_itemtext_property.ebs` - Interactive test with buttons and labels
+- `test_itemtext_all_controls.ebs` - Comprehensive test for all supported control types
 - `test_itemtext_simple.ebs` - Simple validation test
 
 To test manually:
 ```bash
 cd ScriptInterpreter
-mvn javafx:run -Djavafx.args="../test_itemtext_property.ebs"
+mvn javafx:run -Djavafx.args="../test_itemtext_all_controls.ebs"
 ```
 
 ## Related Properties

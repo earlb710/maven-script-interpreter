@@ -1,0 +1,191 @@
+// Test script for itemText property on all supported controls
+// Tests: Button, Label, Text, Hyperlink, ToggleButton, CheckBox, RadioButton
+
+screen testAllControlsScreen = {
+    "title": "itemText Property - All Controls Test",
+    "width": 600,
+    "height": 700,
+    "vars": [
+        {
+            "name": "updateCount",
+            "type": "int",
+            "default": 0
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "15",
+            "padding": "20",
+            "items": [
+                {
+                    "name": "titleLabel",
+                    "display": {
+                        "type": "label",
+                        "labelText": "Testing itemText on All Controls",
+                        "itemFontSize": "20px",
+                        "itemBold": true
+                    }
+                },
+                {
+                    "name": "descLabel",
+                    "display": {
+                        "type": "label",
+                        "labelText": "Click 'Update All' to see itemText in action",
+                        "itemFontSize": "14px",
+                        "itemColor": "#666666"
+                    }
+                },
+                {
+                    "name": "separator1",
+                    "display": {
+                        "type": "separator"
+                    }
+                },
+                {
+                    "name": "testButton",
+                    "display": {
+                        "type": "button",
+                        "labelText": "Button: Initial",
+                        "style": "-fx-min-width: 200px;"
+                    }
+                },
+                {
+                    "name": "testLabel",
+                    "display": {
+                        "type": "label",
+                        "labelText": "Label: Initial",
+                        "itemFontSize": "14px"
+                    }
+                },
+                {
+                    "name": "testText",
+                    "display": {
+                        "type": "text",
+                        "labelText": "Text: Initial",
+                        "itemFontSize": "14px",
+                        "itemColor": "#0066cc"
+                    }
+                },
+                {
+                    "name": "testHyperlink",
+                    "display": {
+                        "type": "hyperlink",
+                        "labelText": "Hyperlink: Initial",
+                        "itemFontSize": "14px"
+                    }
+                },
+                {
+                    "name": "testToggleButton",
+                    "display": {
+                        "type": "togglebutton",
+                        "labelText": "ToggleButton: Initial",
+                        "style": "-fx-min-width: 200px;"
+                    }
+                },
+                {
+                    "name": "testCheckBox",
+                    "display": {
+                        "type": "checkbox",
+                        "labelText": "CheckBox: Initial"
+                    }
+                },
+                {
+                    "name": "testRadioButton",
+                    "display": {
+                        "type": "radiobutton",
+                        "labelText": "RadioButton: Initial"
+                    }
+                },
+                {
+                    "name": "separator2",
+                    "display": {
+                        "type": "separator"
+                    }
+                },
+                {
+                    "name": "updateButton",
+                    "display": {
+                        "type": "button",
+                        "labelText": "Update All Text",
+                        "onClick": "call updateAllTexts();",
+                        "style": "-fx-min-width: 200px; -fx-min-height: 40px; -fx-background-color: #27ae60;"
+                    }
+                },
+                {
+                    "name": "resetButton",
+                    "display": {
+                        "type": "button",
+                        "labelText": "Reset All Text",
+                        "onClick": "call resetAllTexts();",
+                        "style": "-fx-min-width: 200px; -fx-min-height: 40px; -fx-background-color: #cc6600;"
+                    }
+                }
+            ]
+        }
+    ]
+};
+
+// Function to update all control texts
+updateAllTexts() {
+    updateCount = updateCount + 1;
+    var countStr: string = string.fromInt(updateCount);
+    
+    // Update Button
+    call scr.setProperty("testAllControlsScreen.testButton", "itemText", "Button: Updated " + countStr);
+    
+    // Update Label
+    call scr.setProperty("testAllControlsScreen.testLabel", "itemText", "Label: Updated " + countStr);
+    
+    // Update Text
+    call scr.setProperty("testAllControlsScreen.testText", "itemText", "Text: Updated " + countStr);
+    
+    // Update Hyperlink
+    call scr.setProperty("testAllControlsScreen.testHyperlink", "itemText", "Hyperlink: Updated " + countStr);
+    
+    // Update ToggleButton
+    call scr.setProperty("testAllControlsScreen.testToggleButton", "itemText", "ToggleButton: Updated " + countStr);
+    
+    // Update CheckBox
+    call scr.setProperty("testAllControlsScreen.testCheckBox", "itemText", "CheckBox: Updated " + countStr);
+    
+    // Update RadioButton
+    call scr.setProperty("testAllControlsScreen.testRadioButton", "itemText", "RadioButton: Updated " + countStr);
+    
+    print "All control texts updated successfully - Count: " + countStr;
+}
+
+// Function to reset all control texts
+resetAllTexts() {
+    updateCount = 0;
+    
+    // Reset all controls to initial text
+    call scr.setProperty("testAllControlsScreen.testButton", "itemText", "Button: Reset");
+    call scr.setProperty("testAllControlsScreen.testLabel", "itemText", "Label: Reset");
+    call scr.setProperty("testAllControlsScreen.testText", "itemText", "Text: Reset");
+    call scr.setProperty("testAllControlsScreen.testHyperlink", "itemText", "Hyperlink: Reset");
+    call scr.setProperty("testAllControlsScreen.testToggleButton", "itemText", "ToggleButton: Reset");
+    call scr.setProperty("testAllControlsScreen.testCheckBox", "itemText", "CheckBox: Reset");
+    call scr.setProperty("testAllControlsScreen.testRadioButton", "itemText", "RadioButton: Reset");
+    
+    print "All control texts reset successfully";
+}
+
+// Show the screen
+show screen testAllControlsScreen;
+
+print "===================================";
+print "itemText Property - All Controls Test";
+print "===================================";
+print "Supported controls:";
+print "  - Button";
+print "  - Label";
+print "  - Text";
+print "  - Hyperlink";
+print "  - ToggleButton";
+print "  - CheckBox";
+print "  - RadioButton";
+print "";
+print "Click 'Update All Text' to test dynamic text updates";
+print "Click 'Reset All Text' to restore initial text";

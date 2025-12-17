@@ -1,10 +1,10 @@
 # itemText Property - Implementation Summary
 
 ## Problem Solved
-Button and label text property does not work as "text" and "value" have been removed. This implementation adds the "itemText" property for buttons and label items.
+Button, label, and other text-based control text properties do not work as "text" and "value" have been removed. This implementation adds the "itemText" property for all text-based display controls.
 
 ## Solution
-Added `itemText` property that can be set dynamically via `scr.setProperty()` to update button and label text at runtime.
+Added `itemText` property that can be set dynamically via `scr.setProperty()` to update control text at runtime for: Button, Label, Text, Hyperlink, ToggleButton, CheckBox, and RadioButton.
 
 ## Implementation Status: ✅ Complete
 
@@ -20,11 +20,12 @@ Added `itemText` property that can be set dynamically via `scr.setProperty()` to
 2. **docs/AREA_DEFINITION.md** - Updated example to use new property
 
 ### Testing
-1. **test_itemtext_property.ebs** - Interactive test script
-2. **test_itemtext_simple.ebs** - Simple validation script
-3. Build verification: ✅ PASSED
-4. Code review: ✅ PASSED (no issues)
-5. Security scan: ✅ PASSED (no vulnerabilities)
+1. **test_itemtext_property.ebs** - Interactive test script (buttons/labels)
+2. **test_itemtext_all_controls.ebs** - Comprehensive test for all control types
+3. **test_itemtext_simple.ebs** - Simple validation script
+4. Build verification: ✅ PASSED
+5. Code review: ✅ PASSED (no issues)
+6. Security scan: ✅ PASSED (no vulnerabilities)
 
 ## Usage Example
 ```ebs
@@ -48,8 +49,8 @@ call scr.setProperty("myScreen.myButton", "itemText", "Updated Text");
 ```
 
 ## Key Features
-- ✅ Works for Button controls
-- ✅ Works for Label controls
+- ✅ Works for Button, Label, Text, Hyperlink controls
+- ✅ Works for ToggleButton, CheckBox, RadioButton controls
 - ✅ Updates JavaFX controls on UI thread
 - ✅ Stores value in DisplayItem for consistency
 - ✅ Follows existing property naming conventions
@@ -65,6 +66,15 @@ call scr.setProperty("screen.item", "text", "New Text");
 call scr.setProperty("screen.item", "itemText", "New Text");
 ```
 
+## Supported Controls
+1. **Button** - Standard clickable buttons
+2. **Label** - Static text labels
+3. **Text** - Text nodes (javafx.scene.text.Text)
+4. **Hyperlink** - Clickable hyperlink controls
+5. **ToggleButton** - Toggle-state buttons
+6. **CheckBox** - Checkbox controls (updates text label)
+7. **RadioButton** - Radio button controls (updates text label)
+
 ## Related Properties
 - `labelText` - Initial text during screen creation
 - `itemText` - Dynamic text updates at runtime (this implementation)
@@ -74,8 +84,10 @@ call scr.setProperty("screen.item", "itemText", "New Text");
 ## Files Changed
 1. ScriptInterpreter/src/main/java/com/eb/script/interpreter/screen/DisplayItem.java
 2. ScriptInterpreter/src/main/java/com/eb/script/interpreter/builtins/BuiltinsScreen.java
-3. docs/AREA_DEFINITION.md
-4. ITEMTEXT_PROPERTY_IMPLEMENTATION.md (new)
-5. test_itemtext_property.ebs (new)
-6. test_itemtext_simple.ebs (new)
-7. ITEMTEXT_PROPERTY_SUMMARY.md (this file)
+3. ScriptInterpreter/src/main/java/com/eb/script/interpreter/screen/AreaItemFactory.java
+4. docs/AREA_DEFINITION.md
+5. ITEMTEXT_PROPERTY_IMPLEMENTATION.md (new)
+6. ITEMTEXT_PROPERTY_SUMMARY.md (this file)
+7. test_itemtext_property.ebs (new)
+8. test_itemtext_all_controls.ebs (new)
+9. test_itemtext_simple.ebs (new)
