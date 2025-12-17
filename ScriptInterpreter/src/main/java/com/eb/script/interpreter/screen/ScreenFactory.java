@@ -1048,7 +1048,8 @@ public class ScreenFactory {
             // Build a map from item name to area name by iterating through AreaDefinitions
             // This is needed because screenAreaItems doesn't always include area in the key
             Map<String, String> itemToAreaMap = new HashMap<>();
-            List<AreaDefinition> areas = context.getScreenAreas(screenName);
+            @SuppressWarnings("unchecked")
+            List<AreaDefinition> areas = (List<AreaDefinition>) getScreenDataSafe(context, screenName, "areas");
             if (areas != null) {
                 buildItemToAreaMap(areas, itemToAreaMap, "");
             }
@@ -1797,7 +1798,9 @@ public class ScreenFactory {
             }
         } else if (item.varRef != null) {
             // Fallback to variable value if control not found
-            java.util.concurrent.ConcurrentHashMap<String, Object> screenVars = context.getScreenVars(screenName);
+            @SuppressWarnings("unchecked")
+            java.util.concurrent.ConcurrentHashMap<String, Object> screenVars = 
+                (java.util.concurrent.ConcurrentHashMap<String, Object>) getScreenDataSafe(context, screenName, "vars");
             if (screenVars != null) {
                 Object value = screenVars.get(item.varRef.toLowerCase());
                 if (value != null) {
@@ -2166,7 +2169,9 @@ public class ScreenFactory {
             }
         } else if (item.varRef != null) {
             // Fallback to variable value if control not found
-            java.util.concurrent.ConcurrentHashMap<String, Object> screenVars = context.getScreenVars(screenName);
+            @SuppressWarnings("unchecked")
+            java.util.concurrent.ConcurrentHashMap<String, Object> screenVars = 
+                (java.util.concurrent.ConcurrentHashMap<String, Object>) getScreenDataSafe(context, screenName, "vars");
             if (screenVars != null) {
                 Object value = screenVars.get(item.varRef.toLowerCase());
                 if (value != null) {
@@ -2351,7 +2356,8 @@ public class ScreenFactory {
         // Screen Areas section
         sb.append("\n📐 SCREEN AREAS\n");
         sb.append("-".repeat(40)).append("\n");
-        List<AreaDefinition> screenAreas = context.getScreenAreas(screenName);
+        @SuppressWarnings("unchecked")
+        List<AreaDefinition> screenAreas = (List<AreaDefinition>) getScreenDataSafe(context, screenName, "areas");
         if (screenAreas != null && !screenAreas.isEmpty()) {
             for (AreaDefinition area : screenAreas) {
                 formatAreaDefinitionForClipboard(sb, area, 0);
