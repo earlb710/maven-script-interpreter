@@ -1,0 +1,331 @@
+// Test Script: Multi-Window Debug View Support
+// Purpose: Verify that multiple debug views can run on multiple screens simultaneously
+// Usage: Run this script and follow the on-screen instructions
+//
+// This script tests:
+// 1. Opening multiple screens with different data
+// 2. Opening debug view (Ctrl+D) on each screen independently
+// 3. Copy button functionality on each debug panel
+// 4. Closing debug views independently
+// 5. Verifying no interference between debug views on different screens
+
+// Test data for screens
+var screen1Data: string = "Screen 1 Data";
+var screen2Data: string = "Screen 2 Data";
+var screen3Data: string = "Screen 3 Data";
+var testCounter: int = 0;
+
+// Helper function to generate unique test values
+incrementCounter() return int {
+    testCounter = testCounter + 1;
+    return testCounter;
+}
+
+// Screen 1 - Simple data entry screen
+screen testScreen1 = {
+    "title": "Test Screen 1 - Debug View Test",
+    "width": 600,
+    "height": 400,
+    "vars": [
+        {
+            "name": "field1",
+            "type": "string",
+            "default": "Field 1 Value",
+            "display": {
+                "type": "textfield",
+                "labelText": "Field 1:"
+            }
+        },
+        {
+            "name": "field2",
+            "type": "int",
+            "default": 100,
+            "display": {
+                "type": "textfield",
+                "labelText": "Field 2:"
+            }
+        },
+        {
+            "name": "field3",
+            "type": "bool",
+            "default": true,
+            "display": {
+                "type": "checkbox",
+                "labelText": "Enable Option"
+            }
+        },
+        {
+            "name": "counter",
+            "type": "int",
+            "default": 0,
+            "display": {
+                "type": "textfield",
+                "labelText": "Counter:"
+            }
+        },
+        {
+            "name": "incrementBtn",
+            "type": "button",
+            "display": {
+                "type": "button",
+                "labelText": "Increment Counter",
+                "onClick": "
+                    var c: int = call incrementCounter();
+                    scr.setVar('testScreen1', 'counter', c);
+                "
+            }
+        },
+        {
+            "name": "instructions",
+            "type": "label",
+            "display": {
+                "type": "label",
+                "labelText": "Instructions: Press Ctrl+D to toggle debug view. Test copy button functionality."
+            }
+        }
+    ]
+};
+
+// Screen 2 - Different layout and data
+screen testScreen2 = {
+    "title": "Test Screen 2 - Debug View Test",
+    "width": 650,
+    "height": 450,
+    "vars": [
+        {
+            "name": "username",
+            "type": "string",
+            "default": "testuser",
+            "display": {
+                "type": "textfield",
+                "labelText": "Username:"
+            }
+        },
+        {
+            "name": "password",
+            "type": "string",
+            "default": "secret123",
+            "display": {
+                "type": "password",
+                "labelText": "Password:"
+            }
+        },
+        {
+            "name": "email",
+            "type": "string",
+            "default": "test@example.com",
+            "display": {
+                "type": "textfield",
+                "labelText": "Email:"
+            }
+        },
+        {
+            "name": "age",
+            "type": "int",
+            "default": 25,
+            "display": {
+                "type": "textfield",
+                "labelText": "Age:"
+            }
+        },
+        {
+            "name": "active",
+            "type": "bool",
+            "default": false,
+            "display": {
+                "type": "checkbox",
+                "labelText": "Active Account"
+            }
+        },
+        {
+            "name": "updateBtn",
+            "type": "button",
+            "display": {
+                "type": "button",
+                "labelText": "Update Age",
+                "onClick": "
+                    var currentAge: int = scr.getVar('testScreen2', 'age');
+                    scr.setVar('testScreen2', 'age', currentAge + 1);
+                "
+            }
+        },
+        {
+            "name": "instructions2",
+            "type": "label",
+            "display": {
+                "type": "label",
+                "labelText": "Instructions: Open debug view here too (Ctrl+D). Both debug panels should work independently."
+            }
+        }
+    ]
+};
+
+// Screen 3 - Minimal screen for testing
+screen testScreen3 = {
+    "title": "Test Screen 3 - Debug View Test",
+    "width": 500,
+    "height": 350,
+    "vars": [
+        {
+            "name": "testValue1",
+            "type": "string",
+            "default": "Test Value A",
+            "display": {
+                "type": "textfield",
+                "labelText": "Test Value 1:"
+            }
+        },
+        {
+            "name": "testValue2",
+            "type": "string",
+            "default": "Test Value B",
+            "display": {
+                "type": "textfield",
+                "labelText": "Test Value 2:"
+            }
+        },
+        {
+            "name": "testValue3",
+            "type": "int",
+            "default": 999,
+            "display": {
+                "type": "textfield",
+                "labelText": "Test Value 3:"
+            }
+        },
+        {
+            "name": "randomBtn",
+            "type": "button",
+            "display": {
+                "type": "button",
+                "labelText": "Randomize",
+                "onClick": "
+                    var r: int = call random.nextInt(1000);
+                    scr.setVar('testScreen3', 'testValue3', r);
+                "
+            }
+        },
+        {
+            "name": "instructions3",
+            "type": "label",
+            "display": {
+                "type": "label",
+                "labelText": "Instructions: This is the third screen. Test rapid open/close of debug views across all screens."
+            }
+        }
+    ]
+};
+
+// Print test information
+println "";
+println "=================================================================";
+println "MULTI-WINDOW DEBUG VIEW TEST SCRIPT";
+println "=================================================================";
+println "";
+println "This script will open 3 test screens to verify that:";
+println "1. Multiple debug views can be open simultaneously";
+println "2. Each debug view operates independently";
+println "3. Copy button works on each debug panel";
+println "4. Closing one debug view doesn't affect others";
+println "5. Thread cleanup happens correctly per screen";
+println "";
+println "=================================================================";
+println "TEST INSTRUCTIONS:";
+println "=================================================================";
+println "";
+println "1. Three screens will open automatically";
+println "2. On EACH screen:";
+println "   - Press Ctrl+D to open the debug view";
+println "   - Verify debug panel shows correct screen data";
+println "   - Click the Copy button (📋) in debug panel";
+println "   - Verify checkmark (✓) appears briefly";
+println "   - Modify some field values";
+println "   - Observe debug panel updates";
+println "";
+println "3. Test independence:";
+println "   - Open debug view on Screen 1 (Ctrl+D)";
+println "   - Open debug view on Screen 2 (Ctrl+D)";
+println "   - Open debug view on Screen 3 (Ctrl+D)";
+println "   - All 3 debug panels should be visible";
+println "   - Click Copy on Screen 1 debug panel";
+println "   - Verify only Screen 1's copy button shows checkmark";
+println "   - Click Copy on Screen 2 debug panel";
+println "   - Verify only Screen 2's copy button shows checkmark";
+println "";
+println "4. Test cleanup:";
+println "   - Close debug view on Screen 1 (Ctrl+D or Close button)";
+println "   - Verify Screen 2 and 3 debug views still work";
+println "   - Click Copy on Screen 2 - should still work";
+println "   - Reopen debug view on Screen 1 (Ctrl+D)";
+println "   - Click Copy - should work";
+println "";
+println "5. Test rapid toggle:";
+println "   - Rapidly toggle debug view on Screen 1 (Ctrl+D multiple times)";
+println "   - Click Copy button immediately after opening";
+println "   - Close debug view before 1 second elapses";
+println "   - No errors should occur";
+println "";
+println "=================================================================";
+println "EXPECTED RESULTS:";
+println "=================================================================";
+println "";
+println "✓ Each screen has its own independent debug panel";
+println "✓ Copy button works on each screen's debug panel";
+println "✓ Checkmark appears for 1 second on the clicked panel only";
+println "✓ Closing one debug view doesn't affect others";
+println "✓ Rapid toggle doesn't cause errors or thread leaks";
+println "✓ Debug panel accurately shows each screen's variables";
+println "";
+println "=================================================================";
+println "";
+println "Press Enter to open the test screens...";
+
+// Wait for user to be ready
+var ready: string = readln();
+
+// Open all three test screens
+println "Opening Test Screen 1...";
+show screen testScreen1;
+
+println "Opening Test Screen 2...";
+show screen testScreen2;
+
+println "Opening Test Screen 3...";
+show screen testScreen3;
+
+println "";
+println "=================================================================";
+println "TEST SCREENS OPENED!";
+println "=================================================================";
+println "";
+println "Follow the instructions above to test multi-window debug view support.";
+println "";
+println "Key combinations:";
+println "  Ctrl+D - Toggle debug view on focused screen";
+println "  Close button (✕) - Close debug panel";
+println "  Copy button (📋) - Copy debug info to clipboard";
+println "";
+println "When finished testing, close all screens and return here.";
+println "";
+println "Press Enter when done testing...";
+
+// Wait for user to complete testing
+var done: string = readln();
+
+println "";
+println "=================================================================";
+println "TEST COMPLETE";
+println "=================================================================";
+println "";
+println "If you observed the expected results listed above, the";
+println "multi-window debug view support is working correctly!";
+println "";
+println "Key verification points:";
+println "1. Each screen's debug view was independent ✓";
+println "2. Copy button worked on each screen ✓";
+println "3. No interference between screens ✓";
+println "4. Clean panel opening and closing ✓";
+println "5. No errors during rapid toggle ✓";
+println "";
+println "Test script finished.";
+println "";
