@@ -123,6 +123,22 @@ This directory contains short, precise example scripts for each EBS language key
 |------|----------|
 | [screen.ebs](screen.ebs) | `screen`, `show`, `hide` |
 
+### Screen Variable Direct Access Examples
+These examples demonstrate the new direct variable access feature for screen event handlers and timer callbacks. Screen variables can now be accessed directly by name in event code without needing the `screenName.varName` qualified notation.
+
+| File | Description |
+|------|-------------|
+| [screen_vars_direct_access_simple.ebs](screen_vars_direct_access_simple.ebs) | Simple counter example showing direct access in onClick handlers |
+| [screen_vars_direct_access_advanced.ebs](screen_vars_direct_access_advanced.ebs) | Advanced calculator showing direct access in onClick, onChange, startup, and cleanup |
+| [screen_vars_timer_callback.ebs](screen_vars_timer_callback.ebs) | Timer callbacks with direct screen variable access |
+
+**Key Benefits:**
+- **Before**: `onClick: "myScreen.counter = myScreen.counter + 1;"`
+- **After**: `onClick: "counter = counter + 1;"`
+- Works in onClick, onChange, onValidate, startup, cleanup, and timer callbacks
+- Fully backward compatible - qualified notation still works
+- Cleaner, more readable event handler code
+
 ### Radio Button Examples
 | File | Description |
 |------|-------------|
