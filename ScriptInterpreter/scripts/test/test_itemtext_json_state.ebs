@@ -178,7 +178,7 @@ updateUI() {
     
     // Update task count
     var taskCount = call json.getint(appState, "taskCount");
-    var taskCountText = "Tasks Completed: " + string.fromInt(taskCount);
+    var taskCountText = "Tasks Completed: " + string(taskCount);
     call scr.setProperty("stateScreen.taskCountLabel", "itemText", taskCountText);
     
     // Update last update time
@@ -229,7 +229,7 @@ completeTask() {
         call json.set(appState, "taskCount", newCount);
         
         // Update last update
-        var updateMsg = "Task #" + string.fromInt(newCount) + " completed";
+        var updateMsg = "Task #" + string(newCount) + " completed";
         call json.set(appState, "lastUpdate", updateMsg);
         
         print "Task completed: " + updateMsg;
@@ -247,7 +247,7 @@ showState() {
     print "";
     print "=== Current Application State ===";
     print "Mode: " + call json.getstring(appState, "mode");
-    print "Task Count: " + string.fromInt(call json.getint(appState, "taskCount"));
+    print "Task Count: " + string(call json.getint(appState, "taskCount"));
     print "Is Processing: " + string.fromBool(call json.getbool(appState, "isProcessing"));
     print "Last Update: " + call json.getstring(appState, "lastUpdate");
     print "=================================";

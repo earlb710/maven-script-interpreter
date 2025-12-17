@@ -18,7 +18,7 @@ var controlsConfig: map = {
 
 var updateCounter: int = 0;
 
-print "Loaded configuration for " + string.fromInt(call json.arraysize(controlsConfig, "controls")) + " controls";
+print "Loaded configuration for " + string(call json.arraysize(controlsConfig, "controls")) + " controls";
 print "";
 
 // Define the screen with multiple controls
@@ -160,7 +160,7 @@ applyArrayConfig() {
     var controlsArray = call json.get(controlsConfig, "controls");
     var arraySize = call json.arraysize(controlsConfig, "controls");
     
-    print "Processing " + string.fromInt(arraySize) + " controls";
+    print "Processing " + string(arraySize) + " controls";
     
     // Iterate through array and update each control
     var i: int = 0;
@@ -194,7 +194,7 @@ applyArrayConfig() {
 incrementCounters() {
     updateCounter = updateCounter + 1;
     
-    print "Incrementing counters (Update #" + string.fromInt(updateCounter) + ")...";
+    print "Incrementing counters (Update #" + string(updateCounter) + ")...";
     
     // Get the controls array
     var controlsArray = call json.get(controlsConfig, "controls");
@@ -208,7 +208,7 @@ incrementCounters() {
         var baseText = call json.getstring(controlItem, "text");
         
         // Append counter to text
-        var newText = baseText + " [" + string.fromInt(updateCounter) + "]";
+        var newText = baseText + " [" + string(updateCounter) + "]";
         
         // Update control
         var controlPath = "testArrayScreen." + controlId;
@@ -218,13 +218,13 @@ incrementCounters() {
     }
     
     // Update status with counter
-    var statusText = "Updated " + string.fromInt(updateCounter) + " time";
+    var statusText = "Updated " + string(updateCounter) + " time";
     if updateCounter > 1 then {
         statusText = statusText + "s";
     }
     call scr.setProperty("testArrayScreen.statusLabel", "itemText", statusText);
     
-    print "All " + string.fromInt(arraySize) + " controls incremented!";
+    print "All " + string(arraySize) + " controls incremented!";
 }
 
 // Show the screen

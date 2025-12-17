@@ -130,7 +130,7 @@ screen testAllControlsScreen = {
 // Function to update all control texts
 updateAllTexts() {
     updateCount = updateCount + 1;
-    var countStr: string = string.fromInt(updateCount);
+    var countStr: string = string(updateCount);
     
     // Update Button
     call scr.setProperty("testAllControlsScreen.testButton", "itemText", "Button: Updated " + countStr);

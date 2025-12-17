@@ -77,13 +77,13 @@ updateTexts() {
     call scr.setProperty("testItemTextScreen.statusLabel", "itemText", "Status: Button clicked!");
     
     // Update counter label using itemText property
-    var counterText: string = "Counter: " + string.fromInt(counter);
+    var counterText: string = "Counter: " + string(counter);
     call scr.setProperty("testItemTextScreen.counterLabel", "itemText", counterText);
     
     // Update button text using itemText property
-    call scr.setProperty("testItemTextScreen.updateButton", "itemText", "Click Again! (Count: " + string.fromInt(counter) + ")");
+    call scr.setProperty("testItemTextScreen.updateButton", "itemText", "Click Again! (Count: " + string(counter) + ")");
     
-    print "Text updated successfully - Counter: " + string.fromInt(counter);
+    print "Text updated successfully - Counter: " + string(counter);
 }
 
 // Function to reset all text items

@@ -2,6 +2,10 @@
 
 This guide provides an overview of all test scripts for the `itemText` property feature.
 
+## Test Scripts Location
+
+All test scripts are located in: `ScriptInterpreter/scripts/test/`
+
 ## Test Scripts Overview
 
 ### Basic Tests
@@ -16,7 +20,7 @@ This guide provides an overview of all test scripts for the `itemText` property 
 **Run:**
 ```bash
 cd ScriptInterpreter
-mvn javafx:run -Djavafx.args="../test_itemtext_simple.ebs"
+mvn javafx:run -Djavafx.args="scripts/test/test_itemtext_simple.ebs"
 ```
 
 ---
@@ -32,7 +36,7 @@ mvn javafx:run -Djavafx.args="../test_itemtext_simple.ebs"
 **Run:**
 ```bash
 cd ScriptInterpreter
-mvn javafx:run -Djavafx.args="../test_itemtext_property.ebs"
+mvn javafx:run -Djavafx.args="scripts/test/test_itemtext_property.ebs"
 ```
 
 ---
@@ -48,7 +52,7 @@ mvn javafx:run -Djavafx.args="../test_itemtext_property.ebs"
 **Run:**
 ```bash
 cd ScriptInterpreter
-mvn javafx:run -Djavafx.args="../test_itemtext_all_controls.ebs"
+mvn javafx:run -Djavafx.args="scripts/test/test_itemtext_all_controls.ebs"
 ```
 
 ---
@@ -77,7 +81,7 @@ call scr.setProperty("screen.button", "itemText", buttonText);
 **Run:**
 ```bash
 cd ScriptInterpreter
-mvn javafx:run -Djavafx.args="../test_itemtext_json_simple.ebs"
+mvn javafx:run -Djavafx.args="scripts/test/test_itemtext_json_simple.ebs"
 ```
 
 ---
@@ -108,7 +112,7 @@ while i < arraySize {
 **Run:**
 ```bash
 cd ScriptInterpreter
-mvn javafx:run -Djavafx.args="../test_itemtext_json_array.ebs"
+mvn javafx:run -Djavafx.args="scripts/test/test_itemtext_json_array.ebs"
 ```
 
 ---
@@ -143,7 +147,7 @@ call scr.setProperty("screen.button", "itemText", call json.getstring(texts, "bu
 **Run:**
 ```bash
 cd ScriptInterpreter
-mvn javafx:run -Djavafx.args="../test_itemtext_json_state.ebs"
+mvn javafx:run -Djavafx.args="scripts/test/test_itemtext_json_state.ebs"
 ```
 
 ---
