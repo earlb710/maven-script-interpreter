@@ -359,11 +359,7 @@ public class BuiltinsScreen {
 
         // Execute immediately if already on JavaFX thread, otherwise queue it
         // This prevents nested Platform.runLater() calls when called from timer callbacks
-        if (javafx.application.Platform.isFxApplicationThread()) {
-            uiUpdateTask.run();
-        } else {
-            javafx.application.Platform.runLater(uiUpdateTask);
-        }
+        com.eb.util.Util.runOnFx(uiUpdateTask);
 
         return Boolean.TRUE;
     }
