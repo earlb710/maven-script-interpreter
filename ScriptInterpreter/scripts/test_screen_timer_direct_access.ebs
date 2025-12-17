@@ -61,7 +61,7 @@ screen timerTestScreen = {
             "display": {
                 "type": "button",
                 "labelText": "Start Timer",
-                "onClick": "if (thread.timerIsRunning(timerName)) { print 'Timer already running'; } else { thread.timerStart(timerName, timerInterval, 'timerCallback'); message = 'Timer started'; print 'Timer started with interval: ' + timerInterval + 'ms'; }"
+                "onClick": "if (call thread.timerIsRunning(timerName)) { print 'Timer already running'; } else { call thread.timerStart(timerName, timerInterval, 'timerCallback'); message = 'Timer started'; print 'Timer started with interval: ' + timerInterval + 'ms'; }"
             }
         },
         {
@@ -70,7 +70,7 @@ screen timerTestScreen = {
             "display": {
                 "type": "button",
                 "labelText": "Stop Timer",
-                "onClick": "if (thread.timerIsRunning(timerName)) { thread.timerStop(timerName); message = 'Timer stopped'; print 'Timer stopped at count: ' + counter; } else { print 'Timer is not running'; }"
+                "onClick": "if (call thread.timerIsRunning(timerName)) { call thread.timerStop(timerName); message = 'Timer stopped'; print 'Timer stopped at count: ' + counter; } else { print 'Timer is not running'; }"
             }
         },
         {
@@ -88,7 +88,7 @@ screen timerTestScreen = {
             "display": {
                 "type": "button",
                 "labelText": "Check Status",
-                "onClick": "var isRunning = thread.timerIsRunning(timerName); var status = 'Timer is ' + (isRunning ? 'running' : 'stopped'); print status; print 'Current counter: ' + counter; print 'Current message: ' + message;"
+                "onClick": "var isRunning = call thread.timerIsRunning(timerName); var status = 'Timer is ' + (isRunning ? 'running' : 'stopped'); print status; print 'Current counter: ' + counter; print 'Current message: ' + message;"
             }
         },
         {
@@ -97,12 +97,12 @@ screen timerTestScreen = {
             "display": {
                 "type": "button",
                 "labelText": "Close",
-                "onClick": "if (thread.timerIsRunning(timerName)) { thread.timerStop(timerName); print 'Timer stopped before closing'; } close screen;"
+                "onClick": "if (call thread.timerIsRunning(timerName)) { call thread.timerStop(timerName); print 'Timer stopped before closing'; } close screen;"
             }
         }
     ],
     "startup": "counter = 0; message = 'Ready to start'; print 'Startup: Screen initialized';",
-    "cleanup": "if (thread.timerIsRunning(timerName)) { thread.timerStop(timerName); print 'Cleanup: Timer stopped'; } print 'Cleanup: Final counter value: ' + counter;"
+    "cleanup": "if (call thread.timerIsRunning(timerName)) { call thread.timerStop(timerName); print 'Cleanup: Timer stopped'; } print 'Cleanup: Final counter value: ' + counter;"
 };
 
 // Show the screen
