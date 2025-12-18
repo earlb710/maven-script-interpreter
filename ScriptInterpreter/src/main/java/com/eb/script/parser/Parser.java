@@ -3,6 +3,7 @@ package com.eb.script.parser;
 import com.eb.script.interpreter.builtins.Builtins;
 import com.eb.script.json.Json;
 import com.eb.script.RuntimeContext;
+import com.eb.script.package_tool.RuntimeContextSerializer;
 import com.eb.script.token.BitmapType;
 import com.eb.script.token.IntmapType;
 import com.eb.script.token.Category;
@@ -574,7 +575,7 @@ public class Parser {
         // Handle .ebsp (packaged) files specially - they need typedef registration from deserialized statements
         if (importPath.toString().toLowerCase().endsWith(".ebsp")) {
             try {
-                RuntimeContext context = com.eb.script.package_tool.RuntimeContextSerializer.deserialize(importPath);
+                RuntimeContext context = RuntimeContextSerializer.deserialize(importPath);
                 // Register typedefs from the deserialized statements
                 registerTypedefsFromStatements(context.statements);
             } catch (IOException e) {
