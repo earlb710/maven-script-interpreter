@@ -50,17 +50,21 @@ public class RuntimeContextSerializer {
         
         // Write header comment and base64 content to file
         String version = BuiltinsSystem.EBS_LANGUAGE_VERSION;
-        String header = "// packaged esb language ver " + version + "\n";
-        String content = header + base64Encoded;
+        String content = String.format("// packaged esb language ver %s\n%s", version, base64Encoded);
         
         Files.writeString(outputFile, content, StandardCharsets.UTF_8);
     }
     
     /**
      * Deserialize a RuntimeContext from a file.
-     * The file format is expected to be:
+     * Supports both new format (base64 with header) and legacy format (binary):
+     * 
+     * New format:
      * Line 1: // packaged esb language ver X.Y.Z.W
      * Line 2+: Base64-encoded GZIP-compressed serialized RuntimeContext
+     * 
+     * Legacy format:
+     * Direct GZIP-compressed serialized RuntimeContext (binary)
      * 
      * The returned RuntimeContext will have a new Environment instance and
      * the sourcePath will be set to the package file path.
@@ -71,19 +75,37 @@ public class RuntimeContextSerializer {
      * @throws ClassNotFoundException if the RuntimeContext class is not found
      */
     public static RuntimeContext deserialize(Path inputFile) throws IOException, ClassNotFoundException {
-        // Read entire file content
+        // Check if file starts with GZIP magic bytes (legacy binary format)
+        byte[] firstBytes = new byte[2];
+        try (FileInputStream fis = new FileInputStream(inputFile.toFile())) {
+            int bytesRead = fis.read(firstBytes);
+            if (bytesRead >= 2 && firstBytes[0] == (byte) 0x1f && firstBytes[1] == (byte) 0x8b) {
+                // Legacy binary format detected
+                return deserializeLegacy(inputFile);
+            }
+        }
+        
+        // New format: Read entire file content as text
         String fileContent = Files.readString(inputFile, StandardCharsets.UTF_8);
         
-        // Split into lines
-        String[] lines = fileContent.split("\n", 2);
+        // Split into lines (handle different line ending formats)
+        String[] lines = fileContent.split("\\r?\\n", 2);
         
-        // Validate header line
-        if (lines.length < 2 || !lines[0].startsWith("// packaged esb language ver ")) {
+        // Validate header line and content
+        if (lines.length < 2) {
+            throw new IOException("Invalid .ebsp file format: missing content after header");
+        }
+        if (!lines[0].startsWith("// packaged esb language ver ")) {
             throw new IOException("Invalid .ebsp file format: missing or invalid header");
         }
         
         // Extract base64 content (everything after the header line)
         String base64Content = lines[1].trim();
+        
+        // Validate that base64 content is not empty
+        if (base64Content.isEmpty()) {
+            throw new IOException("Invalid .ebsp file format: empty content after header");
+        }
         
         // Decode base64
         byte[] compressedBytes;
@@ -97,6 +119,27 @@ public class RuntimeContextSerializer {
         RuntimeContext context;
         try (ByteArrayInputStream bais = new ByteArrayInputStream(compressedBytes);
              GZIPInputStream gzis = new GZIPInputStream(bais);
+             ObjectInputStream ois = new ObjectInputStream(gzis)) {
+            context = (RuntimeContext) ois.readObject();
+        }
+        
+        // Reconstruct the RuntimeContext with a new Environment and the package path
+        return new RuntimeContext(context.name, inputFile, context.blocks, context.statements);
+    }
+    
+    /**
+     * Deserialize a RuntimeContext from a legacy binary format file.
+     * This is kept for backward compatibility with old .ebsp files.
+     * 
+     * @param inputFile The file to read from
+     * @return The deserialized RuntimeContext with reconstructed Environment
+     * @throws IOException if deserialization fails
+     * @throws ClassNotFoundException if the RuntimeContext class is not found
+     */
+    private static RuntimeContext deserializeLegacy(Path inputFile) throws IOException, ClassNotFoundException {
+        RuntimeContext context;
+        try (FileInputStream fis = new FileInputStream(inputFile.toFile());
+             GZIPInputStream gzis = new GZIPInputStream(fis);
              ObjectInputStream ois = new ObjectInputStream(gzis)) {
             context = (RuntimeContext) ois.readObject();
         }
