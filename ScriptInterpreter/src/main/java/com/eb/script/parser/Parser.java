@@ -142,6 +142,22 @@ public class Parser {
         context.statements = statementsToArray(parser.statements);
     }
 
+    /**
+     * Parse source code and update an existing RuntimeContext with a source file path.
+     * This allows imports to be resolved relative to the source file's directory.
+     * 
+     * @param context The runtime context to update
+     * @param source The source code to parse
+     * @param tokens The tokenized source code
+     * @param sourcePath The path to the source file (used for resolving relative imports)
+     */
+    public static void parse(RuntimeContext context, String source, List<EbsToken> tokens, Path sourcePath) throws IOException, ParseError {
+        Parser parser = new Parser(source, tokens, sourcePath, new HashSet<>());
+        parser.parse();
+        context.blocks = parser.blocks;
+        context.statements = statementsToArray(parser.statements);
+    }
+
     private Parser(String source, List<EbsToken> tokens, Path sourcePath, Set<String> importedFiles) {
         this.tokens = tokens;
         this.source = source;

@@ -99,7 +99,12 @@ public class EbsHandler implements Handler {
         for (String line : lines) {
             if (line != null && !line.isBlank()) {
                 List<EbsToken> tokens = new EbsLexer().tokenize(line);
-                Parser.parse(ctx, line, tokens);
+                // Use sourcePath from RuntimeContext if available to resolve relative imports
+                if (ctx.sourcePath != null) {
+                    Parser.parse(ctx, line, tokens, ctx.sourcePath);
+                } else {
+                    Parser.parse(ctx, line, tokens);
+                }
                 if (env.isEchoOn() && ctx.statements.length == 1) {
                     EbsStyled.appendStyledText(output, "> " + line + "\n");
                 }
