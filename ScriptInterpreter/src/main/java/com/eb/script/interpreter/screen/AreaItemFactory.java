@@ -95,6 +95,7 @@ public class AreaItemFactory {
                             RadioButton rb = new RadioButton(entry.getValue()); // Display text
                             rb.setToggleGroup(toggleGroup);
                             rb.setUserData(entry.getKey()); // Store data value
+                            applyRadioButtonItemStyling(rb, metadata);
                             radioGroup.getChildren().add(rb);
                         }
                         // Store the optionsMap in the container's properties for value binding
@@ -118,6 +119,7 @@ public class AreaItemFactory {
                             RadioButton rb = new RadioButton(displayText);
                             rb.setToggleGroup(toggleGroup);
                             rb.setUserData(dataValue);
+                            applyRadioButtonItemStyling(rb, metadata);
                             radioGroup.getChildren().add(rb);
                         }
                     }
@@ -722,6 +724,50 @@ public class AreaItemFactory {
             if (prefHeight > 0) {
                 ((TextArea) control).setPrefHeight(prefHeight);
             }
+        }
+    }
+    
+    /**
+     * Applies item-specific styling (font size, color, bold, italic) to individual RadioButton controls.
+     * This is called for each RadioButton in a radio button group to ensure the option text
+     * is styled according to the metadata properties.
+     * 
+     * @param radioButton The RadioButton to style
+     * @param metadata The DisplayItem metadata containing styling properties
+     */
+    private static void applyRadioButtonItemStyling(RadioButton radioButton, DisplayItem metadata) {
+        if (radioButton == null || metadata == null) {
+            return;
+        }
+        
+        StringBuilder style = new StringBuilder();
+        
+        // Apply item font size
+        if (metadata.itemFontSize != null && !metadata.itemFontSize.isEmpty()) {
+            style.append("-fx-font-size: ").append(metadata.itemFontSize).append("; ");
+        }
+        
+        // Apply item text color (textColor takes precedence over itemColor)
+        String colorToApply = (metadata.textColor != null && !metadata.textColor.isEmpty()) 
+                            ? metadata.textColor 
+                            : metadata.itemColor;
+        if (colorToApply != null && !colorToApply.isEmpty()) {
+            style.append("-fx-text-fill: ").append(colorToApply).append("; ");
+        }
+        
+        // Apply item bold
+        if (metadata.itemBold != null && metadata.itemBold) {
+            style.append("-fx-font-weight: bold; ");
+        }
+        
+        // Apply item italic
+        if (metadata.itemItalic != null && metadata.itemItalic) {
+            style.append("-fx-font-style: italic; ");
+        }
+        
+        // Apply the style to the RadioButton
+        if (style.length() > 0) {
+            radioButton.setStyle(style.toString());
         }
     }
     
