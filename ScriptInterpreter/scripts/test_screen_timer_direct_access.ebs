@@ -18,19 +18,87 @@ timerCallback(tName: string) {
     print "Timer callback: counter=" + counter + ", message=" + message;
 }
 
-// Define a test screen with timer controls using area items
+// Define a test screen with timer controls
 screen timerTestScreen = {
-    "title": "Timer Variable Access Test (Area Items)",
+    "title": "Timer Variable Access Test",
     "width": 500,
     "height": 450,
-    "sets": [
+    "vars": [
         {
-            "setname": "main",
-            "vars": [
-                {"name": "counter", "type": "int", "default": 0},
-                {"name": "message", "type": "string", "default": "Not started"},
-                {"name": "timerInterval", "type": "int", "default": 1000}
-            ]
+            "name": "counter",
+            "type": "int",
+            "default": 0,
+            "display": {
+                "type": "textfield",
+                "labelText": "Counter:",
+                "promptHelp": "Updates automatically via timer"
+            }
+        },
+        {
+            "name": "message",
+            "type": "string",
+            "default": "Not started",
+            "display": {
+                "type": "textfield",
+                "labelText": "Message:",
+                "promptHelp": "Timer status message"
+            }
+        },
+        {
+            "name": "timerInterval",
+            "type": "int",
+            "default": 1000,
+            "display": {
+                "type": "spinner",
+                "labelText": "Interval (ms):",
+                "min": 100,
+                "max": 5000
+            }
+        },
+        {
+            "name": "btnStart",
+            "type": "string",
+            "display": {
+                "type": "button",
+                "labelText": "Start Timer",
+                "onClick": "if (call thread.timerIsRunning(timerName)) { print 'Timer already running'; } else { call thread.timerStart(timerName, timerInterval, 'timerCallback'); message = 'Timer started'; print 'Timer started with interval: ' + timerInterval + 'ms'; }"
+            }
+        },
+        {
+            "name": "btnStop",
+            "type": "string",
+            "display": {
+                "type": "button",
+                "labelText": "Stop Timer",
+                "onClick": "if (call thread.timerIsRunning(timerName)) { call thread.timerStop(timerName); message = 'Timer stopped'; print 'Timer stopped at count: ' + counter; } else { print 'Timer is not running'; }"
+            }
+        },
+        {
+            "name": "btnReset",
+            "type": "string",
+            "display": {
+                "type": "button",
+                "labelText": "Reset Counter",
+                "onClick": "counter = 0; message = 'Counter reset'; print 'Counter reset to 0';"
+            }
+        },
+        {
+            "name": "btnCheckStatus",
+            "type": "string",
+            "display": {
+                "type": "button",
+                "labelText": "Check Status",
+                "onClick": "var isRunning = call thread.timerIsRunning(timerName); var status = 'Timer is ' + (isRunning ? 'running' : 'stopped'); print status; print 'Current counter: ' + counter; print 'Current message: ' + message;"
+            }
+        },
+        {
+            "name": "btnClose",
+            "type": "string",
+            "display": {
+                "type": "button",
+                "labelText": "Close",
+                "onClick": "if (call thread.timerIsRunning(timerName)) { call thread.timerStop(timerName); print 'Timer stopped before closing'; } close screen;"
+            }
         }
     ],
     "area": [
@@ -43,36 +111,6 @@ screen timerTestScreen = {
             "items": [],
             "areas": [
                 {
-                    "name": "headerArea",
-                    "type": "vbox",
-                    "spacing": "10",
-                    "padding": "10",
-                    "style": "-fx-background-color: #e3f2fd; -fx-border-color: #1976d2; -fx-border-width: 2; -fx-border-radius: 5;",
-                    "items": [
-                        {
-                            "name": "titleLabel",
-                            "display": {
-                                "type": "label",
-                                "labelText": "Timer Variable Access Test",
-                                "labelColor": "#1976d2",
-                                "labelFontSize": "18px",
-                                "labelBold": true,
-                                "style": "-fx-alignment: center;"
-                            }
-                        },
-                        {
-                            "name": "descLabel",
-                            "display": {
-                                "type": "label",
-                                "labelText": "Tests direct screen variable access in timer callbacks using area items",
-                                "labelColor": "#555555",
-                                "labelFontSize": "12px",
-                                "style": "-fx-alignment: center; -fx-wrap-text: true;"
-                            }
-                        }
-                    ]
-                },
-                {
                     "name": "dataArea",
                     "type": "vbox",
                     "spacing": "10",
@@ -80,43 +118,21 @@ screen timerTestScreen = {
                     "style": "-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-border-width: 1; -fx-border-radius: 5;",
                     "items": [
                         {
-                            "name": "counterField",
-                            "varRef": "counter",
-                            "sequence": 1,
-                            "display": {
-                                "type": "textfield",
-                                "labelText": "Counter:",
-                                "promptHelp": "Updates automatically via timer",
-                                "style": "-fx-font-size: 14px;"
-                            }
+                            "name": "counterItem",
+                            "varRef": "counter"
                         },
                         {
-                            "name": "messageField",
-                            "varRef": "message",
-                            "sequence": 2,
-                            "display": {
-                                "type": "textfield",
-                                "labelText": "Message:",
-                                "promptHelp": "Timer status message",
-                                "style": "-fx-font-size: 14px;"
-                            }
+                            "name": "messageItem",
+                            "varRef": "message"
                         },
                         {
-                            "name": "intervalSpinner",
-                            "varRef": "timerInterval",
-                            "sequence": 3,
-                            "display": {
-                                "type": "spinner",
-                                "labelText": "Interval (ms):",
-                                "min": 100,
-                                "max": 5000,
-                                "style": "-fx-font-size: 14px;"
-                            }
+                            "name": "intervalItem",
+                            "varRef": "timerInterval"
                         }
                     ]
                 },
                 {
-                    "name": "controlArea",
+                    "name": "buttonArea",
                     "type": "vbox",
                     "spacing": "10",
                     "padding": "10",
@@ -129,22 +145,12 @@ screen timerTestScreen = {
                             "alignment": "center",
                             "items": [
                                 {
-                                    "name": "btnStart",
-                                    "display": {
-                                        "type": "button",
-                                        "labelText": "Start Timer",
-                                        "onClick": "if (call thread.timerIsRunning(timerName)) { print 'Timer already running'; } else { call thread.timerStart(timerName, timerInterval, 'timerCallback'); message = 'Timer started'; print 'Timer started with interval: ' + timerInterval + 'ms'; }",
-                                        "style": "-fx-min-width: 120px; -fx-font-size: 14px; -fx-background-color: #4caf50; -fx-text-fill: white; -fx-font-weight: bold;"
-                                    }
+                                    "name": "startButtonItem",
+                                    "varRef": "btnStart"
                                 },
                                 {
-                                    "name": "btnStop",
-                                    "display": {
-                                        "type": "button",
-                                        "labelText": "Stop Timer",
-                                        "onClick": "if (call thread.timerIsRunning(timerName)) { call thread.timerStop(timerName); message = 'Timer stopped'; print 'Timer stopped at count: ' + counter; } else { print 'Timer is not running'; }",
-                                        "style": "-fx-min-width: 120px; -fx-font-size: 14px; -fx-background-color: #f44336; -fx-text-fill: white; -fx-font-weight: bold;"
-                                    }
+                                    "name": "stopButtonItem",
+                                    "varRef": "btnStop"
                                 }
                             ]
                         },
@@ -155,22 +161,12 @@ screen timerTestScreen = {
                             "alignment": "center",
                             "items": [
                                 {
-                                    "name": "btnReset",
-                                    "display": {
-                                        "type": "button",
-                                        "labelText": "Reset Counter",
-                                        "onClick": "counter = 0; message = 'Counter reset'; print 'Counter reset to 0';",
-                                        "style": "-fx-min-width: 120px; -fx-font-size: 14px; -fx-background-color: #ff9800; -fx-text-fill: white; -fx-font-weight: bold;"
-                                    }
+                                    "name": "resetButtonItem",
+                                    "varRef": "btnReset"
                                 },
                                 {
-                                    "name": "btnCheckStatus",
-                                    "display": {
-                                        "type": "button",
-                                        "labelText": "Check Status",
-                                        "onClick": "var isRunning = call thread.timerIsRunning(timerName); var status = 'Timer is ' + (isRunning ? 'running' : 'stopped'); print status; print 'Current counter: ' + counter; print 'Current message: ' + message;",
-                                        "style": "-fx-min-width: 120px; -fx-font-size: 14px; -fx-background-color: #2196f3; -fx-text-fill: white; -fx-font-weight: bold;"
-                                    }
+                                    "name": "statusButtonItem",
+                                    "varRef": "btnCheckStatus"
                                 }
                             ]
                         },
@@ -181,13 +177,8 @@ screen timerTestScreen = {
                             "alignment": "center",
                             "items": [
                                 {
-                                    "name": "btnClose",
-                                    "display": {
-                                        "type": "button",
-                                        "labelText": "Close",
-                                        "onClick": "if (call thread.timerIsRunning(timerName)) { call thread.timerStop(timerName); print 'Timer stopped before closing'; } close screen;",
-                                        "style": "-fx-min-width: 250px; -fx-font-size: 14px; -fx-background-color: #607d8b; -fx-text-fill: white; -fx-font-weight: bold;"
-                                    }
+                                    "name": "closeButtonItem",
+                                    "varRef": "btnClose"
                                 }
                             ]
                         }
@@ -204,7 +195,7 @@ screen timerTestScreen = {
 show screen timerTestScreen;
 
 print "";
-print "Screen displayed. Instructions:";
+print "Screen displayed with area items layout. Instructions:";
 print "1. Click 'Start Timer' - timer will increment counter every second";
 print "2. Watch the counter and message fields update automatically";
 print "3. Click 'Stop Timer' - timer stops updating";
@@ -219,3 +210,4 @@ print "  - Counter increments automatically when timer is running";
 print "  - Message updates with timestamp on each timer tick";
 print "  - All button handlers can access and modify variables directly";
 print "  - Cleanup code stops the timer and displays final counter value";
+print "  - Layout organized using area items (data area + button groups)";
