@@ -1,0 +1,83 @@
+// Test script for timer-screen linkage requirement
+// Tests the new requirement that timers must be linked to a screen
+
+print "=== Testing Timer-Screen Linkage ===";
+print "";
+
+// Note: Test 1 (creating timer outside screen without qualified name) would cause error
+// We'll test this manually or in a separate script
+// This script focuses on testing the successful cases
+
+// Test 1: Create a screen to test with
+print "Test 1: Create a test screen";
+
+timerCallback2(timerName: string) {
+    print "Timer 2 fired from screen";
+    call thread.timerStop(timerName);
+}
+
+screen testScreen = {
+    "title": "Test Screen",
+    "width": 300,
+    "height": 200,
+    "vars": [
+        {
+            "name": "label1",
+            "type": "string",
+            "display": {
+                "type": "label",
+                "text": "Test Screen for Timer"
+            }
+        }
+    ],
+    "startup": "
+        print 'Screen startup - creating timer inside screen context';
+        thread.timerStart('timerInScreen', 1000, 'timerCallback2');
+        print 'Timer created inside screen: timerInScreen';
+    "
+};
+
+show screen testScreen;
+print "✓ Test 1 PASSED - screen created";
+print "";
+
+// Wait for timer to fire
+call thread.sleep(1500);
+
+// Test 2: Create timer outside screen with qualified name for existing screen (should succeed)
+print "Test 2: Create timer with qualified name for existing screen (should succeed)";
+
+timerCallback3(timerName: string) {
+    print "Timer 3 fired (created with qualified name)";
+    call thread.timerStop(timerName);
+}
+
+call thread.timerStart("testScreen.timer3", 1000, "timerCallback3");
+print "✓ Test 2 PASSED - timer created with qualified name";
+print "";
+
+// Wait for timer to fire
+call thread.sleep(1500);
+
+// Test 3: Verify timer info shows correct source
+print "Test 3: Verify timer source tracking";
+call thread.timerStart("testScreen.timer4", 2000, "timerCallback2");
+var info4: string = call thread.timerGetInfo("testScreen.timer4");
+print "Timer info: " + info4;
+
+if call str.contains(info4, "\"source\":\"testscreen\"") then {
+    print "✓ Test 3 PASSED - timer correctly linked to testscreen";
+} else {
+    print "✗ Test 3 FAILED - timer not correctly linked";
+}
+call thread.timerStop("testScreen.timer4");
+print "";
+
+// Test 4: List all timers
+print "Test 4: List all active timers";
+var timerList: string = call thread.timerList();
+print "Active timers: " + timerList;
+print "";
+
+print "=== Test Complete ===";
+print "Note: Close the test screen window to end the test";
