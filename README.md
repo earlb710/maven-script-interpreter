@@ -796,6 +796,15 @@ Press `Ctrl+D` again to hide the debug panel.
 
 ## Documentation
 
+### Getting Started Guides
+
+- **[Functions and Imports Guide](ScriptInterpreter/guides/FUNCTIONS_AND_IMPORTS_GUIDE.md)** - Comprehensive guide on defining functions, organizing code with imports, and structuring large applications
+- **[Functions & Imports Quick Reference](ScriptInterpreter/guides/FUNCTIONS_IMPORTS_QUICK_REF.md)** - Quick reference for functions, imports, and project organization patterns
+- **[Complex Data Types Guide](ScriptInterpreter/guides/COMPLEX_DATA_TYPES_GUIDE.md)** - Practical guide for working with arrays and records
+- **[Screen Definition Best Practices](ScriptInterpreter/guides/SCREEN_DEFINITION_BEST_PRACTICES.md)** - Best practices for creating screen/UI definitions
+
+### Language Reference
+
 - **[EBS Script Syntax Reference](docs/EBS_SCRIPT_SYNTAX.md)** - Complete language syntax guide including type aliases (typeof)
 - **[EBS Collections Reference](docs/EBS_COLLECTIONS_REFERENCE.md)** - Comprehensive guide to all collection types (arrays, queues, maps, JSON) with comparison tables and examples
 - **[Array Syntax Guide](docs/ARRAY_SYNTAX_GUIDE.md)** - Comprehensive guide explaining differences between `int[n]` and `array.int[n]` syntax, including performance and memory usage comparisons
@@ -803,8 +812,14 @@ Press `Ctrl+D` again to hide the debug panel.
 - **[TreeView Icons Quick Reference](TREEVIEW_ICONS_QUICKREF.md)** - Quick reference for TreeView icon functions and common patterns
 - **[TreeView Styling Guide](TREEVIEW_STYLING.md)** - Complete guide to styling TreeView items (bold, italic, color) with examples
 - **[TreeView Styling Quick Reference](TREEVIEW_STYLING_QUICKREF.md)** - Quick reference for TreeView styling functions and common patterns
+
+### Comparison Guides
+
 - **[Python vs EBS String Functions](docs/PYTHON_VS_EBS_STRING_FUNCTIONS.md)** - Comparison guide for Python developers learning EBS Script
 - **[EBS Script vs Oracle PL/SQL](docs/EBS_VS_ORACLE_PLSQL.md)** - Comprehensive comparison guide for PL/SQL developers learning EBS Script
+
+### Technical Documentation
+
 - **[Architecture & Flow Documentation](ARCHITECTURE.md)** - Comprehensive documentation of the system architecture, data flow, and internal workings
 - **[Class Tree Lister](CLASS_TREE_LISTER.md)** - Utility for analyzing the project's class hierarchy
 - **[Syntax Reference](ScriptInterpreter/src/main/java/com/eb/script/syntax_ebnf.txt)** - EBNF grammar specification
