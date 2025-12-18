@@ -1,0 +1,111 @@
+// Test script for check detection logic
+// This tests the new check/checkmate/stalemate detection functions
+
+import "chess-game.ebs";
+
+// Main test
+print "==============================================";
+print "Testing Check Detection Functions";
+print "==============================================";
+print "";
+
+// Test 1: Simple check detection
+print "Test 1: Basic King Position Finding";
+call initEmptyBoard();
+call setPiece(4, 0, KING, WHITE);  // White king at e1
+call setPiece(4, 7, KING, BLACK);  // Black king at e8
+
+var whiteKingPos: posType = call findKing(WHITE);
+print "White king found at: (" + whiteKingPos.x + ", " + whiteKingPos.y + ")";
+
+var blackKingPos: posType = call findKing(BLACK);
+print "Black king found at: (" + blackKingPos.x + ", " + blackKingPos.y + ")";
+print "";
+
+// Test 2: Check detection - rook checking king
+print "Test 2: Rook Checking King";
+call initEmptyBoard();
+call setPiece(4, 0, KING, WHITE);  // White king at e1
+call setPiece(4, 7, KING, BLACK);  // Black king at e8
+call setPiece(4, 5, ROOK, WHITE);  // White rook at e6 (checking black king)
+
+var blackInCheck: bool = call isKingInCheck(BLACK);
+if blackInCheck then {
+    print "✓ Black king is in check (correct)";
+} else {
+    print "✗ Black king should be in check";
+}
+
+var whiteInCheck: bool = call isKingInCheck(WHITE);
+if !whiteInCheck then {
+    print "✓ White king is not in check (correct)";
+} else {
+    print "✗ White king should not be in check";
+}
+print "";
+
+// Test 3: Test wouldMoveExposeKing
+print "Test 3: Move Exposing King";
+call initEmptyBoard();
+call setPiece(4, 0, KING, WHITE);   // White king at e1
+call setPiece(4, 1, BISHOP, WHITE); // White bishop at e2 (blocking)
+call setPiece(4, 5, ROOK, BLACK);   // Black rook at e6 (would check if bishop moves)
+call setPiece(4, 7, KING, BLACK);   // Black king at e8
+
+var exposesKing: bool = call wouldMoveExposeKing(4, 1, 5, 2, WHITE);
+if exposesKing then {
+    print "✓ Moving bishop to f3 exposes king (correct)";
+} else {
+    print "✗ Moving bishop should expose king";
+}
+print "";
+
+// Test 4: Test wouldMoveCheckOpponent
+print "Test 4: Move Checking Opponent";
+call initEmptyBoard();
+call setPiece(4, 0, KING, WHITE);   // White king at e1
+call setPiece(4, 7, KING, BLACK);   // Black king at e8
+call setPiece(3, 5, ROOK, WHITE);   // White rook at d6
+
+var checksOpponent: bool = call wouldMoveCheckOpponent(3, 5, 4, 5, WHITE);
+if checksOpponent then {
+    print "✓ Moving rook to e6 checks opponent (correct)";
+} else {
+    print "✗ Moving rook should check opponent";
+}
+print "";
+
+// Test 5: Checkmate detection
+print "Test 5: Checkmate Detection";
+call initEmptyBoard();
+call setPiece(0, 0, KING, BLACK);   // Black king at a1 (corner)
+call setPiece(1, 2, ROOK, WHITE);   // White rook at b3
+call setPiece(2, 1, QUEEN, WHITE);  // White queen at c2
+call setPiece(4, 4, KING, WHITE);   // White king at e5
+
+var isInCheckmate: bool = call isCheckmate(BLACK);
+if isInCheckmate then {
+    print "✓ Black is in checkmate (correct)";
+} else {
+    print "✗ Black should be in checkmate";
+}
+print "";
+
+// Test 6: Stalemate detection
+print "Test 6: Stalemate Detection";
+call initEmptyBoard();
+call setPiece(0, 0, KING, BLACK);   // Black king at a1 (corner)
+call setPiece(1, 2, QUEEN, WHITE);  // White queen at b3 (not checking but blocking all moves)
+call setPiece(2, 2, KING, WHITE);   // White king at c3
+
+var isInStalemate: bool = call isStalemate(BLACK);
+if isInStalemate then {
+    print "✓ Black is in stalemate (correct)";
+} else {
+    print "✗ Black should be in stalemate";
+}
+print "";
+
+print "==============================================";
+print "Test Complete";
+print "==============================================";

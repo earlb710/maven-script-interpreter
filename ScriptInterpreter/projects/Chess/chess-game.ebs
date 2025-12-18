@@ -93,6 +93,7 @@ var board: array.bitmap[64];
 // Timer variables (now in deciseconds - 10ths of a second)
 var timerWhite: int = 6000;  // 600 seconds = 6000 deciseconds
 var timerBlack: int = 6000;  // 600 seconds = 6000 deciseconds
+var initialTimerValue: int = 6000;  // Store initial timer value to calculate elapsed time
 var currentPlayer: int = 0;
 
 // Selection and move indication variables
@@ -100,7 +101,13 @@ var selectedX: int = -1;  // -1 means no selection
 var selectedY: int = -1;
 var greenIndicator: imagedata;  // Green circle for valid moves
 var redIndicator: imagedata;    // Red circle for capture moves
+var yellowCircleIndicator: imagedata; // Yellow circle for moves that check opponent's king
+var redCrossIndicator: imagedata;     // Red cross for invalid moves (expose own king)
+var redCrossBigIndicator: imagedata;  // Larger red cross for checkmate
 var transparentClear: imagedata; // Transparent rectangle for clearing piece positions
+
+// Game state tracking
+var gameOver: bool = false;  // Track if game has ended
 
 // Board layer images (bottom layer - checkerboard)
 var lightSquare: imagedata;     // Light square for board
@@ -246,6 +253,36 @@ createIndicators() {
     call style.setStroke(redCanvas, "#AA0000", 2.0);
     call draw.circle(redCanvas, 30, 30, 20, false);
     redIndicator = call canvas.toImage(redCanvas);
+    
+    // Create yellow circle indicator for moves that check opponent's king
+    // Canvas size matches cell size (60x60) for proper centering
+    var yellowCanvas: canvas = call canvas.create(60, 60, "yellow_indicator");
+    call canvas.clear(yellowCanvas);  // Make canvas transparent
+    call style.setFill(yellowCanvas, "#FFFF0080");  // Semi-transparent yellow
+    call draw.circle(yellowCanvas, 30, 30, 20, true);
+    call style.setStroke(yellowCanvas, "#AAAA00", 2.0);
+    call draw.circle(yellowCanvas, 30, 30, 20, false);
+    yellowCircleIndicator = call canvas.toImage(yellowCanvas);
+    
+    // Create red cross indicator for invalid moves (that would expose own king)
+    // Canvas size matches cell size (60x60) for proper centering
+    var crossCanvas: canvas = call canvas.create(60, 60, "red_cross_indicator");
+    call canvas.clear(crossCanvas);  // Make canvas transparent
+    call style.setStroke(crossCanvas, "#FF0000", 4.0);
+    // Draw X from corner to corner
+    call draw.line(crossCanvas, 15, 15, 45, 45);
+    call draw.line(crossCanvas, 45, 15, 15, 45);
+    redCrossIndicator = call canvas.toImage(crossCanvas);
+    
+    // Create larger red cross indicator for checkmate
+    // Canvas size matches cell size (60x60) for proper centering
+    var bigCrossCanvas: canvas = call canvas.create(60, 60, "red_cross_big_indicator");
+    call canvas.clear(bigCrossCanvas);  // Make canvas transparent
+    call style.setStroke(bigCrossCanvas, "#FF0000", 6.0);  // Thicker lines (6px instead of 4px)
+    // Draw X with larger extent (10-50 instead of 15-45)
+    call draw.line(bigCrossCanvas, 10, 10, 50, 50);
+    call draw.line(bigCrossCanvas, 50, 10, 10, 50);
+    redCrossBigIndicator = call canvas.toImage(bigCrossCanvas);
     
     // Create transparent rectangle for clearing piece positions
     // Canvas size matches cell size (60x60)
@@ -398,12 +435,19 @@ clearIndicators() {
 }
 
 // Set indicator for a specific cell
-setIndicator(x: int, y: int, isCapture: bool) {
+// indicatorType can be: "normal", "capture", "check", "invalid", "checkmate"
+setIndicator(x: int, y: int, indicatorType: string) {
     var indicator: imagedata;
-    if isCapture then {
+    if indicatorType == "capture" then {
         indicator = redIndicator;
+    } else if indicatorType == "check" then {
+        indicator = yellowCircleIndicator;
+    } else if indicatorType == "checkmate" then {
+        indicator = redCrossBigIndicator;
+    } else if indicatorType == "invalid" then {
+        indicator = redCrossIndicator;
     } else {
-        indicator = greenIndicator;
+        indicator = greenIndicator;  // "normal" or default
     }
     
     // Set the indicator based on position
@@ -693,6 +737,12 @@ movePiece(fromX: int, fromY: int, toX: int, toY: int) {
 handleCellClick(x: int, y: int) {
     print "Cell clicked: (" + x + ", " + y + ")";
     
+    // Don't allow moves if game is over
+    if gameOver then {
+        print "Game is over - no more moves allowed";
+        return;
+    }
+    
     // Check if a piece is already selected
     if selectedX >= 0 && selectedY >= 0 then {
         // A piece is selected - check if clicked position is a valid move destination
@@ -713,6 +763,19 @@ handleCellClick(x: int, y: int) {
         }
         
         if isValidMove then {
+            // Check if this move would expose the player's own king
+            var exposesKing: bool = call wouldMoveExposeKing(selectedX, selectedY, x, y, currentPlayer);
+            
+            if exposesKing then {
+                print "Invalid move - would expose king to check!";
+                chessScreen.statusMessage = "Invalid move - would expose your king!";
+                call clearIndicators();
+                call deselectPiece(selectedX, selectedY);
+                selectedX = -1;
+                selectedY = -1;
+                return;
+            }
+            
             // Get information about the move before executing it
             var sourceCellValue: int = call getPieceAt(selectedX, selectedY);
             var destCellValue: int = call getPieceAt(x, y);
@@ -760,11 +823,72 @@ handleCellClick(x: int, y: int) {
             // Switch to next player
             if currentPlayer == WHITE then {
                 currentPlayer = BLACK;
-                chessScreen.statusMessage = "Black to move";
             } else {
                 currentPlayer = WHITE;
-                chessScreen.statusMessage = "White to move";
             }
+            
+            // Check for checkmate or stalemate
+            var isInCheckmate: bool = call isCheckmate(currentPlayer);
+            var isInStalemate: bool = call isStalemate(currentPlayer);
+            
+            if isInCheckmate then {
+                print "Checkmate! Game over.";
+                gameOver = true;
+                
+                // Stop the game timer
+                call thread.timerStop("chessScreen.chessTimer");
+                print "Game timer stopped.";
+                
+                // Mark the losing king with a larger red cross
+                var kingPos: posType = call findKing(currentPlayer);
+                if kingPos.x >= 0 then {
+                    call setIndicator(kingPos.x, kingPos.y, "checkmate");
+                }
+                
+                // Update status message
+                var winner: string;
+                if currentPlayer == WHITE then {
+                    winner = "Black";
+                    chessScreen.statusMessage = "Checkmate! Black wins!";
+                } else {
+                    winner = "White";
+                    chessScreen.statusMessage = "Checkmate! White wins!";
+                }
+                
+                // Show game over dialog
+                call showGameOverDialog(winner, "checkmate");
+            } else if isInStalemate then {
+                print "Stalemate! Game is a draw.";
+                gameOver = true;
+                
+                // Stop the game timer
+                call thread.timerStop("chessScreen.chessTimer");
+                print "Game timer stopped.";
+                
+                // Mark both kings with red crosses
+                var whiteKingPos: posType = call findKing(WHITE);
+                var blackKingPos: posType = call findKing(BLACK);
+                
+                if whiteKingPos.x >= 0 then {
+                    call setIndicator(whiteKingPos.x, whiteKingPos.y, "invalid");
+                }
+                if blackKingPos.x >= 0 then {
+                    call setIndicator(blackKingPos.x, blackKingPos.y, "invalid");
+                }
+                
+                chessScreen.statusMessage = "Stalemate! Game is a draw.";
+                
+                // Show game over dialog
+                call showGameOverDialog("Draw", "stalemate");
+            } else {
+                // Normal game continues
+                if currentPlayer == BLACK then {
+                    chessScreen.statusMessage = "Black to move";
+                } else {
+                    chessScreen.statusMessage = "White to move";
+                }
+            }
+            
             call updateTimerColors();
             print "Switched to next player: " + currentPlayer;
             
@@ -827,21 +951,37 @@ handleCellClick(x: int, y: int) {
         var move = moves[i];
         print "  Move to: (" + move.x + ", " + move.y + ")";
         
-        // Check if this move captures an enemy piece
-        var targetCellValue: int = call getPieceAt(move.x, move.y);
-        var isCapture: bool = false;
+        // Check if this move would expose own king (invalid move - red cross)
+        var exposesKing: bool = call wouldMoveExposeKing(x, y, move.x, move.y, currentPlayer);
         
-        if targetCellValue != -1 then {
-            var targetCell = ChessCell(targetCellValue);
-            if targetCell.pieceType != EMPTY then {
-                isCapture = true;
-                print "    (capture move)";
+        if exposesKing then {
+            print "    (invalid - exposes king)";
+            call setIndicator(move.x, move.y, "invalid");
+        } else {
+            // Check if this move captures an enemy piece
+            var targetCellValue: int = call getPieceAt(move.x, move.y);
+            var isCapture: bool = false;
+            
+            if targetCellValue != -1 then {
+                var targetCell = ChessCell(targetCellValue);
+                if targetCell.pieceType != EMPTY then {
+                    isCapture = true;
+                    print "    (capture move)";
+                }
+            }
+            
+            // Check if this move would check the opponent's king
+            var checksOpponent: bool = call wouldMoveCheckOpponent(x, y, move.x, move.y, currentPlayer);
+            
+            if checksOpponent then {
+                print "    (checks opponent)";
+                call setIndicator(move.x, move.y, "check");
+            } else if isCapture then {
+                call setIndicator(move.x, move.y, "capture");
+            } else {
+                call setIndicator(move.x, move.y, "normal");
             }
         }
-        
-        // Set the indicator
-        print "  Setting indicator at (" + move.x + ", " + move.y + ")";
-        call setIndicator(move.x, move.y, isCapture);
     }
     
     print "handleCellClick complete";
@@ -894,6 +1034,28 @@ formatTimerDecimal(deciseconds: int) return string {
     var minsStr: string = call str.lpad(string(mins), 2, "0");
     var secsStr: string = call str.lpad(string(secs), 2, "0");
     return minsStr + ":" + secsStr + "." + tenths;
+}
+
+// Calculate and format elapsed game time
+formatElapsedTime() return string {
+    // Calculate elapsed time: initial time minus remaining time for both players
+    var elapsedWhite: int = initialTimerValue - timerWhite;
+    var elapsedBlack: int = initialTimerValue - timerBlack;
+    var totalElapsedDeciseconds: int = elapsedWhite + elapsedBlack;
+    
+    // Convert to seconds and minutes
+    var totalSeconds: int = totalElapsedDeciseconds / 10;
+    var minutes: int = totalSeconds / 60;
+    var seconds: int = call modulo(totalSeconds, 60);
+    
+    var result: string;
+    if minutes > 0 then {
+        result = string(minutes) + " min " + string(seconds) + " sec";
+    } else {
+        result = string(seconds) + " sec";
+    }
+    
+    return result;
 }
 
 // Timer callback function - called every 100ms (0.1 seconds)
@@ -1169,6 +1331,7 @@ handleStartGame() {
     var timeInDeciseconds: int = call getTimeLimitInDeciseconds(selectedTimeLimit);
     timerWhite = timeInDeciseconds;
     timerBlack = timeInDeciseconds;
+    initialTimerValue = timeInDeciseconds;  // Store for elapsed time calculation
     
     gameStarted = true;
     
@@ -1841,3 +2004,127 @@ screen chessScreen = {
         }
     ]
 };
+
+// Game Over dialog screen
+screen gameOverDialog = {
+    "title": "Game Over",
+    "width": 400,
+    "height": 250,
+    "showMenu": false,
+    "vars": [
+        {
+            "name": "resultMessage",
+            "type": "string",
+            "default": "Game Over"
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "alignment": "center",
+            "spacing": "20",
+            "padding": "20",
+            "style": "-fx-background-color: #2c2c2c;",
+            "items": [
+                {"name": "resultLabel", "varRef": "resultMessage", "display": {"type": "label", "labelColor": "#ffcc00", "labelFontSize": "24px", "labelBold": true}},
+                {"name": "messageLabel", "display": {"type": "label", "labelText": "What would you like to do?", "labelColor": "#ffffff", "labelFontSize": "16px"}}
+            ],
+            "areas": [
+                {
+                    "name": "buttonArea",
+                    "type": "hbox",
+                    "alignment": "center",
+                    "spacing": "20",
+                    "padding": "20",
+                    "items": [
+                        {"name": "restartBtn", "display": {"type": "button", "labelText": "New Game", "onClick": "call handleRestartGame();", "style": "-fx-font-size: 16px; -fx-padding: 10 30 10 30;"}},
+                        {"name": "exitBtn", "display": {"type": "button", "labelText": "Exit", "onClick": "call handleExitFromGameOver();", "style": "-fx-font-size: 16px; -fx-padding: 10 30 10 30;"}}
+                    ]
+                }
+            ]
+        }
+    ]
+};
+
+// Show game over dialog
+showGameOverDialog(winner: string, gameType: string) {
+    print "Showing game over dialog...";
+    
+    var elapsedTime: string = call formatElapsedTime();
+    
+    var message: string;
+    if gameType == "checkmate" then {
+        message = "Checkmate! " + winner + " wins!\nGame time: " + elapsedTime;
+    } else {
+        message = "Stalemate - " + winner + "!\nGame time: " + elapsedTime;
+    }
+    
+    gameOverDialog.resultMessage = message;
+    show screen gameOverDialog;
+}
+
+// Handle restart game from game over dialog
+handleRestartGame() {
+    print "Restarting game...";
+    close screen gameOverDialog;
+    call resetGame();
+}
+
+// Handle exit from game over dialog
+handleExitFromGameOver() {
+    print "Exiting from game over dialog...";
+    close screen gameOverDialog;
+    call closeChessScreen();
+}
+
+// Reset the game to initial state
+resetGame() {
+    print "Resetting game...";
+    
+    // Reset game state
+    gameOver = false;
+    selectedX = -1;
+    selectedY = -1;
+    currentPlayer = WHITE;
+    
+    // Reset timers
+    var timeInDeciseconds: int = call getTimeLimitInDeciseconds(selectedTimeLimit);
+    timerWhite = timeInDeciseconds;
+    timerBlack = timeInDeciseconds;
+    initialTimerValue = timeInDeciseconds;  // Reset initial value for new game
+    
+    // Clear all indicators
+    call clearIndicators();
+    
+    // Reinitialize the board
+    call initializeBoard();
+    
+    // Update piece images on screen
+    call initializeBoardPieces();
+    
+    // Reset screen display variables
+    chessScreen.whiteTimer = call formatTimerDecimal(timerWhite);
+    chessScreen.blackTimer = call formatTimerDecimal(timerBlack);
+    chessScreen.statusMessage = "White to move";
+    chessScreen.moveHistory = "Game restarted.\nWhite's turn.\n";
+    call updateTimerColors();
+    
+    // Restart the timer
+    call thread.timerStart("chessScreen.chessTimer", 100, "timerCallback");
+    
+    print "Game reset complete!";
+}
+
+// Close chess screen handler
+closeChessScreen() {
+    print "Closing chess screen...";
+    gameStarted = false;
+    
+    // Stop the timer if it's running
+    call thread.timerStop("chessScreen.chessTimer");
+    
+    close screen chessScreen;
+    
+    print "Chess screen closed.";
+}
