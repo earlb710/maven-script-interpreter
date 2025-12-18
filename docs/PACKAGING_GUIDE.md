@@ -10,20 +10,33 @@ The packaging system:
 1. **Parses** your EBS script into an Abstract Syntax Tree (AST)
 2. **Serializes** the AST using Java serialization
 3. **Compresses** the binary data using GZIP compression
-4. **Saves** the result as a `.ebsp` file
+4. **Encodes** the compressed data using Base64 encoding
+5. **Adds** a version header comment
+6. **Saves** the result as a text-based `.ebsp` file
+
+The `.ebsp` file format:
+```
+// packaged esb language ver X.Y.Z.W
+<base64-encoded compressed bytecode>
+```
 
 When you run a `.ebsp` file, the interpreter automatically:
 1. Detects the `.ebsp` extension
-2. Deserializes and decompresses the AST
-3. Executes the pre-parsed code directly (no re-parsing needed)
+2. Reads and validates the version header
+3. Decodes the Base64 content
+4. Deserializes and decompresses the AST
+5. Executes the pre-parsed code directly (no re-parsing needed)
 
 ### Benefits
 
 - **Source Code Protection**: The original source code is not stored in the package
-- **Obfuscation**: Binary serialization and compression make reverse engineering difficult
+- **Version Tracking**: Header comment shows which EBS version created the package
+- **Transfer-Friendly**: Base64 encoding makes files safe for text-based protocols
+- **Obfuscation**: Serialization and compression make reverse engineering difficult
 - **Fast Loading**: Pre-parsed AST loads faster than parsing source code
 - **Compression**: GZIP compression creates compact packages
 - **Seamless Execution**: `.ebsp` files run exactly like `.ebs` files
+- **Text-Based**: Files can be opened in text editors (though content is encoded)
 
 ## Usage
 
