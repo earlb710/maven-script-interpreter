@@ -120,4 +120,4 @@ print "Showing startup dialog...";
 show screen startupDialog;
 
 // Initially disable difficulty selection (default is 2 Player mode)
-call scr.setProperty("startupDialog.difficultyRadio", "disabled", true);
+call scr.setproperty("startupDialog.difficultyRadio", "disabled", true);

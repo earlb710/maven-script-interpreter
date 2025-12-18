@@ -1321,9 +1321,9 @@ getTimeLimitInDeciseconds(timeLimit: string) return int {
 handleGameModeChange() {
     // Enable difficulty selection only for 1 Player mode
     if startupDialog.gameMode == "1" then {
-        call scr.setProperty("startupDialog.difficultyRadio", "disabled", false);
+        call scr.setproperty("startupDialog.difficultyRadio", "disabled", false);
     } else {
-        call scr.setProperty("startupDialog.difficultyRadio", "disabled", true);
+        call scr.setproperty("startupDialog.difficultyRadio", "disabled", true);
     }
 }
 
