@@ -1,13 +1,9 @@
 package com.eb.ui.util;
 
-import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.Region;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 
@@ -23,10 +19,10 @@ import javafx.scene.text.TextFlow;
  * Example usage:
  * <pre>
  * Button saveBtn = new Button("Save");
- * ButtonShortcutHelper.addShortcut(saveBtn, KeyCode.S, true); // Alt+S
+ * ButtonShortcutHelper.addAltShortcut(saveBtn, KeyCode.S); // Alt+S
  * 
  * Button closeBtn = new Button("Close");
- * ButtonShortcutHelper.addShortcut(closeBtn, KeyCode.C, true); // Alt+C
+ * ButtonShortcutHelper.addAltShortcut(closeBtn, KeyCode.C); // Alt+C
  * </pre>
  */
 public class ButtonShortcutHelper {
@@ -94,11 +90,19 @@ public class ButtonShortcutHelper {
         // Update or create tooltip with shortcut information
         updateTooltip(button, keyCode, useAlt, useCtrl);
         
+        // Store reference to event handler so it can be removed when scene changes
+        final javafx.event.EventHandler<KeyEvent>[] handlerRef = new javafx.event.EventHandler[1];
+        
         // Add keyboard event handler to the button's scene
         button.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            // Remove old handler if it exists
+            if (oldScene != null && handlerRef[0] != null) {
+                oldScene.removeEventFilter(KeyEvent.KEY_PRESSED, handlerRef[0]);
+            }
+            
             if (newScene != null) {
-                // Add event filter to handle the keyboard shortcut
-                newScene.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+                // Create and store event filter to handle the keyboard shortcut
+                handlerRef[0] = event -> {
                     boolean modifierMatch = (useAlt && event.isAltDown() && !event.isControlDown()) ||
                                           (useCtrl && event.isControlDown() && !event.isAltDown()) ||
                                           (useAlt && useCtrl && event.isAltDown() && event.isControlDown());
@@ -110,7 +114,8 @@ public class ButtonShortcutHelper {
                             event.consume();
                         }
                     }
-                });
+                };
+                newScene.addEventFilter(KeyEvent.KEY_PRESSED, handlerRef[0]);
             }
         });
     }
