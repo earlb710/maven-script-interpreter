@@ -571,15 +571,52 @@ public class Parser {
         // Mark this file as processed
         importedFiles.add(importKey);
         
-        // Parse the imported file to register its typedefs in the TypeRegistry
-        // The parse() method will recursively process any imports in the imported file
-        // Note: We discard the returned RuntimeContext because we only need the side effect
-        // of registering typedefs. The imported code will be executed later at runtime by the Interpreter.
-        try {
-            Parser.parse(importPath);
-        } catch (ParseError e) {
-            // Re-throw with context about which import failed
-            throw new ParseError("[line " + line + "] Failed to parse import '" + filename + "': " + e.getMessage());
+        // Handle .ebsp (packaged) files specially - they need typedef registration from deserialized statements
+        if (importPath.toString().toLowerCase().endsWith(".ebsp")) {
+            try {
+                RuntimeContext context = com.eb.script.package_tool.RuntimeContextSerializer.deserialize(importPath);
+                // Register typedefs from the deserialized statements
+                registerTypedefsFromStatements(context.statements);
+            } catch (ClassNotFoundException e) {
+                throw new ParseError("[line " + line + "] Failed to load packaged import '" + filename + "': " + e.getMessage());
+            }
+        } else {
+            // Parse the imported file to register its typedefs in the TypeRegistry
+            // The parse() method will recursively process any imports in the imported file
+            // Note: We discard the returned RuntimeContext because we only need the side effect
+            // of registering typedefs. The imported code will be executed later at runtime by the Interpreter.
+            try {
+                Parser.parse(importPath);
+            } catch (ParseError e) {
+                // Re-throw with context about which import failed
+                throw new ParseError("[line " + line + "] Failed to parse import '" + filename + "': " + e.getMessage());
+            }
+        }
+    }
+    
+    /**
+     * Register typedefs from an array of statements (used for .ebsp imports).
+     * This walks through all statements and registers any TypedefStatements found.
+     */
+    private void registerTypedefsFromStatements(Statement[] statements) {
+        if (statements == null) {
+            return;
+        }
+        
+        for (Statement stmt : statements) {
+            if (stmt instanceof TypedefStatement typedef) {
+                // Register this typedef in the TypeRegistry
+                TypeRegistry.TypeAlias alias = new TypeRegistry.TypeAlias(
+                    typedef.typeName,
+                    typedef.dataType,
+                    typedef.recordType,
+                    typedef.bitmapType,
+                    typedef.intmapType,
+                    typedef.isArray,
+                    typedef.arraySize
+                );
+                TypeRegistry.registerTypeAlias(alias);
+            }
         }
     }
 
