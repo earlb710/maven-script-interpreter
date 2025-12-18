@@ -1534,6 +1534,13 @@ public class InterpreterScreen {
             }
         }
         
+        // Stop all timers associated with this screen
+        int stoppedTimers = BuiltinsThread.stopTimersForSource(screenName);
+        if (stoppedTimers > 0 && context.getOutput() != null) {
+            String message = String.format("Stopped %d timer(s) associated with screen '%s'", stoppedTimers, screenName);
+            context.getOutput().printlnInfo(message);
+        }
+        
         // Clean up the screen thread (only top-level screens have their threads interrupted)
         cleanupScreenThread(screenName);
         
