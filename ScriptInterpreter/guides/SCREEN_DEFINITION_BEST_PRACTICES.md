@@ -133,7 +133,7 @@ screen formExample = {
             "display": {
                 "type": "textfield",
                 "mandatory": true,
-                "promptText": "Enter first name"
+                "labelText": "Enter first name"
             }
         },
         {
@@ -142,7 +142,7 @@ screen formExample = {
             "default": 0,
             "display": {
                 "type": "textfield",
-                "promptText": "Age"
+                "labelText": "Age"
             }
         },
         {
@@ -167,7 +167,6 @@ screen formExample = {
     "display": {
         "type": "textfield",
         "mandatory": true,
-        "promptText": "user@example.com",
         "labelText": "Email Address:",
         "labelWidth": "120",
         "width": "250",
@@ -180,9 +179,8 @@ screen formExample = {
 **Best Practices:**
 - Always specify the `type` explicitly (string, int, bool, etc.)
 - Provide meaningful `default` values
-- Use `promptText` to guide users
+- Use `labelText` to guide users and label form fields
 - Set `mandatory: true` for required fields
-- Use `labelText` for form field labels
 - Keep `labelWidth` consistent across related fields (e.g., all 100 or 120)
 
 ### Component Type Selection
@@ -990,7 +988,7 @@ Use this checklist when creating screens:
 - [ ] Meaningful `default` values
 - [ ] Appropriate display `type` for data type
 - [ ] `mandatory: true` for required fields
-- [ ] Helpful `promptText` for user guidance
+- [ ] Helpful `labelText` for user guidance
 - [ ] Consistent `labelWidth` across related fields
 
 **Variable Sets:**
@@ -1072,7 +1070,6 @@ screen customerForm = {
                     "display": {
                         "type": "textfield",
                         "mandatory": true,
-                        "promptText": "Enter first name",
                         "labelText": "First Name:",
                         "labelWidth": "120",
                         "width": "250"
@@ -1085,7 +1082,6 @@ screen customerForm = {
                     "display": {
                         "type": "textfield",
                         "mandatory": true,
-                        "promptText": "Enter last name",
                         "labelText": "Last Name:",
                         "labelWidth": "120",
                         "width": "250"
@@ -1113,7 +1109,6 @@ screen customerForm = {
                     "display": {
                         "type": "textfield",
                         "mandatory": true,
-                        "promptText": "user@example.com",
                         "labelText": "Email:",
                         "labelWidth": "120",
                         "width": "250",
@@ -1126,7 +1121,6 @@ screen customerForm = {
                     "default": "",
                     "display": {
                         "type": "textfield",
-                        "promptText": "555-1234",
                         "labelText": "Phone:",
                         "labelWidth": "120",
                         "width": "250"
