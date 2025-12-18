@@ -936,6 +936,21 @@ foreach char in text {
 }
 ```
 
+#### Reverse Iteration Over Arrays
+```javascript
+var numbers = [1, 2, 3, 4, 5];
+
+// Forward iteration
+foreach num in numbers {
+    print num;  // Output: 1, 2, 3, 4, 5
+}
+
+// Reverse iteration using array.reverse()
+foreach num in #array.reverse(numbers) {
+    print num;  // Output: 5, 4, 3, 2, 1
+}
+```
+
 ### Do-While Loops
 ```javascript
 do {
