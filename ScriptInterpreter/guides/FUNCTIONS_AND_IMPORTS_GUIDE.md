@@ -331,7 +331,7 @@ function setScore(newScore: int) { /* ... */ }
 
 #### Case Sensitivity
 
-**Important:** EBS is case-insensitive for identifiers. All function names are normalized to lowercase internally.
+**Important:** EBS is case-insensitive for all identifiers (function names, variable names, etc.). All identifiers are normalized to lowercase and stored internally in lowercase.
 
 ```javascript
 // These all refer to the same function
@@ -340,9 +340,14 @@ function calculateTotal return int { return 100; }
 var result1 = call calculateTotal();    // Works
 var result2 = call CALCULATETOTAL();    // Works (same function)
 var result3 = call CalculateTotal();    // Works (same function)
+
+// Same applies to variables
+var myValue: int = 42;
+print MYVALUE;     // Works - prints 42
+print MyValue;     // Works - prints 42
 ```
 
-**Best Practice:** Use consistent camelCase naming for readability, even though the interpreter treats all variations the same.
+**Best Practice:** Use consistent camelCase naming for readability, even though the interpreter normalizes all identifiers to lowercase internally.
 
 ---
 

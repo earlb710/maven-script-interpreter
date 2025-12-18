@@ -99,6 +99,31 @@ import "chess-moves.ebs";
 
 ---
 
+## Case Insensitivity
+
+**Important:** All identifiers (function names, variable names, record fields, etc.) are case-insensitive and stored internally in lowercase.
+
+```javascript
+// Function names are case-insensitive
+function calculateTotal return int { return 100; }
+var x = call calculateTotal();   // Works
+var y = call CALCULATETOTAL();   // Works (same function)
+
+// Variable names are case-insensitive
+var myValue: int = 42;
+print MYVALUE;  // Works - prints 42
+
+// Record field names are case-insensitive
+var person: record { name: string };
+person = { "name": "Alice" };
+print person.Name;  // Works
+print person.NAME;  // Works
+```
+
+**Best Practice:** Use consistent camelCase for readability, even though names are normalized to lowercase internally.
+
+---
+
 ## Function Naming Conventions
 
 ```javascript

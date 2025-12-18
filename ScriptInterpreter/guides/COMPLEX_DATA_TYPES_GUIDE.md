@@ -182,6 +182,31 @@ person.age = 31;
 person.email = "alice.smith@example.com";
 ```
 
+#### Field Name Case Insensitivity
+
+**Important:** Record field names are case-insensitive and stored internally in lowercase. This means field access is case-insensitive.
+
+```
+var person: record {
+    name: string,
+    age: int
+};
+
+person = {
+    "name": "Alice",
+    "age": 30
+};
+
+// All of these work - field names are case-insensitive
+print person.name;      // Works
+print person.Name;      // Works
+print person.NAME;      // Works
+print person.age;       // Works
+print person.AGE;       // Works
+```
+
+**Best Practice:** Use consistent camelCase naming for record fields for readability, even though the interpreter normalizes all field names to lowercase internally.
+
 #### Record with Multiple Types
 
 ```
