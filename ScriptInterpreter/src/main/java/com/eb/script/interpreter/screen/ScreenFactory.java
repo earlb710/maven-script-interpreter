@@ -2139,8 +2139,28 @@ public class ScreenFactory {
             }
         }
         
-        // Note: JavaFX component properties are not included here as they are not useful for display items
-        // Container info is only shown on the areas tab where it is relevant
+        // Check if item is backed by a JavaFX component
+        // Null checks are needed as this is called from multiple contexts where parameters may be null
+        if (context != null && screenName != null && varRef != null && !varRef.isEmpty()) {
+            java.util.concurrent.ConcurrentHashMap<String, ScreenComponentType> componentTypes = context.getScreenComponentTypes(screenName);
+            if (componentTypes != null) {
+                // Use lowercase for lookup since keys are stored in lowercase
+                ScreenComponentType componentType = componentTypes.get(varRef.toLowerCase(java.util.Locale.ROOT));
+                if (componentType != null && componentType.getJavaFXNode() != null) {
+                    // Add JavaFX component description
+                    if (info.length() > 0) {
+                        info.append("\n");
+                    }
+                    info.append("JavaFX:\n");
+                    String javafxDesc = componentType.getJavaFXDescription();
+                    // Append the JavaFX description (already formatted by getJavaFXDescription)
+                    String[] lines = javafxDesc.split("\n");
+                    for (String line : lines) {
+                        info.append(line).append("\n");
+                    }
+                }
+            }
+        }
         
         // Remove trailing newline
         if (info.length() > 0 && info.charAt(info.length() - 1) == '\n') {
