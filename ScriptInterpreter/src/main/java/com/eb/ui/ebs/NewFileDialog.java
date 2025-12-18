@@ -1,7 +1,9 @@
 package com.eb.ui.ebs;
 
+import com.eb.ui.util.ButtonShortcutHelper;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.GridPane;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
@@ -216,6 +218,7 @@ public class NewFileDialog extends Dialog<NewFileDialog.FileInfo> {
         
         // Browse button to select directory
         browseButton = new Button("Browse...");
+        ButtonShortcutHelper.addAltShortcut(browseButton, KeyCode.B);
         browseButton.setOnAction(e -> {
             DirectoryChooser dirChooser = new DirectoryChooser();
             dirChooser.setTitle("Select File Location");
@@ -256,6 +259,7 @@ public class NewFileDialog extends Dialog<NewFileDialog.FileInfo> {
         
         // Enable/Disable OK button based on file name
         Button okButton = (Button) getDialogPane().lookupButton(okButtonType);
+        ButtonShortcutHelper.addAltShortcut(okButton, KeyCode.C);
         okButton.setDisable(true);
         
         // Validation: OK button is enabled only when file name is not empty

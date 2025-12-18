@@ -1,5 +1,6 @@
 package com.eb.ui.ebs;
 
+import com.eb.ui.util.ButtonShortcutHelper;
 import com.eb.script.json.Json;
 import java.io.File;
 import java.nio.file.Files;
@@ -12,6 +13,7 @@ import java.util.prefs.Preferences;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
@@ -63,6 +65,10 @@ public class ExportConfigDialog extends Stage {
         // --- Buttons ---
         Button btnExport = new Button("Export…");
         Button btnCancel = new Button("Cancel");
+        
+        // Add keyboard shortcuts to buttons
+        ButtonShortcutHelper.addAltShortcut(btnExport, KeyCode.E);
+        ButtonShortcutHelper.addAltShortcut(btnCancel, KeyCode.C);
         
         btnExport.setDefaultButton(true);
         btnCancel.setCancelButton(true);
