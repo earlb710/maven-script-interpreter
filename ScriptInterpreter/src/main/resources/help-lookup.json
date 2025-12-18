@@ -48,8 +48,8 @@
     {
       "keyword": "foreach",
       "short_description": "Iterates over a collection",
-      "long_help": "The 'foreach' keyword creates a loop that iterates over each element in a collection (array or JSON array). Must be used with 'in'.",
-      "example": "var numbers = [1, 2, 3, 4, 5];\nforeach num in numbers do {\n  print num;\n}"
+      "long_help": "The 'foreach' keyword creates a loop that iterates over each element in a collection (array or JSON array). Must be used with 'in'. Supports bidirectional iteration: use #array.reverse() to iterate arrays in reverse order.",
+      "example": "var numbers = [1, 2, 3, 4, 5];\n// Forward iteration\nforeach num in numbers do {\n  print num;  // 1, 2, 3, 4, 5\n}\n// Reverse iteration\nforeach num in #array.reverse(numbers) do {\n  print num;  // 5, 4, 3, 2, 1\n}"
     },
     {
       "keyword": "in",
@@ -517,6 +517,19 @@
       ],
       "return_type": "any",
       "example": "<b>var</b> arr = [1, 2, 3];<br><b>var</b> removed = <b>call</b> <b>array.remove</b>(arr, 1);<br><b>print</b> removed; // 2"
+    },
+    {
+      "function": "array.reverse",
+      "short_description": "Returns reverse iteration wrapper for array",
+      "long_help": "Returns a wrapper that enables reverse iteration over the array. Use with foreach to iterate arrays from end to beginning.<br>The array itself is not modified or copied - only a lightweight wrapper (~24 bytes) is created. This enables efficient<br>bidirectional iteration with O(1) memory overhead. Compatible with all array types (dynamic, fixed, byte, int, bitmap, intmap).",
+      "parameters": [
+        {
+          "name": "array",
+          "type": "array"
+        }
+      ],
+      "return_type": "iterable",
+      "example": "<b>var</b> numbers = [1, 2, 3, 4, 5];<br><br>// Forward iteration<br><b>foreach</b> num <b>in</b> numbers {<br>  <b>print</b> num;  // 1, 2, 3, 4, 5<br>}<br><br>// Reverse iteration<br><b>foreach</b> num <b>in</b> <b>call</b> <b>array.reverse</b>(numbers) {<br>  <b>print</b> num;  // 5, 4, 3, 2, 1<br>}<br><br>// Short syntax with #<br><b>foreach</b> num <b>in</b> #array.reverse(numbers) {<br>  <b>print</b> num;  // 5, 4, 3, 2, 1<br>}"
     },
     {
       "function": "array.sort",

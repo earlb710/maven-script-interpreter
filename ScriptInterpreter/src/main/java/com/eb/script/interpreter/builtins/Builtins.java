@@ -730,6 +730,11 @@ public final class Builtins {
                 newParam("array", DataType.ARRAY, true),
                 newParam("index", DataType.INTEGER)
         ));
+        // array.reverse(array) - Returns a reverse iteration wrapper for bidirectional iteration
+        addBuiltin(info(
+                "array.reverse", DataType.ANY,
+                newParam("array", DataType.ARRAY, true)
+        ));
         addBuiltin(info(
                 "array.base64encode", DataType.STRING,
                 newParam("bytes", DataType.ARRAY, true)

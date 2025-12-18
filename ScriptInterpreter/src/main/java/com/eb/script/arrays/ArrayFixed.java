@@ -130,6 +130,23 @@ public class ArrayFixed implements ArrayDef<Object, Object[]> {
     }
 
     @Override
+    public Iterator<Object> reverseIterator() {
+        return new Iterator<Object>() {
+            int idx = elements.length - 1;
+
+            @Override
+            public boolean hasNext() {
+                return idx >= 0;
+            }
+
+            @Override
+            public Object next() {
+                return elements[idx--];
+            }
+        };
+    }
+
+    @Override
     public Object[] getAll() {
         return elements;
     }

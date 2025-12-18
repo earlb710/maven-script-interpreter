@@ -1,6 +1,7 @@
 package com.eb.script.arrays;
 
 import com.eb.script.token.DataType;
+import java.util.Iterator;
 
 /**
  *
@@ -37,5 +38,13 @@ public interface ArrayDef<E, A> extends Iterable<E> {
     public boolean isEmpty();
 
     public boolean isFixed();
+    
+    /**
+     * Returns an iterator that iterates over the array in reverse order.
+     * This enables bidirectional iteration over arrays.
+     * 
+     * @return an iterator that traverses the array from end to beginning
+     */
+    public Iterator<E> reverseIterator();
 
 }

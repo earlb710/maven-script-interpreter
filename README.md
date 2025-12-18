@@ -17,7 +17,8 @@ A powerful script interpreter for the EBS (Earl Bosch Script) language, featurin
 - **Configurable Colors**: Customize console colors via JSON configuration file
 - **Database Integration**: Built-in SQL support with cursors and connections
 - **Type Aliases**: Define reusable type aliases for complex types with the `typeof` keyword
-- **Array Support**: Multi-dimensional arrays with type safety
+- **Array Support**: Multi-dimensional arrays with type safety and bidirectional iteration
+- **Bidirectional Iteration**: Iterate arrays forward or reverse using `#array.reverse()`
 - **JSON Support**: Native JSON parsing with support for both standard quoted keys and JavaScript-style unquoted keys, validation, and schema support
 - **File I/O**: Built-in file operations
 - **Script Packaging**: Package EBS applications into binary `.ebsp` files to protect source code from viewing

@@ -1,0 +1,127 @@
+// EBS Language - Bidirectional Array Iteration Example
+// Demonstrates forward and reverse iteration using array.reverse()
+
+print "=== Bidirectional Array Iteration Demo ===";
+print "";
+
+// Test 1: Dynamic array with strings
+print "Test 1: String Array";
+var names = ["Alice", "Bob", "Charlie", "Diana", "Eve"];
+
+print "Forward iteration:";
+foreach name in names {
+    print "  - " + name;
+}
+
+print "";
+print "Reverse iteration:";
+foreach name in #array.reverse(names) {
+    print "  - " + name;
+}
+
+print "";
+print "---";
+print "";
+
+// Test 2: Fixed array with integers
+print "Test 2: Integer Array";
+var numbers: int[5];
+numbers[0] = 10;
+numbers[1] = 20;
+numbers[2] = 30;
+numbers[3] = 40;
+numbers[4] = 50;
+
+print "Forward iteration:";
+foreach num in numbers {
+    print "  Value: " + num;
+}
+
+print "";
+print "Reverse iteration:";
+foreach num in #array.reverse(numbers) {
+    print "  Value: " + num;
+}
+
+print "";
+print "---";
+print "";
+
+// Test 3: Array with calculations
+print "Test 3: Array with Calculations";
+var values = [1, 2, 3, 4, 5];
+var sum: int = 0;
+
+print "Summing forward:";
+foreach val in values {
+    sum = sum + val;
+    print "  Adding " + val + ", sum = " + sum;
+}
+
+sum = 0;
+print "";
+print "Summing backward:";
+foreach val in #array.reverse(values) {
+    sum = sum + val;
+    print "  Adding " + val + ", sum = " + sum;
+}
+
+print "";
+print "---";
+print "";
+
+// Test 4: Empty array
+print "Test 4: Empty Array";
+var empty = [];
+
+print "Forward iteration (should be empty):";
+foreach item in empty {
+    print "  This should not print";
+}
+print "  (no items)";
+
+print "";
+print "Reverse iteration (should be empty):";
+foreach item in #array.reverse(empty) {
+    print "  This should not print";
+}
+print "  (no items)";
+
+print "";
+print "---";
+print "";
+
+// Test 5: Single element array
+print "Test 5: Single Element Array";
+var single = ["Only"];
+
+print "Forward iteration:";
+foreach item in single {
+    print "  - " + item;
+}
+
+print "";
+print "Reverse iteration:";
+foreach item in #array.reverse(single) {
+    print "  - " + item;
+}
+
+print "";
+print "---";
+print "";
+
+// Test 6: Using break in reverse iteration
+print "Test 6: Break in Reverse Iteration";
+var countdown = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
+
+print "Reverse iteration with break at 5:";
+foreach num in #array.reverse(countdown) {
+    if (num == 5) {
+        print "  Breaking at 5";
+        break;
+    }
+    print "  " + num;
+}
+
+print "";
+print "=== All Tests Complete ===";
