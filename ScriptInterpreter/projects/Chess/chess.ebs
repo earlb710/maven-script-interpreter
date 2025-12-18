@@ -25,7 +25,8 @@ screen startupDialog = {
                 "options": ["1:1 Player", "2:2 Player"],
                 "itemColor": "#ffffff",
                 "itemBold": true,
-                "itemFontSize": "14px"
+                "itemFontSize": "14px",
+                "onChange": "call handleGameModeChange();"
             }
         },
         {
@@ -117,3 +118,6 @@ print "Loading chess logo...";
 startupDialog.logo = call image.load(imgPath + "chess_logo.svg");
 print "Showing startup dialog...";
 show screen startupDialog;
+
+// Initially disable difficulty selection (default is 2 Player mode)
+call scr.setProperty("startupDialog.difficultyRadio", "disabled", true);
