@@ -1319,11 +1319,17 @@ getTimeLimitInDeciseconds(timeLimit: string) return int {
 
 // Handle game mode change - enable/disable difficulty selection
 handleGameModeChange() {
+    print "handleGameModeChange() called - gameMode: " + startupDialog.gameMode;
+    
     // Enable difficulty selection only for 1 Player mode
     if startupDialog.gameMode == "1" then {
+        print "Enabling difficulty selection...";
         call scr.setproperty("startupDialog.difficultyRadio", "disabled", false);
+        print "Difficulty selection enabled";
     } else {
+        print "Disabling difficulty selection...";
         call scr.setproperty("startupDialog.difficultyRadio", "disabled", true);
+        print "Difficulty selection disabled";
     }
 }
 
