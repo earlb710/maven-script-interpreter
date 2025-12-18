@@ -577,6 +577,8 @@ public class Parser {
                 RuntimeContext context = com.eb.script.package_tool.RuntimeContextSerializer.deserialize(importPath);
                 // Register typedefs from the deserialized statements
                 registerTypedefsFromStatements(context.statements);
+            } catch (IOException e) {
+                throw new ParseError("[line " + line + "] Failed to read packaged import '" + filename + "': " + e.getMessage());
             } catch (ClassNotFoundException e) {
                 throw new ParseError("[line " + line + "] Failed to load packaged import '" + filename + "': " + e.getMessage());
             }
