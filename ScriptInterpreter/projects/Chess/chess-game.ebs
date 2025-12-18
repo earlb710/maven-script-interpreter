@@ -1271,6 +1271,9 @@ var selectedGameMode: string = "2 player";
 // Variable to store selected time limit
 var selectedTimeLimit: string = "Unlimited";
 
+// Variable to store selected difficulty level
+var selectedDifficulty: string = "Medium";
+
 // Constant for unlimited time (in seconds)
 var UNLIMITED_TIME: int = 99999;
 
@@ -1324,8 +1327,22 @@ handleStartGame() {
     }
     
     selectedTimeLimit = startupDialog.timeLimit;
+    
+    // Store selected difficulty level
+    // The difficulty variable stores "1", "2", "3", or "4"
+    if startupDialog.difficulty == "1" then {
+        selectedDifficulty = "Easy";
+    } else if startupDialog.difficulty == "2" then {
+        selectedDifficulty = "Medium";
+    } else if startupDialog.difficulty == "3" then {
+        selectedDifficulty = "Hard";
+    } else {
+        selectedDifficulty = "Expert";
+    }
+    
     print "Selected game mode: " + selectedGameMode;
     print "Selected time limit: " + selectedTimeLimit;
+    print "Selected difficulty: " + selectedDifficulty;
     
     // Set the timer values based on selection (in deciseconds)
     var timeInDeciseconds: int = call getTimeLimitInDeciseconds(selectedTimeLimit);
