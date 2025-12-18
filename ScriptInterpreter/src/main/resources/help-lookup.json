@@ -22,6 +22,12 @@
       "example": "var content = call file.readTextFile(path=\"data.txt\");\ncall debug.log(message=\"Processing started\");"
     },
     {
+      "keyword": "function",
+      "short_description": "Declares a user-defined function",
+      "long_help": "The 'function' keyword is used to declare custom functions. It is optional - functions can be declared with or without this keyword. Functions can accept parameters, specify return types, and encapsulate reusable code logic. They are invoked using the 'call' keyword.",
+      "example": "// Basic function (with optional 'function' keyword)\nfunction greet {\n  print \"Hello!\";\n}\n\n// Function without 'function' keyword (traditional)\ngreet {\n  print \"Hello!\";\n}\n\n// Function with parameters and return type\nfunction add(a: int, b: int) return int {\n  return a + b;\n}\n\n// Function with default parameters\nfunction greet(name: string = \"World\") return string {\n  return \"Hello, \" + name + \"!\";\n}\n\n// Calling functions\ncall greet;\nvar sum = call add(5, 3);\nvar msg = call greet(\"Alice\");"
+    },
+    {
       "keyword": "return",
       "short_description": "Returns a value from a block",
       "long_help": "The 'return' keyword exits the current execution block and optionally returns a value. It's commonly used in functions and conditional blocks.",
