@@ -527,7 +527,7 @@ public class EbsTab extends Tab {
         lblCount = new Label("");
 
         // Group find field with next/prev buttons in a bordered container
-        HBox findGroup = new HBox(0, findField, btnNext, btnPrev);
+        HBox findGroup = new HBox(2, findField, btnNext, btnPrev);
         findGroup.setAlignment(Pos.CENTER_LEFT);
         findGroup.setStyle("-fx-border-color: #999999; -fx-border-width: 1px; -fx-padding: 1px;");
 
