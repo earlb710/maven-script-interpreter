@@ -1338,8 +1338,7 @@ handleStartGame() {
         
         // Randomly assign white or black to human player
         // Generate random number: 0 or 1
-        var randomValue: int = call math.randomInt(0, 1);
-        humanPlayerColor = randomValue;
+        humanPlayerColor = call math.randomInt(0, 1);
         
         if humanPlayerColor == WHITE then {
             print "You are playing as WHITE. White starts first.";
