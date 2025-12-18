@@ -93,7 +93,7 @@ public class Parser {
 
     public static RuntimeContext parse(Path file) throws IOException, ParseError {
         // Check if this is a packaged .ebsp file
-        if (isPackagedFile(file)) {
+        if (RuntimeContextSerializer.isPackagedFile(file)) {
             try {
                 return RuntimeContextSerializer.deserialize(file);
             } catch (ClassNotFoundException e) {
@@ -159,18 +159,6 @@ public class Parser {
         context.statements = statementsToArray(parser.statements);
     }
     
-    /**
-     * Check if a file path represents a packaged .ebsp file.
-     * Uses the filename only to avoid issues with path separators.
-     * 
-     * @param file The file path to check
-     * @return true if the file is a .ebsp package
-     */
-    private static boolean isPackagedFile(Path file) {
-        String filename = file.getFileName().toString().toLowerCase();
-        return filename.endsWith(".ebsp");
-    }
-
     private Parser(String source, List<EbsToken> tokens, Path sourcePath, Set<String> importedFiles) {
         this.tokens = tokens;
         this.source = source;
@@ -585,7 +573,7 @@ public class Parser {
         importedFiles.add(importKey);
         
         // Handle .ebsp (packaged) files specially - they need typedef registration from deserialized statements
-        if (isPackagedFile(importPath)) {
+        if (RuntimeContextSerializer.isPackagedFile(importPath)) {
             try {
                 RuntimeContext context = RuntimeContextSerializer.deserialize(importPath);
                 // Register typedefs from the deserialized statements

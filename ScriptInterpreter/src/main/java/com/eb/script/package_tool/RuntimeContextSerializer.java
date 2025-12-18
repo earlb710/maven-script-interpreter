@@ -150,11 +150,13 @@ public class RuntimeContextSerializer {
     
     /**
      * Check if a file is a packaged EBS file.
+     * Uses the filename only to avoid issues with path separators.
      * 
      * @param file The file to check
      * @return true if it's a .ebsp file
      */
     public static boolean isPackagedFile(Path file) {
-        return file.toString().toLowerCase().endsWith(".ebsp");
+        String filename = file.getFileName().toString().toLowerCase();
+        return filename.endsWith(".ebsp");
     }
 }
