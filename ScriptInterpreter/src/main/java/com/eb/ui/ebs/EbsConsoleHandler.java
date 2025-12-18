@@ -223,6 +223,10 @@ public class EbsConsoleHandler extends EbsHandler {
 
                             case "/reset":
                                 env.clear();
+                                // Also clear the interpreter context to reset import tracking
+                                if (interpreter != null && interpreter.getContext() != null) {
+                                    interpreter.getContext().clear();
+                                }
                                 if (env.isEchoOn()) {
                                     output.printlnOk("> globals cleared.\n");
                                 }

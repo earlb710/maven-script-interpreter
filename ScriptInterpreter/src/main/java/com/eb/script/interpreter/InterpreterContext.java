@@ -692,6 +692,7 @@ public class InterpreterContext {
         declaredFunctions.clear();
         declaredScreens.clear();
         screenParentMap.clear();
+        importedFiles.clear();
     }
 
     public void remove(String screenName) {
