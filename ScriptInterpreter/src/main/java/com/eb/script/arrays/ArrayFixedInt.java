@@ -172,6 +172,23 @@ public class ArrayFixedInt implements ArrayDef<Integer, int[]> {
     }
 
     @Override
+    public Iterator<Integer> reverseIterator() {
+        return new Iterator<Integer>() {
+            int idx = elements.length - 1;
+
+            @Override
+            public boolean hasNext() {
+                return idx >= 0;
+            }
+
+            @Override
+            public Integer next() {
+                return elements[idx--];
+            }
+        };
+    }
+
+    @Override
     public int[] getAll() {
         return elements;
     }

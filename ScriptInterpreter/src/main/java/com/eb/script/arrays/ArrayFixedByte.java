@@ -172,6 +172,23 @@ public class ArrayFixedByte implements ArrayDef<Byte, byte[]> {
     }
 
     @Override
+    public Iterator<Byte> reverseIterator() {
+        return new Iterator<Byte>() {
+            int idx = elements.length - 1;
+
+            @Override
+            public boolean hasNext() {
+                return idx >= 0;
+            }
+
+            @Override
+            public Byte next() {
+                return elements[idx--];
+            }
+        };
+    }
+
+    @Override
     public byte[] getAll() {
         return elements;
     }

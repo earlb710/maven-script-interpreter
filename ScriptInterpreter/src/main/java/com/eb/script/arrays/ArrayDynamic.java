@@ -130,6 +130,23 @@ public class ArrayDynamic implements ArrayDef<Object, List<Object>> {
     }
 
     @Override
+    public Iterator<Object> reverseIterator() {
+        return new Iterator<Object>() {
+            int idx = elements.size() - 1;
+
+            @Override
+            public boolean hasNext() {
+                return idx >= 0;
+            }
+
+            @Override
+            public Object next() {
+                return elements.get(idx--);
+            }
+        };
+    }
+
+    @Override
     public List<Object> getAll() {
         return elements;
     }

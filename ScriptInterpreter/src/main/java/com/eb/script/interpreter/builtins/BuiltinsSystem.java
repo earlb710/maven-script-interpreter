@@ -7,6 +7,7 @@ import com.eb.script.arrays.ArrayDef;
 import com.eb.script.arrays.ArrayDynamic;
 import com.eb.script.arrays.ArrayFixedByte;
 import com.eb.script.arrays.ArrayFixedInt;
+import com.eb.script.arrays.ReverseArrayWrapper;
 import com.eb.script.token.DataType;
 import com.eb.ui.ebs.EbsApp;
 import java.nio.charset.StandardCharsets;
@@ -56,6 +57,7 @@ public class BuiltinsSystem {
             case "array.fill" -> arrayFill(args);
             case "array.add" -> arrayAdd(args);
             case "array.remove" -> arrayRemove(args);
+            case "array.reverse" -> arrayReverse(args);
             case "array.base64encode" -> base64Encode(args);
             case "array.base64decode" -> base64Decode(args);
             case "array.asbitmap" -> arrayAsBitmap(args);
@@ -326,6 +328,26 @@ public class BuiltinsSystem {
         Object removedValue = array.get(index);
         array.remove(index);
         return removedValue;
+    }
+
+    /**
+     * Returns a reverse iteration wrapper for the given array.
+     * This enables bidirectional iteration by providing a reverse iterator.
+     * 
+     * @param args Single argument: the array to reverse iterate
+     * @return ReverseArrayWrapper that can be used with foreach
+     * @throws InterpreterError if argument is null or not an array
+     */
+    @SuppressWarnings("unchecked")
+    private static Object arrayReverse(Object[] args) throws InterpreterError {
+        if (args[0] == null) {
+            throw new InterpreterError("array.reverse: array cannot be null");
+        }
+        if (!(args[0] instanceof ArrayDef)) {
+            throw new InterpreterError("array.reverse: argument must be an array");
+        }
+        ArrayDef<Object, ?> array = (ArrayDef<Object, ?>) args[0];
+        return new ReverseArrayWrapper<>(array);
     }
 
     /**
