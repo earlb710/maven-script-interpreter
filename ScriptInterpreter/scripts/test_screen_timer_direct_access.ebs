@@ -18,87 +18,182 @@ timerCallback(tName: string) {
     print "Timer callback: counter=" + counter + ", message=" + message;
 }
 
-// Define a test screen with timer controls
+// Define a test screen with timer controls using area items
 screen timerTestScreen = {
-    "title": "Timer Variable Access Test",
+    "title": "Timer Variable Access Test (Area Items)",
     "width": 500,
-    "height": 350,
-    "vars": [
+    "height": 450,
+    "sets": [
         {
-            "name": "counter",
-            "type": "int",
-            "default": 0,
-            "display": {
-                "type": "textfield",
-                "labelText": "Counter:",
-                "promptHelp": "Updates automatically via timer"
-            }
-        },
+            "setname": "main",
+            "vars": [
+                {"name": "counter", "type": "int", "default": 0},
+                {"name": "message", "type": "string", "default": "Not started"},
+                {"name": "timerInterval", "type": "int", "default": 1000}
+            ]
+        }
+    ],
+    "area": [
         {
-            "name": "message",
-            "type": "string",
-            "default": "Not started",
-            "display": {
-                "type": "textfield",
-                "labelText": "Message:",
-                "promptHelp": "Timer status message"
-            }
-        },
-        {
-            "name": "timerInterval",
-            "type": "int",
-            "default": 1000,
-            "display": {
-                "type": "spinner",
-                "labelText": "Interval (ms):",
-                "min": 100,
-                "max": 5000
-            }
-        },
-        {
-            "name": "btnStart",
-            "type": "string",
-            "display": {
-                "type": "button",
-                "labelText": "Start Timer",
-                "onClick": "if (call thread.timerIsRunning(timerName)) { print 'Timer already running'; } else { call thread.timerStart(timerName, timerInterval, 'timerCallback'); message = 'Timer started'; print 'Timer started with interval: ' + timerInterval + 'ms'; }"
-            }
-        },
-        {
-            "name": "btnStop",
-            "type": "string",
-            "display": {
-                "type": "button",
-                "labelText": "Stop Timer",
-                "onClick": "if (call thread.timerIsRunning(timerName)) { call thread.timerStop(timerName); message = 'Timer stopped'; print 'Timer stopped at count: ' + counter; } else { print 'Timer is not running'; }"
-            }
-        },
-        {
-            "name": "btnReset",
-            "type": "string",
-            "display": {
-                "type": "button",
-                "labelText": "Reset Counter",
-                "onClick": "counter = 0; message = 'Counter reset'; print 'Counter reset to 0';"
-            }
-        },
-        {
-            "name": "btnCheckStatus",
-            "type": "string",
-            "display": {
-                "type": "button",
-                "labelText": "Check Status",
-                "onClick": "var isRunning = call thread.timerIsRunning(timerName); var status = 'Timer is ' + (isRunning ? 'running' : 'stopped'); print status; print 'Current counter: ' + counter; print 'Current message: ' + message;"
-            }
-        },
-        {
-            "name": "btnClose",
-            "type": "string",
-            "display": {
-                "type": "button",
-                "labelText": "Close",
-                "onClick": "if (call thread.timerIsRunning(timerName)) { call thread.timerStop(timerName); print 'Timer stopped before closing'; } close screen;"
-            }
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "15",
+            "padding": "20",
+            "style": "-fx-background-color: #f5f5f5;",
+            "items": [],
+            "areas": [
+                {
+                    "name": "headerArea",
+                    "type": "vbox",
+                    "spacing": "10",
+                    "padding": "10",
+                    "style": "-fx-background-color: #e3f2fd; -fx-border-color: #1976d2; -fx-border-width: 2; -fx-border-radius: 5;",
+                    "items": [
+                        {
+                            "name": "titleLabel",
+                            "display": {
+                                "type": "label",
+                                "labelText": "Timer Variable Access Test",
+                                "labelColor": "#1976d2",
+                                "labelFontSize": "18px",
+                                "labelBold": true,
+                                "style": "-fx-alignment: center;"
+                            }
+                        },
+                        {
+                            "name": "descLabel",
+                            "display": {
+                                "type": "label",
+                                "labelText": "Tests direct screen variable access in timer callbacks using area items",
+                                "labelColor": "#555555",
+                                "labelFontSize": "12px",
+                                "style": "-fx-alignment: center; -fx-wrap-text: true;"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "dataArea",
+                    "type": "vbox",
+                    "spacing": "10",
+                    "padding": "10",
+                    "style": "-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-border-width: 1; -fx-border-radius: 5;",
+                    "items": [
+                        {
+                            "name": "counterField",
+                            "varRef": "counter",
+                            "sequence": 1,
+                            "display": {
+                                "type": "textfield",
+                                "labelText": "Counter:",
+                                "promptHelp": "Updates automatically via timer",
+                                "style": "-fx-font-size: 14px;"
+                            }
+                        },
+                        {
+                            "name": "messageField",
+                            "varRef": "message",
+                            "sequence": 2,
+                            "display": {
+                                "type": "textfield",
+                                "labelText": "Message:",
+                                "promptHelp": "Timer status message",
+                                "style": "-fx-font-size: 14px;"
+                            }
+                        },
+                        {
+                            "name": "intervalSpinner",
+                            "varRef": "timerInterval",
+                            "sequence": 3,
+                            "display": {
+                                "type": "spinner",
+                                "labelText": "Interval (ms):",
+                                "min": 100,
+                                "max": 5000,
+                                "style": "-fx-font-size: 14px;"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "controlArea",
+                    "type": "vbox",
+                    "spacing": "10",
+                    "padding": "10",
+                    "items": [],
+                    "areas": [
+                        {
+                            "name": "timerButtonsArea",
+                            "type": "hbox",
+                            "spacing": "10",
+                            "alignment": "center",
+                            "items": [
+                                {
+                                    "name": "btnStart",
+                                    "display": {
+                                        "type": "button",
+                                        "labelText": "Start Timer",
+                                        "onClick": "if (call thread.timerIsRunning(timerName)) { print 'Timer already running'; } else { call thread.timerStart(timerName, timerInterval, 'timerCallback'); message = 'Timer started'; print 'Timer started with interval: ' + timerInterval + 'ms'; }",
+                                        "style": "-fx-min-width: 120px; -fx-font-size: 14px; -fx-background-color: #4caf50; -fx-text-fill: white; -fx-font-weight: bold;"
+                                    }
+                                },
+                                {
+                                    "name": "btnStop",
+                                    "display": {
+                                        "type": "button",
+                                        "labelText": "Stop Timer",
+                                        "onClick": "if (call thread.timerIsRunning(timerName)) { call thread.timerStop(timerName); message = 'Timer stopped'; print 'Timer stopped at count: ' + counter; } else { print 'Timer is not running'; }",
+                                        "style": "-fx-min-width: 120px; -fx-font-size: 14px; -fx-background-color: #f44336; -fx-text-fill: white; -fx-font-weight: bold;"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "actionButtonsArea",
+                            "type": "hbox",
+                            "spacing": "10",
+                            "alignment": "center",
+                            "items": [
+                                {
+                                    "name": "btnReset",
+                                    "display": {
+                                        "type": "button",
+                                        "labelText": "Reset Counter",
+                                        "onClick": "counter = 0; message = 'Counter reset'; print 'Counter reset to 0';",
+                                        "style": "-fx-min-width: 120px; -fx-font-size: 14px; -fx-background-color: #ff9800; -fx-text-fill: white; -fx-font-weight: bold;"
+                                    }
+                                },
+                                {
+                                    "name": "btnCheckStatus",
+                                    "display": {
+                                        "type": "button",
+                                        "labelText": "Check Status",
+                                        "onClick": "var isRunning = call thread.timerIsRunning(timerName); var status = 'Timer is ' + (isRunning ? 'running' : 'stopped'); print status; print 'Current counter: ' + counter; print 'Current message: ' + message;",
+                                        "style": "-fx-min-width: 120px; -fx-font-size: 14px; -fx-background-color: #2196f3; -fx-text-fill: white; -fx-font-weight: bold;"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "closeButtonArea",
+                            "type": "hbox",
+                            "spacing": "10",
+                            "alignment": "center",
+                            "items": [
+                                {
+                                    "name": "btnClose",
+                                    "display": {
+                                        "type": "button",
+                                        "labelText": "Close",
+                                        "onClick": "if (call thread.timerIsRunning(timerName)) { call thread.timerStop(timerName); print 'Timer stopped before closing'; } close screen;",
+                                        "style": "-fx-min-width: 250px; -fx-font-size: 14px; -fx-background-color: #607d8b; -fx-text-fill: white; -fx-font-weight: bold;"
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
         }
     ],
     "startup": "counter = 0; message = 'Ready to start'; print 'Startup: Screen initialized';",
