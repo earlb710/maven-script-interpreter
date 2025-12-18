@@ -65,6 +65,36 @@ screen fullExample = {
 
 **Best Practice:** Start with a minimal definition and add complexity as needed. Don't over-engineer upfront.
 
+### JSON Key Case-Insensitivity
+
+**Important:** Screen definitions use a specialized JSON parser that normalizes all keys to lowercase for case-insensitive matching.
+
+```javascript
+// These are all equivalent - keys are normalized to lowercase
+screen example1 = {
+    "title": "Example",      // lowercase
+    "Width": 600,            // becomes "width"
+    "HEIGHT": 400            // becomes "height"
+};
+
+// You can use camelCase or snake_case - both work
+screen example2 = {
+    "labelText": "Name:",    // becomes "labeltext"
+    "label_text": "Name:",   // becomes "label_text" (but looked up as lowercase)
+    "onClick": "doSomething();",  // becomes "onclick"
+    "on_click": "doSomething();"  // becomes "on_click"
+};
+```
+
+**Key Points:**
+- All JSON keys in screen definitions are converted to lowercase at parse time
+- Use consistent casing in your code for readability (recommend camelCase)
+- Property lookups are case-insensitive: `labelText`, `labeltext`, and `LABELTEXT` all work
+- This applies to all screen JSON: properties, display metadata, area definitions, and items
+- Other JSON (non-screen) preserves original key case
+
+**Best Practice:** Use camelCase consistently in screen definitions for better readability, knowing that the parser will handle case-insensitivity automatically.
+
 ---
 
 ## Screen Properties
