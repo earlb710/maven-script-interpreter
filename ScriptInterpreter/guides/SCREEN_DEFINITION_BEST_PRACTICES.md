@@ -30,7 +30,7 @@ This guide provides best practices and patterns for creating effective screen de
 
 ### Minimal Screen Definition
 
-```javascript
+```
 // Simplest screen - empty window
 screen myScreen = {
     "title": "My Application",
@@ -44,7 +44,7 @@ show screen myScreen;
 
 ### Complete Screen Definition
 
-```javascript
+```
 screen fullExample = {
     "name": "fullExample",           // Optional: defaults to variable name
     "title": "Complete Example",
@@ -69,7 +69,7 @@ screen fullExample = {
 
 **Important:** Screen definitions use a specialized JSON parser that normalizes all keys to lowercase for case-insensitive matching.
 
-```javascript
+```
 // These are all equivalent - keys are normalized to lowercase
 screen example1 = {
     "title": "Example",      // lowercase
@@ -101,7 +101,7 @@ screen example2 = {
 
 ### Window Sizing
 
-```javascript
+```
 // Fixed size window
 screen fixedWindow = {
     "title": "Fixed Size",
@@ -126,7 +126,7 @@ screen maxWindow = {
 
 ### Window Titles
 
-```javascript
+```
 // Clear, descriptive titles
 screen goodTitles = {
     "title": "Customer Registration"     // ✓ Clear purpose
@@ -150,7 +150,7 @@ screen badTitles = {
 
 ### Basic Variable Definition
 
-```javascript
+```
 screen formExample = {
     "title": "User Form",
     "width": 500,
@@ -189,7 +189,7 @@ screen formExample = {
 
 ### Variable with DisplayMetadata
 
-```javascript
+```
 {
     "name": "email",
     "type": "string",
@@ -234,7 +234,7 @@ Variable sets organize related variables into logical groups with shared scope a
 
 ### Basic Variable Set
 
-```javascript
+```
 screen customerForm = {
     "title": "Customer Information",
     "width": 700,
@@ -292,7 +292,7 @@ screen customerForm = {
 
 ### Accessing Variable Set Values
 
-```javascript
+```
 // Access variables through screen reference
 var fname = customerForm.firstName;
 var lname = customerForm.lastName;
@@ -310,7 +310,7 @@ customerForm.phone = "555-1234";
 
 Choose the right container for your layout needs:
 
-```javascript
+```
 // Vertical layout (most common for forms)
 {
     "name": "formArea",
@@ -374,7 +374,7 @@ Choose the right container for your layout needs:
 
 #### Form Layout Pattern
 
-```javascript
+```
 screen formPattern = {
     "title": "Data Entry Form",
     "width": 600,
@@ -416,7 +416,7 @@ screen formPattern = {
 
 #### Dashboard Pattern
 
-```javascript
+```
 screen dashboardPattern = {
     "title": "Dashboard",
     "width": 1200,
@@ -478,7 +478,7 @@ screen dashboardPattern = {
 
 ### onClick Events
 
-```javascript
+```
 // Inline event handler
 {
     "type": "button",
@@ -496,7 +496,7 @@ screen dashboardPattern = {
 
 ### onChange Events
 
-```javascript
+```
 {
     "name": "quantity",
     "type": "int",
@@ -510,7 +510,7 @@ screen dashboardPattern = {
 
 ### onValidate Events
 
-```javascript
+```
 {
     "name": "email",
     "type": "string",
@@ -523,7 +523,7 @@ screen dashboardPattern = {
 
 ### Area-Level Events
 
-```javascript
+```
 {
     "name": "formArea",
     "type": "vbox",
@@ -542,7 +542,7 @@ screen dashboardPattern = {
 
 ### Event Handler Pattern
 
-```javascript
+```
 // Define helper functions
 calculateTotal() return double {
     var quantity: int = orderScreen.quantity;
@@ -609,7 +609,7 @@ Each screen runs in its own thread. Follow these practices for thread-safe scree
 
 ### Accessing Screen Variables
 
-```javascript
+```
 // CORRECT: Use screenName.varName syntax
 var customerName = customerScreen.firstName;
 customerScreen.lastName = "Smith";
@@ -621,7 +621,7 @@ detailScreen.recordId = 123;
 
 ### Cross-Screen Communication
 
-```javascript
+```
 // Screen 1 updates a shared variable
 screen1.sharedData = "Important information";
 
@@ -632,7 +632,7 @@ print "Received: " + data;
 
 ### Screen Lifecycle
 
-```javascript
+```
 // Define screen (stores configuration, doesn't create window)
 screen myScreen = {
     "title": "My Screen",
@@ -669,7 +669,7 @@ show screen myScreen;
 
 ### Master-Detail Pattern
 
-```javascript
+```
 // Master screen - list of records
 screen masterScreen = {
     "title": "Customer List",
@@ -727,7 +727,7 @@ showDetail(id: int) {
 
 ### Form Validation Pattern
 
-```javascript
+```
 validateForm() return bool {
     var isValid: bool = true;
     
@@ -760,7 +760,7 @@ validateForm() return bool {
 
 ### Progress Indicator Pattern
 
-```javascript
+```
 screen progressScreen = {
     "title": "Processing",
     "width": 400,
@@ -807,7 +807,7 @@ processData() {
 
 Screens are initialized lazily by default - the JavaFX Stage is only created on first `show`.
 
-```javascript
+```
 // Define multiple screens - no performance impact
 screen screen1 = {...};
 screen screen2 = {...};
@@ -819,7 +819,7 @@ show screen screen1;  // Creates window here
 
 ### 2. Minimize Nested Areas
 
-```javascript
+```
 // AVOID: Deep nesting
 {
     "type": "vbox",
@@ -845,7 +845,7 @@ show screen screen1;  // Creates window here
 
 ### 3. Reuse Screens Instead of Creating New Ones
 
-```javascript
+```
 // GOOD: Reuse same screen
 show screen detailScreen;
 detailScreen.recordId = newId;
@@ -858,7 +858,7 @@ screen detailScreen = {...};  // Avoid redefining
 
 ### 4. Use Hide Instead of Close
 
-```javascript
+```
 // PREFER: Hide preserves window
 hide screen tempScreen;    // Fast to show again
 show screen tempScreen;    // Instant
@@ -870,7 +870,7 @@ show screen tempScreen;    // Must recreate (slower)
 
 ### 5. Optimize Event Handlers
 
-```javascript
+```
 // GOOD: Call external function
 {
     "onClick": "call processData();"
@@ -888,7 +888,7 @@ show screen tempScreen;    // Must recreate (slower)
 
 ### ❌ Don't: Recreate Screens in Loops
 
-```javascript
+```
 // BAD - Creates new screen definition each iteration
 var i: int = 0;
 while i < 10 do {
@@ -899,7 +899,7 @@ while i < 10 do {
 ```
 
 **Do Instead:**
-```javascript
+```
 // GOOD - Define once, reuse
 screen temp = {"title": "Window"};
 var i: int = 0;
@@ -912,7 +912,7 @@ while i < 10 do {
 
 ### ❌ Don't: Use Generic Names
 
-```javascript
+```
 // BAD
 screen scr1 = {"title": "Screen 1"};
 var var1: string;
@@ -920,7 +920,7 @@ var var2: string;
 ```
 
 **Do Instead:**
-```javascript
+```
 // GOOD
 screen customerForm = {"title": "Customer Registration"};
 var firstName: string;
@@ -929,7 +929,7 @@ var lastName: string;
 
 ### ❌ Don't: Omit Type Declarations
 
-```javascript
+```
 // BAD - Type inference can be unclear
 {
     "name": "count",
@@ -938,7 +938,7 @@ var lastName: string;
 ```
 
 **Do Instead:**
-```javascript
+```
 // GOOD - Explicit type
 {
     "name": "count",
@@ -949,7 +949,7 @@ var lastName: string;
 
 ### ❌ Don't: Put Business Logic in Event Handlers
 
-```javascript
+```
 // BAD - Complex logic inline
 {
     "onClick": "var total = 0; var i = 0; while i < items.length do { total += items[i].price * items[i].qty; i++; } result = total * 1.08;"
@@ -957,7 +957,7 @@ var lastName: string;
 ```
 
 **Do Instead:**
-```javascript
+```
 // GOOD - Separate function
 {
     "onClick": "call calculateOrderTotal();"
@@ -966,7 +966,7 @@ var lastName: string;
 
 ### ❌ Don't: Forget to Handle Errors
 
-```javascript
+```
 // BAD - No validation
 {
     "onClick": "call processOrder();"
@@ -974,7 +974,7 @@ var lastName: string;
 ```
 
 **Do Instead:**
-```javascript
+```
 // GOOD - With validation
 {
     "onClick": "if call validateOrder() then { call processOrder(); } else { print 'Validation failed'; } end if;"
@@ -983,7 +983,7 @@ var lastName: string;
 
 ### ❌ Don't: Mix Concerns in One Screen
 
-```javascript
+```
 // BAD - One screen doing too much
 screen everythingScreen = {
     "title": "Application",
@@ -994,7 +994,7 @@ screen everythingScreen = {
 ```
 
 **Do Instead:**
-```javascript
+```
 // GOOD - Separate concerns
 screen customerScreen = {"title": "Customer Management"};
 screen orderScreen = {"title": "Order Processing"};
@@ -1055,7 +1055,7 @@ Use this checklist when creating screens:
 
 ## Example: Complete Best Practice Screen
 
-```javascript
+```
 // Helper functions
 validateCustomerForm() return bool {
     if customerForm.firstName == "" then {
