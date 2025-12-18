@@ -285,6 +285,49 @@ loadPieceImages() {
     yellowBlackKing = call image.load(imgPath + "yellow_black_king.svg");
 }
 
+// Initialize board pieces on screen using already-loaded piece images
+initializeBoardPieces() {
+    // Row 0 (black back row)
+    chessScreen.c00 = normalBlackRook;
+    chessScreen.c01 = normalBlackKnight;
+    chessScreen.c02 = normalBlackBishop;
+    chessScreen.c03 = normalBlackQueen;
+    chessScreen.c04 = normalBlackKing;
+    chessScreen.c05 = normalBlackBishop;
+    chessScreen.c06 = normalBlackKnight;
+    chessScreen.c07 = normalBlackRook;
+    
+    // Row 1 (black pawns)
+    chessScreen.c10 = normalBlackPawn;
+    chessScreen.c11 = normalBlackPawn;
+    chessScreen.c12 = normalBlackPawn;
+    chessScreen.c13 = normalBlackPawn;
+    chessScreen.c14 = normalBlackPawn;
+    chessScreen.c15 = normalBlackPawn;
+    chessScreen.c16 = normalBlackPawn;
+    chessScreen.c17 = normalBlackPawn;
+    
+    // Row 6 (white pawns)
+    chessScreen.c60 = normalWhitePawn;
+    chessScreen.c61 = normalWhitePawn;
+    chessScreen.c62 = normalWhitePawn;
+    chessScreen.c63 = normalWhitePawn;
+    chessScreen.c64 = normalWhitePawn;
+    chessScreen.c65 = normalWhitePawn;
+    chessScreen.c66 = normalWhitePawn;
+    chessScreen.c67 = normalWhitePawn;
+    
+    // Row 7 (white back row)
+    chessScreen.c70 = normalWhiteRook;
+    chessScreen.c71 = normalWhiteKnight;
+    chessScreen.c72 = normalWhiteBishop;
+    chessScreen.c73 = normalWhiteQueen;
+    chessScreen.c74 = normalWhiteKing;
+    chessScreen.c75 = normalWhiteBishop;
+    chessScreen.c76 = normalWhiteKnight;
+    chessScreen.c77 = normalWhiteRook;
+}
+
 // Clear all move indicators on the board
 clearIndicators() {
     // Clear all 64 indicator positions
@@ -1165,49 +1208,9 @@ handleStartGame() {
     print "  [7,4] White King: raw=" + board[idx74] + ", cellColor=" + sampleCell.cellColor + ", pieceType=" + sampleCell.pieceType + ", pieceColor=" + sampleCell.pieceColor;
     
     print "";
-    print "Loading chess piece SVG images...";
-    
-    // Load SVG images for pieces - Row 0 (black back row)
-    chessScreen.c00 = call image.load(imgPath + "black_rook.svg");
-    chessScreen.c01 = call image.load(imgPath + "black_knight.svg");
-    chessScreen.c02 = call image.load(imgPath + "black_bishop.svg");
-    chessScreen.c03 = call image.load(imgPath + "black_queen.svg");
-    chessScreen.c04 = call image.load(imgPath + "black_king.svg");
-    chessScreen.c05 = call image.load(imgPath + "black_bishop.svg");
-    chessScreen.c06 = call image.load(imgPath + "black_knight.svg");
-    chessScreen.c07 = call image.load(imgPath + "black_rook.svg");
-    
-    // Load SVG images for pieces - Row 1 (black pawns)
-    chessScreen.c10 = call image.load(imgPath + "black_pawn.svg");
-    chessScreen.c11 = call image.load(imgPath + "black_pawn.svg");
-    chessScreen.c12 = call image.load(imgPath + "black_pawn.svg");
-    chessScreen.c13 = call image.load(imgPath + "black_pawn.svg");
-    chessScreen.c14 = call image.load(imgPath + "black_pawn.svg");
-    chessScreen.c15 = call image.load(imgPath + "black_pawn.svg");
-    chessScreen.c16 = call image.load(imgPath + "black_pawn.svg");
-    chessScreen.c17 = call image.load(imgPath + "black_pawn.svg");
-    
-    // Load SVG images for pieces - Row 6 (white pawns)
-    chessScreen.c60 = call image.load(imgPath + "white_pawn.svg");
-    chessScreen.c61 = call image.load(imgPath + "white_pawn.svg");
-    chessScreen.c62 = call image.load(imgPath + "white_pawn.svg");
-    chessScreen.c63 = call image.load(imgPath + "white_pawn.svg");
-    chessScreen.c64 = call image.load(imgPath + "white_pawn.svg");
-    chessScreen.c65 = call image.load(imgPath + "white_pawn.svg");
-    chessScreen.c66 = call image.load(imgPath + "white_pawn.svg");
-    chessScreen.c67 = call image.load(imgPath + "white_pawn.svg");
-    
-    // Load SVG images for pieces - Row 7 (white back row)
-    chessScreen.c70 = call image.load(imgPath + "white_rook.svg");
-    chessScreen.c71 = call image.load(imgPath + "white_knight.svg");
-    chessScreen.c72 = call image.load(imgPath + "white_bishop.svg");
-    chessScreen.c73 = call image.load(imgPath + "white_queen.svg");
-    chessScreen.c74 = call image.load(imgPath + "white_king.svg");
-    chessScreen.c75 = call image.load(imgPath + "white_bishop.svg");
-    chessScreen.c76 = call image.load(imgPath + "white_knight.svg");
-    chessScreen.c77 = call image.load(imgPath + "white_rook.svg");
-    
-    print "Chess piece images loaded!";
+    print "Initializing chess piece images on board...";
+    call initializeBoardPieces();
+    print "Chess piece images initialized!";
     print "";
     print "Initializing board layer (checkerboard pattern)...";
     
