@@ -1,0 +1,155 @@
+// Test Script: Debug View Tooltip Test
+// Purpose: Verify tooltips show JavaFX details for screen items and areas
+// Usage: Run this script, open debug view (Ctrl+D), and hover over items and areas
+
+screen testTooltipScreen = {
+    "title": "Debug Tooltip Test Screen",
+    "width": 600,
+    "height": 500,
+    "areas": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "layout": "vertical",
+            "spacing": "10",
+            "padding": "15",
+            "areas": [
+                {
+                    "name": "inputArea",
+                    "type": "vbox",
+                    "layout": "vertical",
+                    "spacing": "5"
+                },
+                {
+                    "name": "buttonArea",
+                    "type": "hbox",
+                    "layout": "horizontal",
+                    "spacing": "10"
+                }
+            ]
+        }
+    ],
+    "vars": [
+        {
+            "name": "username",
+            "type": "string",
+            "default": "testuser",
+            "area": "inputArea",
+            "display": {
+                "type": "textfield",
+                "labelText": "Username:",
+                "promptHelp": "Enter your username"
+            }
+        },
+        {
+            "name": "email",
+            "type": "string",
+            "default": "test@example.com",
+            "area": "inputArea",
+            "display": {
+                "type": "textfield",
+                "labelText": "Email:",
+                "promptHelp": "Enter your email address"
+            }
+        },
+        {
+            "name": "age",
+            "type": "int",
+            "default": 25,
+            "area": "inputArea",
+            "display": {
+                "type": "textfield",
+                "labelText": "Age:",
+                "promptHelp": "Enter your age"
+            }
+        },
+        {
+            "name": "submitBtn",
+            "type": "string",
+            "default": "",
+            "area": "buttonArea",
+            "display": {
+                "type": "button",
+                "labelText": "Submit",
+                "onClick": "print 'Submit clicked';"
+            }
+        },
+        {
+            "name": "cancelBtn",
+            "type": "string",
+            "default": "",
+            "area": "buttonArea",
+            "display": {
+                "type": "button",
+                "labelText": "Cancel",
+                "onClick": "print 'Cancel clicked';"
+            }
+        }
+    ]
+};
+
+print "";
+print "=================================================================";
+print "DEBUG TOOLTIP TEST";
+print "=================================================================";
+print "";
+print "This test verifies that tooltips in the debug view show JavaFX";
+print "component details for both display items and areas.";
+print "";
+print "TEST INSTRUCTIONS:";
+print "=================================================================";
+print "";
+print "1. After the screen opens, press Ctrl+D to toggle debug view";
+print "";
+print "2. In the debug panel, look for two sections:";
+print "   - 'Screen Items' section (bottom)";
+print "   - 'Screen Areas' section (middle)";
+print "";
+print "3. Test Display Items Tooltips:";
+print "   - Hover over item names in the 'Screen Items' section";
+print "   - Each tooltip should show:";
+print "     * Item name, type, var, area, state";
+print "     * Basic properties (label, prompt, etc.)";
+print "     * JavaFX section with component details:";
+print "       - Type (e.g., TextField, Button)";
+print "       - Component Type (e.g., Screen.TextField)";
+print "       - Width, Height, X, Y position";
+print "       - Style, Style Classes";
+print "       - Visible, Managed, Disabled states";
+print "";
+print "4. Test Areas Tooltips:";
+print "   - Hover over area names in the 'Screen Areas' section";
+print "   - Each tooltip should show:";
+print "     * Area name, type, layout";
+print "     * JavaFX section with container details:";
+print "       - Type (e.g., VBox, HBox)";
+print "       - Width, Height, position";
+print "       - Style information";
+print "";
+print "=================================================================";
+print "EXPECTED RESULTS:";
+print "=================================================================";
+print "";
+print "✓ All display items show JavaFX details in tooltips";
+print "✓ All areas show JavaFX details in tooltips";
+print "✓ Tooltips appear quickly (500ms delay)";
+print "✓ Tooltips are readable and well-formatted";
+print "";
+print "❌ FAILS if JavaFX details are missing from tooltips";
+print "❌ FAILS if tooltips don't appear";
+print "";
+print "=================================================================";
+print "";
+print "Press Enter to open the test screen...";
+
+var ready: string = readln();
+
+print "Opening Test Screen...";
+print "Press Ctrl+D to toggle debug view";
+print "";
+
+show screen testTooltipScreen;
+
+print "";
+print "Screen closed. Test complete.";
+print "";

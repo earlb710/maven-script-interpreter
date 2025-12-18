@@ -1049,24 +1049,6 @@ public class ScreenFactory {
                                 // Limit to last two direct parents only
                                 String limitedAreaPath = limitAreaPathToTwoLevels(parentArea);
                                 tooltipText.append("\nArea: ").append(limitedAreaPath);
-                                
-                                // Add .javafx information for the area (container)
-                                java.util.concurrent.ConcurrentHashMap<String, com.eb.script.interpreter.screen.ScreenContainerType> containerTypes = 
-                                    context.getScreenContainerTypes(screenName);
-                                if (containerTypes != null) {
-                                    // Get the last area name from the path (e.g., "mainArea.childArea" -> "childArea")
-                                    String[] pathParts = parentArea.split("\\.");
-                                    String lastAreaName = pathParts[pathParts.length - 1];
-                                    String areaNameLower = lastAreaName.toLowerCase(java.util.Locale.ROOT);
-                                    
-                                    com.eb.script.interpreter.screen.ScreenContainerType containerType = containerTypes.get(areaNameLower);
-                                    if (containerType != null) {
-                                        String javafxInfo = containerType.getJavaFXDescription();
-                                        if (javafxInfo != null && !javafxInfo.isEmpty()) {
-                                            tooltipText.append("\n---\nContainer Info:\n").append(javafxInfo);
-                                        }
-                                    }
-                                }
                             }
                             tooltipText.append("\nState: ").append(state);
                             // Add all lookup keys if present
@@ -1220,24 +1202,6 @@ public class ScreenFactory {
                             // Limit to last two direct parents only (same as tooltip)
                             String limitedAreaPath = limitAreaPathToTwoLevels(parentArea);
                             clipboardBuilder.append("\nArea: ").append(limitedAreaPath);
-                            
-                            // Add .javafx information for the area (container) - same as tooltip
-                            java.util.concurrent.ConcurrentHashMap<String, com.eb.script.interpreter.screen.ScreenContainerType> containerTypes = 
-                                context.getScreenContainerTypes(screenName);
-                            if (containerTypes != null) {
-                                // Get the last area name from the path (e.g., "mainArea.childArea" -> "childArea")
-                                String[] pathParts = parentArea.split("\\.");
-                                String lastAreaName = pathParts[pathParts.length - 1];
-                                String areaNameLower = lastAreaName.toLowerCase(java.util.Locale.ROOT);
-                                
-                                com.eb.script.interpreter.screen.ScreenContainerType containerType = containerTypes.get(areaNameLower);
-                                if (containerType != null) {
-                                    String javafxInfo = containerType.getJavaFXDescription();
-                                    if (javafxInfo != null && !javafxInfo.isEmpty()) {
-                                        clipboardBuilder.append("\n---\nContainer Info:\n").append(javafxInfo);
-                                    }
-                                }
-                            }
                         }
                         clipboardBuilder.append("\nState: ").append(state);
                         // Add all lookup keys if present
@@ -1423,7 +1387,7 @@ public class ScreenFactory {
         List<AreaDefinition> screenAreas = (List<AreaDefinition>) getScreenDataSafe(context, screenName, "areas");
         if (screenAreas != null && !screenAreas.isEmpty()) {
             for (AreaDefinition area : screenAreas) {
-                addAreaDefinitionToSection(areasSection, area, 0);
+                addAreaDefinitionToSection(areasSection, area, 0, context, screenName);
             }
         } else {
             javafx.scene.control.Label noAreasLabel = new javafx.scene.control.Label("No areas defined");
@@ -1437,12 +1401,15 @@ public class ScreenFactory {
     /**
      * Recursively add area definitions to the section with indentation for hierarchy.
      * Clicking on a row copies the area details to clipboard.
+     * Hovering over a row shows a tooltip with area properties and JavaFX details.
      * 
      * @param section The VBox to add the area to
      * @param area The area definition
      * @param depth The indentation depth
+     * @param context The interpreter context for looking up JavaFX containers
+     * @param screenName The screen name for looking up JavaFX containers
      */
-    private static void addAreaDefinitionToSection(VBox section, AreaDefinition area, int depth) {
+    private static void addAreaDefinitionToSection(VBox section, AreaDefinition area, int depth, InterpreterContext context, String screenName) {
         HBox row = new HBox(3);
         row.setAlignment(Pos.CENTER_LEFT);
         row.setPadding(new Insets(2, 5, 2, 5 + (depth * DEBUG_AREA_INDENT_PIXELS)));
@@ -1469,32 +1436,74 @@ public class ScreenFactory {
         
         row.getChildren().addAll(iconLabel, nameLabel, countLabel);
         
-        // Build clipboard text with all area details
-        StringBuilder clipboardBuilder = new StringBuilder();
-        clipboardBuilder.append("Area: ").append(area.name);
-        clipboardBuilder.append("\nType: ").append(area.type != null ? area.type : "pane");
-        if (area.layout != null) clipboardBuilder.append("\nLayout: ").append(area.layout);
-        if (area.spacing != null) clipboardBuilder.append("\nSpacing: ").append(area.spacing);
-        if (area.padding != null) clipboardBuilder.append("\nPadding: ").append(area.padding);
-        if (area.groupBorder != null) clipboardBuilder.append("\nBorder: ").append(area.groupBorder);
-        if (area.style != null) clipboardBuilder.append("\nStyle: ").append(area.style);
-        if (itemCount > 0) clipboardBuilder.append("\nItems: ").append(itemCount);
-        if (childCount > 0) clipboardBuilder.append("\nChildren: ").append(childCount);
-        if (area.gainFocus != null) clipboardBuilder.append("\ngainFocus: ").append(area.gainFocus);
-        if (area.lostFocus != null) clipboardBuilder.append("\nlostFocus: ").append(area.lostFocus);
+        // Build area description text (used for both tooltip and clipboard)
+        String areaDescriptionText = buildAreaDescriptionText(area, itemCount, childCount, context, screenName);
+        
+        // Add tooltip to the row
+        javafx.scene.control.Tooltip areaTooltip = new javafx.scene.control.Tooltip(areaDescriptionText);
+        areaTooltip.setStyle("-fx-font-size: 14px;");
+        areaTooltip.setShowDelay(javafx.util.Duration.millis(500));
+        areaTooltip.setMaxWidth(DEBUG_TOOLTIP_MAX_WIDTH);
+        areaTooltip.setWrapText(true);
+        javafx.scene.control.Tooltip.install(row, areaTooltip);
         
         String originalStyle = "-fx-background-color: " + (depth % 2 == 0 ? "#f8f3e8" : "#f0ebd8") + ";";
         row.setStyle(originalStyle);
-        makeRowClickable(row, clipboardBuilder.toString(), originalStyle);
+        makeRowClickable(row, areaDescriptionText, originalStyle);
         
         section.getChildren().add(row);
         
         // Recursively add child areas
         if (area.childAreas != null) {
             for (AreaDefinition childArea : area.childAreas) {
-                addAreaDefinitionToSection(section, childArea, depth + 1);
+                addAreaDefinitionToSection(section, childArea, depth + 1, context, screenName);
             }
         }
+    }
+    
+    /**
+     * Build a description text for an area including all properties and JavaFX details.
+     * Used for both tooltip and clipboard text.
+     * 
+     * @param area The area definition
+     * @param itemCount The number of items in the area
+     * @param childCount The number of child areas
+     * @param context The interpreter context for looking up JavaFX containers
+     * @param screenName The screen name for looking up JavaFX containers
+     * @return The formatted description text
+     */
+    private static String buildAreaDescriptionText(AreaDefinition area, int itemCount, int childCount, 
+                                                   InterpreterContext context, String screenName) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("Area: ").append(area.name);
+        builder.append("\nType: ").append(area.type != null ? area.type : "pane");
+        if (area.layout != null) builder.append("\nLayout: ").append(area.layout);
+        if (area.spacing != null) builder.append("\nSpacing: ").append(area.spacing);
+        if (area.padding != null) builder.append("\nPadding: ").append(area.padding);
+        if (area.groupBorder != null) builder.append("\nBorder: ").append(area.groupBorder);
+        if (area.style != null) builder.append("\nStyle: ").append(area.style);
+        if (itemCount > 0) builder.append("\nItems: ").append(itemCount);
+        if (childCount > 0) builder.append("\nChildren: ").append(childCount);
+        if (area.gainFocus != null) builder.append("\ngainFocus: ").append(area.gainFocus);
+        if (area.lostFocus != null) builder.append("\nlostFocus: ").append(area.lostFocus);
+        
+        // Add JavaFX container information if available
+        if (context != null && screenName != null && area.name != null) {
+            java.util.concurrent.ConcurrentHashMap<String, ScreenContainerType> containerTypes = 
+                context.getScreenContainerTypes(screenName);
+            if (containerTypes != null) {
+                String areaNameLower = area.name.toLowerCase(java.util.Locale.ROOT);
+                ScreenContainerType containerType = containerTypes.get(areaNameLower);
+                if (containerType != null && containerType.getJavaFXRegion() != null) {
+                    // Add JavaFX container description
+                    builder.append("\n---\nJavaFX:\n");
+                    String javafxDesc = containerType.getJavaFXDescription();
+                    builder.append(javafxDesc);
+                }
+            }
+        }
+        
+        return builder.toString();
     }
     
     /**
@@ -2132,23 +2141,83 @@ public class ScreenFactory {
         
         // Check if item is backed by a JavaFX component
         // Null checks are needed as this is called from multiple contexts where parameters may be null
-        if (context != null && screenName != null && varRef != null && !varRef.isEmpty()) {
-            java.util.concurrent.ConcurrentHashMap<String, ScreenComponentType> componentTypes = context.getScreenComponentTypes(screenName);
-            if (componentTypes != null) {
-                ScreenComponentType componentType = componentTypes.get(varRef);
-                if (componentType != null && componentType.getJavaFXNode() != null) {
-                    // Add JavaFX component description
-                    if (info.length() > 0) {
-                        info.append("\n");
-                    }
-                    info.append("JavaFX:\n");
-                    String javafxDesc = componentType.getJavaFXDescription();
-                    // Append the JavaFX description (already formatted by getJavaFXDescription)
-                    String[] lines = javafxDesc.split("\n");
-                    for (String line : lines) {
-                        info.append(line).append("\n");
+        Node javafxNode = null;
+        
+        if (context != null && screenName != null) {
+            if (varRef != null && !varRef.isEmpty()) {
+                // Try to get JavaFX node via ScreenComponentType (for items with varRef)
+                java.util.concurrent.ConcurrentHashMap<String, ScreenComponentType> componentTypes = context.getScreenComponentTypes(screenName);
+                if (componentTypes != null) {
+                    // Use lowercase for lookup since keys are stored in lowercase
+                    ScreenComponentType componentType = componentTypes.get(varRef.toLowerCase(java.util.Locale.ROOT));
+                    if (componentType != null && componentType.getJavaFXNode() != null) {
+                        javafxNode = componentType.getJavaFXNode();
                     }
                 }
+            }
+            
+            // If not found via varRef, try looking up by name in boundControls
+            if (javafxNode == null && item.name != null && !item.name.isEmpty()) {
+                List<Node> boundControls = context.getScreenBoundControls().get(screenName);
+                if (boundControls != null) {
+                    String expectedUserData = screenName + "." + item.name;
+                    for (Node node : boundControls) {
+                        Object userData = node.getUserData();
+                        if (userData != null && userData.toString().equals(expectedUserData)) {
+                            javafxNode = node;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Add JavaFX component description if a node was found
+        if (javafxNode != null) {
+            if (info.length() > 0) {
+                info.append("\n");
+            }
+            info.append("JavaFX:\n");
+            
+            // Build JavaFX description similar to ScreenComponentType.getJavaFXDescription()
+            StringBuilder javafxDesc = new StringBuilder();
+            javafxDesc.append("JavaFX Component Description:\n");
+            javafxDesc.append("  Type: ").append(javafxNode.getClass().getSimpleName()).append("\n");
+            
+            // Size information
+            javafxDesc.append("  Width: ").append(String.format("%.2f", javafxNode.getLayoutBounds().getWidth())).append("\n");
+            javafxDesc.append("  Height: ").append(String.format("%.2f", javafxNode.getLayoutBounds().getHeight())).append("\n");
+            
+            // Position
+            javafxDesc.append("  X: ").append(String.format("%.2f", javafxNode.getLayoutX())).append("\n");
+            javafxDesc.append("  Y: ").append(String.format("%.2f", javafxNode.getLayoutY())).append("\n");
+            
+            // Style
+            String style = javafxNode.getStyle();
+            if (style != null && !style.isEmpty()) {
+                javafxDesc.append("  Style: ").append(style).append("\n");
+            }
+            
+            // Style classes
+            if (!javafxNode.getStyleClass().isEmpty()) {
+                javafxDesc.append("  Style Classes: ").append(String.join(", ", javafxNode.getStyleClass())).append("\n");
+            }
+            
+            // Visibility
+            javafxDesc.append("  Visible: ").append(javafxNode.isVisible()).append("\n");
+            javafxDesc.append("  Managed: ").append(javafxNode.isManaged()).append("\n");
+            javafxDesc.append("  Disabled: ").append(javafxNode.isDisabled()).append("\n");
+            
+            // ID
+            String id = javafxNode.getId();
+            if (id != null && !id.isEmpty()) {
+                javafxDesc.append("  ID: ").append(id).append("\n");
+            }
+            
+            // Append the JavaFX description
+            String[] lines = javafxDesc.toString().split("\n");
+            for (String line : lines) {
+                info.append(line).append("\n");
             }
         }
         
