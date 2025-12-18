@@ -1544,13 +1544,6 @@ public class InterpreterScreen {
         // Clean up the screen thread (only top-level screens have their threads interrupted)
         cleanupScreenThread(screenName);
         
-        // Stop all timers associated with this screen
-        int stoppedTimers = BuiltinsThread.stopTimersForSource(screenName);
-        if (stoppedTimers > 0 && context.getOutput() != null) {
-            String message = String.format("Stopped %d timer(s) associated with screen '%s'", stoppedTimers, screenName);
-            context.getOutput().printlnInfo(message);
-        }
-        
         // Close screen (remove runtime state but preserve configuration for re-use)
         context.closeScreen(screenName);
     }

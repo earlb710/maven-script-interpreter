@@ -100,6 +100,8 @@ var selectedX: int = -1;  // -1 means no selection
 var selectedY: int = -1;
 var greenIndicator: imagedata;  // Green circle for valid moves
 var redIndicator: imagedata;    // Red circle for capture moves
+var yellowCircleIndicator: imagedata; // Yellow circle for moves that check opponent's king
+var redCrossIndicator: imagedata;     // Red cross for invalid moves (expose own king)
 var transparentClear: imagedata; // Transparent rectangle for clearing piece positions
 
 // Board layer images (bottom layer - checkerboard)
@@ -246,6 +248,26 @@ createIndicators() {
     call style.setStroke(redCanvas, "#AA0000", 2.0);
     call draw.circle(redCanvas, 30, 30, 20, false);
     redIndicator = call canvas.toImage(redCanvas);
+    
+    // Create yellow circle indicator for moves that check opponent's king
+    // Canvas size matches cell size (60x60) for proper centering
+    var yellowCanvas: canvas = call canvas.create(60, 60, "yellow_indicator");
+    call canvas.clear(yellowCanvas);  // Make canvas transparent
+    call style.setFill(yellowCanvas, "#FFFF0080");  // Semi-transparent yellow
+    call draw.circle(yellowCanvas, 30, 30, 20, true);
+    call style.setStroke(yellowCanvas, "#AAAA00", 2.0);
+    call draw.circle(yellowCanvas, 30, 30, 20, false);
+    yellowCircleIndicator = call canvas.toImage(yellowCanvas);
+    
+    // Create red cross indicator for invalid moves (that would expose own king)
+    // Canvas size matches cell size (60x60) for proper centering
+    var crossCanvas: canvas = call canvas.create(60, 60, "red_cross_indicator");
+    call canvas.clear(crossCanvas);  // Make canvas transparent
+    call style.setStroke(crossCanvas, "#FF0000", 4.0);
+    // Draw X from corner to corner
+    call draw.line(crossCanvas, 15, 15, 45, 45);
+    call draw.line(crossCanvas, 45, 15, 15, 45);
+    redCrossIndicator = call canvas.toImage(crossCanvas);
     
     // Create transparent rectangle for clearing piece positions
     // Canvas size matches cell size (60x60)
@@ -398,12 +420,17 @@ clearIndicators() {
 }
 
 // Set indicator for a specific cell
-setIndicator(x: int, y: int, isCapture: bool) {
+// indicatorType can be: "normal", "capture", "check", "invalid"
+setIndicator(x: int, y: int, indicatorType: string) {
     var indicator: imagedata;
-    if isCapture then {
+    if indicatorType == "capture" then {
         indicator = redIndicator;
+    } else if indicatorType == "check" then {
+        indicator = yellowCircleIndicator;
+    } else if indicatorType == "invalid" then {
+        indicator = redCrossIndicator;
     } else {
-        indicator = greenIndicator;
+        indicator = greenIndicator;  // "normal" or default
     }
     
     // Set the indicator based on position
@@ -713,6 +740,19 @@ handleCellClick(x: int, y: int) {
         }
         
         if isValidMove then {
+            // Check if this move would expose the player's own king
+            var exposesKing: bool = call wouldMoveExposeKing(selectedX, selectedY, x, y, currentPlayer);
+            
+            if exposesKing then {
+                print "Invalid move - would expose king to check!";
+                chessScreen.statusMessage = "Invalid move - would expose your king!";
+                call clearIndicators();
+                call deselectPiece(selectedX, selectedY);
+                selectedX = -1;
+                selectedY = -1;
+                return;
+            }
+            
             // Get information about the move before executing it
             var sourceCellValue: int = call getPieceAt(selectedX, selectedY);
             var destCellValue: int = call getPieceAt(x, y);
@@ -760,11 +800,51 @@ handleCellClick(x: int, y: int) {
             // Switch to next player
             if currentPlayer == WHITE then {
                 currentPlayer = BLACK;
-                chessScreen.statusMessage = "Black to move";
             } else {
                 currentPlayer = WHITE;
-                chessScreen.statusMessage = "White to move";
             }
+            
+            // Check for checkmate or stalemate
+            var isInCheckmate: bool = call isCheckmate(currentPlayer);
+            var isInStalemate: bool = call isStalemate(currentPlayer);
+            
+            if isInCheckmate then {
+                print "Checkmate! Game over.";
+                // Mark the losing king with a red cross
+                var kingPos: posType = call findKing(currentPlayer);
+                if kingPos.x >= 0 then {
+                    call setIndicator(kingPos.x, kingPos.y, "invalid");
+                }
+                
+                // Update status message
+                if currentPlayer == WHITE then {
+                    chessScreen.statusMessage = "Checkmate! Black wins!";
+                } else {
+                    chessScreen.statusMessage = "Checkmate! White wins!";
+                }
+            } else if isInStalemate then {
+                print "Stalemate! Game is a draw.";
+                // Mark both kings with red crosses
+                var whiteKingPos: posType = call findKing(WHITE);
+                var blackKingPos: posType = call findKing(BLACK);
+                
+                if whiteKingPos.x >= 0 then {
+                    call setIndicator(whiteKingPos.x, whiteKingPos.y, "invalid");
+                }
+                if blackKingPos.x >= 0 then {
+                    call setIndicator(blackKingPos.x, blackKingPos.y, "invalid");
+                }
+                
+                chessScreen.statusMessage = "Stalemate! Game is a draw.";
+            } else {
+                // Normal game continues
+                if currentPlayer == BLACK then {
+                    chessScreen.statusMessage = "Black to move";
+                } else {
+                    chessScreen.statusMessage = "White to move";
+                }
+            }
+            
             call updateTimerColors();
             print "Switched to next player: " + currentPlayer;
             
@@ -827,21 +907,37 @@ handleCellClick(x: int, y: int) {
         var move = moves[i];
         print "  Move to: (" + move.x + ", " + move.y + ")";
         
-        // Check if this move captures an enemy piece
-        var targetCellValue: int = call getPieceAt(move.x, move.y);
-        var isCapture: bool = false;
+        // Check if this move would expose own king (invalid move - red cross)
+        var exposesKing: bool = call wouldMoveExposeKing(x, y, move.x, move.y, currentPlayer);
         
-        if targetCellValue != -1 then {
-            var targetCell = ChessCell(targetCellValue);
-            if targetCell.pieceType != EMPTY then {
-                isCapture = true;
-                print "    (capture move)";
+        if exposesKing then {
+            print "    (invalid - exposes king)";
+            call setIndicator(move.x, move.y, "invalid");
+        } else {
+            // Check if this move captures an enemy piece
+            var targetCellValue: int = call getPieceAt(move.x, move.y);
+            var isCapture: bool = false;
+            
+            if targetCellValue != -1 then {
+                var targetCell = ChessCell(targetCellValue);
+                if targetCell.pieceType != EMPTY then {
+                    isCapture = true;
+                    print "    (capture move)";
+                }
+            }
+            
+            // Check if this move would check the opponent's king
+            var checksOpponent: bool = call wouldMoveCheckOpponent(x, y, move.x, move.y, currentPlayer);
+            
+            if checksOpponent then {
+                print "    (checks opponent)";
+                call setIndicator(move.x, move.y, "check");
+            } else if isCapture then {
+                call setIndicator(move.x, move.y, "capture");
+            } else {
+                call setIndicator(move.x, move.y, "normal");
             }
         }
-        
-        // Set the indicator
-        print "  Setting indicator at (" + move.x + ", " + move.y + ")";
-        call setIndicator(move.x, move.y, isCapture);
     }
     
     print "handleCellClick complete";
