@@ -1091,6 +1091,15 @@ public class EbsConsoleHandler extends EbsHandler {
                 }
                 
                 try {
+                    // Clear the interpreter context before running to ensure clean state
+                    // This prevents issues with stale imported files and function registrations
+                    if (ctx != null) {
+                        interpreter.getContext().clear();
+                        ctx.environment.clear();
+                        ctx.blocks.clear();
+                        ctx.statements = null;
+                    }
+                    
                     // Parse the file to get the blocks and statements with correct source path
                     RuntimeContext scriptContext = com.eb.script.parser.Parser.parse(filePath);
                     
