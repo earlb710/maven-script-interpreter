@@ -93,6 +93,7 @@ var board: array.bitmap[64];
 // Timer variables (now in deciseconds - 10ths of a second)
 var timerWhite: int = 6000;  // 600 seconds = 6000 deciseconds
 var timerBlack: int = 6000;  // 600 seconds = 6000 deciseconds
+var initialTimerValue: int = 6000;  // Store initial timer value to calculate elapsed time
 var currentPlayer: int = 0;
 
 // Selection and move indication variables
@@ -1035,6 +1036,28 @@ formatTimerDecimal(deciseconds: int) return string {
     return minsStr + ":" + secsStr + "." + tenths;
 }
 
+// Calculate and format elapsed game time
+formatElapsedTime() return string {
+    // Calculate elapsed time: initial time minus remaining time for both players
+    var elapsedWhite: int = initialTimerValue - timerWhite;
+    var elapsedBlack: int = initialTimerValue - timerBlack;
+    var totalElapsedDeciseconds: int = elapsedWhite + elapsedBlack;
+    
+    // Convert to seconds and minutes
+    var totalSeconds: int = totalElapsedDeciseconds / 10;
+    var minutes: int = totalSeconds / 60;
+    var seconds: int = call modulo(totalSeconds, 60);
+    
+    var result: string;
+    if minutes > 0 then {
+        result = string(minutes) + " min " + string(seconds) + " sec";
+    } else {
+        result = string(seconds) + " sec";
+    }
+    
+    return result;
+}
+
 // Timer callback function - called every 100ms (0.1 seconds)
 // Note: This callback is already executed on JavaFX Platform.runLater by thread.timerStart
 timerCallback(timerName: string) {
@@ -1308,6 +1331,7 @@ handleStartGame() {
     var timeInDeciseconds: int = call getTimeLimitInDeciseconds(selectedTimeLimit);
     timerWhite = timeInDeciseconds;
     timerBlack = timeInDeciseconds;
+    initialTimerValue = timeInDeciseconds;  // Store for elapsed time calculation
     
     gameStarted = true;
     
@@ -2027,11 +2051,13 @@ screen gameOverDialog = {
 showGameOverDialog(winner: string, gameType: string) {
     print "Showing game over dialog...";
     
+    var elapsedTime: string = call formatElapsedTime();
+    
     var message: string;
     if gameType == "checkmate" then {
-        message = "Checkmate! " + winner + " wins!";
+        message = "Checkmate! " + winner + " wins!\nGame time: " + elapsedTime;
     } else {
-        message = "Stalemate - " + winner + "!";
+        message = "Stalemate - " + winner + "!\nGame time: " + elapsedTime;
     }
     
     gameOverDialog.resultMessage = message;
@@ -2063,8 +2089,10 @@ resetGame() {
     currentPlayer = WHITE;
     
     // Reset timers
-    timerWhite = call getTimeLimitInDeciseconds(selectedTimeLimit);
-    timerBlack = call getTimeLimitInDeciseconds(selectedTimeLimit);
+    var timeInDeciseconds: int = call getTimeLimitInDeciseconds(selectedTimeLimit);
+    timerWhite = timeInDeciseconds;
+    timerBlack = timeInDeciseconds;
+    initialTimerValue = timeInDeciseconds;  // Reset initial value for new game
     
     // Clear all indicators
     call clearIndicators();
