@@ -53,6 +53,12 @@ Each keyword has its own example file demonstrating correct usage.
 For the formal EBNF grammar, see:
 - [ScriptInterpreter/src/main/java/com/eb/script/syntax_ebnf.txt](ScriptInterpreter/src/main/java/com/eb/script/syntax_ebnf.txt)
 
+### Getting Started Guides
+- [ScriptInterpreter/guides/FUNCTIONS_AND_IMPORTS_GUIDE.md](ScriptInterpreter/guides/FUNCTIONS_AND_IMPORTS_GUIDE.md) - Functions, imports, and structuring large applications
+- [ScriptInterpreter/guides/FUNCTIONS_IMPORTS_QUICK_REF.md](ScriptInterpreter/guides/FUNCTIONS_IMPORTS_QUICK_REF.md) - Quick reference for functions and imports
+- [ScriptInterpreter/guides/COMPLEX_DATA_TYPES_GUIDE.md](ScriptInterpreter/guides/COMPLEX_DATA_TYPES_GUIDE.md) - Arrays and records guide
+- [ScriptInterpreter/guides/SCREEN_DEFINITION_BEST_PRACTICES.md](ScriptInterpreter/guides/SCREEN_DEFINITION_BEST_PRACTICES.md) - Screen/UI best practices
+
 ### Related Documentation
 - [README.md](README.md) - Project overview and quick start
 - [docs/EBS_COLLECTIONS_REFERENCE.md](docs/EBS_COLLECTIONS_REFERENCE.md) - Comprehensive collections guide (arrays, queues, maps, JSON)
