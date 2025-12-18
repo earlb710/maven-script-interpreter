@@ -21,10 +21,29 @@ timerCallback(timerName: string) {
     }
 }
 
-// Start a repeating timer
+// Create a simple screen to link the timer to
+screen timerScreen = {
+    "title": "Timer Example",
+    "width": 400,
+    "height": 200,
+    "vars": [
+        {
+            "name": "label1",
+            "type": "string",
+            "display": {
+                "type": "label",
+                "text": "Timer running - check console for output"
+            }
+        }
+    ]
+};
+
+show screen timerScreen;
+
+// Start a repeating timer with qualified name (links to screen)
 // Parameters: name (string), period in milliseconds (long), callback function name (string)
-print "Starting timer 'myTimer' with 1000ms period...";
-var timerName: string = call thread.timerStart("myTimer", 1000, "timerCallback");
+print "Starting timer 'timerScreen.myTimer' with 1000ms period...";
+var timerName: string = call thread.timerStart("timerScreen.myTimer", 1000, "timerCallback");
 print "Timer started: " + timerName;
 print "The timer will fire 5 times and then stop itself.";
 print "";

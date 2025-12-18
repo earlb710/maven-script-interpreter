@@ -216,14 +216,12 @@ public class BuiltinsThread {
         
         // Determine the target screen for the timer
         String targetScreen = null;
-        String actualTimerName = timerName;
         
         // Check if timer name contains a dot, indicating qualified name format (screenName.timerName)
         if (timerName.contains(".")) {
             // Parse the qualified name
             int dotIndex = timerName.indexOf('.');
             String screenNamePart = timerName.substring(0, dotIndex);
-            actualTimerName = timerName.substring(dotIndex + 1);
             
             // Validate that screen exists
             if (!screenExists(context, screenNamePart)) {

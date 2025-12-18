@@ -27,8 +27,27 @@ animationFrame(timerName: string) {
     }
 }
 
-// Start animation timer
+// Create a simple screen to link timer to
+screen animScreen = {
+    "title": "Animation Example",
+    "width": 400,
+    "height": 200,
+    "vars": [
+        {
+            "name": "label1",
+            "type": "string",
+            "display": {
+                "type": "label",
+                "text": "Animation running - check console"
+            }
+        }
+    ]
+};
+
+show screen animScreen;
+
+// Start animation timer with qualified name
 print "Starting animation (will run for " + call str.toString(maxFrames / 10) + " seconds)";
 print "";
 
-call thread.timerStart("animation", 100, "animationFrame");
+call thread.timerStart("animScreen.animation", 100, "animationFrame");

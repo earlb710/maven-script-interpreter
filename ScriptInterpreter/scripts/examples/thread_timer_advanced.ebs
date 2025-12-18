@@ -12,7 +12,7 @@ timerCallback1(timerName: string) {
     // Pause after 3 fires
     if timerCount == 3 then {
         print "Pausing timer1...";
-        var paused: bool = call thread.timerPause("timer1");
+        var paused: bool = call thread.timerPause("timerScreen.timer1");
         print "Timer paused: " + call str.toString(paused);
         
         // Schedule resume after 3 seconds
@@ -22,7 +22,7 @@ timerCallback1(timerName: string) {
     // Resume if count is 4 (this happens 3s after pause)
     if timerCount == 4 then {
         print "Resuming timer1...";
-        var resumed: bool = call thread.timerResume("timer1");
+        var resumed: bool = call thread.timerResume("timerScreen.timer1");
         print "Timer resumed: " + call str.toString(resumed);
     }
     
@@ -48,12 +48,31 @@ timerCallback2(timerName: string) {
     }
 }
 
-// Start two timers
+// Create a simple screen to link timers to
+screen timerScreen = {
+    "title": "Advanced Timer Example",
+    "width": 400,
+    "height": 200,
+    "vars": [
+        {
+            "name": "label1",
+            "type": "string",
+            "display": {
+                "type": "label",
+                "text": "Timers running - check console"
+            }
+        }
+    ]
+};
+
+show screen timerScreen;
+
+// Start two timers with qualified names
 print "Starting timer1 with 1000ms period...";
-call thread.timerStart("timer1", 1000, "timerCallback1");
+call thread.timerStart("timerScreen.timer1", 1000, "timerCallback1");
 
 print "Starting timer2 with 1500ms period...";
-call thread.timerStart("timer2", 1500, "timerCallback2");
+call thread.timerStart("timerScreen.timer2", 1500, "timerCallback2");
 
 // Display initial timer information
 print "";
@@ -61,22 +80,22 @@ print "=== Initial Timer Status ===";
 var count: long = call thread.getCount();
 print "Active timer count: " + call str.toString(count);
 
-var running1: bool = call thread.timerIsRunning("timer1");
+var running1: bool = call thread.timerIsRunning("timerScreen.timer1");
 print "Timer1 is running: " + call str.toString(running1);
 
-var running2: bool = call thread.timerIsRunning("timer2");
+var running2: bool = call thread.timerIsRunning("timerScreen.timer2");
 print "Timer2 is running: " + call str.toString(running2);
 
-var period1: long = call thread.timerGetPeriod("timer1");
+var period1: long = call thread.timerGetPeriod("timerScreen.timer1");
 print "Timer1 period: " + call str.toString(period1) + "ms";
 
-var period2: long = call thread.timerGetPeriod("timer2");
+var period2: long = call thread.timerGetPeriod("timerScreen.timer2");
 print "Timer2 period: " + call str.toString(period2) + "ms";
 
 // Get detailed info for timer1
 print "";
 print "=== Timer1 Detailed Info ===";
-var info1: string = call thread.timerGetInfo("timer1");
+var info1: string = call thread.timerGetInfo("timerScreen.timer1");
 print info1;
 
 // List all timers
