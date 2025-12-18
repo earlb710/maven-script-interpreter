@@ -1,0 +1,111 @@
+// Test to verify show screen vs show subscreen behavior
+// This test verifies that:
+// 1. 'show screen' creates independent screens (no namespace qualification)
+// 2. 'show subscreen' creates dependent screens (with namespace qualification)
+
+var testResult: string = "";
+
+screen parentScreen = {
+    "title": "Parent Screen",
+    "width": 400,
+    "height": 300,
+    "vars": [
+        {
+            "name": "parentMessage",
+            "type": "string",
+            "default": "Parent screen",
+            "display": {
+                "type": "textfield",
+                "labelText": "Parent:"
+            }
+        },
+        {
+            "name": "showIndependent",
+            "type": "button",
+            "default": "Show Independent Child",
+            "display": {
+                "type": "button",
+                "labelText": "Show Independent Child",
+                "onClick": "show screen independentChild;"
+            }
+        },
+        {
+            "name": "showDependent",
+            "type": "button",
+            "default": "Show Dependent Child",
+            "display": {
+                "type": "button",
+                "labelText": "Show Dependent Child",
+                "onClick": "show subscreen dependentChild;"
+            }
+        }
+    ]
+};
+
+screen independentChild = {
+    "title": "Independent Child Screen",
+    "width": 400,
+    "height": 200,
+    "vars": [
+        {
+            "name": "childMessage",
+            "type": "string",
+            "default": "I am independent!",
+            "display": {
+                "type": "textfield",
+                "labelText": "Child:"
+            }
+        },
+        {
+            "name": "closeButton",
+            "type": "button",
+            "default": "Close",
+            "display": {
+                "type": "button",
+                "labelText": "Close",
+                "onClick": "hide screen;"
+            }
+        }
+    ]
+};
+
+screen dependentChild = {
+    "title": "Dependent Child Screen",
+    "width": 400,
+    "height": 200,
+    "vars": [
+        {
+            "name": "childMessage",
+            "type": "string",
+            "default": "I am dependent on parent!",
+            "display": {
+                "type": "textfield",
+                "labelText": "Child:"
+            }
+        },
+        {
+            "name": "closeButton",
+            "type": "button",
+            "default": "Close",
+            "display": {
+                "type": "button",
+                "labelText": "Close",
+                "onClick": "hide screen;"
+            }
+        }
+    ]
+};
+
+print "Test: Show Screen vs Show Subscreen";
+print "====================================";
+print "";
+print "Expected behavior:";
+print "1. 'show screen independentChild' should create screen with key 'independentchild'";
+print "2. 'show subscreen dependentChild' should create screen with key 'parentscreen.dependentchild'";
+print "";
+print "Showing parent screen...";
+
+show screen parentScreen;
+
+print "";
+print "Test complete. Check debug output for screen creation keys.";

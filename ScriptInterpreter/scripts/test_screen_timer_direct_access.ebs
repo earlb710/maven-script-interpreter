@@ -22,7 +22,7 @@ timerCallback(tName: string) {
 screen timerTestScreen = {
     "title": "Timer Variable Access Test",
     "width": 500,
-    "height": 350,
+    "height": 450,
     "vars": [
         {
             "name": "counter",
@@ -101,6 +101,92 @@ screen timerTestScreen = {
             }
         }
     ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "15",
+            "padding": "20",
+            "style": "-fx-background-color: #f5f5f5;",
+            "items": [],
+            "areas": [
+                {
+                    "name": "dataArea",
+                    "type": "vbox",
+                    "spacing": "10",
+                    "padding": "10",
+                    "style": "-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-border-width: 1; -fx-border-radius: 5;",
+                    "items": [
+                        {
+                            "name": "counterItem",
+                            "varRef": "counter"
+                        },
+                        {
+                            "name": "messageItem",
+                            "varRef": "message"
+                        },
+                        {
+                            "name": "intervalItem",
+                            "varRef": "timerInterval"
+                        }
+                    ]
+                },
+                {
+                    "name": "buttonArea",
+                    "type": "vbox",
+                    "spacing": "10",
+                    "padding": "10",
+                    "items": [],
+                    "areas": [
+                        {
+                            "name": "timerButtonsArea",
+                            "type": "hbox",
+                            "spacing": "10",
+                            "alignment": "center",
+                            "items": [
+                                {
+                                    "name": "startButtonItem",
+                                    "varRef": "btnStart"
+                                },
+                                {
+                                    "name": "stopButtonItem",
+                                    "varRef": "btnStop"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "actionButtonsArea",
+                            "type": "hbox",
+                            "spacing": "10",
+                            "alignment": "center",
+                            "items": [
+                                {
+                                    "name": "resetButtonItem",
+                                    "varRef": "btnReset"
+                                },
+                                {
+                                    "name": "statusButtonItem",
+                                    "varRef": "btnCheckStatus"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "closeButtonArea",
+                            "type": "hbox",
+                            "spacing": "10",
+                            "alignment": "center",
+                            "items": [
+                                {
+                                    "name": "closeButtonItem",
+                                    "varRef": "btnClose"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
     "startup": "counter = 0; message = 'Ready to start'; print 'Startup: Screen initialized';",
     "cleanup": "if (call thread.timerIsRunning(timerName)) { call thread.timerStop(timerName); print 'Cleanup: Timer stopped'; } print 'Cleanup: Final counter value: ' + counter;"
 };
@@ -109,7 +195,7 @@ screen timerTestScreen = {
 show screen timerTestScreen;
 
 print "";
-print "Screen displayed. Instructions:";
+print "Screen displayed with area items layout. Instructions:";
 print "1. Click 'Start Timer' - timer will increment counter every second";
 print "2. Watch the counter and message fields update automatically";
 print "3. Click 'Stop Timer' - timer stops updating";
@@ -124,3 +210,4 @@ print "  - Counter increments automatically when timer is running";
 print "  - Message updates with timestamp on each timer tick";
 print "  - All button handlers can access and modify variables directly";
 print "  - Cleanup code stops the timer and displays final counter value";
+print "  - Layout organized using area items (data area + button groups)";
