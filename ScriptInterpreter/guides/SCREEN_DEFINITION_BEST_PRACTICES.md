@@ -476,27 +476,64 @@ screen dashboardPattern = {
 
 ## Event Handlers
 
+EBS screens support multiple event types at different levels (item, area, and screen). Events allow you to respond to user interactions and state changes.
+
+### Complete Event Reference
+
+| Event | Level | Trigger | Return Value | Use Case |
+|-------|-------|---------|--------------|----------|
+| `onClick` | Item (buttons) | Button clicked | None | User actions (save, submit, navigate) |
+| `onChange` | Item (input controls) | Value changes | None | Real-time calculations, updates, filtering |
+| `onValidate` | Item (input controls) | Value changes (before onChange) | Boolean | Validate input, return false to reject |
+| `gainFocus` | Area | Focus enters area | None | Highlight section, load data |
+| `lostFocus` | Area | Focus leaves area | None | Save changes, validate section |
+
+### Event Execution Order
+
+When a value changes in an input control:
+1. `onValidate` executes first (if defined) - must return true/false
+2. If validation passes, `onChange` executes (if defined)
+3. Area `gainFocus`/`lostFocus` fire when focus moves between areas
+
 ### onClick Events
 
+Used for buttons and clickable items. Executes when the user clicks the control.
+
 ```
-// Inline event handler
+// Simple inline handler
 {
     "type": "button",
     "text": "Save",
     "onClick": "call saveRecord();"
 }
 
-// Multi-line event handler
+// Multi-line inline handler
 {
     "type": "button",
     "text": "Calculate",
-    "onClick": "var total = price * quantity; print 'Total: ' + total;"
+    "onClick": "var total = price * quantity; orderScreen.result = total; print 'Total: ' + total;"
+}
+
+// Calling multiple functions
+{
+    "type": "button",
+    "text": "Submit",
+    "onClick": "if call validateForm() then { call submitData(); call closeForm(); } end if;"
 }
 ```
 
+**Best Practices:**
+- Keep onClick handlers short - call functions for complex logic
+- Use onClick for discrete user actions (save, delete, calculate, navigate)
+- Always validate before performing destructive actions
+- Provide user feedback after actions complete
+
 ### onChange Events
 
+Used for input controls (textfield, textarea, checkbox, combobox, etc.). Executes whenever the value changes.
+
 ```
+// Real-time calculation
 {
     "name": "quantity",
     "type": "int",
@@ -506,11 +543,41 @@ screen dashboardPattern = {
         "onChange": "call calculateTotal();"
     }
 }
+
+// Update dependent fields
+{
+    "name": "country",
+    "type": "string",
+    "display": {
+        "type": "combobox",
+        "onChange": "call loadStatesForCountry(orderScreen.country);"
+    }
+}
+
+// Enable/disable based on checkbox
+{
+    "name": "enableAdvanced",
+    "type": "bool",
+    "default": false,
+    "display": {
+        "type": "checkbox",
+        "onChange": "call scr.setProperty('myScreen.advancedPanel', 'disabled', not enableAdvanced);"
+    }
+}
 ```
+
+**Best Practices:**
+- Use onChange for real-time updates (calculations, dependent fields)
+- Avoid expensive operations in onChange (use debouncing if needed)
+- onChange fires after successful validation
+- Can update other screen variables or UI properties
 
 ### onValidate Events
 
+Used for input controls to validate user input. Must return a boolean (true = valid, false = invalid).
+
 ```
+// Email validation
 {
     "name": "email",
     "type": "string",
@@ -519,19 +586,65 @@ screen dashboardPattern = {
         "onValidate": "return call validateEmail(email);"
     }
 }
+
+// Inline validation
+{
+    "name": "age",
+    "type": "int",
+    "display": {
+        "type": "textfield",
+        "onValidate": "if age < 18 or age > 100 then { return false; } return true;"
+    }
+}
+
+// Complex validation with multiple checks
+{
+    "name": "password",
+    "type": "string",
+    "display": {
+        "type": "passwordfield",
+        "onValidate": "var len = call string.length(password); if len < 8 then { return false; } if len > 50 then { return false; } return true;"
+    }
+}
 ```
+
+**Best Practices:**
+- Always return a boolean value (true or false)
+- Runs before onChange - if validation fails, onChange doesn't execute
+- Use for input validation, range checks, format verification
+- Keep validation logic simple and fast
+- Consider providing user feedback on validation failure
+- Item-level onValidate takes precedence over variable-level onValidate
 
 ### Area-Level Events
 
+Areas support focus events that fire when focus enters or leaves the area.
+
 ```
+// Focus tracking
 {
     "name": "formArea",
     "type": "vbox",
-    "gainFocus": "print 'Form area gained focus';",
-    "lostFocus": "print 'Form area lost focus';",
+    "gainFocus": "print 'Form area gained focus'; formScreen.currentSection = 'form';",
+    "lostFocus": "print 'Form area lost focus'; call autoSaveFormData();",
+    "items": [/* ... */]
+}
+
+// Highlight active section
+{
+    "name": "detailsSection",
+    "type": "vbox",
+    "gainFocus": "call scr.setProperty('myScreen.detailsSection', 'style', '-fx-background-color: #e8f4f8;');",
+    "lostFocus": "call scr.setProperty('myScreen.detailsSection', 'style', '-fx-background-color: transparent;');",
     "items": [/* ... */]
 }
 ```
+
+**Best Practices:**
+- Use gainFocus to highlight active sections or load section-specific data
+- Use lostFocus for auto-save functionality or section validation
+- Keep focus handlers lightweight
+- Focus events fire when keyboard or mouse focus changes
 
 **Best Practices:**
 - Keep event handlers short - call functions for complex logic
