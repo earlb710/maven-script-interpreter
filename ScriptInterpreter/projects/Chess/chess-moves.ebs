@@ -433,6 +433,7 @@ function wouldMoveExposeKing(fromX: int, fromY: int, toX: int, toY: int, playerC
     // Make the move on the board
     board[toIndex] = fromCellValue;
     // Clear the source square but preserve cell color
+    // Note: piece color is irrelevant when pieceType is EMPTY, using WHITE for consistency
     var emptyCellValue: int = call encodeCellValue(fromCell.cellColor, EMPTY, WHITE);
     board[fromIndex] = emptyCellValue;
     
@@ -477,6 +478,7 @@ function wouldMoveCheckOpponent(fromX: int, fromY: int, toX: int, toY: int, play
     // Make the move on the board
     board[toIndex] = fromCellValue;
     // Clear the source square but preserve cell color
+    // Note: piece color is irrelevant when pieceType is EMPTY, using WHITE for consistency
     var emptyCellValue: int = call encodeCellValue(fromCell.cellColor, EMPTY, WHITE);
     board[fromIndex] = emptyCellValue;
     
