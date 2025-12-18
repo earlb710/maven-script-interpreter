@@ -936,6 +936,23 @@ foreach char in text {
 }
 ```
 
+#### Reverse Iteration Over Arrays
+```javascript
+var numbers = [1, 2, 3, 4, 5];
+
+// Forward iteration
+foreach num in numbers {
+    print num;  // Output: 1, 2, 3, 4, 5
+}
+
+// Reverse iteration using the array.reverse() builtin
+foreach num in call array.reverse(numbers) {
+    print num;  // Output: 5, 4, 3, 2, 1
+}
+```
+
+> **Note:** `array.reverse()` is a builtin function that returns a reverse iteration wrapper. See the [Array Functions](#array-functions) section for details.
+
 ### Do-While Loops
 ```javascript
 do {
