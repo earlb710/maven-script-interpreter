@@ -3991,6 +3991,10 @@ public class ScreenFactory {
                     // Store context and screenName for screen status updates when control values change
                     control.getProperties().put(ControlListenerFactory.PROP_INTERPRETER_CONTEXT, context);
                     control.getProperties().put(ControlListenerFactory.PROP_SCREEN_NAME, screenName);
+                    // DEBUG: Log control binding setup
+                    System.out.println("[DEBUG] Binding control to var: screenName=" + screenName + 
+                                       ", varRef=" + item.varRef + 
+                                       ", controlType=" + control.getClass().getSimpleName());
                     // Store stateful property for change tracking control - get from Var
                     boolean stateful = true; // default
                     if (context != null) {
@@ -4015,6 +4019,10 @@ public class ScreenFactory {
                     control.getProperties().put(ControlListenerFactory.PROP_STATEFUL, stateful);
                     // Track this control so we can refresh it when variables change
                     boundControls.add(control);
+                    // DEBUG: Log control added to boundControls
+                    System.out.println("[DEBUG] Added control to boundControls: screenName=" + screenName + 
+                                       ", varRef=" + item.varRef + 
+                                       ", boundControls.size=" + boundControls.size());
                     
                     // Store the JavaFX Node reference in the ScreenComponentType
                     if (context != null) {

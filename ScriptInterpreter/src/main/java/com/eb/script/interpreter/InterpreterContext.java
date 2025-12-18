@@ -534,8 +534,14 @@ public class InterpreterContext {
         // Use lowercase for consistent lookup since callbacks are stored with lowercase keys
         String lowerScreenName = screenName.toLowerCase();
         Runnable callback = screenRefreshCallbacks.get(lowerScreenName);
+        // DEBUG: Log refresh trigger
+        System.out.println("[DEBUG] triggerScreenRefresh called: screenName=" + screenName + 
+                           ", callbackExists=" + (callback != null));
         if (callback != null) {
             callback.run();
+            System.out.println("[DEBUG] Screen refresh callback executed for: " + screenName);
+        } else {
+            System.out.println("[DEBUG] WARNING: No refresh callback registered for screen: " + screenName);
         }
     }
 
