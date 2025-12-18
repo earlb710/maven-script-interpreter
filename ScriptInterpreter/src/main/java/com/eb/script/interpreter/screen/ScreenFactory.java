@@ -3371,6 +3371,10 @@ public class ScreenFactory {
         // Store bound controls in context if provided
         // Use lowercase for consistent lookup across the application
         String lowerScreenName = screenName.toLowerCase();
+        // DEBUG: Log callback registration attempt
+        System.out.println("[DEBUG] Attempting to register refresh callback: screenName=" + screenName + 
+                           ", allBoundControls.size=" + allBoundControls.size() + 
+                           ", contextExists=" + (context != null));
         if (context != null && !allBoundControls.isEmpty()) {
             context.getScreenBoundControls().put(lowerScreenName, allBoundControls);
 
@@ -3380,6 +3384,10 @@ public class ScreenFactory {
                 // This prevents nested Platform.runLater() calls when called from timer callbacks
                 com.eb.util.Util.runOnFx(() -> refreshBoundControls(allBoundControls, screenVars));
             });
+            System.out.println("[DEBUG] Refresh callback registered successfully for: " + screenName);
+        } else {
+            System.out.println("[DEBUG] WARNING: Refresh callback NOT registered for: " + screenName + 
+                               " (context=" + (context != null) + ", isEmpty=" + allBoundControls.isEmpty() + ")");
         }
 
         // Wrap content in ScrollPane to handle overflow when content is larger than window
