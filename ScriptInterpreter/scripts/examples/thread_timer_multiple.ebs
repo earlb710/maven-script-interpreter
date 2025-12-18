@@ -26,22 +26,41 @@ slowTimer(name: string) {
     if count3 >= 3 then {
         print "";
         print "Stopping all timers...";
-        call thread.timerStop("fast");
-        call thread.timerStop("medium");
-        call thread.timerStop("slow");
+        call thread.timerStop("timerScreen.fast");
+        call thread.timerStop("timerScreen.medium");
+        call thread.timerStop("timerScreen.slow");
         print "All timers stopped.";
     }
 }
 
-// Start multiple timers with different intervals
+// Create a simple screen to link timers to
+screen timerScreen = {
+    "title": "Multiple Timers Example",
+    "width": 400,
+    "height": 200,
+    "vars": [
+        {
+            "name": "label1",
+            "type": "string",
+            "display": {
+                "type": "label",
+                "text": "Multiple timers running - check console"
+            }
+        }
+    ]
+};
+
+show screen timerScreen;
+
+// Start multiple timers with different intervals using qualified names
 print "Starting three timers with different periods:";
 print "- Fast: 500ms";
 print "- Medium: 1000ms";
 print "- Slow: 2000ms";
 print "";
 
-call thread.timerStart("fast", 500, "fastTimer");
-call thread.timerStart("medium", 1000, "mediumTimer");
-call thread.timerStart("slow", 2000, "slowTimer");
+call thread.timerStart("timerScreen.fast", 500, "fastTimer");
+call thread.timerStart("timerScreen.medium", 1000, "mediumTimer");
+call thread.timerStart("timerScreen.slow", 2000, "slowTimer");
 
 print "All timers started. They will run until the slow timer stops them.";

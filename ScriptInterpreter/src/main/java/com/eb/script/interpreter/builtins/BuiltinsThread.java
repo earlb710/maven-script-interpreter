@@ -170,10 +170,15 @@ public class BuiltinsThread {
     /**
      * thread.timerStart(name, period, callback) - Start a repeating timer
      * 
+     * Timers must be linked to a screen:
+     * - If created inside a screen, the timer is automatically linked to that screen
+     * - If created outside a screen, use qualified name format "screenName.timerName"
+     * - If no screen can be identified, an error is thrown
+     * 
      * @param context The interpreter context for executing callbacks
      * @param args Arguments: name (STRING), period (LONG milliseconds), callback (STRING function name)
      * @return The timer name for convenience
-     * @throws InterpreterError if arguments are invalid
+     * @throws InterpreterError if arguments are invalid or screen cannot be identified
      */
     private static Object timerStart(InterpreterContext context, Object[] args) throws InterpreterError {
         if (args.length < 3) {
@@ -208,6 +213,32 @@ public class BuiltinsThread {
 
         // Get the current screen context for the callback (if in a screen)
         final String currentScreen = context.getCurrentScreen();
+        
+        // Determine the target screen for the timer
+        String targetScreen = null;
+        
+        // Check if timer name contains a dot, indicating qualified name format (screenName.timerName)
+        if (timerName.contains(".")) {
+            // Parse the qualified name
+            int dotIndex = timerName.indexOf('.');
+            String screenNamePart = timerName.substring(0, dotIndex);
+            
+            // Validate that screen exists
+            if (!screenExists(context, screenNamePart)) {
+                throw new InterpreterError("thread.timerStart: screen '" + screenNamePart + 
+                    "' does not exist. Cannot create timer with qualified name '" + timerName + "'");
+            }
+            
+            targetScreen = screenNamePart.toLowerCase();
+        } else if (currentScreen != null && !currentScreen.isEmpty()) {
+            // Timer is being created inside a screen - link to current screen
+            targetScreen = currentScreen;
+        } else {
+            // Timer is being created outside a screen without qualified name - error
+            throw new InterpreterError("thread.timerStart: timer '" + timerName + 
+                "' is being created outside a screen context. " +
+                "Use qualified name format 'screenName.timerName' to link the timer to a specific screen.");
+        }
 
         // Stop existing timer with the same name if it exists
         TimerInfo existingTimer = THREAD_TIMERS.get(timerName);
@@ -217,7 +248,7 @@ public class BuiltinsThread {
         }
 
         // Create the repeating task using the helper method
-        Runnable timerTask = createTimerTask(timerName, finalCallbackName, currentScreen, context);
+        Runnable timerTask = createTimerTask(timerName, finalCallbackName, targetScreen, context);
 
         // Schedule the task to run repeatedly
         ScheduledFuture<?> future = SCHEDULER.scheduleAtFixedRate(
@@ -227,13 +258,22 @@ public class BuiltinsThread {
             TimeUnit.MILLISECONDS
         );
 
-        // Determine the source: screen name if in a screen context, otherwise "script"
-        String source = (currentScreen != null && !currentScreen.isEmpty()) ? currentScreen : "script";
-
-        // Store the timer info
-        THREAD_TIMERS.put(timerName, new TimerInfo(future, periodMs, finalCallbackName, context, source));
+        // Store the timer info with the determined screen as source
+        THREAD_TIMERS.put(timerName, new TimerInfo(future, periodMs, finalCallbackName, context, targetScreen));
 
         return timerName;
+    }
+    
+    /**
+     * Helper method to check if a screen exists (either configured or already created).
+     * 
+     * @param context The interpreter context
+     * @param screenName The screen name to check
+     * @return true if the screen exists, false otherwise
+     */
+    private static boolean screenExists(InterpreterContext context, String screenName) {
+        String lowerScreenName = screenName.toLowerCase();
+        return context.hasScreenConfig(lowerScreenName) || context.getScreens().containsKey(lowerScreenName);
     }
 
     /**
