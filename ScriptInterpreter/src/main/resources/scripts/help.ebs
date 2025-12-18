@@ -533,6 +533,45 @@ tempNode = call json.set(tempNode, "value", "Screen");
 tempNode = call json.set(tempNode, "icon", "icons/normal-page.png");
 call array.add(examplesChildren, tempNode);
 
+// Build Guides section by programmatically loading files from guides directory
+var guidesChildren: array[*];
+
+// Get list of markdown files in guides directory
+var guidesPath: string = "guides";
+var guideFiles: json = call file.listFiles(guidesPath);
+
+if guideFiles != null && guideFiles.length > 0 then {
+    // Create a sortable array of guide filenames
+    var guideNames: array[*];
+    
+    foreach guideFile in guideFiles {
+        var fileName: string = call json.getString(guideFile, "name", "");
+        var isDir: bool = call json.getBool(guideFile, "isDir", false);
+        
+        // Only include .md files, not directories
+        if !isDir && call str.endsWith(fileName, ".md") then {
+            call array.add(guideNames, fileName);
+        }
+    }
+    
+    // Sort guide names alphabetically
+    call array.sort(guideNames, true);
+    
+    // Create tree nodes for each guide
+    foreach guideName in guideNames {
+        var guideNode: json = call json.jsonFromString("{}");
+        // Use filename without extension as display name, replacing underscores with spaces
+        var displayName: string = call str.replace(guideName, ".md", "");
+        displayName = call str.replace(displayName, "_", " ");
+        guideNode = call json.set(guideNode, "value", displayName);
+        guideNode = call json.set(guideNode, "icon", "icons/help-page.png");
+        guideNode = call json.set(guideNode, "expanded", false);
+        // Store the actual filename as a custom property for later retrieval
+        guideNode = call json.set(guideNode, "filename", guideName);
+        call array.add(guidesChildren, guideNode);
+    }
+}
+
 var rootChildren: array[*];
 
 // Use json.jsonFromString to create a fresh JSON object to avoid circular references
@@ -550,6 +589,16 @@ examplesRootNode = call json.set(examplesRootNode, "icon", "icons/tree-node.png"
 examplesRootNode = call json.set(examplesRootNode, "expanded", true);
 examplesRootNode = call json.set(examplesRootNode, "children", examplesChildren);
 call array.add(rootChildren, examplesRootNode);
+
+// Add Guides node if we found any guide files
+if guidesChildren.length > 0 then {
+    var guidesRootNode: json = call json.jsonFromString("{}");
+    guidesRootNode = call json.set(guidesRootNode, "value", "Guides");
+    guidesRootNode = call json.set(guidesRootNode, "icon", "icons/tree-node.png");
+    guidesRootNode = call json.set(guidesRootNode, "expanded", true);
+    guidesRootNode = call json.set(guidesRootNode, "children", guidesChildren);
+    call array.add(rootChildren, guidesRootNode);
+}
 
 // Use json.jsonFromString to create a fresh JSON object to avoid circular references
 var treeStructure: json = call json.jsonFromString("{}");
@@ -1033,9 +1082,73 @@ getBuiltinHelp(builtinName: string) return string {
     return "No help found for builtin: " + builtinName;
 }
 
+// Function to get guide content from markdown file
+getGuideContent(guideName: string) return string {
+    // guideName could be the display name (with spaces) or filename
+    // Try to find the matching guide file
+    var guidesPath: string = "guides";
+    var guideFiles: json = call file.listFiles(guidesPath);
+    
+    if guideFiles != null && guideFiles.length > 0 then {
+        foreach guideFile in guideFiles {
+            var fileName: string = call json.getString(guideFile, "name", "");
+            var isDir: bool = call json.getBool(guideFile, "isDir", false);
+            
+            // Only check .md files
+            if !isDir && call str.endsWith(fileName, ".md") then {
+                // Create display name from filename
+                var displayName: string = call str.replace(fileName, ".md", "");
+                displayName = call str.replace(displayName, "_", " ");
+                
+                // Check if this matches the requested guide name
+                if displayName == guideName || fileName == guideName then {
+                    // Read the markdown file
+                    try {
+                        var filePath: string = guidesPath + "/" + fileName;
+                        var markdownContent: string = call file.readTextFile(filePath);
+                        
+                        // Convert markdown to HTML using the builtin function
+                        var htmlContent: string = call file.markdownToHtml(markdownContent, true);
+                        
+                        return htmlContent;
+                    } exceptions {
+                        when ex {
+                            var errorMsg: string = "Error loading guide: " + ex;
+                            return errorMsg;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    return "Guide not found: " + guideName;
+}
+
 // Function to get help content based on selected topic
 getHelpContent(topic: string) return string {
     var content: string = "";
+    
+    // Check if this is a guide topic (matches a guide display name)
+    // Try to load it as a guide first
+    var guidesPath: string = "guides";
+    var guideFiles: json = call file.listFiles(guidesPath);
+    
+    if guideFiles != null && guideFiles.length > 0 then {
+        foreach guideFile in guideFiles {
+            var fileName: string = call json.getString(guideFile, "name", "");
+            var isDir: bool = call json.getBool(guideFile, "isDir", false);
+            
+            if !isDir && call str.endsWith(fileName, ".md") then {
+                var displayName: string = call str.replace(fileName, ".md", "");
+                displayName = call str.replace(displayName, "_", " ");
+                
+                if displayName == topic then {
+                    return call getGuideContent(topic);
+                }
+            }
+        }
+    }
     
     // Check for scr.setProperty sub-topics first (special case)
     // Map property names to their topic keys
@@ -1279,6 +1392,9 @@ call scr.setTreeItemBold("helpScreen", "Help Topics", true);
 // Top-level nodes with children
 call scr.setTreeItemBold("helpScreen", "Help Topics.Syntax", true);
 call scr.setTreeItemBold("helpScreen", "Help Topics.Examples", true);
+if guidesChildren.length > 0 then {
+    call scr.setTreeItemBold("helpScreen", "Help Topics.Guides", true);
+}
 
 // Syntax section nodes with children
 call scr.setTreeItemBold("helpScreen", "Help Topics.Syntax.Structure", true);

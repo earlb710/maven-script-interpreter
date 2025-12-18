@@ -571,13 +571,18 @@ public class EbsTab extends Tab {
         startInLabel.setMaxWidth(400); // Limit width to prevent layout issues with long paths
         startInLabel.setTooltip(new Tooltip("File operations use relative paths from this directory\n" + startInText));
 
-        // Create button row - add View button only for HTML files
+        // Create button row - add View button for HTML and Markdown files
         HBox buttons;
-        if (isHtml) {
+        if (isHtml || isMd) {
             Button viewBtn = new Button("View");
             viewBtn.setPadding(new Insets(5, 10, 5, 10));
-            viewBtn.setTooltip(new Tooltip("Open HTML in WebView"));
-            viewBtn.setOnAction(e -> openHtmlInWebView());
+            if (isHtml) {
+                viewBtn.setTooltip(new Tooltip("Open HTML in WebView"));
+                viewBtn.setOnAction(e -> openHtmlInWebView());
+            } else if (isMd) {
+                viewBtn.setTooltip(new Tooltip("Convert Markdown to HTML and view in WebView"));
+                viewBtn.setOnAction(e -> openMarkdownInWebView());
+            }
             buttons = new HBox(8, runBtn, clearBtn, viewBtn, startInLabel);
         } else {
             buttons = new HBox(8, runBtn, clearBtn, startInLabel);
@@ -2581,6 +2586,145 @@ public class EbsTab extends Tab {
         });
         
         // Load the HTML content with injected base tag for resolving relative paths (images, CSS, JS, etc.)
+        String contentWithBase = injectBaseTag(htmlContent, baseUrl);
+        webView.getEngine().loadContent(contentWithBase, "text/html");
+        
+        // Create a BorderPane layout with toolbar at top, WebView in center, and StatusBar at bottom
+        BorderPane root = new BorderPane();
+        root.setTop(toolbar);
+        root.setCenter(webView);
+        root.setBottom(statusBar);
+        
+        // Create a scene with the layout (800x600 is a reasonable default, window is resizable)
+        Scene scene = new Scene(root, 800, 600);
+        webViewStage.setScene(scene);
+        
+        // Show the stage
+        webViewStage.show();
+    }
+    
+    /**
+     * Opens markdown content in a WebView after converting to HTML.
+     * Similar to openHtmlInWebView but converts markdown first using file.markdownToHtml builtin.
+     */
+    private void openMarkdownInWebView() {
+        // Get the current markdown content from the editor
+        String markdownContent = dispArea.getText();
+        
+        // Convert markdown to HTML using the builtin function
+        String htmlContent;
+        try {
+            htmlContent = BuiltinsFile.markdownToHtml(context.environment, markdownContent, true);
+        } catch (Exception ex) {
+            outputArea.appendText("Error converting markdown to HTML: " + ex.getMessage() + "\n");
+            return;
+        }
+        
+        // Create a new Stage (window) for the WebView
+        Stage webViewStage = new Stage();
+        webViewStage.setTitle("Markdown Preview - " + (filename != null ? filename : "untitled"));
+        
+        // Create a WebView
+        WebView webView = new WebView();
+        
+        // Create a pin button to keep window always on top
+        ToggleButton pinBtn = new ToggleButton("📌 Pin");
+        pinBtn.setTooltip(new Tooltip("Keep window always on top"));
+        pinBtn.setOnAction(e -> {
+            webViewStage.setAlwaysOnTop(pinBtn.isSelected());
+        });
+        
+        // Create auto-refresh toggle button with debounced updates (0.5 second delay)
+        ToggleButton autoRefreshBtn = new ToggleButton("🔄 Auto Refresh");
+        autoRefreshBtn.setTooltip(new Tooltip("Automatically refresh preview when editor changes"));
+        
+        // Get base URL for resolving relative paths (images, CSS, JS, etc.)
+        String baseUrl = tabContext.path.getParent() != null 
+            ? tabContext.path.getParent().toUri().toString() 
+            : tabContext.path.toUri().toString();
+        
+        // Timer for debouncing editor changes
+        PauseTransition refreshTimer = new PauseTransition(Duration.millis(500));
+        refreshTimer.setOnFinished(e -> {
+            // Refresh the WebView with current editor content
+            String updatedMarkdown = dispArea.getText();
+            try {
+                String updatedHtml = BuiltinsFile.markdownToHtml(context.environment, updatedMarkdown, true);
+                // Inject base tag for resolving relative paths
+                String contentWithBase = injectBaseTag(updatedHtml, baseUrl);
+                webView.getEngine().loadContent(contentWithBase, "text/html");
+            } catch (Exception ex) {
+                // If conversion fails, show error in status bar (we'll add this later)
+                System.err.println("Error converting markdown: " + ex.getMessage());
+            }
+        });
+        
+        // Listener for editor text changes
+        javafx.beans.value.ChangeListener<String> textChangeListener = (obs, oldText, newText) -> {
+            if (autoRefreshBtn.isSelected()) {
+                // Restart the timer on each change (debouncing)
+                refreshTimer.playFromStart();
+            }
+        };
+        
+        // Apply custom styling when auto-refresh is toggled
+        autoRefreshBtn.selectedProperty().addListener((obs, wasSelected, isSelected) -> {
+            if (isSelected) {
+                // Blue background with white text when on
+                autoRefreshBtn.setStyle("-fx-background-color: #2196F3; -fx-text-fill: white;");
+                // Add the listener when enabled
+                dispArea.textProperty().addListener(textChangeListener);
+            } else {
+                // Reset to default style when off
+                autoRefreshBtn.setStyle("");
+                // Stop any pending refresh
+                refreshTimer.stop();
+                // Remove the listener when disabled
+                dispArea.textProperty().removeListener(textChangeListener);
+            }
+        });
+        
+        // Clean up when window closes
+        webViewStage.setOnCloseRequest(e -> {
+            refreshTimer.stop();
+            dispArea.textProperty().removeListener(textChangeListener);
+        });
+        
+        // Create a toolbar with the pin and auto-refresh buttons
+        HBox toolbar = new HBox(5);
+        toolbar.setPadding(new Insets(5));
+        toolbar.setAlignment(Pos.CENTER_LEFT);
+        toolbar.getChildren().addAll(pinBtn, autoRefreshBtn);
+        toolbar.getStyleClass().add("toolbar");
+        
+        // Create a StatusBar to show URLs when hovering over links
+        StatusBar statusBar = new StatusBar();
+        
+        // Listen to WebEngine's status changed event to display hover URLs
+        webView.getEngine().setOnStatusChanged(event -> {
+            String status = event.getData();
+            if (status != null && !status.isEmpty()) {
+                // Show the URL in the status bar message section
+                statusBar.setMessage(status);
+            } else {
+                // Clear the status bar when not hovering over a link
+                statusBar.clearMessage();
+            }
+        });
+        
+        // Add load state listener for error detection
+        webView.getEngine().getLoadWorker().stateProperty().addListener((obs, oldState, newState) -> {
+            if (newState == javafx.concurrent.Worker.State.FAILED) {
+                statusBar.setMessage("Failed to load HTML content");
+            }
+        });
+        
+        // Enable JavaScript console error logging
+        webView.getEngine().setOnError(event -> {
+            statusBar.setMessage("Error: " + event.getMessage());
+        });
+        
+        // Load the converted HTML content with injected base tag
         String contentWithBase = injectBaseTag(htmlContent, baseUrl);
         webView.getEngine().loadContent(contentWithBase, "text/html");
         

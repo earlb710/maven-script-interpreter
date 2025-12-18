@@ -38,6 +38,9 @@ module com.eb.scriptinterpreter {
     // Apache Commons Net for FTP
     requires org.apache.commons.net;
     
+    // Commonmark for Markdown to HTML conversion
+    requires org.commonmark;
+    
     // JavaFX SVG Support - provides Batik integration
     // Batik is provided as automatic modules, we need to require them explicitly
     // Note: We only require the Batik modules we actually use to avoid issues with

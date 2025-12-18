@@ -1228,4 +1228,136 @@ public class BuiltinsFile {
             throw new InterpreterError("classTree.scan: " + ex.getMessage());
         }
     }
+
+    /**
+     * Converts a Markdown document to HTML for display in WebView.
+     * 
+     * @param env The environment context
+     * @param args args[0] = markdownText (String) - the markdown text to convert
+     *             args[1] = includeStyles (Boolean, optional, default true) - whether to include basic CSS styles
+     * @return HTML string
+     * @throws InterpreterError if conversion fails
+     */
+    public static String markdownToHtml(Environment env, Object... args) throws InterpreterError {
+        if (args.length < 1 || args[0] == null) {
+            throw new InterpreterError("file.markdownToHtml requires at least 1 argument: markdownText");
+        }
+
+        String markdownText = (String) args[0];
+        boolean includeStyles = true;
+        
+        if (args.length > 1 && args[1] != null) {
+            includeStyles = (Boolean) args[1];
+        }
+
+        try {
+            // Parse the markdown using commonmark-java
+            org.commonmark.parser.Parser parser = org.commonmark.parser.Parser.builder().build();
+            org.commonmark.node.Node document = parser.parse(markdownText);
+            org.commonmark.renderer.html.HtmlRenderer renderer = org.commonmark.renderer.html.HtmlRenderer.builder().build();
+            String htmlBody = renderer.render(document);
+
+            // If includeStyles is true, wrap in a complete HTML document with basic styling
+            if (includeStyles) {
+                StringBuilder html = new StringBuilder();
+                html.append("<!DOCTYPE html>\n");
+                html.append("<html>\n<head>\n");
+                html.append("<meta charset=\"UTF-8\">\n");
+                html.append("<style>\n");
+                html.append("body {\n");
+                html.append("  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;\n");
+                html.append("  line-height: 1.6;\n");
+                html.append("  color: #333;\n");
+                html.append("  max-width: 900px;\n");
+                html.append("  margin: 20px auto;\n");
+                html.append("  padding: 20px;\n");
+                html.append("  background-color: #fff;\n");
+                html.append("}\n");
+                html.append("h1, h2, h3, h4, h5, h6 {\n");
+                html.append("  margin-top: 24px;\n");
+                html.append("  margin-bottom: 16px;\n");
+                html.append("  font-weight: 600;\n");
+                html.append("  line-height: 1.25;\n");
+                html.append("}\n");
+                html.append("h1 { font-size: 2em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }\n");
+                html.append("h2 { font-size: 1.5em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }\n");
+                html.append("h3 { font-size: 1.25em; }\n");
+                html.append("h4 { font-size: 1em; }\n");
+                html.append("h5 { font-size: 0.875em; }\n");
+                html.append("h6 { font-size: 0.85em; color: #6a737d; }\n");
+                html.append("code {\n");
+                html.append("  font-family: 'Courier New', Courier, monospace;\n");
+                html.append("  background-color: rgba(27, 31, 35, 0.05);\n");
+                html.append("  padding: 0.2em 0.4em;\n");
+                html.append("  border-radius: 3px;\n");
+                html.append("  font-size: 85%;\n");
+                html.append("}\n");
+                html.append("pre {\n");
+                html.append("  background-color: #f6f8fa;\n");
+                html.append("  border-radius: 3px;\n");
+                html.append("  padding: 16px;\n");
+                html.append("  overflow: auto;\n");
+                html.append("  line-height: 1.45;\n");
+                html.append("}\n");
+                html.append("pre code {\n");
+                html.append("  background-color: transparent;\n");
+                html.append("  padding: 0;\n");
+                html.append("}\n");
+                html.append("blockquote {\n");
+                html.append("  padding: 0 1em;\n");
+                html.append("  color: #6a737d;\n");
+                html.append("  border-left: 0.25em solid #dfe2e5;\n");
+                html.append("  margin: 0;\n");
+                html.append("}\n");
+                html.append("table {\n");
+                html.append("  border-collapse: collapse;\n");
+                html.append("  width: 100%;\n");
+                html.append("  margin-bottom: 16px;\n");
+                html.append("}\n");
+                html.append("table th, table td {\n");
+                html.append("  padding: 6px 13px;\n");
+                html.append("  border: 1px solid #dfe2e5;\n");
+                html.append("}\n");
+                html.append("table th {\n");
+                html.append("  font-weight: 600;\n");
+                html.append("  background-color: #f6f8fa;\n");
+                html.append("}\n");
+                html.append("table tr:nth-child(even) {\n");
+                html.append("  background-color: #f6f8fa;\n");
+                html.append("}\n");
+                html.append("a {\n");
+                html.append("  color: #0366d6;\n");
+                html.append("  text-decoration: none;\n");
+                html.append("}\n");
+                html.append("a:hover {\n");
+                html.append("  text-decoration: underline;\n");
+                html.append("}\n");
+                html.append("ul, ol {\n");
+                html.append("  padding-left: 2em;\n");
+                html.append("  margin-bottom: 16px;\n");
+                html.append("}\n");
+                html.append("li {\n");
+                html.append("  margin-top: 0.25em;\n");
+                html.append("}\n");
+                html.append("hr {\n");
+                html.append("  height: 0.25em;\n");
+                html.append("  padding: 0;\n");
+                html.append("  margin: 24px 0;\n");
+                html.append("  background-color: #e1e4e8;\n");
+                html.append("  border: 0;\n");
+                html.append("}\n");
+                html.append("</style>\n");
+                html.append("</head>\n<body>\n");
+                html.append(htmlBody);
+                html.append("\n</body>\n</html>");
+                return html.toString();
+            } else {
+                // Return just the HTML body without styling
+                return htmlBody;
+            }
+
+        } catch (Exception ex) {
+            throw new InterpreterError("file.markdownToHtml: " + Util.formatExceptionWithOrigin(ex));
+        }
+    }
 }
