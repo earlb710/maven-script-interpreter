@@ -4205,6 +4205,12 @@ call array.add(array, value);           // Add to end
 call array.add(array, value, index);    // Insert at index
 var removed = call array.remove(array, index);  // Remove at index, returns removed value
 
+// Bidirectional iteration
+var reverseWrapper = call array.reverse(array);  // Returns reverse iteration wrapper
+foreach item in #array.reverse(array) {          // Iterate in reverse
+    print item;
+}
+
 // Type casting for byte/bitmap arrays
 var bitmapArray = call array.asBitmap(byteArray);
 var byteArray = call array.asByte(bitmapArray);
@@ -4288,6 +4294,94 @@ intmapArray[0] = 1048832;
 var intArray = call array.asInt(intmapArray);
 print intArray[0];  // 1048832 (raw integer value)
 ```
+
+#### array.reverse(array)
+Returns a wrapper that enables reverse iteration over the array using foreach. The array itself is not modified or copied - only a lightweight wrapper (~24 bytes) is created, providing O(1) memory overhead for bidirectional iteration.
+
+**Parameters:**
+- `array` (array, required): The array to iterate in reverse
+
+**Returns:** Iterable wrapper - Can be used with foreach for reverse iteration
+
+**Supported Array Types:** All array types (dynamic, fixed, byte, int, bitmap, intmap)
+
+**Example - Basic Reverse Iteration:**
+```javascript
+var numbers = [1, 2, 3, 4, 5];
+
+// Forward iteration (normal)
+foreach num in numbers {
+    print num;  // Output: 1, 2, 3, 4, 5
+}
+
+// Reverse iteration
+foreach num in #array.reverse(numbers) {
+    print num;  // Output: 5, 4, 3, 2, 1
+}
+```
+
+**Example - Countdown:**
+```javascript
+var countdown = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
+
+foreach num in #array.reverse(countdown) {
+    print "T-minus " + num;
+}
+print "Liftoff!";
+// Output: T-minus 1, T-minus 2, ..., T-minus 10, Liftoff!
+```
+
+**Example - Reverse Search:**
+```javascript
+var items = ["apple", "banana", "cherry", "date"];
+
+// Find from the end
+foreach item in #array.reverse(items) {
+    if (item == "banana") {
+        print "Found: " + item;
+        break;
+    }
+}
+```
+
+**Example - Stack-like LIFO Processing:**
+```javascript
+var stack = [];
+call array.add(stack, "First");
+call array.add(stack, "Second");
+call array.add(stack, "Third");
+
+// Process in LIFO order (Last-In-First-Out)
+foreach item in #array.reverse(stack) {
+    print item;  // Output: Third, Second, First
+}
+```
+
+**Example - Works with Fixed Arrays:**
+```javascript
+var fixed: int[4];
+fixed[0] = 100;
+fixed[1] = 200;
+fixed[2] = 300;
+fixed[3] = 400;
+
+foreach val in #array.reverse(fixed) {
+    print val;  // Output: 400, 300, 200, 100
+}
+```
+
+**Performance:**
+- **Time Complexity:** O(n) - same as forward iteration
+- **Space Complexity:** O(1) - only a wrapper object (~24 bytes)
+- **No Array Copying:** The original array is never duplicated
+- **No Mutation:** The array remains unchanged
+
+**Use Cases:**
+- Processing items in reverse order
+- Countdown operations
+- Stack-like LIFO processing
+- Reverse search operations
+- Undo/history traversal
 
 ### Queue Functions
 

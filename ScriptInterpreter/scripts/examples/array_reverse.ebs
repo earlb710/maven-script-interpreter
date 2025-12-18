@@ -1,0 +1,77 @@
+// EBS Language Reference - See EBS_LANGUAGE_REFERENCE.md
+// Example: array.reverse - Reverse iteration over arrays
+// Syntax: foreach item in #array.reverse(array) { }
+
+print "=== array.reverse Example ===";
+print "";
+
+// Example 1: Basic reverse iteration
+print "Example 1: Basic Reverse Iteration";
+var numbers = [1, 2, 3, 4, 5];
+
+print "Forward:";
+foreach num in numbers {
+    print "  " + num;
+}
+
+print "Reverse:";
+foreach num in #array.reverse(numbers) {
+    print "  " + num;
+}
+
+print "";
+
+// Example 2: Countdown
+print "Example 2: Countdown";
+var countdown = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
+
+foreach num in #array.reverse(countdown) {
+    print "T-minus " + num;
+}
+print "Liftoff!";
+
+print "";
+
+// Example 3: Reverse search
+print "Example 3: Reverse Search (find from end)";
+var items = ["apple", "banana", "cherry", "date", "elderberry"];
+
+foreach item in #array.reverse(items) {
+    print "Checking: " + item;
+    if (item == "cherry") {
+        print "Found 'cherry' from the end!";
+        break;
+    }
+}
+
+print "";
+
+// Example 4: Process in LIFO order (stack-like)
+print "Example 4: Stack-like LIFO Processing";
+var stack = [];
+call array.add(stack, "First");
+call array.add(stack, "Second");
+call array.add(stack, "Third");
+
+print "Pop from stack:";
+foreach item in #array.reverse(stack) {
+    print "  " + item;
+}
+
+print "";
+
+// Example 5: Reverse with fixed array
+print "Example 5: Fixed Array Reverse";
+var fixed: int[4];
+fixed[0] = 100;
+fixed[1] = 200;
+fixed[2] = 300;
+fixed[3] = 400;
+
+print "Fixed array in reverse:";
+foreach val in #array.reverse(fixed) {
+    print "  Value: " + val;
+}
+
+print "";
+print "=== Complete ===";
