@@ -89,45 +89,10 @@ print "==============================================";
 print "           Chess Game Application";
 print "==============================================";
 print "";
-print "Initializing chess board...";
 
-call initializeBoard();
-call printBoard();
-
-// Create board layer and indicator images
-print "Creating board layer images...";
-call createBoardLayer();
-
-print "Creating move indicator images...";
-call createIndicators();
-
+// Load piece images once at startup (used throughout the game)
 print "Loading normal and yellow piece images...";
 call loadPieceImages();
-
-print "";
-print "Board Encoding Information:";
-print "===========================";
-print "Each cell uses a bitmap byte:";
-print "  Bit 0: Cell color (0=light, 1=dark)";
-print "  Bits 1-6: Piece type (0=empty, 1-6=piece)";
-print "  Bit 7: Piece color (0=white, 1=black)";
-print "";
-
-print "Sample cell values:";
-var idx00: int = call boardIndex(0, 0);
-var sampleCell = ChessCell(board[idx00]);
-print "  [0,0] Black Rook: raw=" + board[idx00] + ", cellColor=" + sampleCell.cellColor + ", pieceType=" + sampleCell.pieceType + ", pieceColor=" + sampleCell.pieceColor;
-
-var idx74: int = call boardIndex(7, 4);
-sampleCell = ChessCell(board[idx74]);
-print "  [7,4] White King: raw=" + board[idx74] + ", cellColor=" + sampleCell.cellColor + ", pieceType=" + sampleCell.pieceType + ", pieceColor=" + sampleCell.pieceColor;
-
-print "";
-print "Initializing chess piece images on board...";
-call initializeBoardPieces();
-print "Chess piece images initialized!";
-print "";
-print "Initializing board layer (checkerboard pattern)...";
 
 // Show startup dialog first
 // All game initialization happens in handleStartGame() when user clicks Start
