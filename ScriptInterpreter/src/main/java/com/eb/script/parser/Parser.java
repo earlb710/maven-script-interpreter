@@ -3214,10 +3214,16 @@ public class Parser {
     private Statement showScreenStatement() throws ParseError {
         int line = previous().line; // the 'show' token
 
-        // Expect 'screen' keyword
-        consume(EbsTokenType.SCREEN, "Expected 'screen' after 'show'.");
+        // Check if it's 'show screen' or 'show subscreen'
+        boolean isSubscreen = false;
+        if (match(EbsTokenType.SUBSCREEN)) {
+            isSubscreen = true;
+        } else {
+            // Expect 'screen' keyword
+            consume(EbsTokenType.SCREEN, "Expected 'screen' or 'subscreen' after 'show'.");
+        }
 
-        // Check if there's a screen name or if it's just "show screen;"
+        // Check if there's a screen name or if it's just "show screen;" / "show subscreen;"
         String screenName = null;
         if (check(EbsTokenType.IDENTIFIER)) {
             EbsToken nameTok = advance();
@@ -3243,8 +3249,8 @@ public class Parser {
             callbackName = (String) callbackTok.literal;
         }
 
-        consume(EbsTokenType.SEMICOLON, "Expected ';' after 'show screen'.");
-        return new ScreenShowStatement(line, screenName, parameters, callbackName);
+        consume(EbsTokenType.SEMICOLON, "Expected ';' after 'show " + (isSubscreen ? "subscreen" : "screen") + "'.");
+        return new ScreenShowStatement(line, screenName, parameters, callbackName, isSubscreen);
     }
 
     private Statement hideScreenStatement() throws ParseError {

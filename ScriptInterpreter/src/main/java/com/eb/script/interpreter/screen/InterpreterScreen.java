@@ -972,8 +972,16 @@ public class InterpreterScreen {
         String parentScreenKey = context.getCurrentScreen();
         
         // Generate the qualified screen key (parent.child or just child)
-        // If called from within a parent screen, automatically add parent prefix
-        String qualifiedScreenKey = getQualifiedScreenKey(screenName, parentScreenKey);
+        // For 'show subscreen': automatically add parent prefix
+        // For 'show screen': use unqualified name (independent screen)
+        String qualifiedScreenKey;
+        if (stmt.isSubscreen && parentScreenKey != null && !parentScreenKey.isEmpty()) {
+            // Subscreen: qualify with parent
+            qualifiedScreenKey = getQualifiedScreenKey(screenName, parentScreenKey);
+        } else {
+            // Independent screen: use unqualified name
+            qualifiedScreenKey = getQualifiedScreenKey(screenName, null);
+        }
         
         interpreter.environment().pushCallStack(stmt.getLine(), StatementKind.STATEMENT, "Screen %1 show", qualifiedScreenKey);
         try {
@@ -985,8 +993,8 @@ public class InterpreterScreen {
                 throw interpreter.error(stmt.getLine(), "Screen '" + screenName + "' does not exist. Create it first with 'screen " + screenName + " = {...};'");
             }
 
-            // If we have a parent, record the parent-child relationship using the qualified key
-            if (parentScreenKey != null && !parentScreenKey.equalsIgnoreCase(screenName)) {
+            // If this is a subscreen with a parent, record the parent-child relationship
+            if (stmt.isSubscreen && parentScreenKey != null && !parentScreenKey.equalsIgnoreCase(screenName)) {
                 context.setScreenParent(qualifiedScreenKey, parentScreenKey.toLowerCase());
             }
 

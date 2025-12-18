@@ -87,6 +87,7 @@ public enum EbsTokenType implements LexerToken {
     HAVING(PrintStyle.SQL, Category.KEYWORD, "having"),
     // --- UI keywords ---
     SCREEN(PrintStyle.KEYWORD, Category.KEYWORD, "screen"),
+    SUBSCREEN(PrintStyle.KEYWORD, Category.KEYWORD, "subscreen"),
     SHOW(PrintStyle.KEYWORD, Category.KEYWORD, "show"),
     HIDE(PrintStyle.KEYWORD, Category.KEYWORD, "hide"),
     SUBMIT(PrintStyle.KEYWORD, Category.KEYWORD, "submit"),
