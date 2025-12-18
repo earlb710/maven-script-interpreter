@@ -1,10 +1,12 @@
 package com.eb.ui.ebs;
 
+import com.eb.ui.util.ButtonShortcutHelper;
 import java.util.prefs.Preferences;
 import com.eb.script.json.Json;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.stage.Modality;
@@ -130,6 +132,12 @@ public class AiChatModelSetupDialog extends Stage {
         Button btnSave = new Button("Save");
         Button btnTest = new Button("Test…");
         Button btnClose = new Button("Close");
+        
+        // Add keyboard shortcuts to buttons
+        ButtonShortcutHelper.addAltShortcut(btnSave, KeyCode.S);
+        ButtonShortcutHelper.addAltShortcut(btnTest, KeyCode.T);
+        ButtonShortcutHelper.addAltShortcut(btnClose, KeyCode.C);
+        
         btnSave.setDefaultButton(true);
         btnClose.setCancelButton(true);
 
