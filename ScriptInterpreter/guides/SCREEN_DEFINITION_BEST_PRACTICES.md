@@ -859,7 +859,7 @@ screen detailScreen = {...};  // Avoid redefining
 ### 4. Use Hide Instead of Close
 
 ```
-// PREFER: Hide preserves window
+// PREFER: Hide preserves window (if screen will be used again)
 hide screen tempScreen;    // Fast to show again
 show screen tempScreen;    // Instant
 
@@ -867,6 +867,8 @@ show screen tempScreen;    // Instant
 close screen tempScreen;   // Destroys resources
 show screen tempScreen;    // Must recreate (slower)
 ```
+
+**Important:** If a window will not be used again or is used infrequently, close it to free up resources. Use `hide` for screens that will be shown again soon or frequently. Use `close` for one-time dialogs or screens that are rarely accessed.
 
 ### 5. Optimize Event Handlers
 
