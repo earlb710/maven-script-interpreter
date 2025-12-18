@@ -125,9 +125,13 @@ public final class Console {
         btnClose = new Button("Close");
         lblCount = new Label("");
         
+        // Group find field with next/prev buttons in a bordered container
+        HBox findGroup = new HBox(2, findField, btnNext, btnPrev);
+        findGroup.setAlignment(Pos.CENTER_LEFT);
+        findGroup.setStyle("-fx-border-color: #999999; -fx-border-width: 1px; -fx-padding: 1px;");
+        
         findBar = new HBox(8, new Label("Find:"),
-                findField, chkCase, chkWord, chkRegex,
-                btnPrev, btnNext,
+                findGroup, chkCase, chkWord, chkRegex,
                 lblCount, btnClose);
         findBar.getStyleClass().add("find-bar");
         findBar.setVisible(false);
