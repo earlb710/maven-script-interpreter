@@ -1,6 +1,7 @@
 package com.eb.script.arrays;
 
 import com.eb.script.token.DataType;
+import java.io.Serializable;
 
 /**
  * Interface for queue data structures in the EBS scripting language.
@@ -8,7 +9,7 @@ import com.eb.script.token.DataType;
  *
  * @author Earl Bosch
  */
-public interface QueueDef<E> extends Iterable<E> {
+public interface QueueDef<E> extends Iterable<E>, Serializable {
 
     /**
      * Get the data type of elements in this queue.

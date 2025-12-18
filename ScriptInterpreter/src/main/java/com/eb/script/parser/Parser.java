@@ -3,6 +3,7 @@ package com.eb.script.parser;
 import com.eb.script.interpreter.builtins.Builtins;
 import com.eb.script.json.Json;
 import com.eb.script.RuntimeContext;
+import com.eb.script.package_tool.RuntimeContextSerializer;
 import com.eb.script.token.BitmapType;
 import com.eb.script.token.IntmapType;
 import com.eb.script.token.Category;
@@ -92,9 +93,9 @@ public class Parser {
 
     public static RuntimeContext parse(Path file) throws IOException, ParseError {
         // Check if this is a packaged .ebsp file
-        if (file.toString().toLowerCase().endsWith(".ebsp")) {
+        if (RuntimeContextSerializer.isPackagedFile(file)) {
             try {
-                return com.eb.script.package_tool.RuntimeContextSerializer.deserialize(file);
+                return RuntimeContextSerializer.deserialize(file);
             } catch (ClassNotFoundException e) {
                 throw new ParseError("Error loading packaged script: " + e.getMessage());
             }
@@ -157,7 +158,7 @@ public class Parser {
         context.blocks = parser.blocks;
         context.statements = statementsToArray(parser.statements);
     }
-
+    
     private Parser(String source, List<EbsToken> tokens, Path sourcePath, Set<String> importedFiles) {
         this.tokens = tokens;
         this.source = source;
@@ -571,15 +572,54 @@ public class Parser {
         // Mark this file as processed
         importedFiles.add(importKey);
         
-        // Parse the imported file to register its typedefs in the TypeRegistry
-        // The parse() method will recursively process any imports in the imported file
-        // Note: We discard the returned RuntimeContext because we only need the side effect
-        // of registering typedefs. The imported code will be executed later at runtime by the Interpreter.
-        try {
-            Parser.parse(importPath);
-        } catch (ParseError e) {
-            // Re-throw with context about which import failed
-            throw new ParseError("[line " + line + "] Failed to parse import '" + filename + "': " + e.getMessage());
+        // Handle .ebsp (packaged) files specially - they need typedef registration from deserialized statements
+        if (RuntimeContextSerializer.isPackagedFile(importPath)) {
+            try {
+                RuntimeContext context = RuntimeContextSerializer.deserialize(importPath);
+                // Register typedefs from the deserialized statements
+                registerTypedefsFromStatements(context.statements);
+            } catch (IOException e) {
+                throw new ParseError("[line " + line + "] Failed to read packaged import '" + filename + "': " + e.getMessage());
+            } catch (ClassNotFoundException e) {
+                throw new ParseError("[line " + line + "] Failed to load packaged import '" + filename + "': " + e.getMessage());
+            }
+        } else {
+            // Parse the imported file to register its typedefs in the TypeRegistry
+            // The parse() method will recursively process any imports in the imported file
+            // Note: We discard the returned RuntimeContext because we only need the side effect
+            // of registering typedefs. The imported code will be executed later at runtime by the Interpreter.
+            try {
+                Parser.parse(importPath);
+            } catch (ParseError e) {
+                // Re-throw with context about which import failed
+                throw new ParseError("[line " + line + "] Failed to parse import '" + filename + "': " + e.getMessage());
+            }
+        }
+    }
+    
+    /**
+     * Register typedefs from an array of statements (used for .ebsp imports).
+     * This walks through all statements and registers any TypedefStatements found.
+     */
+    private void registerTypedefsFromStatements(Statement[] statements) {
+        if (statements == null) {
+            return;
+        }
+        
+        for (Statement stmt : statements) {
+            if (stmt instanceof TypedefStatement typedef) {
+                // Register this typedef in the TypeRegistry
+                TypeRegistry.TypeAlias alias = new TypeRegistry.TypeAlias(
+                    typedef.typeName,
+                    typedef.dataType,
+                    typedef.recordType,
+                    typedef.bitmapType,
+                    typedef.intmapType,
+                    typedef.isArray,
+                    typedef.arraySize
+                );
+                TypeRegistry.registerTypeAlias(alias);
+            }
         }
     }
 

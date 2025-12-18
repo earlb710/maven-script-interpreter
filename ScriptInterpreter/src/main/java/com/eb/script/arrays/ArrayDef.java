@@ -1,13 +1,14 @@
 package com.eb.script.arrays;
 
 import com.eb.script.token.DataType;
+import java.io.Serializable;
 import java.util.Iterator;
 
 /**
  *
  * @author Earl Bosch
  */
-public interface ArrayDef<E, A> extends Iterable<E> {
+public interface ArrayDef<E, A> extends Iterable<E>, Serializable {
 
     public DataType getDataType();
 
