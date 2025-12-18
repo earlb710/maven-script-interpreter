@@ -3371,10 +3371,6 @@ public class ScreenFactory {
         // Store bound controls in context if provided
         // Use lowercase for consistent lookup across the application
         String lowerScreenName = screenName.toLowerCase();
-        // DEBUG: Log callback registration attempt
-        System.out.println("[DEBUG] Attempting to register refresh callback: screenName=" + screenName + 
-                           ", allBoundControls.size=" + allBoundControls.size() + 
-                           ", contextExists=" + (context != null));
         if (context != null && !allBoundControls.isEmpty()) {
             context.getScreenBoundControls().put(lowerScreenName, allBoundControls);
 
@@ -3384,10 +3380,6 @@ public class ScreenFactory {
                 // This prevents nested Platform.runLater() calls when called from timer callbacks
                 com.eb.util.Util.runOnFx(() -> refreshBoundControls(allBoundControls, screenVars));
             });
-            System.out.println("[DEBUG] Refresh callback registered successfully for: " + screenName);
-        } else {
-            System.out.println("[DEBUG] WARNING: Refresh callback NOT registered for: " + screenName + 
-                               " (context=" + (context != null) + ", isEmpty=" + allBoundControls.isEmpty() + ")");
         }
 
         // Wrap content in ScrollPane to handle overflow when content is larger than window
@@ -3999,10 +3991,6 @@ public class ScreenFactory {
                     // Store context and screenName for screen status updates when control values change
                     control.getProperties().put(ControlListenerFactory.PROP_INTERPRETER_CONTEXT, context);
                     control.getProperties().put(ControlListenerFactory.PROP_SCREEN_NAME, screenName);
-                    // DEBUG: Log control binding setup
-                    System.out.println("[DEBUG] Binding control to var: screenName=" + screenName + 
-                                       ", varRef=" + item.varRef + 
-                                       ", controlType=" + control.getClass().getSimpleName());
                     // Store stateful property for change tracking control - get from Var
                     boolean stateful = true; // default
                     if (context != null) {
@@ -4027,10 +4015,6 @@ public class ScreenFactory {
                     control.getProperties().put(ControlListenerFactory.PROP_STATEFUL, stateful);
                     // Track this control so we can refresh it when variables change
                     boundControls.add(control);
-                    // DEBUG: Log control added to boundControls
-                    System.out.println("[DEBUG] Added control to boundControls: screenName=" + screenName + 
-                                       ", varRef=" + item.varRef + 
-                                       ", boundControls.size=" + boundControls.size());
                     
                     // Store the JavaFX Node reference in the ScreenComponentType
                     if (context != null) {

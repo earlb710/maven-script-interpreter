@@ -381,10 +381,6 @@ public class ControlUpdater {
             return;
         }
 
-        // DEBUG: Log refresh start
-        System.out.println("[DEBUG] refreshBoundControls called: boundControls.size=" + boundControls.size() + 
-                           ", screenVars.size=" + screenVars.size());
-
         for (Node control : boundControls) {
             String varName = (String) control.getProperties().get("varName");
             DisplayItem metadata = (DisplayItem) control.getProperties().get("metadata");
@@ -392,10 +388,6 @@ public class ControlUpdater {
             if (varName != null) {
                 // Use VarRefResolver for case-insensitive lookup and complex expressions
                 Object currentValue = VarRefResolver.resolveVarRefValue(varName.toLowerCase(), screenVars);
-                // DEBUG: Log control update
-                System.out.println("[DEBUG] Updating control: varName=" + varName + 
-                                   ", controlType=" + control.getClass().getSimpleName() + 
-                                   ", newValue=" + currentValue);
                 updateControlFromValue(control, currentValue, metadata);
             }
         }
