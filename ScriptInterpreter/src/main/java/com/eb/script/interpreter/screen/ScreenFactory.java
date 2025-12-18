@@ -2141,24 +2141,79 @@ public class ScreenFactory {
         
         // Check if item is backed by a JavaFX component
         // Null checks are needed as this is called from multiple contexts where parameters may be null
+        Node javafxNode = null;
+        
         if (context != null && screenName != null && varRef != null && !varRef.isEmpty()) {
+            // Try to get JavaFX node via ScreenComponentType (for items with varRef)
             java.util.concurrent.ConcurrentHashMap<String, ScreenComponentType> componentTypes = context.getScreenComponentTypes(screenName);
             if (componentTypes != null) {
                 // Use lowercase for lookup since keys are stored in lowercase
                 ScreenComponentType componentType = componentTypes.get(varRef.toLowerCase(java.util.Locale.ROOT));
                 if (componentType != null && componentType.getJavaFXNode() != null) {
-                    // Add JavaFX component description
-                    if (info.length() > 0) {
-                        info.append("\n");
-                    }
-                    info.append("JavaFX:\n");
-                    String javafxDesc = componentType.getJavaFXDescription();
-                    // Append the JavaFX description (already formatted by getJavaFXDescription)
-                    String[] lines = javafxDesc.split("\n");
-                    for (String line : lines) {
-                        info.append(line).append("\n");
+                    javafxNode = componentType.getJavaFXNode();
+                }
+            }
+        } else if (context != null && screenName != null && item.name != null && !item.name.isEmpty()) {
+            // For items without varRef (like buttons and labels), look up by name in boundControls
+            List<Node> boundControls = context.getScreenBoundControls().get(screenName);
+            if (boundControls != null) {
+                String expectedUserData = screenName + "." + item.name;
+                for (Node node : boundControls) {
+                    Object userData = node.getUserData();
+                    if (userData != null && userData.toString().equals(expectedUserData)) {
+                        javafxNode = node;
+                        break;
                     }
                 }
+            }
+        }
+        
+        // Add JavaFX component description if a node was found
+        if (javafxNode != null) {
+            if (info.length() > 0) {
+                info.append("\n");
+            }
+            info.append("JavaFX:\n");
+            
+            // Build JavaFX description similar to ScreenComponentType.getJavaFXDescription()
+            StringBuilder javafxDesc = new StringBuilder();
+            javafxDesc.append("JavaFX Component Description:\n");
+            javafxDesc.append("  Type: ").append(javafxNode.getClass().getSimpleName()).append("\n");
+            
+            // Size information
+            javafxDesc.append("  Width: ").append(String.format("%.2f", javafxNode.getLayoutBounds().getWidth())).append("\n");
+            javafxDesc.append("  Height: ").append(String.format("%.2f", javafxNode.getLayoutBounds().getHeight())).append("\n");
+            
+            // Position
+            javafxDesc.append("  X: ").append(String.format("%.2f", javafxNode.getLayoutX())).append("\n");
+            javafxDesc.append("  Y: ").append(String.format("%.2f", javafxNode.getLayoutY())).append("\n");
+            
+            // Style
+            String style = javafxNode.getStyle();
+            if (style != null && !style.isEmpty()) {
+                javafxDesc.append("  Style: ").append(style).append("\n");
+            }
+            
+            // Style classes
+            if (!javafxNode.getStyleClass().isEmpty()) {
+                javafxDesc.append("  Style Classes: ").append(String.join(", ", javafxNode.getStyleClass())).append("\n");
+            }
+            
+            // Visibility
+            javafxDesc.append("  Visible: ").append(javafxNode.isVisible()).append("\n");
+            javafxDesc.append("  Managed: ").append(javafxNode.isManaged()).append("\n");
+            javafxDesc.append("  Disabled: ").append(javafxNode.isDisabled()).append("\n");
+            
+            // ID
+            String id = javafxNode.getId();
+            if (id != null && !id.isEmpty()) {
+                javafxDesc.append("  ID: ").append(id).append("\n");
+            }
+            
+            // Append the JavaFX description
+            String[] lines = javafxDesc.toString().split("\n");
+            for (String line : lines) {
+                info.append(line).append("\n");
             }
         }
         
