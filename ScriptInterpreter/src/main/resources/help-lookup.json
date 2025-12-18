@@ -5340,12 +5340,13 @@
     },
     {
       "function": "thread.timerStart",
-      "short_description": "Starts a repeating timer with callback",
-      "long_help": "Starts a repeating timer that invokes a callback function at fixed intervals. The timer runs asynchronously in the background<br>and continues until explicitly stopped with thread.timerStop. The callback function receives the timer name as a parameter.<br>Multiple timers can run concurrently with unique names. Returns the timer name for convenience.",
+      "short_description": "Starts a repeating timer with callback linked to a screen",
+      "long_help": "Starts a repeating timer that invokes a callback function at fixed intervals. The timer runs asynchronously in the background<br>and continues until explicitly stopped with thread.timerStop. The callback function receives the timer name as a parameter.<br>Multiple timers can run concurrently with unique names. Returns the timer name for convenience.<br><br><b>IMPORTANT - Timer-Screen Linkage:</b><br>- Timers created inside a screen are automatically linked to that screen<br>- Timers created outside a screen must use qualified name format 'screenName.timerName'<br>- If no screen can be identified, an error is thrown",
       "parameters": [
         {
           "name": "name",
-          "type": "string"
+          "type": "string",
+          "description": "Timer name. Use 'timerName' inside screen (auto-links) or 'screenName.timerName' outside screen"
         },
         {
           "name": "period",
@@ -5357,7 +5358,7 @@
         }
       ],
       "return_type": "string",
-      "example": "<b>myCallback</b>(timerName: <b>string</b>) {<br>&nbsp;&nbsp;<b>print</b> \"Timer fired: \" + timerName;<br>}<br><br><b>var</b> name = <b>call</b> <b>thread.timerStart</b>(name=\"myTimer\", period=1000, callback=\"myCallback\");<br>// Timer will fire every 1000ms (1 second)"
+      "example": "<b>// Inside a screen (auto-links):</b><br>screen myScreen = {<br>&nbsp;&nbsp;\"startup\": \"thread.timerStart('myTimer', 1000, 'callback');\"<br>};<br><br><b>// Outside a screen (qualified name):</b><br><b>myCallback</b>(timerName: <b>string</b>) {<br>&nbsp;&nbsp;<b>print</b> \"Timer fired: \" + timerName;<br>}<br>screen myScreen = { \"vars\": [] };<br><b>call</b> <b>thread.timerStart</b>(name=\"myScreen.myTimer\", period=1000, callback=\"myCallback\");"
     },
     {
       "function": "thread.timerStop",

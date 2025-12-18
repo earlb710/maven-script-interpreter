@@ -11,7 +11,9 @@ This document describes the implementation of `thread.timerStart` and `thread.ti
 Starts a repeating timer that invokes a callback function at fixed intervals.
 
 **Parameters:**
-- `name` (STRING): Unique identifier for the timer
+- `name` (STRING): Unique identifier for the timer. Must be linked to a screen:
+  - If created inside a screen: Use simple name (e.g., "myTimer") - auto-links to current screen
+  - If created outside a screen: Use qualified name (e.g., "screenName.myTimer") - links to specified screen
 - `period` (LONG): Time interval in milliseconds between callback invocations
 - `callback` (STRING): Name of the function to call when the timer fires
 
@@ -23,16 +25,53 @@ Starts a repeating timer that invokes a callback function at fixed intervals.
 - If a timer with the same name already exists, it is stopped and replaced
 - The callback function receives the timer name as its parameter
 - Multiple timers can run concurrently
+- **Timer-Screen Linkage (NEW):**
+  - Timers created inside a screen are automatically linked to that screen
+  - Timers created outside a screen must use qualified name format "screenName.timerName"
+  - If no screen can be identified, an error is thrown
+  - The specified screen must exist (either configured or already shown)
 
-**Example:**
+**Examples:**
+
+*Creating timer inside a screen (auto-links):*
+```ebs
+screen myScreen = {
+    "title": "My Screen",
+    "width": 400,
+    "height": 300,
+    "vars": [],
+    "startup": "
+        // Timer auto-links to myScreen
+        thread.timerStart('myTimer', 1000, 'timerCallback');
+    "
+};
+```
+
+*Creating timer outside a screen with qualified name:*
 ```ebs
 // Define callback function
 timerCallback(timerName: string) {
     print "Timer fired: " + timerName;
 }
 
-// Start timer that fires every 1000ms (1 second)
-var name: string = call thread.timerStart("myTimer", 1000, "timerCallback");
+// Define screen first
+screen myScreen = {
+    "title": "My Screen",
+    "width": 400,
+    "height": 300,
+    "vars": []
+};
+
+// Create timer with qualified name (links to myScreen)
+var name: string = call thread.timerStart("myScreen.myTimer", 1000, "timerCallback");
+```
+
+*Error case - creating timer outside screen without qualified name:*
+```ebs
+// This will throw an error!
+call thread.timerStart("myTimer", 1000, "timerCallback");
+// Error: timer 'myTimer' is being created outside a screen context.
+// Use qualified name format 'screenName.timerName' to link the timer to a specific screen.
 ```
 
 ### thread.timerStop(name)
