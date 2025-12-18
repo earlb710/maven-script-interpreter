@@ -2143,26 +2143,30 @@ public class ScreenFactory {
         // Null checks are needed as this is called from multiple contexts where parameters may be null
         Node javafxNode = null;
         
-        if (context != null && screenName != null && varRef != null && !varRef.isEmpty()) {
-            // Try to get JavaFX node via ScreenComponentType (for items with varRef)
-            java.util.concurrent.ConcurrentHashMap<String, ScreenComponentType> componentTypes = context.getScreenComponentTypes(screenName);
-            if (componentTypes != null) {
-                // Use lowercase for lookup since keys are stored in lowercase
-                ScreenComponentType componentType = componentTypes.get(varRef.toLowerCase(java.util.Locale.ROOT));
-                if (componentType != null && componentType.getJavaFXNode() != null) {
-                    javafxNode = componentType.getJavaFXNode();
+        if (context != null && screenName != null) {
+            if (varRef != null && !varRef.isEmpty()) {
+                // Try to get JavaFX node via ScreenComponentType (for items with varRef)
+                java.util.concurrent.ConcurrentHashMap<String, ScreenComponentType> componentTypes = context.getScreenComponentTypes(screenName);
+                if (componentTypes != null) {
+                    // Use lowercase for lookup since keys are stored in lowercase
+                    ScreenComponentType componentType = componentTypes.get(varRef.toLowerCase(java.util.Locale.ROOT));
+                    if (componentType != null && componentType.getJavaFXNode() != null) {
+                        javafxNode = componentType.getJavaFXNode();
+                    }
                 }
             }
-        } else if (context != null && screenName != null && item.name != null && !item.name.isEmpty()) {
-            // For items without varRef (like buttons and labels), look up by name in boundControls
-            List<Node> boundControls = context.getScreenBoundControls().get(screenName);
-            if (boundControls != null) {
-                String expectedUserData = screenName + "." + item.name;
-                for (Node node : boundControls) {
-                    Object userData = node.getUserData();
-                    if (userData != null && userData.toString().equals(expectedUserData)) {
-                        javafxNode = node;
-                        break;
+            
+            // If not found via varRef, try looking up by name in boundControls
+            if (javafxNode == null && item.name != null && !item.name.isEmpty()) {
+                List<Node> boundControls = context.getScreenBoundControls().get(screenName);
+                if (boundControls != null) {
+                    String expectedUserData = screenName + "." + item.name;
+                    for (Node node : boundControls) {
+                        Object userData = node.getUserData();
+                        if (userData != null && userData.toString().equals(expectedUserData)) {
+                            javafxNode = node;
+                            break;
+                        }
                     }
                 }
             }
