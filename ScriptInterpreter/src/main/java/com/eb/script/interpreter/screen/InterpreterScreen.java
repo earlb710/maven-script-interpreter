@@ -975,8 +975,8 @@ public class InterpreterScreen {
         // For 'show subscreen': automatically add parent prefix
         // For 'show screen': use unqualified name (independent screen)
         String qualifiedScreenKey;
-        if (stmt.isSubscreen && parentScreenKey != null && !parentScreenKey.isEmpty()) {
-            // Subscreen: qualify with parent
+        if (stmt.isSubscreen) {
+            // Subscreen: qualify with parent (getQualifiedScreenKey handles null parent)
             qualifiedScreenKey = getQualifiedScreenKey(screenName, parentScreenKey);
         } else {
             // Independent screen: use unqualified name
