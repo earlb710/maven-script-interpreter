@@ -2702,7 +2702,7 @@ public class EbsTab extends Tab {
             
             boolean caseSensitive = webViewFindCaseSensitive.isSelected();
             Object result = webView.getEngine().executeScript(
-                "window.highlightSearchText('" + searchText.replace("'", "\\'") + "', " + caseSensitive + ")"
+                "window.highlightSearchText('" + escapeJavaScriptString(searchText) + "', " + caseSensitive + ")"
             );
             
             int matchCount = result != null ? ((Number) result).intValue() : 0;
@@ -3082,7 +3082,7 @@ public class EbsTab extends Tab {
             
             boolean caseSensitive = webViewFindCaseSensitive.isSelected();
             Object result = webView.getEngine().executeScript(
-                "window.highlightSearchText('" + searchText.replace("'", "\\'") + "', " + caseSensitive + ")"
+                "window.highlightSearchText('" + escapeJavaScriptString(searchText) + "', " + caseSensitive + ")"
             );
             
             int matchCount = result != null ? ((Number) result).intValue() : 0;
@@ -3223,6 +3223,26 @@ public class EbsTab extends Tab {
         
         // Show the stage
         webViewStage.show();
+    }
+    
+    /**
+     * Escapes a string for safe use in JavaScript code.
+     * Handles backslashes, quotes, and special characters.
+     * 
+     * @param text The text to escape
+     * @return Escaped text safe for JavaScript string literals
+     */
+    private String escapeJavaScriptString(String text) {
+        if (text == null) {
+            return "";
+        }
+        return text
+            .replace("\\", "\\\\")  // Backslash
+            .replace("'", "\\'")     // Single quote
+            .replace("\"", "\\\"")   // Double quote
+            .replace("\n", "\\n")    // Newline
+            .replace("\r", "\\r")    // Carriage return
+            .replace("\t", "\\t");   // Tab
     }
     
     /**
