@@ -1288,7 +1288,6 @@ screen chessScreen = {
     "title": "Chess Game",
     "width": 980,
     "height": 780,
-    "cleanup": "call cleanupChessScreen();",
     "vars": [
         {"name": "whiteTimer", "type": "string", "default": "10:00"},
         {"name": "blackTimer", "type": "string", "default": "10:00"},
