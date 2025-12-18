@@ -22,7 +22,10 @@ screen startupDialog = {
                 "labelColor": "#ffcc00",
                 "labelFontSize": "14px",
                 "labelBold": true,
-                "options": ["1:1 Player", "2:2 Player"]
+                "options": ["1:1 Player", "2:2 Player"],
+                "itemColor": "#ffffff",
+                "itemBold": true,
+                "itemFontSize": "14px"
             }
         },
         {

@@ -1123,7 +1123,7 @@ handleStartGame() {
     gameStarted = true;
     
     // Close the startup dialog
-    hide screen startupDialog;
+    close screen startupDialog;
     
     print "Starting chess game - Mode: " + selectedGameMode + ", Timer: " + selectedTimeLimit;
     print "";
@@ -1275,7 +1275,7 @@ handleExitGame() {
     print "Timer stopped.";
     
     // Close the startup dialog
-    hide screen startupDialog;
+    close screen startupDialog;
     print "Startup dialog closed.";
     print "=== handleExitGame() COMPLETE ===";
     print "";
