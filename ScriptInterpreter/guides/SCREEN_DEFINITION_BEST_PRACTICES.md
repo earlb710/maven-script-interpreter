@@ -482,18 +482,125 @@ EBS screens support multiple event types at different levels (item, area, and sc
 
 | Event | Level | Trigger | Return Value | Use Case |
 |-------|-------|---------|--------------|----------|
+| `startup` | Screen | Screen first shown/created | None | Initialize data, load resources |
+| `cleanup` | Screen | Screen closed | None | Save state, release resources |
+| `gainFocus` | Screen/Area | Screen/area gains focus | None | Refresh data, highlight UI |
+| `lostFocus` | Screen/Area | Screen/area loses focus | None | Auto-save, validate changes |
 | `onClick` | Item (buttons) | Button clicked | None | User actions (save, submit, navigate) |
 | `onChange` | Item (input controls) | Value changes | None | Real-time calculations, updates, filtering |
 | `onValidate` | Item (input controls) | Value changes (before onChange) | Boolean | Validate input, return false to reject |
-| `gainFocus` | Area | Focus enters area | None | Highlight section, load data |
-| `lostFocus` | Area | Focus leaves area | None | Save changes, validate section |
 
 ### Event Execution Order
 
-When a value changes in an input control:
+**Screen Lifecycle:**
+1. `startup` executes when screen is first shown (once per screen creation)
+2. Screen `gainFocus`/`lostFocus` fire when screen window gains/loses focus
+3. `cleanup` executes when screen is closed (not on hide)
+
+**Item Value Changes:**
 1. `onValidate` executes first (if defined) - must return true/false
 2. If validation passes, `onChange` executes (if defined)
 3. Area `gainFocus`/`lostFocus` fire when focus moves between areas
+
+### Screen-Level Events
+
+Screen-level events are defined at the top level of the screen definition JSON and apply to the entire screen window.
+
+#### startup Event
+
+Executes when the screen is first created and shown. Use for initialization tasks.
+
+```
+screen myApp = {
+    "title": "Application",
+    "width": 800,
+    "height": 600,
+    "startup": "call initializeApp(); myApp.status = 'Ready';",
+    "vars": [/* ... */],
+    "area": [/* ... */]
+};
+
+show screen myApp;  // startup executes here on first show
+```
+
+**Use Cases:**
+- Load initial data from database or files
+- Initialize default values
+- Set up timers or background processes
+- Display welcome messages
+- Connect to external resources
+
+#### cleanup Event
+
+Executes when the screen is closed (not on hide). Use for cleanup and resource release.
+
+```
+screen dataEntry = {
+    "title": "Data Entry",
+    "width": 600,
+    "height": 400,
+    "startup": "call openDatabaseConnection();",
+    "cleanup": "call closeDatabaseConnection(); call saveUserPreferences();",
+    "vars": [/* ... */]
+};
+
+close screen dataEntry;  // cleanup executes here
+```
+
+**Use Cases:**
+- Close database connections
+- Save user preferences or state
+- Release file handles or network connections
+- Stop timers or background threads
+- Log user activity
+
+#### Screen gainFocus Event
+
+Executes when the screen window gains focus (becomes active).
+
+```
+screen dashboard = {
+    "title": "Dashboard",
+    "width": 1000,
+    "height": 700,
+    "gainFocus": "call refreshDashboardData(); print 'Dashboard is now active';",
+    "vars": [/* ... */]
+};
+```
+
+**Use Cases:**
+- Refresh displayed data
+- Resume timers or updates
+- Highlight UI elements
+- Log focus events
+
+#### Screen lostFocus Event
+
+Executes when the screen window loses focus (becomes inactive).
+
+```
+screen editor = {
+    "title": "Document Editor",
+    "width": 900,
+    "height": 600,
+    "lostFocus": "call autoSaveDocument(); print 'Editor lost focus';",
+    "vars": [/* ... */]
+};
+```
+
+**Use Cases:**
+- Auto-save changes
+- Pause timers or background updates
+- Validate unsaved changes
+- Log focus events
+
+**Best Practices for Screen-Level Events:**
+- Keep startup code fast - avoid long-running operations
+- Always clean up resources in cleanup to prevent memory leaks
+- Use gainFocus to refresh time-sensitive data
+- Use lostFocus for auto-save functionality
+- Remember: cleanup only fires on close, not on hide
+- Screen-level gainFocus/lostFocus are different from area-level events
 
 ### onClick Events
 
