@@ -1,0 +1,39 @@
+// Test to verify that timers are stopped when screen is closed via window close button
+
+print "=== Testing Timer Cleanup on Window Close ===";
+print "";
+
+var timerFired: bool = false;
+
+timerCallback(timerName: string) {
+    timerFired = true;
+    print "Timer fired: " + timerName;
+}
+
+screen testScreen = {
+    "title": "Test Timer Cleanup",
+    "width": 300,
+    "height": 200,
+    "vars": [
+        {
+            "name": "label1",
+            "type": "string",
+            "display": {
+                "type": "label",
+                "text": "Close this window to test timer cleanup"
+            }
+        }
+    ],
+    "startup": "
+        print 'Screen starting - creating timer';
+        thread.timerStart('testTimer', 500, 'timerCallback');
+        print 'Timer created. Close the window to test cleanup.';
+    "
+};
+
+show screen testScreen;
+
+print "Screen shown. Timer should be running.";
+print "Close the window (X button) to verify timer is stopped.";
+print "";
+print "You should see a message like: 'Stopped 1 timer(s) associated with screen...'";
