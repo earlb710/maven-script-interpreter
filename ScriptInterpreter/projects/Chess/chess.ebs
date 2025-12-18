@@ -706,7 +706,7 @@ handleCellClick(x: int, y: int) {
                 playerName = "Black";
             }
             var moveEntry: string = playerName + ": " + moveNotation + "\n";
-            movehistory = movehistory + moveEntry;
+            chessscreen.movehistory = chessscreen.movehistory + moveEntry;
             print "Move added to history: " + moveEntry;
             
             // Clear indicators and selection
@@ -717,10 +717,10 @@ handleCellClick(x: int, y: int) {
             // Switch to next player
             if currentPlayer == WHITE then {
                 currentPlayer = BLACK;
-                statusmessage = "Black to move";
+                chessscreen.statusmessage = "Black to move";
             } else {
                 currentPlayer = WHITE;
-                statusmessage = "White to move";
+                chessscreen.statusmessage = "White to move";
             }
             call updateTimerColors();
             print "Switched to next player: " + currentPlayer;
@@ -868,8 +868,8 @@ timerCallback(timerName: string) {
             timerWhite = timerWhite - 1;
             var timerText: string = call formatTimerDecimal(timerWhite);
             
-            // Update screen variable directly (no qualification needed in timer callback)
-            whitetimer = timerText;
+            // Update screen variable using qualified notation
+            chessscreen.whitetimer = timerText;
             
             // Debug: Print every 10 deciseconds (1 second)
             if call modulo(timerWhite, 10) == 0 then {
@@ -882,8 +882,8 @@ timerCallback(timerName: string) {
             timerBlack = timerBlack - 1;
             var timerText: string = call formatTimerDecimal(timerBlack);
             
-            // Update screen variable directly (no qualification needed in timer callback)
-            blacktimer = timerText;
+            // Update screen variable using qualified notation
+            chessscreen.blacktimer = timerText;
             
             // Debug: Print every 10 deciseconds (1 second)
             if call modulo(timerBlack, 10) == 0 then {
@@ -1369,10 +1369,10 @@ resetGame() {
     timerBlack = timeInDeciseconds;
     currentPlayer = 0;
     
-    whitetimer = call formatTimerDecimal(timerWhite);
-    blacktimer = call formatTimerDecimal(timerBlack);
-    statusmessage = "White to move - Game Reset!";
-    movehistory = "Game started.\nWhite's turn.\n";
+    chessscreen.whitetimer = call formatTimerDecimal(timerWhite);
+    chessscreen.blacktimer = call formatTimerDecimal(timerBlack);
+    chessscreen.statusmessage = "White to move - Game Reset!";
+    chessscreen.movehistory = "Game started.\nWhite's turn.\n";
     call updateTimerColors();
     // Timer display is automatically updated via varRef binding
 }
