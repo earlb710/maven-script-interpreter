@@ -186,7 +186,7 @@ person.email = "alice.smith@example.com";
 
 **Important:** Record field names are case-insensitive and stored internally in lowercase. This means field access is case-insensitive.
 
-```
+```javascript
 var person: record {
     name: string,
     age: int
