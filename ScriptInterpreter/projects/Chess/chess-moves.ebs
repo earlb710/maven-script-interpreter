@@ -1,7 +1,7 @@
 // Chess Move Calculation Functions
 // ==================================
 // This file contains all the move calculation logic for chess pieces.
-// It is imported by chess.ebs.
+// It is imported by chess-game.ebs.
 //
 // Functions:
 //   - Helper functions for board access and position validation
