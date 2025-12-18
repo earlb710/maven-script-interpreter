@@ -2,6 +2,7 @@
 package com.eb.ui.ebs;
 
 import com.eb.ui.tabs.*;
+import com.eb.ui.util.ButtonShortcutHelper;
 import com.eb.script.RuntimeContext;
 import com.eb.script.interpreter.builtins.BuiltinsFile;
 import com.eb.script.file.FileData;
@@ -520,10 +521,15 @@ public class EbsTab extends Tab {
         chkRegex = new CheckBox("Regex");
 
         btnPrev = new Button("Prev");
+        ButtonShortcutHelper.addAltShortcut(btnPrev, KeyCode.P);
         btnNext = new Button("Next");
+        ButtonShortcutHelper.addAltShortcut(btnNext, KeyCode.N);
         btnReplace = new Button("Replace");
+        ButtonShortcutHelper.addAltShortcut(btnReplace, KeyCode.R);
         btnReplaceAll = new Button("Replace All");
+        ButtonShortcutHelper.addAltShortcut(btnReplaceAll, KeyCode.A);
         btnClose = new Button("Close");
+        ButtonShortcutHelper.addAltShortcut(btnClose, KeyCode.C);
         lblCount = new Label("");
 
         // Group find field with next/prev buttons in a bordered container
@@ -550,6 +556,7 @@ public class EbsTab extends Tab {
         Button runBtn = new Button("Run");
         runBtn.setDefaultButton(true);
         runBtn.setPadding(new Insets(5, 10, 5, 10));
+        ButtonShortcutHelper.addAltShortcut(runBtn, KeyCode.U);
         
         // Only enable Run button for .ebs files
         if (!isEbs) {
@@ -562,6 +569,7 @@ public class EbsTab extends Tab {
         Button clearBtn = new Button("Clear");
         clearBtn.setPadding(new Insets(5, 10, 5, 10));
         clearBtn.setOnAction(e -> outputArea.clear());
+        ButtonShortcutHelper.addAltShortcut(clearBtn, KeyCode.L);
 
         // Show the "start in" directory (script's parent directory)
         Path startInDir = tabContext.path != null ? tabContext.path.getParent() : null;
@@ -576,6 +584,7 @@ public class EbsTab extends Tab {
         if (isHtml || isMd) {
             Button viewBtn = new Button("View");
             viewBtn.setPadding(new Insets(5, 10, 5, 10));
+            ButtonShortcutHelper.addAltShortcut(viewBtn, KeyCode.V);
             if (isHtml) {
                 viewBtn.setTooltip(new Tooltip("Open HTML in WebView"));
                 viewBtn.setOnAction(e -> openHtmlInWebView());

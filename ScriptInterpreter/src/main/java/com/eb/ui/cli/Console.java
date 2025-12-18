@@ -1,6 +1,7 @@
 package com.eb.ui.cli;
 
 import com.eb.ui.ebs.EbsStyled;
+import com.eb.ui.util.ButtonShortcutHelper;
 import com.eb.script.interpreter.InterpreterError;
 import com.eb.script.parser.ParseError;
 import com.eb.script.token.ebs.EbsToken;
@@ -168,18 +169,21 @@ public final class Console {
         // Buttons (optional)
         Button btnClear = new Button(" Clear ");
         btnClear.setOnAction(e -> outputArea.clear());
+        ButtonShortcutHelper.addAltShortcut(btnClear, KeyCode.L);
         
         Button btnReset = new Button(" Reset ");
         btnReset.setOnAction(e -> resetConsole());
         Tooltip resetTooltip = new Tooltip("Clear console, close all screens, stop all threads, and clear all globals");
         resetTooltip.setShowDelay(javafx.util.Duration.millis(500));
         btnReset.setTooltip(resetTooltip);
+        ButtonShortcutHelper.addAltShortcut(btnReset, KeyCode.R);
         
         Button btnSubmit = new Button("Submit");
         btnSubmit.setOnAction(e -> submitInputBuffer());
         Tooltip bt = new Tooltip("[control + enter]");
         bt.setShowDelay(javafx.util.Duration.millis(500));
         btnSubmit.setTooltip(bt);
+        ButtonShortcutHelper.addAltShortcut(btnSubmit, KeyCode.U);
 
         HBox bottom = new HBox(1, inputFrame, new Separator(Orientation.VERTICAL), new VBox(1, btnClear, btnReset, btnSubmit));
         bottom.setPadding(new Insets(3));
