@@ -3322,9 +3322,6 @@ public class ScreenFactory {
             OnClickHandler onClickHandler,
             InterpreterContext context,
             boolean showMenu) {
-        System.out.println("=== DEBUG [ScreenFactory.createScreen] Screen: " + screenName + " ===");
-        System.out.println("    showMenu parameter = " + showMenu);
-        
         // Log debug mode state at the start of createScreen for troubleshooting
         if (isDebugMode()) {
             System.out.println("\n[DEBUG] createScreen() called with debug mode ENABLED");
