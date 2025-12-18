@@ -1,0 +1,161 @@
+// Test: Bidirectional Array Iteration
+// Tests the array.reverse() builtin and reverseIterator() functionality
+
+print "=== Test: Bidirectional Array Iteration ===";
+print "";
+
+var testsPassed: int = 0;
+var testsFailed: int = 0;
+
+// Helper function to verify results
+verifyEqual(name: string, actual: string, expected: string) {
+    if (actual == expected) {
+        print "[PASS] " + name;
+        testsPassed = testsPassed + 1;
+    } else {
+        print "[FAIL] " + name;
+        print "  Expected: " + expected;
+        print "  Actual: " + actual;
+        testsFailed = testsFailed + 1;
+    }
+}
+
+// Test 1: Basic reverse iteration
+print "Test 1: Basic reverse iteration";
+var arr1 = [1, 2, 3];
+var result1: string = "";
+foreach item in #array.reverse(arr1) {
+    result1 = result1 + item;
+}
+call verifyEqual("Reverse [1,2,3]", result1, "321");
+print "";
+
+// Test 2: Forward vs Reverse comparison
+print "Test 2: Forward vs Reverse comparison";
+var arr2 = ["A", "B", "C"];
+var forward: string = "";
+var backward: string = "";
+foreach item in arr2 {
+    forward = forward + item;
+}
+foreach item in #array.reverse(arr2) {
+    backward = backward + item;
+}
+call verifyEqual("Forward ABC", forward, "ABC");
+call verifyEqual("Reverse ABC", backward, "CBA");
+print "";
+
+// Test 3: Empty array
+print "Test 3: Empty array";
+var arr3 = [];
+var result3: string = "empty";
+foreach item in #array.reverse(arr3) {
+    result3 = "not-empty";
+}
+call verifyEqual("Empty array reverse", result3, "empty");
+print "";
+
+// Test 4: Single element
+print "Test 4: Single element";
+var arr4 = [42];
+var result4: int = 0;
+foreach item in #array.reverse(arr4) {
+    result4 = item;
+}
+call verifyEqual("Single element", string(result4), "42");
+print "";
+
+// Test 5: Fixed array
+print "Test 5: Fixed array";
+var arr5: int[4];
+arr5[0] = 10;
+arr5[1] = 20;
+arr5[2] = 30;
+arr5[3] = 40;
+var result5: string = "";
+foreach item in #array.reverse(arr5) {
+    result5 = result5 + string(item) + ",";
+}
+call verifyEqual("Fixed array reverse", result5, "40,30,20,10,");
+print "";
+
+// Test 6: Break in reverse iteration
+print "Test 6: Break in reverse iteration";
+var arr6 = [1, 2, 3, 4, 5];
+var result6: int = 0;
+foreach item in #array.reverse(arr6) {
+    if (item == 3) {
+        break;
+    }
+    result6 = result6 + item;
+}
+call verifyEqual("Break at 3 (from end)", string(result6), "9");
+print "";
+
+// Test 7: Continue in reverse iteration
+print "Test 7: Continue in reverse iteration";
+var arr7 = [1, 2, 3, 4, 5];
+var result7: int = 0;
+foreach item in #array.reverse(arr7) {
+    if (item == 3) {
+        continue;
+    }
+    result7 = result7 + item;
+}
+call verifyEqual("Skip 3 in reverse", string(result7), "12");
+print "";
+
+// Test 8: Multiple reverse iterations
+print "Test 8: Multiple reverse iterations";
+var arr8 = ["X", "Y"];
+var result8a: string = "";
+var result8b: string = "";
+foreach item in #array.reverse(arr8) {
+    result8a = result8a + item;
+}
+foreach item in #array.reverse(arr8) {
+    result8b = result8b + item;
+}
+call verifyEqual("First reverse", result8a, "YX");
+call verifyEqual("Second reverse", result8b, "YX");
+print "";
+
+// Test 9: Large array
+print "Test 9: Large array";
+var arr9: int[100];
+var idx: int = 0;
+while (idx < 100) {
+    arr9[idx] = idx + 1;
+    idx = idx + 1;
+}
+var result9: int = 0;
+var count: int = 0;
+foreach item in #array.reverse(arr9) {
+    if (count < 3) {
+        result9 = result9 + item;
+    }
+    count = count + 1;
+}
+call verifyEqual("Large array first 3 reversed", string(result9), "297");
+print "";
+
+// Test 10: String array
+print "Test 10: String array";
+var arr10 = ["hello", "world", "test"];
+var result10: string = "";
+foreach item in #array.reverse(arr10) {
+    result10 = result10 + item + " ";
+}
+call verifyEqual("String array reverse", result10, "test world hello ");
+print "";
+
+// Summary
+print "=================================";
+print "Tests Passed: " + testsPassed;
+print "Tests Failed: " + testsFailed;
+if (testsFailed == 0) {
+    print "=== ALL TESTS PASSED ===";
+} else {
+    print "=== SOME TESTS FAILED ===";
+}
+print "=================================";
