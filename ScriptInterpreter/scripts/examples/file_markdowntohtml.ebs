@@ -1,0 +1,30 @@
+// EBS Language Reference v1.0.8.12 - See EBS_LANGUAGE_REFERENCE.md
+// Example: file.markdownToHtml - Convert Markdown to HTML for WebView display
+
+// Example 1: Simple markdown to HTML with default styling
+var markdown: string = "# Hello World\n\nThis is a **bold** test with *italic* text.\n\n## Features\n\n- Item 1\n- Item 2\n- Item 3";
+
+var html: string = call file.markdownToHtml(markdown);
+print "HTML with styling:";
+print html;
+print "";
+
+// Example 2: Convert markdown without styling (just HTML body)
+var htmlBodyOnly: string = call file.markdownToHtml(markdown, false);
+print "HTML body only:";
+print htmlBodyOnly;
+print "";
+
+// Example 3: Read a markdown file and convert it to HTML
+var mdPath: string = "guides/FUNCTIONS_IMPORTS_QUICK_REF.md";
+if call file.exists(mdPath) then {
+    var mdContent: string = call file.readTextFile(mdPath);
+    var mdHtml: string = call file.markdownToHtml(mdContent);
+    
+    // Save to HTML file
+    var htmlPath: string = "/tmp/quick_ref.html";
+    call file.writeTextFile(htmlPath, mdHtml);
+    print "Converted " + mdPath + " to " + htmlPath;
+} else {
+    print "File not found: " + mdPath;
+}

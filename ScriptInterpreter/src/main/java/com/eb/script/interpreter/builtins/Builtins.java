@@ -578,6 +578,13 @@ public final class Builtins {
                 newParam("dest", DataType.STRING)
         ));
 
+        // Markdown to HTML conversion
+        addBuiltin(info(
+                "file.markdownToHtml", DataType.STRING,
+                newParam("markdownText", DataType.STRING),
+                newParam("includeStyles", DataType.BOOL, false) // optional; default true
+        ));
+
         // Open/close ZIP archives
         addBuiltin(info(
                 "file.openZip", DataType.STRING,
@@ -2198,6 +2205,7 @@ public final class Builtins {
             case "file.rename" -> BuiltinsFile.rename(env, args);
             case "file.move" -> BuiltinsFile.move(env, args);
             case "file.copy" -> BuiltinsFile.copy(env, args);
+            case "file.markdowntohtml" -> BuiltinsFile.markdownToHtml(env, args);
             case "file.openzip" -> BuiltinsFile.openZip(env, args);
             case "file.createzip" -> BuiltinsFile.createZip(env, args);
             case "file.listzipfiles" -> BuiltinsFile.listZipFiles(env, args);

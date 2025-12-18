@@ -1,0 +1,124 @@
+// Markdown Viewer - Display markdown files in a WebView
+// This example demonstrates the file.markdownToHtml builtin function
+
+// Sample markdown content
+var sampleMarkdown: string = "# Markdown Viewer Example\n\n";
+sampleMarkdown = sampleMarkdown + "This demonstrates the **file.markdownToHtml** function.\n\n";
+sampleMarkdown = sampleMarkdown + "## Features\n\n";
+sampleMarkdown = sampleMarkdown + "- Converts Markdown to HTML\n";
+sampleMarkdown = sampleMarkdown + "- Includes built-in CSS styling\n";
+sampleMarkdown = sampleMarkdown + "- Perfect for WebView display\n\n";
+sampleMarkdown = sampleMarkdown + "## Code Example\n\n";
+sampleMarkdown = sampleMarkdown + "```javascript\n";
+sampleMarkdown = sampleMarkdown + "var html = call file.markdownToHtml(markdown);\n";
+sampleMarkdown = sampleMarkdown + "```\n\n";
+sampleMarkdown = sampleMarkdown + "## Tables\n\n";
+sampleMarkdown = sampleMarkdown + "| Feature | Status |\n";
+sampleMarkdown = sampleMarkdown + "|---------|--------|\n";
+sampleMarkdown = sampleMarkdown + "| Headers | ✓ |\n";
+sampleMarkdown = sampleMarkdown + "| Lists | ✓ |\n";
+sampleMarkdown = sampleMarkdown + "| Code | ✓ |\n";
+sampleMarkdown = sampleMarkdown + "| Tables | ✓ |\n\n";
+sampleMarkdown = sampleMarkdown + "> **Note:** The function includes GitHub-style CSS by default.\n\n";
+sampleMarkdown = sampleMarkdown + "### Links\n\n";
+sampleMarkdown = sampleMarkdown + "Check out the [documentation](README.md) for more details.\n";
+
+// Convert markdown to HTML
+var html: string = call file.markdownToHtml(sampleMarkdown);
+
+// Display in a screen with WebView
+screen markdownViewer = {
+    "title": "Markdown Viewer - file.markdownToHtml Example",
+    "width": 900,
+    "height": 700,
+    "vars": [
+        {
+            "name": "webContent",
+            "type": "string",
+            "default": $html,
+            "display": {
+                "type": "webview",
+                "labelText": "Rendered Markdown:"
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "alignment": "center",
+            "spacing": "10",
+            "padding": "10",
+            "items": [
+                {"name": "webView", "varRef": "webContent"}
+            ],
+            "areas": [
+                {
+                    "name": "buttonArea",
+                    "type": "hbox",
+                    "alignment": "center",
+                    "spacing": "10",
+                    "padding": "10",
+                    "items": [
+                        {
+                            "name": "loadGuideBtn",
+                            "display": {
+                                "type": "button",
+                                "labelText": "Load Quick Reference",
+                                "onClick": "call loadQuickRef();"
+                            }
+                        },
+                        {
+                            "name": "loadFullGuideBtn",
+                            "display": {
+                                "type": "button",
+                                "labelText": "Load Full Guide",
+                                "onClick": "call loadFullGuide();"
+                            }
+                        },
+                        {
+                            "name": "closeBtn",
+                            "display": {
+                                "type": "button",
+                                "labelText": "Close",
+                                "onClick": "call scr.hidescreen(\"markdownViewer\");"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+};
+
+// Function to load the quick reference guide
+function loadQuickRef {
+    var guidePath: string = "ScriptInterpreter/guides/FUNCTIONS_IMPORTS_QUICK_REF.md";
+    
+    if call file.exists(guidePath) then {
+        var mdContent: string = call file.readTextFile(guidePath);
+        var guideHtml: string = call file.markdownToHtml(mdContent);
+        markdownViewer.webContent = guideHtml;
+        print "Loaded: FUNCTIONS_IMPORTS_QUICK_REF.md";
+    } else {
+        print "File not found: " + guidePath;
+    }
+}
+
+// Function to load the full guide
+function loadFullGuide {
+    var guidePath: string = "ScriptInterpreter/guides/FUNCTIONS_AND_IMPORTS_GUIDE.md";
+    
+    if call file.exists(guidePath) then {
+        var mdContent: string = call file.readTextFile(guidePath);
+        var guideHtml: string = call file.markdownToHtml(mdContent);
+        markdownViewer.webContent = guideHtml;
+        print "Loaded: FUNCTIONS_AND_IMPORTS_GUIDE.md";
+    } else {
+        print "File not found: " + guidePath;
+    }
+}
+
+// Show the viewer
+show screen markdownViewer;
+print "Markdown viewer displayed. Use buttons to load different guides.";
