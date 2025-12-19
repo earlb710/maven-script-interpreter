@@ -1947,7 +1947,7 @@ showLastMove(fromX: int, fromY: int, toX: int, toY: int) {
         
         // Draw arrow segments on intermediate cells (not the destination)
         var stepCount: int = 0;
-        while (currentX != toX || currentY != toY) && stepCount < maxSteps {
+        while ((currentX != toX || currentY != toY) && stepCount < maxSteps) {
             // Safety check: ensure we don't exceed array bounds
             if arrowPathCount >= 63 then {
                 break;  // Stop if we're about to overflow
