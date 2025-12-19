@@ -1563,13 +1563,8 @@ findAllLegalMoves(playerColor: int) return array {
                         
                         if !exposesKing then {
                             // Create a move record with source and destination
-                            var legalMove: json = {
-                                "fromX": x,
-                                "fromY": y,
-                                "toX": move.x,
-                                "toY": move.y,
-                                "pieceType": cell.pieceType
-                            };
+                            var jsonStr: string = '{"fromX": ' + x + ', "fromY": ' + y + ', "toX": ' + move.x + ', "toY": ' + move.y + ', "pieceType": ' + cell.pieceType + '}';
+                            var legalMove: json = call json.jsonfromstring(jsonStr);
                             call array.push(allMoves, legalMove);
                         }
                     }
