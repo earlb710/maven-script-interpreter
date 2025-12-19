@@ -106,6 +106,19 @@ var redCrossIndicator: imagedata;     // Red cross for invalid moves (expose own
 var redCrossBigIndicator: imagedata;  // Larger red cross for checkmate
 var transparentClear: imagedata; // Transparent rectangle for clearing piece positions
 var blueArrowIndicator: imagedata; // Blue arrow for showing last move
+var arrowStartIndicator: imagedata;  // Circle indicator for arrow start position
+var arrowLineHorizontal: imagedata;  // Horizontal line segment for arrow path
+var arrowLineVertical: imagedata;    // Vertical line segment for arrow path
+var arrowLineDiagonal1: imagedata;   // Diagonal line segment (NW-SE) for arrow path
+var arrowLineDiagonal2: imagedata;   // Diagonal line segment (NE-SW) for arrow path
+var arrowHeadRight: imagedata;       // Arrow head pointing right
+var arrowHeadLeft: imagedata;        // Arrow head pointing left
+var arrowHeadUp: imagedata;          // Arrow head pointing up
+var arrowHeadDown: imagedata;        // Arrow head pointing down
+var arrowHeadNE: imagedata;          // Arrow head pointing north-east
+var arrowHeadNW: imagedata;          // Arrow head pointing north-west
+var arrowHeadSE: imagedata;          // Arrow head pointing south-east
+var arrowHeadSW: imagedata;          // Arrow head pointing south-west
 
 // Game state tracking
 var gameOver: bool = false;  // Track if game has ended
@@ -309,6 +322,132 @@ createIndicators() {
     call draw.line(blueArrowCanvas, 45, 15, 42, 22);  // Right side of arrow head
     
     blueArrowIndicator = call canvas.toImage(blueArrowCanvas);
+    
+    // Create arrow start indicator (small filled circle for move origin)
+    var arrowStartCanvas: canvas = call canvas.create(60, 60, "arrow_start_indicator");
+    call canvas.clear(arrowStartCanvas);
+    call style.setFill(arrowStartCanvas, "#0080FFCC");  // Semi-transparent blue (more opaque)
+    call draw.circle(arrowStartCanvas, 30, 30, 8, true);
+    call style.setStroke(arrowStartCanvas, "#0060CC", 2.0);
+    call draw.circle(arrowStartCanvas, 30, 30, 8, false);
+    arrowStartIndicator = call canvas.toImage(arrowStartCanvas);
+    
+    // Create horizontal arrow line segment
+    var arrowLineHCanvas: canvas = call canvas.create(60, 60, "arrow_line_h");
+    call canvas.clear(arrowLineHCanvas);
+    call style.setStroke(arrowLineHCanvas, "#0080FFCC", 5.0);
+    call draw.line(arrowLineHCanvas, 0, 30, 60, 30);
+    arrowLineHorizontal = call canvas.toImage(arrowLineHCanvas);
+    
+    // Create vertical arrow line segment
+    var arrowLineVCanvas: canvas = call canvas.create(60, 60, "arrow_line_v");
+    call canvas.clear(arrowLineVCanvas);
+    call style.setStroke(arrowLineVCanvas, "#0080FFCC", 5.0);
+    call draw.line(arrowLineVCanvas, 30, 0, 30, 60);
+    arrowLineVertical = call canvas.toImage(arrowLineVCanvas);
+    
+    // Create diagonal arrow line segment (NW-SE direction: \)
+    var arrowLineD1Canvas: canvas = call canvas.create(60, 60, "arrow_line_d1");
+    call canvas.clear(arrowLineD1Canvas);
+    call style.setStroke(arrowLineD1Canvas, "#0080FFCC", 5.0);
+    call draw.line(arrowLineD1Canvas, 0, 0, 60, 60);
+    arrowLineDiagonal1 = call canvas.toImage(arrowLineD1Canvas);
+    
+    // Create diagonal arrow line segment (NE-SW direction: /)
+    var arrowLineD2Canvas: canvas = call canvas.create(60, 60, "arrow_line_d2");
+    call canvas.clear(arrowLineD2Canvas);
+    call style.setStroke(arrowLineD2Canvas, "#0080FFCC", 5.0);
+    call draw.line(arrowLineD2Canvas, 0, 60, 60, 0);
+    arrowLineDiagonal2 = call canvas.toImage(arrowLineD2Canvas);
+    
+    // Create arrow head pointing right
+    var arrowHeadRCanvas: canvas = call canvas.create(60, 60, "arrow_head_right");
+    call canvas.clear(arrowHeadRCanvas);
+    call style.setStroke(arrowHeadRCanvas, "#0080FFCC", 5.0);
+    call draw.line(arrowHeadRCanvas, 0, 30, 50, 30);  // Main line
+    call style.setFill(arrowHeadRCanvas, "#0080FFCC");
+    // Draw filled triangle for arrow head
+    call draw.line(arrowHeadRCanvas, 50, 30, 35, 20);
+    call draw.line(arrowHeadRCanvas, 50, 30, 35, 40);
+    call draw.line(arrowHeadRCanvas, 35, 20, 35, 40);
+    arrowHeadRight = call canvas.toImage(arrowHeadRCanvas);
+    
+    // Create arrow head pointing left
+    var arrowHeadLCanvas: canvas = call canvas.create(60, 60, "arrow_head_left");
+    call canvas.clear(arrowHeadLCanvas);
+    call style.setStroke(arrowHeadLCanvas, "#0080FFCC", 5.0);
+    call draw.line(arrowHeadLCanvas, 60, 30, 10, 30);  // Main line
+    call style.setFill(arrowHeadLCanvas, "#0080FFCC");
+    call draw.line(arrowHeadLCanvas, 10, 30, 25, 20);
+    call draw.line(arrowHeadLCanvas, 10, 30, 25, 40);
+    call draw.line(arrowHeadLCanvas, 25, 20, 25, 40);
+    arrowHeadLeft = call canvas.toImage(arrowHeadLCanvas);
+    
+    // Create arrow head pointing up
+    var arrowHeadUCanvas: canvas = call canvas.create(60, 60, "arrow_head_up");
+    call canvas.clear(arrowHeadUCanvas);
+    call style.setStroke(arrowHeadUCanvas, "#0080FFCC", 5.0);
+    call draw.line(arrowHeadUCanvas, 30, 60, 30, 10);  // Main line
+    call style.setFill(arrowHeadUCanvas, "#0080FFCC");
+    call draw.line(arrowHeadUCanvas, 30, 10, 20, 25);
+    call draw.line(arrowHeadUCanvas, 30, 10, 40, 25);
+    call draw.line(arrowHeadUCanvas, 20, 25, 40, 25);
+    arrowHeadUp = call canvas.toImage(arrowHeadUCanvas);
+    
+    // Create arrow head pointing down
+    var arrowHeadDCanvas: canvas = call canvas.create(60, 60, "arrow_head_down");
+    call canvas.clear(arrowHeadDCanvas);
+    call style.setStroke(arrowHeadDCanvas, "#0080FFCC", 5.0);
+    call draw.line(arrowHeadDCanvas, 30, 0, 30, 50);  // Main line
+    call style.setFill(arrowHeadDCanvas, "#0080FFCC");
+    call draw.line(arrowHeadDCanvas, 30, 50, 20, 35);
+    call draw.line(arrowHeadDCanvas, 30, 50, 40, 35);
+    call draw.line(arrowHeadDCanvas, 20, 35, 40, 35);
+    arrowHeadDown = call canvas.toImage(arrowHeadDCanvas);
+    
+    // Create arrow head pointing north-east
+    var arrowHeadNECanvas: canvas = call canvas.create(60, 60, "arrow_head_ne");
+    call canvas.clear(arrowHeadNECanvas);
+    call style.setStroke(arrowHeadNECanvas, "#0080FFCC", 5.0);
+    call draw.line(arrowHeadNECanvas, 0, 60, 50, 10);  // Main diagonal line
+    call style.setFill(arrowHeadNECanvas, "#0080FFCC");
+    call draw.line(arrowHeadNECanvas, 50, 10, 40, 25);
+    call draw.line(arrowHeadNECanvas, 50, 10, 35, 20);
+    call draw.line(arrowHeadNECanvas, 40, 25, 35, 20);
+    arrowHeadNE = call canvas.toImage(arrowHeadNECanvas);
+    
+    // Create arrow head pointing north-west
+    var arrowHeadNWCanvas: canvas = call canvas.create(60, 60, "arrow_head_nw");
+    call canvas.clear(arrowHeadNWCanvas);
+    call style.setStroke(arrowHeadNWCanvas, "#0080FFCC", 5.0);
+    call draw.line(arrowHeadNWCanvas, 60, 60, 10, 10);  // Main diagonal line
+    call style.setFill(arrowHeadNWCanvas, "#0080FFCC");
+    call draw.line(arrowHeadNWCanvas, 10, 10, 25, 20);
+    call draw.line(arrowHeadNWCanvas, 10, 10, 20, 25);
+    call draw.line(arrowHeadNWCanvas, 25, 20, 20, 25);
+    arrowHeadNW = call canvas.toImage(arrowHeadNWCanvas);
+    
+    // Create arrow head pointing south-east
+    var arrowHeadSECanvas: canvas = call canvas.create(60, 60, "arrow_head_se");
+    call canvas.clear(arrowHeadSECanvas);
+    call style.setStroke(arrowHeadSECanvas, "#0080FFCC", 5.0);
+    call draw.line(arrowHeadSECanvas, 0, 0, 50, 50);  // Main diagonal line
+    call style.setFill(arrowHeadSECanvas, "#0080FFCC");
+    call draw.line(arrowHeadSECanvas, 50, 50, 35, 40);
+    call draw.line(arrowHeadSECanvas, 50, 50, 40, 35);
+    call draw.line(arrowHeadSECanvas, 35, 40, 40, 35);
+    arrowHeadSE = call canvas.toImage(arrowHeadSECanvas);
+    
+    // Create arrow head pointing south-west
+    var arrowHeadSWCanvas: canvas = call canvas.create(60, 60, "arrow_head_sw");
+    call canvas.clear(arrowHeadSWCanvas);
+    call style.setStroke(arrowHeadSWCanvas, "#0080FFCC", 5.0);
+    call draw.line(arrowHeadSWCanvas, 60, 0, 10, 50);  // Main diagonal line
+    call style.setFill(arrowHeadSWCanvas, "#0080FFCC");
+    call draw.line(arrowHeadSWCanvas, 10, 50, 25, 40);
+    call draw.line(arrowHeadSWCanvas, 10, 50, 20, 35);
+    call draw.line(arrowHeadSWCanvas, 25, 40, 20, 35);
+    arrowHeadSW = call canvas.toImage(arrowHeadSWCanvas);
     
     // Create transparent rectangle for clearing piece positions
     // Canvas size matches cell size (60x60)
@@ -1638,15 +1777,167 @@ handleExitGame() {
 // Move Visualization
 // ====================
 
-// Show the last move with blue arrow indicators
+// Get the arrow line segment image for a given direction
+getArrowLineSegment(dx: int, dy: int) return imagedata {
+    if dx == 0 && dy != 0 then {
+        // Vertical movement
+        return arrowLineVertical;
+    } else if dx != 0 && dy == 0 then {
+        // Horizontal movement
+        return arrowLineHorizontal;
+    } else if dx == dy then {
+        // Diagonal NW-SE (\)
+        return arrowLineDiagonal1;
+    } else if dx == (0 - dy) then {
+        // Diagonal NE-SW (/)
+        return arrowLineDiagonal2;
+    }
+    // Default to horizontal if direction is unclear
+    return arrowLineHorizontal;
+}
+
+// Get the arrow head image for a given direction
+getArrowHead(dx: int, dy: int) return imagedata {
+    // Normalize direction
+    var dirX: int = 0;
+    var dirY: int = 0;
+    
+    if dx > 0 then { dirX = 1; }
+    if dx < 0 then { dirX = -1; }
+    if dy > 0 then { dirY = 1; }
+    if dy < 0 then { dirY = -1; }
+    
+    // Return appropriate arrow head based on direction
+    if dirX == 1 && dirY == 0 then { return arrowHeadRight; }
+    if dirX == -1 && dirY == 0 then { return arrowHeadLeft; }
+    if dirX == 0 && dirY == 1 then { return arrowHeadDown; }
+    if dirX == 0 && dirY == -1 then { return arrowHeadUp; }
+    if dirX == 1 && dirY == 1 then { return arrowHeadSE; }
+    if dirX == 1 && dirY == -1 then { return arrowHeadNE; }
+    if dirX == -1 && dirY == 1 then { return arrowHeadSW; }
+    if dirX == -1 && dirY == -1 then { return arrowHeadNW; }
+    
+    // Default
+    return arrowHeadRight;
+}
+
+// Set a specific arrow indicator image at a position
+setArrowIndicator(x: int, y: int, indicator: imagedata) {
+    // Set the indicator based on position
+    if y == 0 then {
+        if x == 0 then { chessScreen.i00 = indicator; }
+        if x == 1 then { chessScreen.i01 = indicator; }
+        if x == 2 then { chessScreen.i02 = indicator; }
+        if x == 3 then { chessScreen.i03 = indicator; }
+        if x == 4 then { chessScreen.i04 = indicator; }
+        if x == 5 then { chessScreen.i05 = indicator; }
+        if x == 6 then { chessScreen.i06 = indicator; }
+        if x == 7 then { chessScreen.i07 = indicator; }
+    } else if y == 1 then {
+        if x == 0 then { chessScreen.i10 = indicator; }
+        if x == 1 then { chessScreen.i11 = indicator; }
+        if x == 2 then { chessScreen.i12 = indicator; }
+        if x == 3 then { chessScreen.i13 = indicator; }
+        if x == 4 then { chessScreen.i14 = indicator; }
+        if x == 5 then { chessScreen.i15 = indicator; }
+        if x == 6 then { chessScreen.i16 = indicator; }
+        if x == 7 then { chessScreen.i17 = indicator; }
+    } else if y == 2 then {
+        if x == 0 then { chessScreen.i20 = indicator; }
+        if x == 1 then { chessScreen.i21 = indicator; }
+        if x == 2 then { chessScreen.i22 = indicator; }
+        if x == 3 then { chessScreen.i23 = indicator; }
+        if x == 4 then { chessScreen.i24 = indicator; }
+        if x == 5 then { chessScreen.i25 = indicator; }
+        if x == 6 then { chessScreen.i26 = indicator; }
+        if x == 7 then { chessScreen.i27 = indicator; }
+    } else if y == 3 then {
+        if x == 0 then { chessScreen.i30 = indicator; }
+        if x == 1 then { chessScreen.i31 = indicator; }
+        if x == 2 then { chessScreen.i32 = indicator; }
+        if x == 3 then { chessScreen.i33 = indicator; }
+        if x == 4 then { chessScreen.i34 = indicator; }
+        if x == 5 then { chessScreen.i35 = indicator; }
+        if x == 6 then { chessScreen.i36 = indicator; }
+        if x == 7 then { chessScreen.i37 = indicator; }
+    } else if y == 4 then {
+        if x == 0 then { chessScreen.i40 = indicator; }
+        if x == 1 then { chessScreen.i41 = indicator; }
+        if x == 2 then { chessScreen.i42 = indicator; }
+        if x == 3 then { chessScreen.i43 = indicator; }
+        if x == 4 then { chessScreen.i44 = indicator; }
+        if x == 5 then { chessScreen.i45 = indicator; }
+        if x == 6 then { chessScreen.i46 = indicator; }
+        if x == 7 then { chessScreen.i47 = indicator; }
+    } else if y == 5 then {
+        if x == 0 then { chessScreen.i50 = indicator; }
+        if x == 1 then { chessScreen.i51 = indicator; }
+        if x == 2 then { chessScreen.i52 = indicator; }
+        if x == 3 then { chessScreen.i53 = indicator; }
+        if x == 4 then { chessScreen.i54 = indicator; }
+        if x == 5 then { chessScreen.i55 = indicator; }
+        if x == 6 then { chessScreen.i56 = indicator; }
+        if x == 7 then { chessScreen.i57 = indicator; }
+    } else if y == 6 then {
+        if x == 0 then { chessScreen.i60 = indicator; }
+        if x == 1 then { chessScreen.i61 = indicator; }
+        if x == 2 then { chessScreen.i62 = indicator; }
+        if x == 3 then { chessScreen.i63 = indicator; }
+        if x == 4 then { chessScreen.i64 = indicator; }
+        if x == 5 then { chessScreen.i65 = indicator; }
+        if x == 6 then { chessScreen.i66 = indicator; }
+        if x == 7 then { chessScreen.i67 = indicator; }
+    } else if y == 7 then {
+        if x == 0 then { chessScreen.i70 = indicator; }
+        if x == 1 then { chessScreen.i71 = indicator; }
+        if x == 2 then { chessScreen.i72 = indicator; }
+        if x == 3 then { chessScreen.i73 = indicator; }
+        if x == 4 then { chessScreen.i74 = indicator; }
+        if x == 5 then { chessScreen.i75 = indicator; }
+        if x == 6 then { chessScreen.i76 = indicator; }
+        if x == 7 then { chessScreen.i77 = indicator; }
+    }
+}
+
+// Clear all arrow indicators from the previous move
+clearArrowPath() {
+    if lastMoveFromX < 0 || lastMoveFromY < 0 || lastMoveToX < 0 || lastMoveToY < 0 then {
+        return;
+    }
+    
+    // Calculate direction
+    var dx: int = lastMoveToX - lastMoveFromX;
+    var dy: int = lastMoveToY - lastMoveFromY;
+    
+    // Determine step direction
+    var stepX: int = 0;
+    var stepY: int = 0;
+    
+    if dx > 0 then { stepX = 1; }
+    if dx < 0 then { stepX = -1; }
+    if dy > 0 then { stepY = 1; }
+    if dy < 0 then { stepY = -1; }
+    
+    // Clear all cells along the path
+    var currentX: int = lastMoveFromX;
+    var currentY: int = lastMoveFromY;
+    
+    while currentX != lastMoveToX || currentY != lastMoveToY {
+        call clearIndicator(currentX, currentY);
+        
+        // Move to next cell
+        currentX = currentX + stepX;
+        currentY = currentY + stepY;
+    }
+    
+    // Clear the destination cell
+    call clearIndicator(lastMoveToX, lastMoveToY);
+}
+
+// Show the last move with an arrow spanning from FROM to TO
 showLastMove(fromX: int, fromY: int, toX: int, toY: int) {
-    // Clear previous move indicators if they exist
-    if lastMoveFromX >= 0 && lastMoveFromY >= 0 then {
-        call clearIndicator(lastMoveFromX, lastMoveFromY);
-    }
-    if lastMoveToX >= 0 && lastMoveToY >= 0 then {
-        call clearIndicator(lastMoveToX, lastMoveToY);
-    }
+    // Clear previous move arrow path
+    call clearArrowPath();
     
     // Store the new move positions
     lastMoveFromX = fromX;
@@ -1654,9 +1945,38 @@ showLastMove(fromX: int, fromY: int, toX: int, toY: int) {
     lastMoveToX = toX;
     lastMoveToY = toY;
     
-    // Show blue arrows on the from and to positions
-    call setIndicator(fromX, fromY, "move");
-    call setIndicator(toX, toY, "move");
+    // Calculate direction and distance
+    var dx: int = toX - fromX;
+    var dy: int = toY - fromY;
+    
+    // Determine step direction (for traversing path)
+    var stepX: int = 0;
+    var stepY: int = 0;
+    
+    if dx > 0 then { stepX = 1; }
+    if dx < 0 then { stepX = -1; }
+    if dy > 0 then { stepY = 1; }
+    if dy < 0 then { stepY = -1; }
+    
+    // Show arrow start indicator at FROM position
+    call setArrowIndicator(fromX, fromY, arrowStartIndicator);
+    
+    // Get the appropriate line segment for this direction
+    var lineSegment: imagedata = call getArrowLineSegment(dx, dy);
+    
+    // Draw line segments on intermediate cells
+    var currentX: int = fromX + stepX;
+    var currentY: int = fromY + stepY;
+    
+    while currentX != toX || currentY != toY {
+        call setArrowIndicator(currentX, currentY, lineSegment);
+        currentX = currentX + stepX;
+        currentY = currentY + stepY;
+    }
+    
+    // Show arrow head at TO position
+    var arrowHead: imagedata = call getArrowHead(dx, dy);
+    call setArrowIndicator(toX, toY, arrowHead);
 }
 
 // ====================
