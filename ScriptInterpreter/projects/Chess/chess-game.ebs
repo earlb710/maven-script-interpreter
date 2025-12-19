@@ -1912,62 +1912,88 @@ showLastMove(fromX: int, fromY: int, toX: int, toY: int) {
     if dy < 0 then { dirY = -1; }
     
     // Show blue circle on the starting position
-    call setCustomIndicator(fromX, fromY, blueCircleIndicator);
-    arrowPathX[arrowPathCount] = fromX;
-    arrowPathY[arrowPathCount] = fromY;
-    arrowPathCount = arrowPathCount + 1;
-    
-    // Draw arrow segments from source to destination
-    // Note: For knight moves (L-shaped), this draws a diagonal path showing the general direction
-    // rather than the actual L-shaped path, which is an acceptable approximation
-    var currentX: int = fromX;
-    var currentY: int = fromY;
-    var stepX: int = dirX;
-    var stepY: int = dirY;
-    
-    // Move one step at a time
-    currentX = currentX + stepX;
-    currentY = currentY + stepY;
-    
-    // Draw arrow segments on intermediate cells and the destination
-    while currentX != toX || currentY != toY {
-        var arrow: imagedata;
-        
-        // Select the appropriate arrow based on direction
-        if dirX == 1 && dirY == 0 then {
-            arrow = blueArrowRight;
-        } else if dirX == -1 && dirY == 0 then {
-            arrow = blueArrowLeft;
-        } else if dirX == 0 && dirY == 1 then {
-            arrow = blueArrowDown;
-        } else if dirX == 0 && dirY == -1 then {
-            arrow = blueArrowUp;
-        } else if dirX == 1 && dirY == -1 then {
-            arrow = blueArrowUpRight;
-        } else if dirX == -1 && dirY == -1 then {
-            arrow = blueArrowUpLeft;
-        } else if dirX == 1 && dirY == 1 then {
-            arrow = blueArrowDownRight;
-        } else if dirX == -1 && dirY == 1 then {
-            arrow = blueArrowDownLeft;
-        } else {
-            arrow = blueCircleIndicator;  // Fallback for unexpected cases
-        }
-        
-        call setCustomIndicator(currentX, currentY, arrow);
-        arrowPathX[arrowPathCount] = currentX;
-        arrowPathY[arrowPathCount] = currentY;
+    if arrowPathCount < 64 then {
+        call setCustomIndicator(fromX, fromY, blueCircleIndicator);
+        arrowPathX[arrowPathCount] = fromX;
+        arrowPathY[arrowPathCount] = fromY;
         arrowPathCount = arrowPathCount + 1;
+    }
+    
+    // Calculate absolute distances
+    var absDx: int = dx;
+    var absDy: int = dy;
+    if absDx < 0 then { absDx = 0 - absDx; }
+    if absDy < 0 then { absDy = 0 - absDy; }
+    
+    // Determine if this is a knight move (L-shaped: different distances in x and y)
+    var isKnightMove: bool = absDx != absDy && absDx != 0 && absDy != 0;
+    
+    // For knight moves, only draw one arrow in the general direction (no intermediate cells)
+    // For straight/diagonal moves, draw arrows on all intermediate cells
+    if !isKnightMove then {
+        // Draw arrow segments from source to destination
+        var currentX: int = fromX;
+        var currentY: int = fromY;
+        var stepX: int = dirX;
+        var stepY: int = dirY;
         
+        // Calculate maximum steps to prevent infinite loops (safety check)
+        var maxSteps: int = absDx;
+        if absDy > maxSteps then { maxSteps = absDy; }
+        
+        // Move one step at a time
         currentX = currentX + stepX;
         currentY = currentY + stepY;
+        
+        // Draw arrow segments on intermediate cells (not the destination)
+        var stepCount: int = 0;
+        while (currentX != toX || currentY != toY) && stepCount < maxSteps {
+            // Safety check: ensure we don't exceed array bounds
+            if arrowPathCount >= 63 then {
+                break;  // Stop if we're about to overflow
+            }
+            
+            var arrow: imagedata;
+            
+            // Select the appropriate arrow based on direction
+            if dirX == 1 && dirY == 0 then {
+                arrow = blueArrowRight;
+            } else if dirX == -1 && dirY == 0 then {
+                arrow = blueArrowLeft;
+            } else if dirX == 0 && dirY == 1 then {
+                arrow = blueArrowDown;
+            } else if dirX == 0 && dirY == -1 then {
+                arrow = blueArrowUp;
+            } else if dirX == 1 && dirY == -1 then {
+                arrow = blueArrowUpRight;
+            } else if dirX == -1 && dirY == -1 then {
+                arrow = blueArrowUpLeft;
+            } else if dirX == 1 && dirY == 1 then {
+                arrow = blueArrowDownRight;
+            } else if dirX == -1 && dirY == 1 then {
+                arrow = blueArrowDownLeft;
+            } else {
+                arrow = blueCircleIndicator;  // Fallback for unexpected cases
+            }
+            
+            call setCustomIndicator(currentX, currentY, arrow);
+            arrowPathX[arrowPathCount] = currentX;
+            arrowPathY[arrowPathCount] = currentY;
+            arrowPathCount = arrowPathCount + 1;
+            
+            currentX = currentX + stepX;
+            currentY = currentY + stepY;
+            stepCount = stepCount + 1;
+        }
     }
     
     // Show blue circle on the destination position
-    call setCustomIndicator(toX, toY, blueCircleIndicator);
-    arrowPathX[arrowPathCount] = toX;
-    arrowPathY[arrowPathCount] = toY;
-    arrowPathCount = arrowPathCount + 1;
+    if arrowPathCount < 64 then {
+        call setCustomIndicator(toX, toY, blueCircleIndicator);
+        arrowPathX[arrowPathCount] = toX;
+        arrowPathY[arrowPathCount] = toY;
+        arrowPathCount = arrowPathCount + 1;
+    }
 }
 
 // ====================
