@@ -92,6 +92,7 @@ public abstract class Lexer<T extends LexerToken> {
         sourceLength = str.length();
         errors.clear();
         current = 0;
+        line = 1;  // Reset line counter for each new tokenization
     }
 
     protected ReturnToken<T> scanNextToken() {
