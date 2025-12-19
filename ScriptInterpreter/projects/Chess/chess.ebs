@@ -5,7 +5,7 @@ import "chess-game.ebs";
 screen startupDialog = {
     "title": "Chess Game - Start",
     "width": 660,
-    "height": 580,
+    "height": 640,
     "showMenu": false,
     "vars": [
         {
