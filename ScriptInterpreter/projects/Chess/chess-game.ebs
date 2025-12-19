@@ -906,14 +906,17 @@ handleCellClick(x: int, y: int) {
             // Deselect the piece (turn yellow back to normal) before moving
             call deselectPiece(selectedX, selectedY);
             
-            // Move the piece
-            call movePiece(selectedX, selectedY, x, y);
+            // Store move coordinates before clearing selection
+            var moveFromX: int = selectedX;
+            var moveFromY: int = selectedY;
+            var moveToX: int = x;
+            var moveToY: int = y;
             
-            // Show the last move with blue arrows
-            call showLastMove(selectedX, selectedY, x, y);
+            // Move the piece
+            call movePiece(moveFromX, moveFromY, moveToX, moveToY);
             
             // Format and add move to history
-            var moveNotation: string = call formatMove(selectedX, selectedY, x, y, movingPieceType, movingPieceColor, isCapture, capturedPieceType, capturedPieceColor);
+            var moveNotation: string = call formatMove(moveFromX, moveFromY, moveToX, moveToY, movingPieceType, movingPieceColor, isCapture, capturedPieceType, capturedPieceColor);
             var playerName: string;
             if currentPlayer == WHITE then {
                 playerName = "White";
@@ -924,10 +927,13 @@ handleCellClick(x: int, y: int) {
             chessScreen.moveHistory = chessScreen.moveHistory + moveEntry;
             print "Move added to history: " + moveEntry;
             
-            // Clear indicators and selection
+            // Clear indicators and selection (valid move indicators)
             call clearIndicators();
             selectedX = -1;
             selectedY = -1;
+            
+            // Show the last move with blue arrows (after clearing other indicators)
+            call showLastMove(moveFromX, moveFromY, moveToX, moveToY);
             
             // Switch to next player
             if currentPlayer == WHITE then {
