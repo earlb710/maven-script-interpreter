@@ -2172,12 +2172,8 @@ makeComputerMove() {
     }
     
     // Clear the human player's move arrows before showing computer's move
-    if lastMoveFromX >= 0 && lastMoveFromY >= 0 then {
-        call clearIndicator(lastMoveFromX, lastMoveFromY);
-    }
-    if lastMoveToX >= 0 && lastMoveToY >= 0 then {
-        call clearIndicator(lastMoveToX, lastMoveToY);
-    }
+    // Use clearArrowPath() to properly clear all arrow segments from the previous move
+    call clearArrowPath();
     
     // Move the piece
     call movePiece(fromX, fromY, toX, toY);
