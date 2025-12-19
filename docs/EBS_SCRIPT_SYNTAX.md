@@ -2624,6 +2624,25 @@ Executes EBS code when a button is clicked.
 }
 ```
 
+##### shortcut (Button only)
+Defines a keyboard shortcut for the button. The shortcut key is automatically underlined in the button label and shown in a tooltip.
+
+```javascript
+"display": {
+    "type": "button",
+    "labelText": "Save",
+    "shortcut": "Alt+S",  // Alt+S triggers the button
+    "onClick": "call saveData();"
+}
+```
+
+Supported formats:
+- `"Alt+S"` - Alt modifier with S key
+- `"Ctrl+R"` - Ctrl modifier with R key
+- `"Alt+Ctrl+X"` - Both modifiers with X key
+
+See [BUTTON_SHORTCUT_PROPERTY.md](../BUTTON_SHORTCUT_PROPERTY.md) for complete documentation.
+
 ##### onValidate
 Validates user input and shows visual error feedback. Must return a boolean (`true` for valid, `false` for invalid).
 
