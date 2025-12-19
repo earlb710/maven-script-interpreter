@@ -1,0 +1,273 @@
+// Test castling functionality
+print "===================================";
+print "Testing Chess Castling Functionality";
+print "===================================";
+print "";
+
+// Define the types needed
+ChessCell typeof bitmap { cellColor: 0, pieceType: 1-6, pieceColor: 7 };
+posType typeof record { x: int, y: int };
+
+// Constants
+var EMPTY: int = 0;
+var PAWN: int = 1;
+var ROOK: int = 2;
+var KNIGHT: int = 3;
+var BISHOP: int = 4;
+var QUEEN: int = 5;
+var KING: int = 6;
+var WHITE: int = 0;
+var BLACK: int = 1;
+
+// Create test board
+var board: array.bitmap[64];
+
+// Castling tracking variables
+var whiteKingMoved: bool = false;
+var blackKingMoved: bool = false;
+var whiteKingsideRookMoved: bool = false;
+var whiteQueensideRookMoved: bool = false;
+var blackKingsideRookMoved: bool = false;
+var blackQueensideRookMoved: bool = false;
+
+// Helper functions
+boardIndex(row: int, col: int) return int {
+    return row * 8 + col;
+}
+
+modulo(a: int, b: int) return int {
+    var q: int = a / b;
+    return a - (q * b);
+}
+
+isValidPosition(x: int, y: int) return bool {
+    return x >= 0 && x < 8 && y >= 0 && y < 8;
+}
+
+function getPieceAt(x: int, y: int) return int {
+    if call isValidPosition(x, y) then {
+        var idx: int = call boardIndex(y, x);
+        var cellValue: int = board[idx];
+        return cellValue;
+    } else {
+        return -1;
+    }
+}
+
+function isOccupiedByColor(x: int, y: int, color: int) return bool {
+    var cellValue: int = call getPieceAt(x, y);
+    if cellValue == -1 then {
+        return false;
+    }
+    var cell = ChessCell(cellValue);
+    return cell.pieceType != EMPTY && cell.pieceColor == color;
+}
+
+encodeCellValue(cellColor: int, pieceType: int, pieceColor: int) return int {
+    return cellColor + (pieceType * 2) + (pieceColor * 128);
+}
+
+// Import move functions
+import "chess-moves.ebs";
+
+// Initialize empty board
+print "Initializing test board...";
+var row: int = 0;
+var col: int = 0;
+var idx: int = 0;
+
+for (row = 0; row < 8; row++) {
+    for (col = 0; col < 8; col++) {
+        var cellColor: int = call modulo(row + col, 2);
+        idx = call boardIndex(row, col);
+        board[idx] = call encodeCellValue(cellColor, EMPTY, WHITE);
+    }
+}
+
+// Test 1: White kingside castling
+print "";
+print "Test 1: White kingside castling";
+print "--------------------------------";
+print "Setting up position: White king at e1, rook at h1, clear path";
+
+// Place white king at e1 (x=4, y=7)
+board[call boardIndex(7, 4)] = call encodeCellValue(1, KING, WHITE);
+
+// Place white rook at h1 (x=7, y=7)
+board[call boardIndex(7, 7)] = call encodeCellValue(0, ROOK, WHITE);
+
+print "Getting valid moves for white king at (4, 7)...";
+var moves = call validMoves(4, 7);
+print "Found " + moves.length + " valid moves";
+
+var foundKingsideCastle: bool = false;
+var i: int = 0;
+for (i = 0; i < moves.length; i = i + 1) {
+    var move: posType = moves[i];
+    if move.x == 6 && move.y == 7 then {
+        foundKingsideCastle = true;
+        print "✓ Kingside castling move found at (6, 7)";
+    }
+}
+
+if !foundKingsideCastle then {
+    print "✗ ERROR: Kingside castling move NOT found!";
+}
+
+// Test 2: White queenside castling
+print "";
+print "Test 2: White queenside castling";
+print "---------------------------------";
+print "Adding white rook at a1, clear path";
+
+// Place white rook at a1 (x=0, y=7)
+board[call boardIndex(7, 0)] = call encodeCellValue(1, ROOK, WHITE);
+
+print "Getting valid moves for white king at (4, 7)...";
+moves = call validMoves(4, 7);
+print "Found " + moves.length + " valid moves";
+
+var foundQueensideCastle: bool = false;
+for (i = 0; i < moves.length; i = i + 1) {
+    var move2: posType = moves[i];
+    if move2.x == 2 && move2.y == 7 then {
+        foundQueensideCastle = true;
+        print "✓ Queenside castling move found at (2, 7)";
+    }
+}
+
+if !foundQueensideCastle then {
+    print "✗ ERROR: Queenside castling move NOT found!";
+}
+
+// Test 3: Castling blocked by piece in the way
+print "";
+print "Test 3: Castling blocked by piece";
+print "-----------------------------------";
+print "Placing knight at f1 (blocking kingside castling)";
+
+// Place knight at f1 (x=5, y=7)
+board[call boardIndex(7, 5)] = call encodeCellValue(0, KNIGHT, WHITE);
+
+print "Getting valid moves for white king at (4, 7)...";
+moves = call validMoves(4, 7);
+print "Found " + moves.length + " valid moves";
+
+var foundBlockedCastle: bool = false;
+for (i = 0; i < moves.length; i = i + 1) {
+    var move3: posType = moves[i];
+    if move3.x == 6 && move3.y == 7 then {
+        foundBlockedCastle = true;
+    }
+}
+
+if foundBlockedCastle then {
+    print "✗ ERROR: Kingside castling should be blocked but was allowed!";
+} else {
+    print "✓ Kingside castling correctly blocked by knight";
+}
+
+// Test 4: Castling not allowed after king moves
+print "";
+print "Test 4: Castling after king moved";
+print "-----------------------------------";
+print "Setting whiteKingMoved = true";
+
+// Remove the knight to clear the path
+board[call boardIndex(7, 5)] = call encodeCellValue(0, EMPTY, WHITE);
+
+// Mark king as moved
+whiteKingMoved = true;
+
+print "Getting valid moves for white king at (4, 7)...";
+moves = call validMoves(4, 7);
+print "Found " + moves.length + " valid moves";
+
+var foundAfterMove: bool = false;
+for (i = 0; i < moves.length; i = i + 1) {
+    var move4: posType = moves[i];
+    if move4.x == 6 && move4.y == 7 then {
+        foundAfterMove = true;
+    }
+}
+
+if foundAfterMove then {
+    print "✗ ERROR: Castling should not be allowed after king moved!";
+} else {
+    print "✓ Castling correctly prevented after king moved";
+}
+
+// Test 5: Black castling
+print "";
+print "Test 5: Black castling";
+print "------------------------";
+print "Setting up black king and rooks";
+
+// Reset flags
+blackKingMoved = false;
+blackKingsideRookMoved = false;
+blackQueensideRookMoved = false;
+
+// Place black king at e8 (x=4, y=0)
+board[call boardIndex(0, 4)] = call encodeCellValue(0, KING, BLACK);
+
+// Place black rook at h8 (x=7, y=0)
+board[call boardIndex(0, 7)] = call encodeCellValue(1, ROOK, BLACK);
+
+// Place black rook at a8 (x=0, y=0)
+board[call boardIndex(0, 0)] = call encodeCellValue(0, ROOK, BLACK);
+
+print "Getting valid moves for black king at (4, 0)...";
+moves = call validMoves(4, 0);
+print "Found " + moves.length + " valid moves";
+
+var foundBlackKingside: bool = false;
+var foundBlackQueenside: bool = false;
+
+for (i = 0; i < moves.length; i = i + 1) {
+    var move5: posType = moves[i];
+    if move5.x == 6 && move5.y == 0 then {
+        foundBlackKingside = true;
+    }
+    if move5.x == 2 && move5.y == 0 then {
+        foundBlackQueenside = true;
+    }
+}
+
+if foundBlackKingside then {
+    print "✓ Black kingside castling move found at (6, 0)";
+} else {
+    print "✗ ERROR: Black kingside castling move NOT found!";
+}
+
+if foundBlackQueenside then {
+    print "✓ Black queenside castling move found at (2, 0)";
+} else {
+    print "✗ ERROR: Black queenside castling move NOT found!";
+}
+
+// Summary
+print "";
+print "===================================";
+print "Test Summary";
+print "===================================";
+
+var totalTests: int = 5;
+var passedTests: int = 0;
+
+if foundKingsideCastle then { passedTests = passedTests + 1; }
+if foundQueensideCastle then { passedTests = passedTests + 1; }
+if !foundBlockedCastle then { passedTests = passedTests + 1; }
+if !foundAfterMove then { passedTests = passedTests + 1; }
+if foundBlackKingside && foundBlackQueenside then { passedTests = passedTests + 1; }
+
+print "Tests passed: " + passedTests + " / " + totalTests;
+
+if passedTests == totalTests then {
+    print "✓ All tests PASSED!";
+} else {
+    print "✗ Some tests FAILED!";
+}
+
+print "";
+print "Test complete!";
