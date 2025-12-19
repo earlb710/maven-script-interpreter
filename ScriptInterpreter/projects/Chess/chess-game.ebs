@@ -1567,7 +1567,7 @@ findAllLegalMoves(playerColor: int) return array {
                                                    ', "toX": ' + move.x + ', "toY": ' + move.y + 
                                                    ', "pieceType": ' + cell.pieceType + '}';
                             var legalMove: json = call json.jsonfromstring(jsonStr);
-                            call array.push(allMoves, legalMove);
+                            call array.add(allMoves, legalMove);
                         }
                     }
                 }
