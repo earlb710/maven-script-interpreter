@@ -1,5 +1,6 @@
 package com.eb.ui.ebs;
 
+import com.eb.ui.util.ButtonShortcutHelper;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -18,6 +19,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -214,6 +216,12 @@ public class FtpConfigDialog extends Stage {
         Button btnRemove = new Button("Remove");
         Button btnSave = new Button("Save");
         Button btnClose = new Button("Close");
+        
+        // Add keyboard shortcuts to buttons
+        ButtonShortcutHelper.addAltShortcut(btnAdd, KeyCode.A);
+        ButtonShortcutHelper.addAltShortcut(btnRemove, KeyCode.M); // Alt+M for reMove
+        ButtonShortcutHelper.addAltShortcut(btnSave, KeyCode.S);
+        ButtonShortcutHelper.addAltShortcut(btnClose, KeyCode.C);
         
         btnSave.setDefaultButton(true);
         btnClose.setCancelButton(true);

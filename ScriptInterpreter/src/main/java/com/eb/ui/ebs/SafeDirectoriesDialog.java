@@ -1,5 +1,6 @@
 package com.eb.ui.ebs;
 
+import com.eb.ui.util.ButtonShortcutHelper;
 import java.awt.Desktop;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -18,6 +19,7 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import java.util.function.BiConsumer;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -120,6 +122,14 @@ public class SafeDirectoriesDialog extends Stage {
         Button btnBrowse = new Button("Browse");
         Button btnSave = new Button("Save");
         Button btnClose = new Button("Close");
+        
+        // Add keyboard shortcuts to buttons
+        ButtonShortcutHelper.addAltShortcut(btnAdd, KeyCode.A);
+        ButtonShortcutHelper.addAltShortcut(btnRemove, KeyCode.M); // Alt+M for reMove
+        ButtonShortcutHelper.addAltShortcut(btnCopy, KeyCode.O);
+        ButtonShortcutHelper.addAltShortcut(btnBrowse, KeyCode.B);
+        ButtonShortcutHelper.addAltShortcut(btnSave, KeyCode.S);
+        ButtonShortcutHelper.addAltShortcut(btnClose, KeyCode.C);
         
         btnSave.setDefaultButton(true);
         btnClose.setCancelButton(true);

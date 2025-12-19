@@ -1,5 +1,6 @@
 package com.eb.ui.ebs;
 
+import com.eb.ui.util.ButtonShortcutHelper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.prefs.Preferences;
@@ -12,6 +13,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -111,6 +113,13 @@ public class DatabaseConfigDialog extends Stage {
         Button btnCopy = new Button("Copy Connection String");
         Button btnSave = new Button("Save");
         Button btnClose = new Button("Close");
+        
+        // Add keyboard shortcuts to buttons
+        ButtonShortcutHelper.addAltShortcut(btnAdd, KeyCode.A);
+        ButtonShortcutHelper.addAltShortcut(btnRemove, KeyCode.M); // Alt+M for reMove
+        ButtonShortcutHelper.addAltShortcut(btnCopy, KeyCode.O);
+        ButtonShortcutHelper.addAltShortcut(btnSave, KeyCode.S);
+        ButtonShortcutHelper.addAltShortcut(btnClose, KeyCode.C);
         
         btnSave.setDefaultButton(true);
         btnClose.setCancelButton(true);

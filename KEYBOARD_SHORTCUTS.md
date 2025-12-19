@@ -1,5 +1,11 @@
 # Keyboard Shortcuts Reference
 
+## Overview
+
+The EBS Console application supports comprehensive keyboard navigation, including menu access, editor shortcuts, and button shortcuts. All buttons in the application have keyboard shortcuts with underlined characters and tooltip hints.
+
+For detailed information about button shortcuts, see [BUTTON_SHORTCUTS.md](BUTTON_SHORTCUTS.md).
+
 ## Global Keyboard Shortcuts (Console Application)
 
 Access menus quickly from anywhere in the console application using Alt+ key combinations:
@@ -72,17 +78,38 @@ These shortcuts work in script editor tabs:
 | **Ctrl+Shift+N** | New Project |
 | **Ctrl+Shift+O** | Open Project |
 
+## Button Shortcuts
+
+All buttons in the application now support keyboard shortcuts:
+- Look for **underlined letters** in button labels
+- Press **Alt + [letter]** to activate the button
+- Hover over buttons to see the shortcut in the tooltip
+
+**Common Button Shortcuts:**
+- **Alt+S**: Save (in most dialogs)
+- **Alt+C**: Close/Cancel (in most dialogs)
+- **Alt+O**: OK (in dialogs)
+- **Alt+M**: Remove (in configuration dialogs)
+- **Alt+A**: Add (in configuration dialogs)
+- **Alt+R**: Replace/Refresh/Reset (context-dependent)
+
+For a complete list of button shortcuts, see [BUTTON_SHORTCUTS.md](BUTTON_SHORTCUTS.md).
+
 ## Tips
 
 1. **Menu Access**: Press Alt+[letter] to open a menu, then use arrow keys to navigate menu items, Enter to select, or Esc to close.
 
-2. **Quick Editor Access**: In screens, press Alt+E to quickly jump to the first input field without using the mouse.
+2. **Button Access**: Press Alt+[letter] to activate buttons. Look for underlined letters in button labels.
 
-3. **Context-Aware**: Alt+E behaves differently in console (opens Edit menu) vs. screens (focuses editor), providing the most useful action in each context.
+3. **Quick Editor Access**: In screens, press Alt+E to quickly jump to the first input field without using the mouse.
 
-4. **Combine Shortcuts**: Use Alt+F followed by arrow keys to navigate the File menu entirely with keyboard.
+4. **Context-Aware**: Alt+E behaves differently in console (opens Edit menu) vs. screens (focuses editor), providing the most useful action in each context.
 
-5. **Find in Console**: Press Ctrl+F in the console output area to search through console output.
+5. **Combine Shortcuts**: Use Alt+F followed by arrow keys to navigate the File menu entirely with keyboard.
+
+6. **Find in Console**: Press Ctrl+F in the console output area to search through console output.
+
+7. **Tooltip Hints**: Hover over any button to see its keyboard shortcut in the tooltip.
 
 ## Screen Editor Focus
 

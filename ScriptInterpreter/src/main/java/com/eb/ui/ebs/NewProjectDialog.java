@@ -1,8 +1,10 @@
 package com.eb.ui.ebs;
 
+import com.eb.ui.util.ButtonShortcutHelper;
 import com.eb.util.Util;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
@@ -90,6 +92,7 @@ public class NewProjectDialog extends Dialog<NewProjectDialog.ProjectInfo> {
         
         // Browse button to select directory
         browseButton = new Button("Browse...");
+        ButtonShortcutHelper.addAltShortcut(browseButton, KeyCode.B);
         browseButton.setOnAction(e -> {
             DirectoryChooser dirChooser = new DirectoryChooser();
             dirChooser.setTitle("Select Project Directory");
@@ -125,6 +128,7 @@ public class NewProjectDialog extends Dialog<NewProjectDialog.ProjectInfo> {
         
         // Enable/Disable OK button based on project name
         Button okButton = (Button) getDialogPane().lookupButton(okButtonType);
+        ButtonShortcutHelper.addAltShortcut(okButton, KeyCode.O);
         okButton.setDisable(true);
         
         // Track if user has manually edited the path

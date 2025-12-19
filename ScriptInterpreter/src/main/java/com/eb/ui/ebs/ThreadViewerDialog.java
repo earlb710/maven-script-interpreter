@@ -1,5 +1,6 @@
 package com.eb.ui.ebs;
 
+import com.eb.ui.util.ButtonShortcutHelper;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
@@ -12,6 +13,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -235,6 +237,11 @@ public class ThreadViewerDialog extends Stage {
         Button btnClose = new Button("Close");
         CheckBox autoRefreshCheckBox = new CheckBox("Auto-refresh (2s)");
         autoRefreshCheckBox.setSelected(true); // Auto-refresh enabled by default
+
+        // Add keyboard shortcuts to buttons
+        ButtonShortcutHelper.addAltShortcut(btnRefresh, KeyCode.R);
+        ButtonShortcutHelper.addAltShortcut(btnStopThread, KeyCode.T);
+        ButtonShortcutHelper.addAltShortcut(btnClose, KeyCode.C);
 
         btnClose.setCancelButton(true);
         btnStopThread.setDisable(true); // Disabled until a screen thread is selected

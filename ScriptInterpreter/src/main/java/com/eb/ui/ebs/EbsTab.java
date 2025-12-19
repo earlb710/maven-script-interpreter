@@ -2,6 +2,7 @@
 package com.eb.ui.ebs;
 
 import com.eb.ui.tabs.*;
+import com.eb.ui.util.ButtonShortcutHelper;
 import com.eb.script.RuntimeContext;
 import com.eb.script.interpreter.builtins.BuiltinsFile;
 import com.eb.script.file.FileData;
@@ -520,10 +521,15 @@ public class EbsTab extends Tab {
         chkRegex = new CheckBox("Regex");
 
         btnPrev = new Button("Prev");
+        ButtonShortcutHelper.addAltShortcut(btnPrev, KeyCode.P);
         btnNext = new Button("Next");
+        ButtonShortcutHelper.addAltShortcut(btnNext, KeyCode.N);
         btnReplace = new Button("Replace");
+        ButtonShortcutHelper.addAltShortcut(btnReplace, KeyCode.R);
         btnReplaceAll = new Button("Replace All");
+        ButtonShortcutHelper.addAltShortcut(btnReplaceAll, KeyCode.A);
         btnClose = new Button("Close");
+        ButtonShortcutHelper.addAltShortcut(btnClose, KeyCode.C);
         lblCount = new Label("");
 
         // Group find field with next/prev buttons in a bordered container
@@ -550,6 +556,7 @@ public class EbsTab extends Tab {
         Button runBtn = new Button("Run");
         runBtn.setDefaultButton(true);
         runBtn.setPadding(new Insets(5, 10, 5, 10));
+        ButtonShortcutHelper.addAltShortcut(runBtn, KeyCode.U);
         
         // Only enable Run button for .ebs files
         if (!isEbs) {
@@ -562,6 +569,7 @@ public class EbsTab extends Tab {
         Button clearBtn = new Button("Clear");
         clearBtn.setPadding(new Insets(5, 10, 5, 10));
         clearBtn.setOnAction(e -> outputArea.clear());
+        ButtonShortcutHelper.addAltShortcut(clearBtn, KeyCode.L);
 
         // Show the "start in" directory (script's parent directory)
         Path startInDir = tabContext.path != null ? tabContext.path.getParent() : null;
@@ -576,6 +584,7 @@ public class EbsTab extends Tab {
         if (isHtml || isMd) {
             Button viewBtn = new Button("View");
             viewBtn.setPadding(new Insets(5, 10, 5, 10));
+            ButtonShortcutHelper.addAltShortcut(viewBtn, KeyCode.V);
             if (isHtml) {
                 viewBtn.setTooltip(new Tooltip("Open HTML in WebView"));
                 viewBtn.setOnAction(e -> openHtmlInWebView());
@@ -2558,222 +2567,6 @@ public class EbsTab extends Tab {
         toolbar.getChildren().addAll(pinBtn, autoRefreshBtn);
         toolbar.getStyleClass().add("toolbar");
         
-        // Create find bar for searching in the WebView
-        TextField webViewFindField = new TextField();
-        webViewFindField.setPromptText("Find in page");
-        webViewFindField.setPrefWidth(200);
-        
-        Label webViewFindCount = new Label("");
-        
-        Button webViewFindPrev = new Button("◀");
-        webViewFindPrev.setTooltip(new Tooltip("Previous match (Shift+Enter)"));
-        
-        Button webViewFindNext = new Button("▶");
-        webViewFindNext.setTooltip(new Tooltip("Next match (Enter)"));
-        
-        CheckBox webViewFindCaseSensitive = new CheckBox("Aa");
-        webViewFindCaseSensitive.setTooltip(new Tooltip("Match case"));
-        
-        Button webViewFindClose = new Button("✕");
-        webViewFindClose.setTooltip(new Tooltip("Close (Esc)"));
-        
-        HBox webViewFindBar = new HBox(5);
-        webViewFindBar.setPadding(new Insets(5));
-        webViewFindBar.setAlignment(Pos.CENTER_LEFT);
-        webViewFindBar.getChildren().addAll(
-            new Label("Find:"), 
-            webViewFindField, 
-            webViewFindNext, 
-            webViewFindPrev, 
-            webViewFindCaseSensitive,
-            webViewFindCount,
-            webViewFindClose
-        );
-        webViewFindBar.getStyleClass().add("find-bar");
-        webViewFindBar.setVisible(false);
-        webViewFindBar.setManaged(false);
-        
-        // JavaScript helpers for find functionality
-        // Initialize the find state when the document loads
-        final String initFindScript = """
-            window.currentSearchIndex = -1;
-            window.searchMatches = [];
-            window.searchText = '';
-            
-            // Function to clear all highlights
-            window.clearSearchHighlights = function() {
-                var highlights = document.querySelectorAll('.search-highlight');
-                highlights.forEach(function(el) {
-                    var parent = el.parentNode;
-                    parent.replaceChild(document.createTextNode(el.textContent), el);
-                    parent.normalize();
-                });
-                window.searchMatches = [];
-                window.currentSearchIndex = -1;
-            };
-            
-            // Function to highlight search matches
-            window.highlightSearchText = function(searchText, caseSensitive) {
-                window.clearSearchHighlights();
-                
-                if (!searchText) {
-                    return 0;
-                }
-                
-                window.searchText = searchText;
-                var flags = caseSensitive ? 'g' : 'gi';
-                var regex = new RegExp(searchText.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&'), flags);
-                
-                // Function to recursively search and highlight text nodes
-                function highlightNode(node) {
-                    if (node.nodeType === 3) { // Text node
-                        var text = node.nodeValue;
-                        var matches = text.match(regex);
-                        
-                        if (matches) {
-                            var span = document.createElement('span');
-                            var lastIndex = 0;
-                            
-                            text.replace(regex, function(match, offset) {
-                                span.appendChild(document.createTextNode(text.substring(lastIndex, offset)));
-                                
-                                var highlight = document.createElement('span');
-                                highlight.className = 'search-highlight';
-                                highlight.style.backgroundColor = 'yellow';
-                                highlight.style.color = 'black';
-                                highlight.textContent = match;
-                                
-                                span.appendChild(highlight);
-                                window.searchMatches.push(highlight);
-                                
-                                lastIndex = offset + match.length;
-                            });
-                            
-                            span.appendChild(document.createTextNode(text.substring(lastIndex)));
-                            node.parentNode.replaceChild(span, node);
-                        }
-                    } else if (node.nodeType === 1 && node.childNodes && !/(script|style)/i.test(node.tagName)) {
-                        Array.from(node.childNodes).forEach(highlightNode);
-                    }
-                }
-                
-                highlightNode(document.body);
-                return window.searchMatches.length;
-            };
-            
-            // Function to navigate to a specific match
-            window.goToMatch = function(index) {
-                if (window.searchMatches.length === 0) {
-                    return;
-                }
-                
-                // Remove current highlight
-                var current = document.querySelector('.search-highlight-current');
-                if (current) {
-                    current.classList.remove('search-highlight-current');
-                    current.style.backgroundColor = 'yellow';
-                }
-                
-                // Wrap around
-                if (index < 0) {
-                    index = window.searchMatches.length - 1;
-                } else if (index >= window.searchMatches.length) {
-                    index = 0;
-                }
-                
-                window.currentSearchIndex = index;
-                var match = window.searchMatches[index];
-                match.classList.add('search-highlight-current');
-                match.style.backgroundColor = 'orange';
-                match.scrollIntoView({behavior: 'smooth', block: 'center'});
-                
-                return index;
-            };
-            """;
-        
-        // Find functionality
-        Runnable performSearch = () -> {
-            String searchText = webViewFindField.getText();
-            if (searchText == null || searchText.isEmpty()) {
-                webViewFindCount.setText("");
-                webView.getEngine().executeScript("window.clearSearchHighlights()");
-                return;
-            }
-            
-            boolean caseSensitive = webViewFindCaseSensitive.isSelected();
-            Object result = webView.getEngine().executeScript(
-                "window.highlightSearchText('" + escapeJavaScriptString(searchText) + "', " + caseSensitive + ")"
-            );
-            
-            int matchCount = result != null ? ((Number) result).intValue() : 0;
-            
-            if (matchCount > 0) {
-                webView.getEngine().executeScript("window.goToMatch(0)");
-                webViewFindCount.setText("1/" + matchCount);
-            } else {
-                webViewFindCount.setText("0 matches");
-            }
-        };
-        
-        Runnable findNext = () -> {
-            Object result = webView.getEngine().executeScript("window.goToMatch(window.currentSearchIndex + 1)");
-            if (result != null) {
-                int currentIndex = ((Number) result).intValue();
-                int totalMatches = ((Number) webView.getEngine().executeScript("window.searchMatches.length")).intValue();
-                webViewFindCount.setText((currentIndex + 1) + "/" + totalMatches);
-            }
-        };
-        
-        Runnable findPrevious = () -> {
-            Object result = webView.getEngine().executeScript("window.goToMatch(window.currentSearchIndex - 1)");
-            if (result != null) {
-                int currentIndex = ((Number) result).intValue();
-                int totalMatches = ((Number) webView.getEngine().executeScript("window.searchMatches.length")).intValue();
-                webViewFindCount.setText((currentIndex + 1) + "/" + totalMatches);
-            }
-        };
-        
-        // Event handlers
-        webViewFindField.textProperty().addListener((obs, oldText, newText) -> {
-            performSearch.run();
-        });
-        
-        webViewFindCaseSensitive.selectedProperty().addListener((obs, wasSelected, isSelected) -> {
-            performSearch.run();
-        });
-        
-        webViewFindNext.setOnAction(e -> findNext.run());
-        webViewFindPrev.setOnAction(e -> findPrevious.run());
-        
-        webViewFindClose.setOnAction(e -> {
-            webViewFindBar.setVisible(false);
-            webViewFindBar.setManaged(false);
-            webView.getEngine().executeScript("window.clearSearchHighlights()");
-            webViewFindField.clear();
-            webViewFindCount.setText("");
-            webView.requestFocus();
-        });
-        
-        // Keyboard shortcuts for find field
-        webViewFindField.setOnKeyPressed(e -> {
-            if (e.getCode() == KeyCode.ENTER) {
-                if (e.isShiftDown()) {
-                    findPrevious.run();
-                } else {
-                    findNext.run();
-                }
-                e.consume();
-            } else if (e.getCode() == KeyCode.ESCAPE) {
-                webViewFindBar.setVisible(false);
-                webViewFindBar.setManaged(false);
-                webView.getEngine().executeScript("window.clearSearchHighlights()");
-                webViewFindField.clear();
-                webViewFindCount.setText("");
-                webView.requestFocus();
-                e.consume();
-            }
-        });
-        
         // Create a StatusBar to show URLs when hovering over links
         StatusBar statusBar = new StatusBar();
         
@@ -2794,10 +2587,6 @@ public class EbsTab extends Tab {
             if (newState == javafx.concurrent.Worker.State.FAILED) {
                 statusBar.setMessage("Failed to load HTML content");
             }
-            // Initialize find script when page loads successfully
-            if (newState == javafx.concurrent.Worker.State.SUCCEEDED) {
-                webView.getEngine().executeScript(initFindScript);
-            }
         });
         
         // Enable JavaScript console error logging
@@ -2809,36 +2598,14 @@ public class EbsTab extends Tab {
         String contentWithBase = injectBaseTag(htmlContent, baseUrl);
         webView.getEngine().loadContent(contentWithBase, "text/html");
         
-        // Combine toolbar and find bar in a VBox
-        VBox topContainer = new VBox();
-        topContainer.getChildren().addAll(toolbar, webViewFindBar);
-        
-        // Create a BorderPane layout with topContainer at top, WebView in center, and StatusBar at bottom
+        // Create a BorderPane layout with toolbar at top, WebView in center, and StatusBar at bottom
         BorderPane root = new BorderPane();
-        root.setTop(topContainer);
+        root.setTop(toolbar);
         root.setCenter(webView);
         root.setBottom(statusBar);
         
-        // Add keyboard shortcut to show/hide find bar (Ctrl+F)
+        // Create a scene with the layout (800x600 is a reasonable default, window is resizable)
         Scene scene = new Scene(root, 800, 600);
-        scene.setOnKeyPressed(e -> {
-            if (e.isControlDown() && e.getCode() == KeyCode.F) {
-                if (webViewFindBar.isVisible()) {
-                    webViewFindBar.setVisible(false);
-                    webViewFindBar.setManaged(false);
-                    webView.getEngine().executeScript("window.clearSearchHighlights()");
-                    webViewFindField.clear();
-                    webViewFindCount.setText("");
-                    webView.requestFocus();
-                } else {
-                    webViewFindBar.setVisible(true);
-                    webViewFindBar.setManaged(true);
-                    Platform.runLater(() -> webViewFindField.requestFocus());
-                }
-                e.consume();
-            }
-        });
-        
         webViewStage.setScene(scene);
         
         // Show the stage
@@ -2939,221 +2706,6 @@ public class EbsTab extends Tab {
         toolbar.getChildren().addAll(pinBtn, autoRefreshBtn);
         toolbar.getStyleClass().add("toolbar");
         
-        // Create find bar for searching in the WebView (same as HTML preview)
-        TextField webViewFindField = new TextField();
-        webViewFindField.setPromptText("Find in page");
-        webViewFindField.setPrefWidth(200);
-        
-        Label webViewFindCount = new Label("");
-        
-        Button webViewFindPrev = new Button("◀");
-        webViewFindPrev.setTooltip(new Tooltip("Previous match (Shift+Enter)"));
-        
-        Button webViewFindNext = new Button("▶");
-        webViewFindNext.setTooltip(new Tooltip("Next match (Enter)"));
-        
-        CheckBox webViewFindCaseSensitive = new CheckBox("Aa");
-        webViewFindCaseSensitive.setTooltip(new Tooltip("Match case"));
-        
-        Button webViewFindClose = new Button("✕");
-        webViewFindClose.setTooltip(new Tooltip("Close (Esc)"));
-        
-        HBox webViewFindBar = new HBox(5);
-        webViewFindBar.setPadding(new Insets(5));
-        webViewFindBar.setAlignment(Pos.CENTER_LEFT);
-        webViewFindBar.getChildren().addAll(
-            new Label("Find:"), 
-            webViewFindField, 
-            webViewFindNext, 
-            webViewFindPrev, 
-            webViewFindCaseSensitive,
-            webViewFindCount,
-            webViewFindClose
-        );
-        webViewFindBar.getStyleClass().add("find-bar");
-        webViewFindBar.setVisible(false);
-        webViewFindBar.setManaged(false);
-        
-        // JavaScript helpers for find functionality
-        final String initFindScript = """
-            window.currentSearchIndex = -1;
-            window.searchMatches = [];
-            window.searchText = '';
-            
-            // Function to clear all highlights
-            window.clearSearchHighlights = function() {
-                var highlights = document.querySelectorAll('.search-highlight');
-                highlights.forEach(function(el) {
-                    var parent = el.parentNode;
-                    parent.replaceChild(document.createTextNode(el.textContent), el);
-                    parent.normalize();
-                });
-                window.searchMatches = [];
-                window.currentSearchIndex = -1;
-            };
-            
-            // Function to highlight search matches
-            window.highlightSearchText = function(searchText, caseSensitive) {
-                window.clearSearchHighlights();
-                
-                if (!searchText) {
-                    return 0;
-                }
-                
-                window.searchText = searchText;
-                var flags = caseSensitive ? 'g' : 'gi';
-                var regex = new RegExp(searchText.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&'), flags);
-                
-                // Function to recursively search and highlight text nodes
-                function highlightNode(node) {
-                    if (node.nodeType === 3) { // Text node
-                        var text = node.nodeValue;
-                        var matches = text.match(regex);
-                        
-                        if (matches) {
-                            var span = document.createElement('span');
-                            var lastIndex = 0;
-                            
-                            text.replace(regex, function(match, offset) {
-                                span.appendChild(document.createTextNode(text.substring(lastIndex, offset)));
-                                
-                                var highlight = document.createElement('span');
-                                highlight.className = 'search-highlight';
-                                highlight.style.backgroundColor = 'yellow';
-                                highlight.style.color = 'black';
-                                highlight.textContent = match;
-                                
-                                span.appendChild(highlight);
-                                window.searchMatches.push(highlight);
-                                
-                                lastIndex = offset + match.length;
-                            });
-                            
-                            span.appendChild(document.createTextNode(text.substring(lastIndex)));
-                            node.parentNode.replaceChild(span, node);
-                        }
-                    } else if (node.nodeType === 1 && node.childNodes && !/(script|style)/i.test(node.tagName)) {
-                        Array.from(node.childNodes).forEach(highlightNode);
-                    }
-                }
-                
-                highlightNode(document.body);
-                return window.searchMatches.length;
-            };
-            
-            // Function to navigate to a specific match
-            window.goToMatch = function(index) {
-                if (window.searchMatches.length === 0) {
-                    return;
-                }
-                
-                // Remove current highlight
-                var current = document.querySelector('.search-highlight-current');
-                if (current) {
-                    current.classList.remove('search-highlight-current');
-                    current.style.backgroundColor = 'yellow';
-                }
-                
-                // Wrap around
-                if (index < 0) {
-                    index = window.searchMatches.length - 1;
-                } else if (index >= window.searchMatches.length) {
-                    index = 0;
-                }
-                
-                window.currentSearchIndex = index;
-                var match = window.searchMatches[index];
-                match.classList.add('search-highlight-current');
-                match.style.backgroundColor = 'orange';
-                match.scrollIntoView({behavior: 'smooth', block: 'center'});
-                
-                return index;
-            };
-            """;
-        
-        // Find functionality
-        Runnable performSearch = () -> {
-            String searchText = webViewFindField.getText();
-            if (searchText == null || searchText.isEmpty()) {
-                webViewFindCount.setText("");
-                webView.getEngine().executeScript("window.clearSearchHighlights()");
-                return;
-            }
-            
-            boolean caseSensitive = webViewFindCaseSensitive.isSelected();
-            Object result = webView.getEngine().executeScript(
-                "window.highlightSearchText('" + escapeJavaScriptString(searchText) + "', " + caseSensitive + ")"
-            );
-            
-            int matchCount = result != null ? ((Number) result).intValue() : 0;
-            
-            if (matchCount > 0) {
-                webView.getEngine().executeScript("window.goToMatch(0)");
-                webViewFindCount.setText("1/" + matchCount);
-            } else {
-                webViewFindCount.setText("0 matches");
-            }
-        };
-        
-        Runnable findNext = () -> {
-            Object result = webView.getEngine().executeScript("window.goToMatch(window.currentSearchIndex + 1)");
-            if (result != null) {
-                int currentIndex = ((Number) result).intValue();
-                int totalMatches = ((Number) webView.getEngine().executeScript("window.searchMatches.length")).intValue();
-                webViewFindCount.setText((currentIndex + 1) + "/" + totalMatches);
-            }
-        };
-        
-        Runnable findPrevious = () -> {
-            Object result = webView.getEngine().executeScript("window.goToMatch(window.currentSearchIndex - 1)");
-            if (result != null) {
-                int currentIndex = ((Number) result).intValue();
-                int totalMatches = ((Number) webView.getEngine().executeScript("window.searchMatches.length")).intValue();
-                webViewFindCount.setText((currentIndex + 1) + "/" + totalMatches);
-            }
-        };
-        
-        // Event handlers
-        webViewFindField.textProperty().addListener((obs, oldText, newText) -> {
-            performSearch.run();
-        });
-        
-        webViewFindCaseSensitive.selectedProperty().addListener((obs, wasSelected, isSelected) -> {
-            performSearch.run();
-        });
-        
-        webViewFindNext.setOnAction(e -> findNext.run());
-        webViewFindPrev.setOnAction(e -> findPrevious.run());
-        
-        webViewFindClose.setOnAction(e -> {
-            webViewFindBar.setVisible(false);
-            webViewFindBar.setManaged(false);
-            webView.getEngine().executeScript("window.clearSearchHighlights()");
-            webViewFindField.clear();
-            webViewFindCount.setText("");
-            webView.requestFocus();
-        });
-        
-        // Keyboard shortcuts for find field
-        webViewFindField.setOnKeyPressed(e -> {
-            if (e.getCode() == KeyCode.ENTER) {
-                if (e.isShiftDown()) {
-                    findPrevious.run();
-                } else {
-                    findNext.run();
-                }
-                e.consume();
-            } else if (e.getCode() == KeyCode.ESCAPE) {
-                webViewFindBar.setVisible(false);
-                webViewFindBar.setManaged(false);
-                webView.getEngine().executeScript("window.clearSearchHighlights()");
-                webViewFindField.clear();
-                webViewFindCount.setText("");
-                webView.requestFocus();
-                e.consume();
-            }
-        });
-        
         // Create a StatusBar to show URLs when hovering over links
         StatusBar statusBar = new StatusBar();
         
@@ -3174,10 +2726,6 @@ public class EbsTab extends Tab {
             if (newState == javafx.concurrent.Worker.State.FAILED) {
                 statusBar.setMessage("Failed to load HTML content");
             }
-            // Initialize find script when page loads successfully
-            if (newState == javafx.concurrent.Worker.State.SUCCEEDED) {
-                webView.getEngine().executeScript(initFindScript);
-            }
         });
         
         // Enable JavaScript console error logging
@@ -3189,60 +2737,18 @@ public class EbsTab extends Tab {
         String contentWithBase = injectBaseTag(htmlContent, baseUrl);
         webView.getEngine().loadContent(contentWithBase, "text/html");
         
-        // Combine toolbar and find bar in a VBox
-        VBox topContainer = new VBox();
-        topContainer.getChildren().addAll(toolbar, webViewFindBar);
-        
-        // Create a BorderPane layout with topContainer at top, WebView in center, and StatusBar at bottom
+        // Create a BorderPane layout with toolbar at top, WebView in center, and StatusBar at bottom
         BorderPane root = new BorderPane();
-        root.setTop(topContainer);
+        root.setTop(toolbar);
         root.setCenter(webView);
         root.setBottom(statusBar);
         
-        // Add keyboard shortcut to show/hide find bar (Ctrl+F)
+        // Create a scene with the layout (800x600 is a reasonable default, window is resizable)
         Scene scene = new Scene(root, 800, 600);
-        scene.setOnKeyPressed(e -> {
-            if (e.isControlDown() && e.getCode() == KeyCode.F) {
-                if (webViewFindBar.isVisible()) {
-                    webViewFindBar.setVisible(false);
-                    webViewFindBar.setManaged(false);
-                    webView.getEngine().executeScript("window.clearSearchHighlights()");
-                    webViewFindField.clear();
-                    webViewFindCount.setText("");
-                    webView.requestFocus();
-                } else {
-                    webViewFindBar.setVisible(true);
-                    webViewFindBar.setManaged(true);
-                    Platform.runLater(() -> webViewFindField.requestFocus());
-                }
-                e.consume();
-            }
-        });
-        
         webViewStage.setScene(scene);
         
         // Show the stage
         webViewStage.show();
-    }
-    
-    /**
-     * Escapes a string for safe use in JavaScript code.
-     * Handles backslashes, quotes, and special characters.
-     * 
-     * @param text The text to escape
-     * @return Escaped text safe for JavaScript string literals
-     */
-    private String escapeJavaScriptString(String text) {
-        if (text == null) {
-            return "";
-        }
-        return text
-            .replace("\\", "\\\\")  // Backslash
-            .replace("'", "\\'")     // Single quote
-            .replace("\"", "\\\"")   // Double quote
-            .replace("\n", "\\n")    // Newline
-            .replace("\r", "\\r")    // Carriage return
-            .replace("\t", "\\t");   // Tab
     }
     
     /**
