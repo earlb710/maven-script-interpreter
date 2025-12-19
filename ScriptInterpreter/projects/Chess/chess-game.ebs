@@ -1005,9 +1005,6 @@ handleCellClick(x: int, y: int) {
             if selectedGameMode == "1 player" && !gameOver then {
                 // Check if current player is the computer
                 if currentPlayer != humanPlayerColor then {
-                    // Add a brief delay to show the human player's move visualization
-                    // before the computer responds (500ms)
-                    call thread.sleep(500);
                     print "Triggering computer move...";
                     call makeComputerMove();
                 }
@@ -1792,17 +1789,6 @@ makeComputerMove() {
     
     print "Computer moving from (" + fromX + ", " + fromY + ") to (" + toX + ", " + toY + ")";
     
-    // Calculate elapsed time and add delay if needed (minimum 1 second)
-    var endTime = call date.now();
-    var endMs: long = call date.toEpochMs(endTime);
-    var elapsedMs: long = endMs - startMs;
-    
-    if elapsedMs < 1000 then {
-        var delayMs: long = 1000 - elapsedMs;
-        print "Adding delay of " + delayMs + "ms to reach 1 second minimum";
-        call thread.sleep(delayMs);
-    }
-    
     // Get information about the move before executing it
     var sourceCellValue: int = call getPieceAt(fromX, fromY);
     var destCellValue: int = call getPieceAt(toX, toY);
@@ -1823,6 +1809,26 @@ makeComputerMove() {
     var sourceCell = ChessCell(sourceCellValue);
     var movingPieceType: int = sourceCell.pieceType;
     var movingPieceColor: int = sourceCell.pieceColor;
+    
+    // Calculate elapsed time and add delay if needed (minimum 1 second)
+    // Wait until 1 second has passed before showing the computer's move
+    var endTime = call date.now();
+    var endMs: long = call date.toEpochMs(endTime);
+    var elapsedMs: long = endMs - startMs;
+    
+    if elapsedMs < 1000 then {
+        var delayMs: long = 1000 - elapsedMs;
+        print "Waiting " + delayMs + "ms to reach 1 second before showing move";
+        call thread.sleep(delayMs);
+    }
+    
+    // Clear the human player's move arrows before showing computer's move
+    if lastMoveFromX >= 0 && lastMoveFromY >= 0 then {
+        call clearIndicator(lastMoveFromX, lastMoveFromY);
+    }
+    if lastMoveToX >= 0 && lastMoveToY >= 0 then {
+        call clearIndicator(lastMoveToX, lastMoveToY);
+    }
     
     // Move the piece
     call movePiece(fromX, fromY, toX, toY);
