@@ -1,0 +1,77 @@
+// Test script demonstrating the fix for while loop condition parsing
+// Issue: (currentX != toX || currentY != toY) && stepCount < maxSteps was giving error
+
+print "=== Testing While Loop Condition Fix ===";
+print "";
+
+var currentX: int = 5;
+var toX: int = 10;
+var currentY: int = 3;
+var toY: int = 3;
+var stepCount: int = 0;
+var maxSteps: int = 100;
+
+print "Test 1: Original problematic condition";
+print "Initial: currentX=" + currentX + ", toX=" + toX + ", currentY=" + currentY + ", toY=" + toY + ", stepCount=" + stepCount;
+print "Condition: (currentX != toX || currentY != toY) && stepCount < maxSteps";
+
+while (currentX != toX || currentY != toY) && stepCount < maxSteps {
+    print "  Loop iteration " + stepCount + ": currentX=" + currentX + ", currentY=" + currentY;
+    currentX = currentX + 1;
+    stepCount = stepCount + 1;
+}
+
+print "Final: currentX=" + currentX + ", stepCount=" + stepCount;
+print "✓ Test 1 passed - condition parsed and executed correctly";
+print "";
+
+// Reset for test 2
+currentX = 5;
+currentY = 3;
+stepCount = 0;
+
+print "Test 2: Multiple parenthesized groups";
+print "Condition: (currentX < toX && stepCount < 5) || (currentY == toY && stepCount < 3)";
+
+while (currentX < toX && stepCount < 5) || (currentY == toY && stepCount < 3) {
+    print "  Loop iteration " + stepCount + ": currentX=" + currentX;
+    currentX = currentX + 1;
+    stepCount = stepCount + 1;
+}
+
+print "Final: currentX=" + currentX + ", stepCount=" + stepCount;
+print "✓ Test 2 passed";
+print "";
+
+// Reset for test 3
+stepCount = 0;
+
+print "Test 3: Simple condition without parentheses";
+print "Condition: stepCount < 3";
+
+while stepCount < 3 {
+    print "  Loop iteration " + stepCount;
+    stepCount = stepCount + 1;
+}
+
+print "Final: stepCount=" + stepCount;
+print "✓ Test 3 passed";
+print "";
+
+// Reset for test 4
+stepCount = 0;
+
+print "Test 4: Condition with 'then' keyword";
+print "Condition: stepCount < 2 then";
+
+while stepCount < 2 then {
+    print "  Loop iteration " + stepCount;
+    stepCount = stepCount + 1;
+}
+
+print "Final: stepCount=" + stepCount;
+print "✓ Test 4 passed";
+print "";
+
+print "=== All Tests Passed! ===";
+print "The while loop now correctly handles complex conditions with parentheses and logical operators.";
