@@ -1680,6 +1680,8 @@ public class InterpreterScreen {
             // Event handlers
             "onclick", "on_click", "onvalidate", "on_validate", "onchange", "on_change",
             "onexpand", "on_expand", "oncollapse", "on_collapse",
+            // Button shortcuts
+            "shortcut",
             // Options and data
             "options", "columns", "displayrecords", "display_records",
             // Tree properties

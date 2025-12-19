@@ -92,13 +92,10 @@ public class ButtonShortcutHelper {
         // Store reference to event handler so it can be removed when scene changes
         final javafx.event.EventHandler<KeyEvent>[] handlerRef = new javafx.event.EventHandler[1];
         
-        System.out.println("DEBUG ButtonShortcutHelper: Setting up shortcut for button '" + buttonText + "', KeyCode=" + keyCode + ", Alt=" + useAlt + ", Ctrl=" + useCtrl);
-        
         // Create a helper method to add the event filter to a scene
         final Runnable addEventFilter = () -> {
             javafx.scene.Scene scene = button.getScene();
             if (scene != null) {
-                System.out.println("DEBUG ButtonShortcutHelper: Adding event filter to scene for button '" + buttonText + "'");
                 // Create and store event filter to handle the keyboard shortcut
                 handlerRef[0] = event -> {
                     boolean modifierMatch = (useAlt && event.isAltDown() && !event.isControlDown()) ||
@@ -106,32 +103,24 @@ public class ButtonShortcutHelper {
                                           (useAlt && useCtrl && event.isAltDown() && event.isControlDown());
                     
                     if (modifierMatch && event.getCode() == keyCode) {
-                        System.out.println("DEBUG ButtonShortcutHelper: Shortcut matched for button '" + buttonText + "', visible=" + button.isVisible() + ", managed=" + button.isManaged() + ", disabled=" + button.isDisabled());
                         // Check if button is visible, managed, and not disabled
                         if (button.isVisible() && button.isManaged() && !button.isDisabled()) {
-                            System.out.println("DEBUG ButtonShortcutHelper: Firing button '" + buttonText + "'");
                             button.fire();
                             event.consume();
                         }
                     }
                 };
                 scene.addEventFilter(KeyEvent.KEY_PRESSED, handlerRef[0]);
-            } else {
-                System.out.println("DEBUG ButtonShortcutHelper: Scene is null when trying to add event filter for button '" + buttonText + "'");
             }
         };
         
         // If button already has a scene, add the event filter immediately
         if (button.getScene() != null) {
-            System.out.println("DEBUG ButtonShortcutHelper: Button '" + buttonText + "' already has scene, adding filter immediately");
             addEventFilter.run();
-        } else {
-            System.out.println("DEBUG ButtonShortcutHelper: Button '" + buttonText + "' does not have scene yet, will add filter when scene changes");
         }
         
         // Add keyboard event handler to the button's scene
         button.sceneProperty().addListener((obs, oldScene, newScene) -> {
-            System.out.println("DEBUG ButtonShortcutHelper: Scene property changed for button '" + buttonText + "', oldScene=" + (oldScene != null) + ", newScene=" + (newScene != null));
             // Remove old handler if it exists
             if (oldScene != null && handlerRef[0] != null) {
                 oldScene.removeEventFilter(KeyEvent.KEY_PRESSED, handlerRef[0]);
