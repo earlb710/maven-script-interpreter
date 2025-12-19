@@ -66,8 +66,11 @@ public class Run {
             System.out.println("Return:" + e.value);
         } catch (Interpreter.BreakSignal e) {
             System.out.println("Execution interupted : Break");
+        } catch (java.nio.file.NoSuchFileException ex) {
+            System.err.println("Error: Script file not found: " + ex.getFile());
+            System.exit(1);
         } catch (IOException ex) {
-            System.getLogger(Run.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+            System.err.println("Error reading script file: " + ex.getMessage());
             System.exit(1);
         }
     }
