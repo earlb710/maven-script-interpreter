@@ -1967,8 +1967,12 @@ showLastMove(fromX: int, fromY: int, toX: int, toY: int) {
     if absX < 0 then { absX = 0 - absX; }
     if absY < 0 then { absY = 0 - absY; }
     
+    // Check if this is a knight move (L-shaped: moves 2 in one direction and 1 in the other)
     var isKnightMove: bool = false;
-    if (absX == 2 && absY == 1) || (absX == 1 && absY == 2) then {
+    if absX == 2 && absY == 1 then {
+        isKnightMove = true;
+    }
+    if absX == 1 && absY == 2 then {
         isKnightMove = true;
     }
     
