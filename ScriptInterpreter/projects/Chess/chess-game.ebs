@@ -1539,7 +1539,7 @@ getPieceValue(pieceType: int) return int {
 
 // Find all legal moves for the computer player (filters out moves that expose king)
 findAllLegalMoves(playerColor: int) return array {
-    var allMoves: array = call array.create();
+    var allMoves = [];
     
     // Iterate through all board positions
     var y: int = 0;
