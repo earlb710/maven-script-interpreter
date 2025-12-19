@@ -2475,15 +2475,32 @@ public class Parser {
         // We arrive here after having matched IF in statement()
         int line = previous().line;
 
-        Expression condition;
-        if (match(EbsTokenType.LPAREN)) {
-            condition = expression();
-            consume(EbsTokenType.RPAREN, "Expected ')' after if condition.");
-        } else {
-            // No parentheses → require 'then' to disambiguate
-            condition = expression();
-            consume(EbsTokenType.THEN, "Expected 'then' after if condition.");
-        }
+        // Parse the condition expression
+        // The expression parser will handle parentheses naturally, allowing expressions like:
+        // - (x == 1 && y == 2) || (x == 3 && y == 4)   [fixed by this change]
+        // - x == 1 && y == 2
+        // - (x == 1)
+        // 
+        // Previously, the parser treated an opening '(' as a condition wrapper and consumed
+        // only up to the matching ')', which failed for complex expressions like:
+        //   if (absX == 2 && absY == 1) || (absX == 1 && absY == 2) then {...}
+        // 
+        // Now we always parse the full expression, which correctly handles all operator
+        // precedence and parenthesization.
+        Expression condition = expression();
+        
+        // Optionally consume 'then' keyword if present
+        // This allows multiple syntaxes:
+        // - if condition then { ... }        (explicit 'then' for clarity)
+        // - if (condition) { ... }           (parenthesized condition, no 'then' needed)
+        // - if condition then statement;     (single statement with 'then')
+        // - if (condition) statement;        (single statement without 'then')
+        // 
+        // No ambiguity arises because:
+        // - The expression parser consumes the entire condition including all operators
+        // - The then-branch must start with '{' or a statement keyword (var, if, print, etc.)
+        // - Statement starters are clearly distinguishable from expression operators
+        consumeOptional(EbsTokenType.THEN);
 
         // Parse the 'then' branch: either a block `{ ... }` or a single statement
         Statement thenBranch;
