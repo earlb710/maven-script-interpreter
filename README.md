@@ -49,8 +49,27 @@ mvn javafx:run
 
 #### Command-Line Script Execution
 
+Execute a script:
 ```bash
 java -cp target/classes com.eb.script.Run <script-file.ebs>
+```
+
+Parse and validate syntax only (without execution):
+```bash
+java -cp target/classes com.eb.script.Run --parse <script-file.ebs>
+# or use the short form:
+java -cp target/classes com.eb.script.Run -p <script-file.ebs>
+```
+
+The `--parse` flag validates the script's syntax and imports without executing it. This is useful for:
+- Checking for syntax errors before running
+- Validating that all imported files exist and parse correctly
+- Integrating EBS syntax checking into build systems or CI/CD pipelines
+- Minimizing syntax errors during development
+
+Show help:
+```bash
+java -cp target/classes com.eb.script.Run --help
 ```
 
 ### Console Configuration
