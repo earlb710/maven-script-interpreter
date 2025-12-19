@@ -293,10 +293,21 @@ createIndicators() {
     // Canvas size matches cell size (60x60) for proper centering
     var blueArrowCanvas: canvas = call canvas.create(60, 60, "blue_arrow_indicator");
     call canvas.clear(blueArrowCanvas);  // Make canvas transparent
+    
+    // Draw blue circle
     call style.setFill(blueArrowCanvas, "#0080FF80");  // Semi-transparent blue
     call draw.circle(blueArrowCanvas, 30, 30, 18, true);
     call style.setStroke(blueArrowCanvas, "#0060CC", 2.5);
     call draw.circle(blueArrowCanvas, 30, 30, 18, false);
+    
+    // Draw arrow line from bottom-left to top-right with arrow head
+    call style.setStroke(blueArrowCanvas, "#0060CC", 3.0);
+    call draw.line(blueArrowCanvas, 15, 45, 45, 15);
+    
+    // Draw arrow head (two lines forming a V at the top-right end)
+    call draw.line(blueArrowCanvas, 45, 15, 38, 18);  // Left side of arrow head
+    call draw.line(blueArrowCanvas, 45, 15, 42, 22);  // Right side of arrow head
+    
     blueArrowIndicator = call canvas.toImage(blueArrowCanvas);
     
     // Create transparent rectangle for clearing piece positions
@@ -540,6 +551,84 @@ setIndicator(x: int, y: int, indicatorType: string) {
         if x == 5 then { chessScreen.i75 = indicator; }
         if x == 6 then { chessScreen.i76 = indicator; }
         if x == 7 then { chessScreen.i77 = indicator; }
+    }
+}
+
+// Clear a single indicator at a specific position
+clearIndicator(x: int, y: int) {
+    // Set the indicator to null based on position
+    if y == 0 then {
+        if x == 0 then { chessScreen.i00 = null; }
+        if x == 1 then { chessScreen.i01 = null; }
+        if x == 2 then { chessScreen.i02 = null; }
+        if x == 3 then { chessScreen.i03 = null; }
+        if x == 4 then { chessScreen.i04 = null; }
+        if x == 5 then { chessScreen.i05 = null; }
+        if x == 6 then { chessScreen.i06 = null; }
+        if x == 7 then { chessScreen.i07 = null; }
+    } else if y == 1 then {
+        if x == 0 then { chessScreen.i10 = null; }
+        if x == 1 then { chessScreen.i11 = null; }
+        if x == 2 then { chessScreen.i12 = null; }
+        if x == 3 then { chessScreen.i13 = null; }
+        if x == 4 then { chessScreen.i14 = null; }
+        if x == 5 then { chessScreen.i15 = null; }
+        if x == 6 then { chessScreen.i16 = null; }
+        if x == 7 then { chessScreen.i17 = null; }
+    } else if y == 2 then {
+        if x == 0 then { chessScreen.i20 = null; }
+        if x == 1 then { chessScreen.i21 = null; }
+        if x == 2 then { chessScreen.i22 = null; }
+        if x == 3 then { chessScreen.i23 = null; }
+        if x == 4 then { chessScreen.i24 = null; }
+        if x == 5 then { chessScreen.i25 = null; }
+        if x == 6 then { chessScreen.i26 = null; }
+        if x == 7 then { chessScreen.i27 = null; }
+    } else if y == 3 then {
+        if x == 0 then { chessScreen.i30 = null; }
+        if x == 1 then { chessScreen.i31 = null; }
+        if x == 2 then { chessScreen.i32 = null; }
+        if x == 3 then { chessScreen.i33 = null; }
+        if x == 4 then { chessScreen.i34 = null; }
+        if x == 5 then { chessScreen.i35 = null; }
+        if x == 6 then { chessScreen.i36 = null; }
+        if x == 7 then { chessScreen.i37 = null; }
+    } else if y == 4 then {
+        if x == 0 then { chessScreen.i40 = null; }
+        if x == 1 then { chessScreen.i41 = null; }
+        if x == 2 then { chessScreen.i42 = null; }
+        if x == 3 then { chessScreen.i43 = null; }
+        if x == 4 then { chessScreen.i44 = null; }
+        if x == 5 then { chessScreen.i45 = null; }
+        if x == 6 then { chessScreen.i46 = null; }
+        if x == 7 then { chessScreen.i47 = null; }
+    } else if y == 5 then {
+        if x == 0 then { chessScreen.i50 = null; }
+        if x == 1 then { chessScreen.i51 = null; }
+        if x == 2 then { chessScreen.i52 = null; }
+        if x == 3 then { chessScreen.i53 = null; }
+        if x == 4 then { chessScreen.i54 = null; }
+        if x == 5 then { chessScreen.i55 = null; }
+        if x == 6 then { chessScreen.i56 = null; }
+        if x == 7 then { chessScreen.i57 = null; }
+    } else if y == 6 then {
+        if x == 0 then { chessScreen.i60 = null; }
+        if x == 1 then { chessScreen.i61 = null; }
+        if x == 2 then { chessScreen.i62 = null; }
+        if x == 3 then { chessScreen.i63 = null; }
+        if x == 4 then { chessScreen.i64 = null; }
+        if x == 5 then { chessScreen.i65 = null; }
+        if x == 6 then { chessScreen.i66 = null; }
+        if x == 7 then { chessScreen.i67 = null; }
+    } else if y == 7 then {
+        if x == 0 then { chessScreen.i70 = null; }
+        if x == 1 then { chessScreen.i71 = null; }
+        if x == 2 then { chessScreen.i72 = null; }
+        if x == 3 then { chessScreen.i73 = null; }
+        if x == 4 then { chessScreen.i74 = null; }
+        if x == 5 then { chessScreen.i75 = null; }
+        if x == 6 then { chessScreen.i76 = null; }
+        if x == 7 then { chessScreen.i77 = null; }
     }
 }
 
