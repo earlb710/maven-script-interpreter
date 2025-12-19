@@ -65,7 +65,7 @@ public class Run {
         } catch (Interpreter.ReturnSignal e) {
             System.out.println("Return:" + e.value);
         } catch (Interpreter.BreakSignal e) {
-            System.out.println("Execution interupted : Break");
+            System.out.println("Execution interrupted : Break");
         } catch (java.nio.file.NoSuchFileException ex) {
             System.err.println("Error: Script file not found: " + ex.getFile());
             System.exit(1);
