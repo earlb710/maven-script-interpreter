@@ -95,8 +95,8 @@ public class EbsTab extends Tab {
     private boolean dropdownOpen = false; // tracks if dropdown is currently open
     private int searchOriginPosition = -1; // position where the search was initiated (before any matches selected)
     
-    // Minimum character count for find highlighting (more than 2 means at least 3)
-    private static final int MIN_FIND_CHARS = 3;
+    // Minimum character count for find highlighting (at least 2)
+    private static final int MIN_FIND_CHARS = 2;
     
     // Timer for debounced editor change re-highlighting (1 second)
     private PauseTransition editorChangeTimer;
@@ -1623,7 +1623,7 @@ public class EbsTab extends Tab {
             return;
         }
         
-        // Only highlight when there are more than 2 characters (at least 3)
+        // Only highlight when there are at least 2 characters
         if (q.length() < MIN_FIND_CHARS) {
             lblCount.setText("Enter " + MIN_FIND_CHARS + "+ chars to search");
             lastMatches = java.util.Collections.emptyList();
