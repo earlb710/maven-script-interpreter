@@ -121,6 +121,125 @@ function getKnightMoves(x: int, y: int) return array {
     return moves;
 }
 
+// Check if castling is allowed for a given king position and side
+// side: 1 for kingside, -1 for queenside
+// This checks: 1) pieces haven't moved, 2) squares are empty, 3) king not in check, 4) king doesn't move through check
+function canCastle(kingX: int, kingY: int, kingColor: int, side: int) return bool {
+    // Determine which pieces need to be checked based on color
+    var kingMoved: bool;
+    var rookMoved: bool;
+    var rookX: int;
+    
+    if kingColor == WHITE then {
+        // White king should be at e1 (x=4, y=7)
+        if kingX != 4 || kingY != 7 then {
+            return false;
+        }
+        kingMoved = whiteKingMoved;
+        
+        if side == 1 then {
+            // Kingside - rook at h1 (x=7, y=7)
+            rookMoved = whiteKingsideRookMoved;
+            rookX = 7;
+        } else {
+            // Queenside - rook at a1 (x=0, y=7)
+            rookMoved = whiteQueensideRookMoved;
+            rookX = 0;
+        }
+    } else {
+        // Black king should be at e8 (x=4, y=0)
+        if kingX != 4 || kingY != 0 then {
+            return false;
+        }
+        kingMoved = blackKingMoved;
+        
+        if side == 1 then {
+            // Kingside - rook at h8 (x=7, y=0)
+            rookMoved = blackKingsideRookMoved;
+            rookX = 7;
+        } else {
+            // Queenside - rook at a8 (x=0, y=0)
+            rookMoved = blackQueensideRookMoved;
+            rookX = 0;
+        }
+    }
+    
+    // Check if king or rook has moved
+    if kingMoved || rookMoved then {
+        return false;
+    }
+    
+    // Verify that the rook is actually present at the expected position
+    var rookCellValue: int = call getPieceAt(rookX, kingY);
+    if rookCellValue == -1 then {
+        return false;  // Invalid position
+    }
+    
+    var rookCell = ChessCell(rookCellValue);
+    if rookCell.pieceType != ROOK || rookCell.pieceColor != kingColor then {
+        return false;  // Rook is not present or wrong color
+    }
+    
+    // Check if squares between king and rook are empty
+    var startX: int;
+    var endX: int;
+    if side == 1 then {
+        // Kingside: check f and g files (x=5, x=6)
+        startX = kingX + 1;
+        endX = rookX;
+    } else {
+        // Queenside: check b, c, d files (x=1, x=2, x=3)
+        startX = rookX + 1;
+        endX = kingX;
+    }
+    
+    var checkX: int = startX;
+    for (checkX = startX; checkX < endX; checkX = checkX + 1) {
+        var cellValue: int = call getPieceAt(checkX, kingY);
+        if cellValue != -1 then {
+            var cell = ChessCell(cellValue);
+            if cell.pieceType != EMPTY then {
+                return false;  // Square is occupied
+            }
+        }
+    }
+    
+    // Check if king is currently in check
+    if call isKingInCheck(kingColor) then {
+        return false;
+    }
+    
+    // Determine opponent color
+    var opponentColor: int;
+    if kingColor == WHITE then {
+        opponentColor = BLACK;
+    } else {
+        opponentColor = WHITE;
+    }
+    
+    // Check if king would move through check or end in check
+    // King moves from e-file (x=4) to g-file (x=6) for kingside or c-file (x=2) for queenside
+    if side == 1 then {
+        // Kingside: check f-file (x=5) and g-file (x=6)
+        if call isSquareAttacked(5, kingY, opponentColor) then {
+            return false;
+        }
+        if call isSquareAttacked(6, kingY, opponentColor) then {
+            return false;
+        }
+    } else {
+        // Queenside: check d-file (x=3) and c-file (x=2)
+        if call isSquareAttacked(3, kingY, opponentColor) then {
+            return false;
+        }
+        if call isSquareAttacked(2, kingY, opponentColor) then {
+            return false;
+        }
+    }
+    
+    return true;
+}
+
 // Get all possible moves for a king at given position
 function getKingMoves(x: int, y: int) return array {
     var moves: posType[] = [];
@@ -143,6 +262,25 @@ function getKingMoves(x: int, y: int) return array {
         if call isValidPosition(newX, newY) then {
             var newPos: posType = call createPos(newX, newY);
             call array.add(moves, newPos);
+        }
+    }
+    
+    // Add castling moves if allowed
+    var cellValue: int = call getPieceAt(x, y);
+    if cellValue != -1 then {
+        var cell = ChessCell(cellValue);
+        var kingColor: int = cell.pieceColor;
+        
+        // Check kingside castling
+        if call canCastle(x, y, kingColor, 1) then {
+            var kingsideCastle: posType = call createPos(x + 2, y);  // King moves 2 squares to the right
+            call array.add(moves, kingsideCastle);
+        }
+        
+        // Check queenside castling
+        if call canCastle(x, y, kingColor, -1) then {
+            var queensideCastle: posType = call createPos(x - 2, y);  // King moves 2 squares to the left
+            call array.add(moves, queensideCastle);
         }
     }
     

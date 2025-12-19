@@ -114,6 +114,14 @@ var lastMoveFromY: int = -1;  // Last move start Y position
 var lastMoveToX: int = -1;    // Last move end X position
 var lastMoveToY: int = -1;    // Last move end Y position
 
+// Castling tracking variables
+var whiteKingMoved: bool = false;
+var blackKingMoved: bool = false;
+var whiteKingsideRookMoved: bool = false;  // Rook at h1 (x=7, y=7)
+var whiteQueensideRookMoved: bool = false; // Rook at a1 (x=0, y=7)
+var blackKingsideRookMoved: bool = false;  // Rook at h8 (x=7, y=0)
+var blackQueensideRookMoved: bool = false; // Rook at a8 (x=0, y=0)
+
 // Board layer images (bottom layer - checkerboard)
 var lightSquare: imagedata;     // Light square for board
 var darkSquare: imagedata;      // Dark square for board
@@ -819,12 +827,68 @@ movePiece(fromX: int, fromY: int, toX: int, toY: int) {
     var toCellValue: int = board[toIdx];
     var toCell = ChessCell(toCellValue);
     
-    // Update the board array
+    // Check if this is a castling move (king moving 2 squares horizontally)
+    var isCastling: bool = false;
+    if fromCell.pieceType == KING then {
+        var xDiff: int = toX - fromX;
+        if xDiff == 2 || xDiff == -2 then {
+            isCastling = true;
+            print "Castling detected!";
+            
+            // Determine which rook to move
+            var rookFromX: int;
+            var rookToX: int;
+            var rookY: int = fromY;
+            
+            if xDiff == 2 then {
+                // Kingside castling (O-O): Rook moves from h-file (x=7) to f-file (x=5)
+                rookFromX = 7;
+                rookToX = 5;
+                print "Kingside castling";
+            } else {
+                // Queenside castling (O-O-O): Rook moves from a-file (x=0) to d-file (x=3)
+                rookFromX = 0;
+                rookToX = 3;
+                print "Queenside castling";
+            }
+            
+            // Verify the rook exists before moving it
+            var rookFromIdx: int = call boardIndex(rookY, rookFromX);
+            var rookCellValue: int = board[rookFromIdx];
+            var rookCell = ChessCell(rookCellValue);
+            
+            // Validate rook is present (should always be true if canCastle validated correctly)
+            if rookCell.pieceType == ROOK && rookCell.pieceColor == fromCell.pieceColor then {
+                var rookToIdx: int = call boardIndex(rookY, rookToX);
+                var rookToCellValue: int = board[rookToIdx];
+                var rookToCell = ChessCell(rookToCellValue);
+                
+                // Move rook on board array
+                board[rookToIdx] = call encodeCellValue(rookToCell.cellColor, rookCell.pieceType, rookCell.pieceColor);
+                // Clear the source square but preserve cell color - piece color is irrelevant for empty squares
+                board[rookFromIdx] = call encodeCellValue(rookCell.cellColor, EMPTY, rookCell.pieceColor);
+                
+                // Move rook on screen
+                var rookImage: imagedata = call getNormalPiece(rookCell.pieceType, rookCell.pieceColor);
+                if rookImage != null then {
+                    call setPieceImage(rookToX, rookY, rookImage);
+                }
+                call setPieceImage(rookFromX, rookY, transparentClear);
+                
+                print "Rook moved from (" + rookFromX + ", " + rookY + ") to (" + rookToX + ", " + rookY + ")";
+            } else {
+                print "WARNING: Expected rook not found at castling position!";
+            }
+        }
+    }
+    
+    // Update the board array - move the king (or regular piece)
     // Set destination to the moved piece (preserve cell color from destination)
     board[toIdx] = call encodeCellValue(toCell.cellColor, fromCell.pieceType, fromCell.pieceColor);
     
     // Clear the source cell (keep cell color, set piece to EMPTY)
-    board[fromIdx] = call encodeCellValue(fromCell.cellColor, EMPTY, WHITE);
+    // Piece color is irrelevant for empty squares, but keep it for consistency
+    board[fromIdx] = call encodeCellValue(fromCell.cellColor, EMPTY, fromCell.pieceColor);
     
     // Update the screen images
     // Get the normal piece image (not yellow) for the destination
@@ -835,6 +899,36 @@ movePiece(fromX: int, fromY: int, toX: int, toY: int) {
     
     // Clear the source cell image on screen with transparent rectangle
     call setPieceImage(fromX, fromY, transparentClear);
+    
+    // Track piece movements for castling rules
+    if fromCell.pieceType == KING then {
+        if fromCell.pieceColor == WHITE then {
+            whiteKingMoved = true;
+            print "White king has moved - castling no longer allowed";
+        } else {
+            blackKingMoved = true;
+            print "Black king has moved - castling no longer allowed";
+        }
+    } else if fromCell.pieceType == ROOK then {
+        // Check which rook moved
+        if fromCell.pieceColor == WHITE then {
+            if fromX == 0 && fromY == 7 then {
+                whiteQueensideRookMoved = true;
+                print "White queenside rook has moved";
+            } else if fromX == 7 && fromY == 7 then {
+                whiteKingsideRookMoved = true;
+                print "White kingside rook has moved";
+            }
+        } else {
+            if fromX == 0 && fromY == 0 then {
+                blackQueensideRookMoved = true;
+                print "Black queenside rook has moved";
+            } else if fromX == 7 && fromY == 0 then {
+                blackKingsideRookMoved = true;
+                print "Black kingside rook has moved";
+            }
+        }
+    }
     
     print "Piece moved successfully";
 }
@@ -2561,6 +2655,14 @@ resetGame() {
     selectedX = -1;
     selectedY = -1;
     currentPlayer = WHITE;
+    
+    // Reset castling tracking
+    whiteKingMoved = false;
+    blackKingMoved = false;
+    whiteKingsideRookMoved = false;
+    whiteQueensideRookMoved = false;
+    blackKingsideRookMoved = false;
+    blackQueensideRookMoved = false;
     
     // Reset timers
     var timeInDeciseconds: int = call getTimeLimitInDeciseconds(selectedTimeLimit);
