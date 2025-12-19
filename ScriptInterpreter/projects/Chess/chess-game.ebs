@@ -1886,7 +1886,7 @@ handleExitGame() {
 showLastMove(fromX: int, fromY: int, toX: int, toY: int) {
     // Clear previous arrow path indicators
     var i: int = 0;
-    while i < arrowPathCount do {
+    while i < arrowPathCount {
         call clearIndicator(arrowPathX[i], arrowPathY[i]);
         i = i + 1;
     }
@@ -1930,7 +1930,7 @@ showLastMove(fromX: int, fromY: int, toX: int, toY: int) {
     currentY = currentY + stepY;
     
     // Draw arrow segments on intermediate cells and the destination
-    while currentX != toX || currentY != toY do {
+    while currentX != toX || currentY != toY {
         var arrow: imagedata;
         
         // Select the appropriate arrow based on direction
