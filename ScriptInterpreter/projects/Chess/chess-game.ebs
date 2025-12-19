@@ -1928,9 +1928,56 @@ showLastMove(fromX: int, fromY: int, toX: int, toY: int) {
     // Determine if this is a knight move (L-shaped: different distances in x and y)
     var isKnightMove: bool = absDx != absDy && absDx != 0 && absDy != 0;
     
-    // For knight moves, only draw one arrow in the general direction (no intermediate cells)
-    // For straight/diagonal moves, draw arrows on all intermediate cells
-    if !isKnightMove then {
+    // Handle knight moves with L-shaped arrow path
+    if isKnightMove then {
+        // Knight moves in an L-shape: 2 squares in one direction, 1 in perpendicular
+        // Draw arrows along the L-shaped path
+        var longDir: int = 0;   // Direction of the 2-square movement (x or y)
+        var shortDir: int = 0;  // Direction of the 1-square movement
+        
+        // Determine which direction has 2 squares and which has 1
+        if absDx == 2 then {
+            // Move 2 squares horizontally first, then 1 vertically
+            // First leg: horizontal arrows
+            var step1: int = 0;
+            while step1 < 2 && arrowPathCount < 63 {
+                var midX: int = fromX + (dirX * (step1 + 1));
+                var arrow: imagedata;
+                if dirX == 1 then {
+                    arrow = blueArrowRight;
+                } else {
+                    arrow = blueArrowLeft;
+                }
+                call setCustomIndicator(midX, fromY, arrow);
+                arrowPathX[arrowPathCount] = midX;
+                arrowPathY[arrowPathCount] = fromY;
+                arrowPathCount = arrowPathCount + 1;
+                step1 = step1 + 1;
+            }
+            
+            // Second leg: vertical arrow at destination (already at toX, toY)
+        } else if absDy == 2 then {
+            // Move 2 squares vertically first, then 1 horizontally
+            // First leg: vertical arrows
+            var step1: int = 0;
+            while step1 < 2 && arrowPathCount < 63 {
+                var midY: int = fromY + (dirY * (step1 + 1));
+                var arrow: imagedata;
+                if dirY == 1 then {
+                    arrow = blueArrowDown;
+                } else {
+                    arrow = blueArrowUp;
+                }
+                call setCustomIndicator(fromX, midY, arrow);
+                arrowPathX[arrowPathCount] = fromX;
+                arrowPathY[arrowPathCount] = midY;
+                arrowPathCount = arrowPathCount + 1;
+                step1 = step1 + 1;
+            }
+            
+            // Second leg: horizontal arrow at destination (already at toX, toY)
+        }
+    } else {
         // Draw arrow segments from source to destination
         var currentX: int = fromX;
         var currentY: int = fromY;
