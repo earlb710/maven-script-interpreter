@@ -509,11 +509,8 @@ public class AreaItemFactory {
                 Button button = (Button) control;
                 button.setText(metadata.labelText);
                 
-                System.out.println("DEBUG AreaItemFactory: Button '" + metadata.labelText + "' created, shortcut=" + metadata.shortcut);
-                
                 // Apply shortcut key if specified
                 if (metadata.shortcut != null && !metadata.shortcut.isEmpty()) {
-                    System.out.println("DEBUG AreaItemFactory: Applying shortcut '" + metadata.shortcut + "' to button '" + metadata.labelText + "'");
                     applyButtonShortcut(button, metadata.shortcut);
                 }
             } else if (control instanceof javafx.scene.text.Text) {

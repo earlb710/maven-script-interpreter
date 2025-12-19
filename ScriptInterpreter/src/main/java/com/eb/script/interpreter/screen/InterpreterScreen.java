@@ -1898,10 +1898,8 @@ public class InterpreterScreen {
         // Extract shortcut key combination for buttons - check both camelCase and lowercase
         if (displayDef.containsKey("shortcut")) {
             metadata.shortcut = String.valueOf(displayDef.get("shortcut"));
-            System.out.println("DEBUG InterpreterScreen: Parsed shortcut '" + metadata.shortcut + "' for screen '" + screenName + "'");
         } else if (displayDef.containsKey("shortcut")) {
             metadata.shortcut = String.valueOf(displayDef.get("shortcut"));
-            System.out.println("DEBUG InterpreterScreen: Parsed shortcut (lowercase) '" + metadata.shortcut + "' for screen '" + screenName + "'");
         }
 
         // Extract onClick event handler for buttons - check both camelCase and lowercase
