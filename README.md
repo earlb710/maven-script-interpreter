@@ -109,6 +109,8 @@ See `ScriptInterpreter/scripts/examples/css-screen-demo/` for a complete working
 
 ### Basic Syntax
 
+**Important:** EBS is case-insensitive for all identifiers (variable names, function names, screen names, etc.). All identifiers are normalized to lowercase internally. For example, `myVariable`, `MyVariable`, and `MYVARIABLE` all refer to the same variable. See [docs/EBS_SCRIPT_SYNTAX.md](docs/EBS_SCRIPT_SYNTAX.md) for complete details.
+
 ```javascript
 // Variable declaration
 var name: string = "World";

@@ -2,6 +2,8 @@
 
 This document provides a quick reference for all properties available on each container type in the EBS screen system.
 
+**Important:** All property names in screen definitions are case-insensitive and stored internally in lowercase. For example, `alignment`, `Alignment`, and `ALIGNMENT` all refer to the same property.
+
 ## How to Access Properties
 
 ```javascript

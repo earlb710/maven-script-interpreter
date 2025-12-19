@@ -10,6 +10,8 @@ For the complete language syntax reference, built-in functions, and examples, se
 
 **[docs/EBS_SCRIPT_SYNTAX.md](docs/EBS_SCRIPT_SYNTAX.md)**
 
+**Important Language Feature:** EBS is case-insensitive for all identifiers (variable names, function names, screen names, type aliases, record field names, etc.). All identifiers are normalized to lowercase and stored internally in lowercase. For example, `myVariable`, `MyVariable`, and `MYVARIABLE` all refer to the same variable. Screen definition JSON keys are also case-insensitive.
+
 This document includes:
 - Basic syntax and program structure
 - Data types and type casting
