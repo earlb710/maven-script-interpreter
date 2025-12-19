@@ -29,7 +29,9 @@ Language and Console Rules
   - Use `mvn javafx:run` to start; `Ctrl+Enter` executes the editor script.
   - Support documented console commands (`/open`, `/save`, `/help`, `/clear`, `/echo on|off`, `/ai setup`, `/safe-dirs`).
 - CLI execution:
-  - `java -cp target/classes com.eb.script.Run <script.ebs>`
+  - Run script: `java -cp target/classes com.eb.script.Run <script.ebs>`
+  - Validate only: `java -cp target/classes com.eb.script.Run --parse <script.ebs>` (checks syntax and imports without execution)
+  - Show help: `java -cp target/classes com.eb.script.Run --help`
 
 Screens and Variables
 - Screen windows are NOT shown automatically; require explicit: `show screen <name>;` (new syntax) or `screen <name> show;` (legacy) and support hide/show cycles.
@@ -79,6 +81,7 @@ Build, Run, and Tooling
 - Build: `mvn clean compile` under `ScriptInterpreter`
 - Run UI: `mvn javafx:run`
 - Run CLI script: `java -cp target/classes com.eb.script.Run <script.ebs>`
+- Parse/validate script only: `java -cp target/classes com.eb.script.Run --parse <script.ebs>` (validates syntax and imports without execution)
 - Class tree analysis: `java -cp target/classes com.eb.util.ClassTreeLister [srcDir]`
 
 Security and Safety
@@ -97,7 +100,8 @@ Testing and Scripts
 - **Before creating EBS scripts**: Always verify correct syntax in `EBS_SCRIPT_SYNTAX.md` and available builtins in `Builtins.java`
   - Function syntax: `functionName(params) return returnType { ... }` (no `function` keyword)
   - Builtin functions: Check `Builtins.java` for available functions (e.g., `string.toUpper`, not `upper`)
-  - Test scripts with parser validation before committing
+  - **Always validate scripts before committing**: Use `java -cp target/classes com.eb.script.Run --parse <script.ebs>` to check syntax and imports
+  - The parse-only mode validates the script and all imported files without execution, catching syntax errors early
 
 Documentation and Maintenance
 - **IMPORTANT**: If solving a problem requires creating a new keyword, data type, event, or builtin that was not explicitly asked for, first get feedback on how to proceed before implementing.
