@@ -746,28 +746,33 @@ movePiece(fromX: int, fromY: int, toX: int, toY: int) {
                 print "Queenside castling";
             }
             
-            // Move the rook
+            // Verify the rook exists before moving it
             var rookFromIdx: int = call boardIndex(rookY, rookFromX);
             var rookCellValue: int = board[rookFromIdx];
             var rookCell = ChessCell(rookCellValue);
             
-            var rookToIdx: int = call boardIndex(rookY, rookToX);
-            var rookToCellValue: int = board[rookToIdx];
-            var rookToCell = ChessCell(rookToCellValue);
-            
-            // Move rook on board array
-            board[rookToIdx] = call encodeCellValue(rookToCell.cellColor, rookCell.pieceType, rookCell.pieceColor);
-            // Clear the source square but preserve cell color - piece color is irrelevant for empty squares
-            board[rookFromIdx] = call encodeCellValue(rookCell.cellColor, EMPTY, rookCell.pieceColor);
-            
-            // Move rook on screen
-            var rookImage: imagedata = call getNormalPiece(rookCell.pieceType, rookCell.pieceColor);
-            if rookImage != null then {
-                call setPieceImage(rookToX, rookY, rookImage);
+            // Validate rook is present (should always be true if canCastle validated correctly)
+            if rookCell.pieceType == ROOK && rookCell.pieceColor == fromCell.pieceColor then {
+                var rookToIdx: int = call boardIndex(rookY, rookToX);
+                var rookToCellValue: int = board[rookToIdx];
+                var rookToCell = ChessCell(rookToCellValue);
+                
+                // Move rook on board array
+                board[rookToIdx] = call encodeCellValue(rookToCell.cellColor, rookCell.pieceType, rookCell.pieceColor);
+                // Clear the source square but preserve cell color - piece color is irrelevant for empty squares
+                board[rookFromIdx] = call encodeCellValue(rookCell.cellColor, EMPTY, rookCell.pieceColor);
+                
+                // Move rook on screen
+                var rookImage: imagedata = call getNormalPiece(rookCell.pieceType, rookCell.pieceColor);
+                if rookImage != null then {
+                    call setPieceImage(rookToX, rookY, rookImage);
+                }
+                call setPieceImage(rookFromX, rookY, transparentClear);
+                
+                print "Rook moved from (" + rookFromX + ", " + rookY + ") to (" + rookToX + ", " + rookY + ")";
+            } else {
+                print "WARNING: Expected rook not found at castling position!";
             }
-            call setPieceImage(rookFromX, rookY, transparentClear);
-            
-            print "Rook moved from (" + rookFromX + ", " + rookY + ") to (" + rookToX + ", " + rookY + ")";
         }
     }
     

@@ -169,6 +169,17 @@ function canCastle(kingX: int, kingY: int, kingColor: int, side: int) return boo
         return false;
     }
     
+    // Verify that the rook is actually present at the expected position
+    var rookCellValue: int = call getPieceAt(rookX, kingY);
+    if rookCellValue == -1 then {
+        return false;  // Invalid position
+    }
+    
+    var rookCell = ChessCell(rookCellValue);
+    if rookCell.pieceType != ROOK || rookCell.pieceColor != kingColor then {
+        return false;  // Rook is not present or wrong color
+    }
+    
     // Check if squares between king and rook are empty
     var startX: int;
     var endX: int;
