@@ -1347,7 +1347,7 @@ handleStartGame() {
         
         // Randomly assign white or black to human player
         // Generate random number: 0 or 1
-        humanPlayerColor = call math.randomInt(0, 1);
+        humanPlayerColor = call random.nextLong(0, 2);
         
         if humanPlayerColor == WHITE then {
             print "You are playing as WHITE. White starts first.";
@@ -1624,7 +1624,7 @@ selectBestMoveEasy(playerColor: int) return json {
     if moveCount == 0 then {
         return null;
     }
-    var randomIndex: int = call math.randomInt(0, moveCount - 1);
+    var randomIndex: int = call random.nextLong(0, moveCount);
     print "Computer selecting random move (no captures available)";
     return allMoves[randomIndex];
 }
