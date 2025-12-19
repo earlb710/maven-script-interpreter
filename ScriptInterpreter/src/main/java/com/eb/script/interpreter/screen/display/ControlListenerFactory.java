@@ -9,6 +9,8 @@ import com.eb.script.token.DataType;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -398,13 +400,39 @@ public class ControlListenerFactory {
      * @param handler The runnable to execute on change
      */
     public static void attachValueChangeListener(Node control, Runnable handler) {
-        // Handle HBox containing slider (when showSliderValue is true)
-        if (control instanceof HBox) {
-            HBox hbox = (HBox) control;
-            if (!hbox.getChildren().isEmpty() && hbox.getChildren().get(0) instanceof Slider) {
-                Slider slider = (Slider) hbox.getChildren().get(0);
-                slider.valueProperty().addListener((obs, oldVal, newVal) -> handler.run());
+        // Handle VBox or HBox containing radio buttons (when options are provided)
+        if (control instanceof VBox || control instanceof HBox) {
+            Pane pane = (Pane) control;
+            // Check if this container has radio buttons
+            boolean hasRadioButtons = pane.getChildren().stream()
+                .anyMatch(child -> child instanceof RadioButton);
+            
+            if (hasRadioButtons) {
+                // Attach listener to all radio buttons in the container
+                for (Node child : pane.getChildren()) {
+                    if (child instanceof RadioButton) {
+                        ((RadioButton) child).selectedProperty().addListener((obs, oldVal, newVal) -> {
+                            // Only trigger when selected (not when deselected)
+                            if (newVal) {
+                                handler.run();
+                            }
+                        });
+                    } else if (child instanceof VBox || child instanceof HBox) {
+                        // Recursively handle nested containers (e.g., when wrapped with label)
+                        attachValueChangeListener(child, handler);
+                    }
+                }
                 return;
+            }
+            
+            // Handle HBox containing slider (when showSliderValue is true)
+            if (control instanceof HBox) {
+                HBox hbox = (HBox) control;
+                if (!hbox.getChildren().isEmpty() && hbox.getChildren().get(0) instanceof Slider) {
+                    Slider slider = (Slider) hbox.getChildren().get(0);
+                    slider.valueProperty().addListener((obs, oldVal, newVal) -> handler.run());
+                    return;
+                }
             }
         }
         

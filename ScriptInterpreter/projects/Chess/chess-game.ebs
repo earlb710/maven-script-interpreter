@@ -1271,6 +1271,12 @@ var selectedGameMode: string = "2 player";
 // Variable to store selected time limit
 var selectedTimeLimit: string = "Unlimited";
 
+// Variable to store selected difficulty level
+var selectedDifficulty: string = "Easy";
+
+// Variable to store human player's color in 1-player mode (0=WHITE, 1=BLACK)
+var humanPlayerColor: int = 0;
+
 // Constant for unlimited time (in seconds)
 var UNLIMITED_TIME: int = 99999;
 
@@ -1311,6 +1317,16 @@ getTimeLimitInDeciseconds(timeLimit: string) return int {
     }
 }
 
+// Handle game mode change - enable/disable difficulty selection
+handleGameModeChange() {
+    // Enable difficulty selection only for 1 Player mode
+    if startupDialog.gameMode == "1" then {
+        call scr.setproperty("startupDialog.difficultyRadio", "disabled", false);
+    } else {
+        call scr.setproperty("startupDialog.difficultyRadio", "disabled", true);
+    }
+}
+
 // Handle Start button click from startup dialog
 handleStartGame() {
     print "Start button clicked!";
@@ -1319,13 +1335,39 @@ handleStartGame() {
     // The gameMode variable stores "1" or "2"
     if startupDialog.gameMode == "1" then {
         selectedGameMode = "1 player";
+        
+        // Randomly assign white or black to human player
+        // Generate random number: 0 or 1
+        humanPlayerColor = call math.randomInt(0, 1);
+        
+        if humanPlayerColor == WHITE then {
+            print "You are playing as WHITE. White starts first.";
+        } else {
+            print "You are playing as BLACK. White (computer) starts first.";
+        }
     } else {
         selectedGameMode = "2 player";
     }
     
     selectedTimeLimit = startupDialog.timeLimit;
+    
+    // Store selected difficulty level
+    // The difficulty variable stores "1", "2", "3", or "4"
+    if startupDialog.difficulty == "1" then {
+        selectedDifficulty = "Easy";
+    } else if startupDialog.difficulty == "2" then {
+        selectedDifficulty = "Medium";
+    } else if startupDialog.difficulty == "3" then {
+        selectedDifficulty = "Hard";
+    } else {
+        selectedDifficulty = "Expert";
+    }
+    
     print "Selected game mode: " + selectedGameMode;
     print "Selected time limit: " + selectedTimeLimit;
+    if selectedGameMode == "1 player" then {
+        print "Selected difficulty: " + selectedDifficulty;
+    }
     
     // Set the timer values based on selection (in deciseconds)
     var timeInDeciseconds: int = call getTimeLimitInDeciseconds(selectedTimeLimit);

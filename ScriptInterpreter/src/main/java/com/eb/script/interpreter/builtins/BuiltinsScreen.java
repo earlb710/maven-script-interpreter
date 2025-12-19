@@ -2591,7 +2591,19 @@ public class BuiltinsScreen {
             }
             case "disabled" -> {
                 if (value instanceof Boolean) {
-                    control.setDisable((Boolean) value);
+                    boolean disabled = (Boolean) value;
+                    control.setDisable(disabled);
+                    
+                    // Special handling for VBox containers with RadioButtons
+                    // JavaFX sometimes doesn't properly disable RadioButtons within containers
+                    // so we explicitly disable each radio button individually
+                    if (control instanceof javafx.scene.layout.VBox) {
+                        javafx.scene.layout.VBox vbox = (javafx.scene.layout.VBox) control;
+                        disableRadioButtonsInContainer(vbox, disabled);
+                    } else if (control instanceof javafx.scene.layout.HBox) {
+                        javafx.scene.layout.HBox hbox = (javafx.scene.layout.HBox) control;
+                        disableRadioButtonsInContainer(hbox, disabled);
+                    }
                 }
             }
             case "visible" -> {
@@ -2740,6 +2752,22 @@ public class BuiltinsScreen {
             // Note: Other properties like colspan, rowspan, hgrow, vgrow, margin, padding, alignment
             // are layout-specific and would require re-layouting the parent container to apply.
             // These are stored in the AreaItem but not directly applied to the control at runtime.
+        }
+    }
+
+    /**
+     * Helper method to recursively disable/enable all RadioButtons within a container.
+     * This is needed because JavaFX doesn't always properly propagate the disabled state
+     * from parent containers to RadioButton children.
+     */
+    private static void disableRadioButtonsInContainer(javafx.scene.Parent container, boolean disabled) {
+        for (javafx.scene.Node child : container.getChildrenUnmodifiable()) {
+            if (child instanceof javafx.scene.control.RadioButton) {
+                ((javafx.scene.control.RadioButton) child).setDisable(disabled);
+            } else if (child instanceof javafx.scene.Parent) {
+                // Recursively process nested containers
+                disableRadioButtonsInContainer((javafx.scene.Parent) child, disabled);
+            }
         }
     }
 
