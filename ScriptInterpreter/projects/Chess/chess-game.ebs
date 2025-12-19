@@ -1005,6 +1005,9 @@ handleCellClick(x: int, y: int) {
             if selectedGameMode == "1 player" && !gameOver then {
                 // Check if current player is the computer
                 if currentPlayer != humanPlayerColor then {
+                    // Add a brief delay to show the human player's move visualization
+                    // before the computer responds (500ms)
+                    call thread.sleep(500);
                     print "Triggering computer move...";
                     call makeComputerMove();
                 }
