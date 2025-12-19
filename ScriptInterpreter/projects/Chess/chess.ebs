@@ -25,7 +25,8 @@ screen startupDialog = {
                 "options": ["1:1 Player", "2:2 Player"],
                 "itemColor": "#ffffff",
                 "itemBold": true,
-                "itemFontSize": "14px"
+                "itemFontSize": "14px",
+                "onChange": "call handleGameModeChange();"
             }
         },
         {
@@ -41,6 +42,22 @@ screen startupDialog = {
                 "options": ["10 minutes", "15 minutes", "20 minutes", "30 minutes", "60 minutes", "Unlimited"],
                 "itemFontSize": "14px"
             }
+        },
+        {
+            "name": "difficulty",
+            "type": "string",
+            "default": "1",
+            "display": {
+                "type": "radiobutton",
+                "labelText": "Computer Difficulty:",
+                "labelColor": "#ffcc00",
+                "labelFontSize": "14px",
+                "labelBold": true,
+                "options": ["1:Easy", "2:Medium", "3:Hard", "4:Expert"],
+                "itemColor": "#ffffff",
+                "itemBold": true,
+                "itemFontSize": "14px"
+            }
         }
     ],
     "area": [
@@ -54,7 +71,8 @@ screen startupDialog = {
             "items": [
                 {"name": "logoImage", "varRef": "logo", "display": {"type": "image", "fitWidth": 400, "fitHeight": 200, "preserveRatio": true}},
                 {"name": "titleLabel", "display": {"type": "label", "labelText": "\u265A Welcome to Chess! \u2654", "labelColor": "#ffcc00", "labelFontSize": "20px", "labelBold": true}},
-                {"name": "gameModeRadio", "varRef": "gameMode"}
+                {"name": "gameModeRadio", "varRef": "gameMode"},
+                {"name": "difficultyRadio", "varRef": "difficulty"}
             ],
             "areas": [
                 {
@@ -100,3 +118,6 @@ print "Loading chess logo...";
 startupDialog.logo = call image.load(imgPath + "chess_logo.svg");
 print "Showing startup dialog...";
 show screen startupDialog;
+
+// Initially disable difficulty selection (default is 2 Player mode)
+call scr.setproperty("startupDialog.difficultyRadio", "disabled", true);

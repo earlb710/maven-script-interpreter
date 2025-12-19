@@ -474,7 +474,9 @@ var person: json = {
 // Result: {"name": "Alice", "age": 30}
 ```
 
-**Important**: `$variable` (without quotes) = variable reference; `"$variable"` (with quotes) = literal string
+**Important**: 
+- `$variable` (without quotes) = variable reference; `"$variable"` (with quotes) = literal string
+- Variable names are case-insensitive: `$userName`, `$USERNAME`, and `$UserName` all refer to the same variable
 
 ### JSON Characteristics
 
