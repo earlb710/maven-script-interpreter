@@ -1961,17 +1961,32 @@ showLastMove(fromX: int, fromY: int, toX: int, toY: int) {
     // Show arrow start indicator at FROM position
     call setArrowIndicator(fromX, fromY, arrowStartIndicator);
     
-    // Get the appropriate line segment for this direction
-    var lineSegment: imagedata = call getArrowLineSegment(dx, dy);
+    // Check if this is a knight move (L-shaped: moves 2 in one direction and 1 in the other)
+    var absX: int = dx;
+    var absY: int = dy;
+    if absX < 0 then { absX = 0 - absX; }
+    if absY < 0 then { absY = 0 - absY; }
     
-    // Draw line segments on intermediate cells
-    var currentX: int = fromX + stepX;
-    var currentY: int = fromY + stepY;
+    var isKnightMove: bool = false;
+    if (absX == 2 && absY == 1) || (absX == 1 && absY == 2) then {
+        isKnightMove = true;
+    }
     
-    while currentX != toX || currentY != toY {
-        call setArrowIndicator(currentX, currentY, lineSegment);
-        currentX = currentX + stepX;
-        currentY = currentY + stepY;
+    // For knight moves, only show start and end markers (no intermediate line)
+    // For all other moves, draw line segments through intermediate cells
+    if !isKnightMove then {
+        // Get the appropriate line segment for this direction
+        var lineSegment: imagedata = call getArrowLineSegment(dx, dy);
+        
+        // Draw line segments on intermediate cells
+        var currentX: int = fromX + stepX;
+        var currentY: int = fromY + stepY;
+        
+        while currentX != toX || currentY != toY {
+            call setArrowIndicator(currentX, currentY, lineSegment);
+            currentX = currentX + stepX;
+            currentY = currentY + stepY;
+        }
     }
     
     // Show arrow head at TO position
