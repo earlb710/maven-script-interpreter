@@ -88,15 +88,14 @@ Destination:      [Blue Circle]
 5  ·  ·  ·  ·  ·  ·  ·  ·
 4  ·  ·  ·  ·  ·  ·  ·  ·
 3  ·  ·  ●  ·  ·  ·  ·  ·
-2  ·  ↗ ·  ·  ·  ·  ·  ·
+2  ·  ·  ·  ·  ·  ·  ·  ·
 1  ·  ●  ·  ·  ·  ·  ·  ·
    a  b  c  d  e  f  g  h
 
 ● = Blue Circle (source and destination)
-↗ = Blue Arrow showing general direction
 ```
 
-Note: Knight moves use a directional arrow showing the general direction from source to destination since they don't move in straight lines.
+Note: Knight moves (L-shaped) show only endpoint circles since the L-shaped path doesn't map to a straight line. This provides a clean visualization showing where the knight started and ended.
 
 ## Technical Implementation
 
