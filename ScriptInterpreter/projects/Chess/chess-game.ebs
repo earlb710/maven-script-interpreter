@@ -1011,6 +1011,10 @@ handleCellClick(x: int, y: int) {
             if selectedGameMode == "1 player" && !gameOver then {
                 // Check if current player is the computer
                 if currentPlayer != humanPlayerColor then {
+                    // Use a short delay to allow UI to update and show human player's blue circles
+                    // before computer starts calculating (100ms is enough for screen refresh)
+                    print "Scheduling computer move after UI update...";
+                    call thread.sleep(100);
                     print "Triggering computer move...";
                     call makeComputerMove();
                 }
