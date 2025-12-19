@@ -2475,15 +2475,18 @@ public class Parser {
         // We arrive here after having matched IF in statement()
         int line = previous().line;
 
-        Expression condition;
-        if (match(EbsTokenType.LPAREN)) {
-            condition = expression();
-            consume(EbsTokenType.RPAREN, "Expected ')' after if condition.");
-        } else {
-            // No parentheses → require 'then' to disambiguate
-            condition = expression();
-            consume(EbsTokenType.THEN, "Expected 'then' after if condition.");
-        }
+        // Parse the condition expression
+        // The expression parser will handle parentheses naturally, allowing expressions like:
+        // - (x == 1 && y == 2) || (x == 3 && y == 4)
+        // - x == 1 && y == 2
+        // - (x == 1)
+        Expression condition = expression();
+        
+        // Optionally consume 'then' keyword if present
+        // This allows both syntaxes:
+        // - if condition then { ... }
+        // - if (condition) { ... }
+        consumeOptional(EbsTokenType.THEN);
 
         // Parse the 'then' branch: either a block `{ ... }` or a single statement
         Statement thenBranch;
