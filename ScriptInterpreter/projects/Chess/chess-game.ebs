@@ -757,7 +757,8 @@ movePiece(fromX: int, fromY: int, toX: int, toY: int) {
             
             // Move rook on board array
             board[rookToIdx] = call encodeCellValue(rookToCell.cellColor, rookCell.pieceType, rookCell.pieceColor);
-            board[rookFromIdx] = call encodeCellValue(rookCell.cellColor, EMPTY, WHITE);
+            // Clear the source square but preserve cell color - piece color is irrelevant for empty squares
+            board[rookFromIdx] = call encodeCellValue(rookCell.cellColor, EMPTY, rookCell.pieceColor);
             
             // Move rook on screen
             var rookImage: imagedata = call getNormalPiece(rookCell.pieceType, rookCell.pieceColor);
@@ -775,7 +776,8 @@ movePiece(fromX: int, fromY: int, toX: int, toY: int) {
     board[toIdx] = call encodeCellValue(toCell.cellColor, fromCell.pieceType, fromCell.pieceColor);
     
     // Clear the source cell (keep cell color, set piece to EMPTY)
-    board[fromIdx] = call encodeCellValue(fromCell.cellColor, EMPTY, WHITE);
+    // Piece color is irrelevant for empty squares, but keep it for consistency
+    board[fromIdx] = call encodeCellValue(fromCell.cellColor, EMPTY, fromCell.pieceColor);
     
     // Update the screen images
     // Get the normal piece image (not yellow) for the destination

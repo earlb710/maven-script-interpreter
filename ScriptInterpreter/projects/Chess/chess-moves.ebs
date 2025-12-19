@@ -206,16 +206,22 @@ function canCastle(kingX: int, kingY: int, kingColor: int, side: int) return boo
         opponentColor = WHITE;
     }
     
-    // Check if king would move through check
+    // Check if king would move through check or end in check
     // King moves from e-file (x=4) to g-file (x=6) for kingside or c-file (x=2) for queenside
     if side == 1 then {
-        // Kingside: check f-file (x=5)
+        // Kingside: check f-file (x=5) and g-file (x=6)
         if call isSquareAttacked(5, kingY, opponentColor) then {
             return false;
         }
+        if call isSquareAttacked(6, kingY, opponentColor) then {
+            return false;
+        }
     } else {
-        // Queenside: check d-file (x=3)
+        // Queenside: check d-file (x=3) and c-file (x=2)
         if call isSquareAttacked(3, kingY, opponentColor) then {
+            return false;
+        }
+        if call isSquareAttacked(2, kingY, opponentColor) then {
             return false;
         }
     }
