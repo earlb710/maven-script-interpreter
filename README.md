@@ -551,6 +551,12 @@ show screen myWindow;
   - Update via `scr.setProperty("screenName.itemName", "itemText", "New Text")`
   - Works with JSON configuration for batch updates
   - See test scripts: `test_itemtext_json_simple.ebs`, `test_itemtext_json_array.ebs`, `test_itemtext_json_state.ebs`
+- **Button Keyboard Shortcuts**: Define keyboard shortcuts declaratively using the `shortcut` property
+  - Automatically underlines the shortcut character in the button label (e.g., S̲ave for Alt+S)
+  - Displays shortcut in button tooltip for discoverability
+  - Supports Alt, Ctrl, and combined modifiers (e.g., "Alt+S", "Ctrl+R", "Alt+Ctrl+X")
+  - Example: `"display": { "type": "button", "labelText": "Save", "shortcut": "Alt+S" }`
+  - See [BUTTON_SHORTCUT_PROPERTY.md](BUTTON_SHORTCUT_PROPERTY.md) and `test_button_shortcut.ebs` for details
 - **Container Alignment**: Control positioning of child elements within areas using the `alignment` property
   - Supports 17 alignment values: `left`, `right`, `center`, `top-left`, `top-center`, etc.
   - Works with HBox, VBox, StackPane, FlowPane, and TilePane containers

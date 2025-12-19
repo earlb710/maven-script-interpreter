@@ -5565,6 +5565,7 @@ public class ScreenFactory {
         merged.onClick = base.onClick;
         merged.onValidate = base.onValidate;
         merged.onChange = base.onChange;
+        merged.shortcut = base.shortcut;
         
         // Override with non-null overlay values
         if (overlay.itemType != null) merged.itemType = overlay.itemType;
@@ -5605,6 +5606,7 @@ public class ScreenFactory {
         if (overlay.onClick != null) merged.onClick = overlay.onClick;
         if (overlay.onValidate != null) merged.onValidate = overlay.onValidate;
         if (overlay.onChange != null) merged.onChange = overlay.onChange;
+        if (overlay.shortcut != null) merged.shortcut = overlay.shortcut;
         
         return merged;
     }

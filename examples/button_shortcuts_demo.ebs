@@ -1,0 +1,408 @@
+// Comprehensive demonstration of button keyboard shortcuts
+// This script showcases all supported shortcut formats and best practices
+
+screen shortcutsDemo = {
+    "title": "Button Shortcuts Demo - Comprehensive Examples",
+    "width": 700,
+    "height": 600,
+    "areas": [
+        {
+            "name": "headerArea",
+            "type": "vbox",
+            "spacing": "5",
+            "padding": "15",
+            "style": "-fx-background-color: #f0f0f0; -fx-border-color: #cccccc; -fx-border-width: 0 0 2 0;"
+        },
+        {
+            "name": "fileActionsArea",
+            "type": "hbox",
+            "spacing": "10",
+            "padding": "15"
+        },
+        {
+            "name": "editActionsArea",
+            "type": "hbox",
+            "spacing": "10",
+            "padding": "15"
+        },
+        {
+            "name": "viewActionsArea",
+            "type": "hbox",
+            "spacing": "10",
+            "padding": "15"
+        },
+        {
+            "name": "statusArea",
+            "type": "vbox",
+            "spacing": "5",
+            "padding": "15",
+            "style": "-fx-background-color: #e8f4f8; -fx-border-color: #4CAF50; -fx-border-width: 2; -fx-border-radius: 5; -fx-background-radius: 5;"
+        },
+        {
+            "name": "footerArea",
+            "type": "hbox",
+            "spacing": "10",
+            "padding": "15",
+            "alignment": "center-right"
+        }
+    ],
+    "vars": [
+        // Header Section
+        {
+            "name": "titleLabel",
+            "type": "string",
+            "default": "Button Keyboard Shortcuts Demo",
+            "area": "headerArea",
+            "display": {
+                "type": "label",
+                "itemFontSize": "18",
+                "itemBold": true,
+                "itemColor": "#2196F3"
+            }
+        },
+        {
+            "name": "instructionsLabel",
+            "type": "string",
+            "default": "Press Alt+H to see help, or use any shortcut keys shown below (underlined characters)",
+            "area": "headerArea",
+            "display": {
+                "type": "label",
+                "itemFontSize": "12",
+                "itemColor": "#666666"
+            }
+        },
+        {
+            "name": "headerSeparator",
+            "type": "string",
+            "default": "",
+            "area": "headerArea",
+            "display": {
+                "type": "separator"
+            }
+        },
+        
+        // File Actions Section
+        {
+            "name": "fileActionsLabel",
+            "type": "string",
+            "default": "File Actions (Alt + Letter):",
+            "area": "fileActionsArea",
+            "display": {
+                "type": "label",
+                "labelBold": true,
+                "itemColor": "#333333"
+            }
+        },
+        {
+            "name": "newButton",
+            "type": "string",
+            "default": "",
+            "area": "fileActionsArea",
+            "display": {
+                "type": "button",
+                "labelText": "New",
+                "shortcut": "Alt+N",
+                "onClick": "statusMessage = 'Created new document (Alt+N)'; lastAction = 'NEW';"
+            }
+        },
+        {
+            "name": "openButton",
+            "type": "string",
+            "default": "",
+            "area": "fileActionsArea",
+            "display": {
+                "type": "button",
+                "labelText": "Open",
+                "shortcut": "Alt+O",
+                "onClick": "statusMessage = 'Opening file (Alt+O)'; lastAction = 'OPEN';"
+            }
+        },
+        {
+            "name": "saveButton",
+            "type": "string",
+            "default": "",
+            "area": "fileActionsArea",
+            "display": {
+                "type": "button",
+                "labelText": "Save",
+                "shortcut": "Alt+S",
+                "onClick": "statusMessage = 'Saved document (Alt+S)'; lastAction = 'SAVE';"
+            }
+        },
+        {
+            "name": "printButton",
+            "type": "string",
+            "default": "",
+            "area": "fileActionsArea",
+            "display": {
+                "type": "button",
+                "labelText": "Print",
+                "shortcut": "Alt+P",
+                "onClick": "statusMessage = 'Printing document (Alt+P)'; lastAction = 'PRINT';"
+            }
+        },
+        
+        // Edit Actions Section
+        {
+            "name": "editActionsLabel",
+            "type": "string",
+            "default": "Edit Actions (Ctrl + Letter):",
+            "area": "editActionsArea",
+            "display": {
+                "type": "label",
+                "labelBold": true,
+                "itemColor": "#333333"
+            }
+        },
+        {
+            "name": "copyButton",
+            "type": "string",
+            "default": "",
+            "area": "editActionsArea",
+            "display": {
+                "type": "button",
+                "labelText": "Copy",
+                "shortcut": "Ctrl+C",
+                "onClick": "statusMessage = 'Copied selection (Ctrl+C)'; lastAction = 'COPY';"
+            }
+        },
+        {
+            "name": "pasteButton",
+            "type": "string",
+            "default": "",
+            "area": "editActionsArea",
+            "display": {
+                "type": "button",
+                "labelText": "Paste",
+                "shortcut": "Ctrl+V",
+                "onClick": "statusMessage = 'Pasted content (Ctrl+V)'; lastAction = 'PASTE';"
+            }
+        },
+        {
+            "name": "undoButton",
+            "type": "string",
+            "default": "",
+            "area": "editActionsArea",
+            "display": {
+                "type": "button",
+                "labelText": "Undo",
+                "shortcut": "Ctrl+Z",
+                "onClick": "statusMessage = 'Undone last action (Ctrl+Z)'; lastAction = 'UNDO';"
+            }
+        },
+        {
+            "name": "redoButton",
+            "type": "string",
+            "default": "",
+            "area": "editActionsArea",
+            "display": {
+                "type": "button",
+                "labelText": "Redo",
+                "shortcut": "Ctrl+Y",
+                "onClick": "statusMessage = 'Redone action (Ctrl+Y)'; lastAction = 'REDO';"
+            }
+        },
+        
+        // View Actions Section
+        {
+            "name": "viewActionsLabel",
+            "type": "string",
+            "default": "View Actions (Mixed modifiers):",
+            "area": "viewActionsArea",
+            "display": {
+                "type": "label",
+                "labelBold": true,
+                "itemColor": "#333333"
+            }
+        },
+        {
+            "name": "zoomInButton",
+            "type": "string",
+            "default": "",
+            "area": "viewActionsArea",
+            "display": {
+                "type": "button",
+                "labelText": "Zoom In",
+                "shortcut": "Ctrl+Plus",
+                "onClick": "statusMessage = 'Zoomed in (Ctrl+Plus)'; lastAction = 'ZOOM_IN';"
+            }
+        },
+        {
+            "name": "zoomOutButton",
+            "type": "string",
+            "default": "",
+            "area": "viewActionsArea",
+            "display": {
+                "type": "button",
+                "labelText": "Zoom Out",
+                "shortcut": "Ctrl+Minus",
+                "onClick": "statusMessage = 'Zoomed out (Ctrl+Minus)'; lastAction = 'ZOOM_OUT';"
+            }
+        },
+        {
+            "name": "fullscreenButton",
+            "type": "string",
+            "default": "",
+            "area": "viewActionsArea",
+            "display": {
+                "type": "button",
+                "labelText": "Fullscreen",
+                "shortcut": "F11",
+                "onClick": "statusMessage = 'Toggled fullscreen (F11)'; lastAction = 'FULLSCREEN';"
+            }
+        },
+        {
+            "name": "refreshButton",
+            "type": "string",
+            "default": "",
+            "area": "viewActionsArea",
+            "display": {
+                "type": "button",
+                "labelText": "Refresh",
+                "shortcut": "F5",
+                "onClick": "statusMessage = 'Refreshed view (F5)'; lastAction = 'REFRESH';"
+            }
+        },
+        
+        // Status Section
+        {
+            "name": "statusLabel",
+            "type": "string",
+            "default": "Status:",
+            "area": "statusArea",
+            "display": {
+                "type": "label",
+                "labelBold": true,
+                "itemColor": "#2E7D32"
+            }
+        },
+        {
+            "name": "statusMessage",
+            "type": "string",
+            "default": "Ready - Try pressing any shortcut key!",
+            "area": "statusArea",
+            "display": {
+                "type": "label",
+                "itemFontSize": "14",
+                "itemColor": "#1976D2"
+            }
+        },
+        {
+            "name": "lastAction",
+            "type": "string",
+            "default": "NONE",
+            "area": "statusArea",
+            "display": {
+                "type": "label",
+                "labelText": "Last Action:",
+                "itemFontSize": "12",
+                "itemColor": "#666666"
+            }
+        },
+        
+        // Footer Section
+        {
+            "name": "helpButton",
+            "type": "string",
+            "default": "",
+            "area": "footerArea",
+            "display": {
+                "type": "button",
+                "labelText": "Help",
+                "shortcut": "Alt+H",
+                "onClick": "call showHelp();"
+            }
+        },
+        {
+            "name": "closeButton",
+            "type": "string",
+            "default": "",
+            "area": "footerArea",
+            "display": {
+                "type": "button",
+                "labelText": "Close",
+                "shortcut": "Alt+X",
+                "onClick": "close screen shortcutsDemo;"
+            }
+        }
+    ]
+};
+
+// Function to display help information
+function showHelp() {
+    print "═══════════════════════════════════════════════════════════════";
+    print "BUTTON KEYBOARD SHORTCUTS - HELP";
+    print "═══════════════════════════════════════════════════════════════";
+    print "";
+    print "FEATURE OVERVIEW:";
+    print "  • Buttons automatically underline the shortcut character";
+    print "  • Tooltips show the full shortcut combination";
+    print "  • Press the shortcut to activate the button";
+    print "";
+    print "AVAILABLE SHORTCUTS:";
+    print "  File Actions (Alt + key):";
+    print "    Alt+N  - New document";
+    print "    Alt+O  - Open file";
+    print "    Alt+S  - Save document";
+    print "    Alt+P  - Print document";
+    print "";
+    print "  Edit Actions (Ctrl + key):";
+    print "    Ctrl+C - Copy selection";
+    print "    Ctrl+V - Paste content";
+    print "    Ctrl+Z - Undo last action";
+    print "    Ctrl+Y - Redo action";
+    print "";
+    print "  View Actions (various):";
+    print "    Ctrl+Plus  - Zoom in";
+    print "    Ctrl+Minus - Zoom out";
+    print "    F11        - Toggle fullscreen";
+    print "    F5         - Refresh view";
+    print "";
+    print "  Other:";
+    print "    Alt+H  - Show this help";
+    print "    Alt+X  - Close window";
+    print "";
+    print "TECHNICAL DETAILS:";
+    print "  • Shortcuts use JavaFX event filters at scene level";
+    print "  • Only active when button is visible and enabled";
+    print "  • Automatically works with focus/unfocus states";
+    print "";
+    print "SUPPORTED FORMATS:";
+    print "  • \"Alt+X\"       - Alt modifier with any key";
+    print "  • \"Ctrl+X\"      - Ctrl modifier with any key";
+    print "  • \"Alt+Ctrl+X\"  - Both modifiers combined";
+    print "  • \"F1\" to \"F12\" - Function keys";
+    print "  • Named keys: Enter, Escape, Tab, Space, etc.";
+    print "";
+    print "═══════════════════════════════════════════════════════════════";
+    print "";
+    
+    shortcutsDemo.statusMessage = "Help displayed - Check console output";
+    shortcutsDemo.lastAction = "HELP";
+}
+
+// Display startup information
+print "═══════════════════════════════════════════════════════════════";
+print "BUTTON KEYBOARD SHORTCUTS - COMPREHENSIVE DEMO";
+print "═══════════════════════════════════════════════════════════════";
+print "";
+print "This demonstration shows various button shortcut configurations:";
+print "";
+print "1. Alt modifier shortcuts (Alt+N, Alt+O, Alt+S, Alt+P)";
+print "2. Ctrl modifier shortcuts (Ctrl+C, Ctrl+V, Ctrl+Z, Ctrl+Y)";
+print "3. Special key shortcuts (F5, F11, Ctrl+Plus, Ctrl+Minus)";
+print "4. Help and navigation (Alt+H, Alt+X)";
+print "";
+print "VISUAL INDICATORS:";
+print "  • Underlined characters in button labels (e.g., S̲ave, O̲pen)";
+print "  • Tooltips showing full shortcut (hover over buttons)";
+print "";
+print "HOW TO USE:";
+print "  • Press Alt+H to see detailed help";
+print "  • Try any shortcut - watch the status message update";
+print "  • Hover over buttons to see their shortcuts in tooltips";
+print "";
+print "═══════════════════════════════════════════════════════════════";
+print "";
+
+show screen shortcutsDemo;

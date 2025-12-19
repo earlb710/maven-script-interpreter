@@ -92,14 +92,10 @@ public class ButtonShortcutHelper {
         // Store reference to event handler so it can be removed when scene changes
         final javafx.event.EventHandler<KeyEvent>[] handlerRef = new javafx.event.EventHandler[1];
         
-        // Add keyboard event handler to the button's scene
-        button.sceneProperty().addListener((obs, oldScene, newScene) -> {
-            // Remove old handler if it exists
-            if (oldScene != null && handlerRef[0] != null) {
-                oldScene.removeEventFilter(KeyEvent.KEY_PRESSED, handlerRef[0]);
-            }
-            
-            if (newScene != null) {
+        // Create a helper method to add the event filter to a scene
+        final Runnable addEventFilter = () -> {
+            javafx.scene.Scene scene = button.getScene();
+            if (scene != null) {
                 // Create and store event filter to handle the keyboard shortcut
                 handlerRef[0] = event -> {
                     boolean modifierMatch = (useAlt && event.isAltDown() && !event.isControlDown()) ||
@@ -114,7 +110,25 @@ public class ButtonShortcutHelper {
                         }
                     }
                 };
-                newScene.addEventFilter(KeyEvent.KEY_PRESSED, handlerRef[0]);
+                scene.addEventFilter(KeyEvent.KEY_PRESSED, handlerRef[0]);
+            }
+        };
+        
+        // If button already has a scene, add the event filter immediately
+        if (button.getScene() != null) {
+            addEventFilter.run();
+        }
+        
+        // Add keyboard event handler to the button's scene
+        button.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            // Remove old handler if it exists
+            if (oldScene != null && handlerRef[0] != null) {
+                oldScene.removeEventFilter(KeyEvent.KEY_PRESSED, handlerRef[0]);
+                handlerRef[0] = null;
+            }
+            
+            if (newScene != null) {
+                addEventFilter.run();
             }
         });
     }
