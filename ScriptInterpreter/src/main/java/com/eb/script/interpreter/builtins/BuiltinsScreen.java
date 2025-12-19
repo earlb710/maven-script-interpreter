@@ -2436,10 +2436,7 @@ public class BuiltinsScreen {
             }
             case "disabled" -> {
                 if (value instanceof Boolean) {
-                    boolean disabled = (Boolean) value;
-                    System.out.println("DEBUG: setAreaItemProperty - Setting item.disabled=" + disabled + " for item: " + item.name);
-                    item.disabled = disabled;
-                    System.out.println("DEBUG: setAreaItemProperty - After setting, item.disabled=" + item.disabled);
+                    item.disabled = (Boolean) value;
                 } else {
                     throw new InterpreterError("scr.setProperty: 'disabled' property must be a boolean");
                 }
@@ -2595,7 +2592,6 @@ public class BuiltinsScreen {
             case "disabled" -> {
                 if (value instanceof Boolean) {
                     boolean disabled = (Boolean) value;
-                    System.out.println("DEBUG: Setting disabled=" + disabled + " on control: " + control.getClass().getSimpleName() + " userData=" + control.getUserData());
                     control.setDisable(disabled);
                     
                     // Special handling for VBox containers with RadioButtons
@@ -2603,14 +2599,11 @@ public class BuiltinsScreen {
                     // so we explicitly disable each radio button individually
                     if (control instanceof javafx.scene.layout.VBox) {
                         javafx.scene.layout.VBox vbox = (javafx.scene.layout.VBox) control;
-                        System.out.println("DEBUG: Applying disabled=" + disabled + " to RadioButtons in VBox");
                         disableRadioButtonsInContainer(vbox, disabled);
                     } else if (control instanceof javafx.scene.layout.HBox) {
                         javafx.scene.layout.HBox hbox = (javafx.scene.layout.HBox) control;
-                        System.out.println("DEBUG: Applying disabled=" + disabled + " to RadioButtons in HBox");
                         disableRadioButtonsInContainer(hbox, disabled);
                     }
-                    System.out.println("DEBUG: After setting, control.isDisabled()=" + control.isDisabled());
                 }
             }
             case "visible" -> {

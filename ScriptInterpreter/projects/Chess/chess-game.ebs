@@ -1272,7 +1272,7 @@ var selectedGameMode: string = "2 player";
 var selectedTimeLimit: string = "Unlimited";
 
 // Variable to store selected difficulty level
-var selectedDifficulty: string = "Medium";
+var selectedDifficulty: string = "Easy";
 
 // Variable to store human player's color in 1-player mode (0=WHITE, 1=BLACK)
 var humanPlayerColor: int = 0;
@@ -1319,17 +1319,11 @@ getTimeLimitInDeciseconds(timeLimit: string) return int {
 
 // Handle game mode change - enable/disable difficulty selection
 handleGameModeChange() {
-    print "handleGameModeChange() called - gameMode: " + startupDialog.gameMode;
-    
     // Enable difficulty selection only for 1 Player mode
     if startupDialog.gameMode == "1" then {
-        print "Enabling difficulty selection...";
         call scr.setproperty("startupDialog.difficultyRadio", "disabled", false);
-        print "Difficulty selection enabled";
     } else {
-        print "Disabling difficulty selection...";
         call scr.setproperty("startupDialog.difficultyRadio", "disabled", true);
-        print "Difficulty selection disabled";
     }
 }
 

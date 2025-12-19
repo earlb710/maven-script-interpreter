@@ -46,7 +46,7 @@ screen startupDialog = {
         {
             "name": "difficulty",
             "type": "string",
-            "default": "2",
+            "default": "1",
             "display": {
                 "type": "radiobutton",
                 "labelText": "Computer Difficulty:",
