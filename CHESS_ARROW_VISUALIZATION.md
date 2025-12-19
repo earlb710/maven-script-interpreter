@@ -88,14 +88,15 @@ Destination:      [Blue Circle]
 5  ·  ·  ·  ·  ·  ·  ·  ·
 4  ·  ·  ·  ·  ·  ·  ·  ·
 3  ·  ·  ●  ·  ·  ·  ·  ·
-2  ·  ·  ·  ·  ·  ·  ·  ·
+2  ·  ↑  ·  ·  ·  ·  ·  ·
 1  ·  ●  ·  ·  ·  ·  ·  ·
    a  b  c  d  e  f  g  h
 
 ● = Blue Circle (source and destination)
+↑ = Blue Arrow showing the 2-square vertical movement
 ```
 
-Note: Knight moves (L-shaped) show only endpoint circles since the L-shaped path doesn't map to a straight line. This provides a clean visualization showing where the knight started and ended.
+Note: Knight moves (L-shaped) show arrows along the longer part of the L-shape (2 squares), with the destination circle completing the L visually. This clearly shows how the knight moved: 2 squares up from b1 to b3, then the destination at c3 shows the 1-square horizontal movement.
 
 ## Technical Implementation
 
