@@ -105,9 +105,14 @@ var yellowCircleIndicator: imagedata; // Yellow circle for moves that check oppo
 var redCrossIndicator: imagedata;     // Red cross for invalid moves (expose own king)
 var redCrossBigIndicator: imagedata;  // Larger red cross for checkmate
 var transparentClear: imagedata; // Transparent rectangle for clearing piece positions
+var blueArrowIndicator: imagedata; // Blue arrow for showing last move
 
 // Game state tracking
 var gameOver: bool = false;  // Track if game has ended
+var lastMoveFromX: int = -1;  // Last move start X position
+var lastMoveFromY: int = -1;  // Last move start Y position
+var lastMoveToX: int = -1;    // Last move end X position
+var lastMoveToY: int = -1;    // Last move end Y position
 
 // Board layer images (bottom layer - checkerboard)
 var lightSquare: imagedata;     // Light square for board
@@ -284,6 +289,16 @@ createIndicators() {
     call draw.line(bigCrossCanvas, 50, 10, 10, 50);
     redCrossBigIndicator = call canvas.toImage(bigCrossCanvas);
     
+    // Create blue arrow indicator for showing last move
+    // Canvas size matches cell size (60x60) for proper centering
+    var blueArrowCanvas: canvas = call canvas.create(60, 60, "blue_arrow_indicator");
+    call canvas.clear(blueArrowCanvas);  // Make canvas transparent
+    call style.setFill(blueArrowCanvas, "#0080FF80");  // Semi-transparent blue
+    call draw.circle(blueArrowCanvas, 30, 30, 18, true);
+    call style.setStroke(blueArrowCanvas, "#0060CC", 2.5);
+    call draw.circle(blueArrowCanvas, 30, 30, 18, false);
+    blueArrowIndicator = call canvas.toImage(blueArrowCanvas);
+    
     // Create transparent rectangle for clearing piece positions
     // Canvas size matches cell size (60x60)
     var clearCanvas: canvas = call canvas.create(60, 60, "transparent_clear");
@@ -446,6 +461,8 @@ setIndicator(x: int, y: int, indicatorType: string) {
         indicator = redCrossBigIndicator;
     } else if indicatorType == "invalid" then {
         indicator = redCrossIndicator;
+    } else if indicatorType == "move" then {
+        indicator = blueArrowIndicator;
     } else {
         indicator = greenIndicator;  // "normal" or default
     }
@@ -802,6 +819,9 @@ handleCellClick(x: int, y: int) {
             
             // Move the piece
             call movePiece(selectedX, selectedY, x, y);
+            
+            // Show the last move with blue arrows
+            call showLastMove(selectedX, selectedY, x, y);
             
             // Format and add move to history
             var moveNotation: string = call formatMove(selectedX, selectedY, x, y, movingPieceType, movingPieceColor, isCapture, capturedPieceType, capturedPieceColor);
@@ -1516,6 +1536,31 @@ handleExitGame() {
 }
 
 // ====================
+// Move Visualization
+// ====================
+
+// Show the last move with blue arrow indicators
+showLastMove(fromX: int, fromY: int, toX: int, toY: int) {
+    // Clear previous move indicators if they exist
+    if lastMoveFromX >= 0 && lastMoveFromY >= 0 then {
+        call clearIndicator(lastMoveFromX, lastMoveFromY);
+    }
+    if lastMoveToX >= 0 && lastMoveToY >= 0 then {
+        call clearIndicator(lastMoveToX, lastMoveToY);
+    }
+    
+    // Store the new move positions
+    lastMoveFromX = fromX;
+    lastMoveFromY = fromY;
+    lastMoveToX = toX;
+    lastMoveToY = toY;
+    
+    // Show blue arrows on the from and to positions
+    call setIndicator(fromX, fromY, "move");
+    call setIndicator(toX, toY, "move");
+}
+
+// ====================
 // Computer Player AI
 // ====================
 
@@ -1633,6 +1678,10 @@ selectBestMoveEasy(playerColor: int) return json {
 makeComputerMove() {
     print "Computer is thinking...";
     
+    // Track start time for ensuring minimum 1 second delay
+    var startTime = call date.now();
+    var startMs: long = call date.toEpochMs(startTime);
+    
     // Select the best move based on difficulty
     // TODO: Implement Medium, Hard, and Expert difficulty levels
     // For now, all difficulties use Easy logic
@@ -1650,6 +1699,17 @@ makeComputerMove() {
     var toY: int = selectedMove.toY;
     
     print "Computer moving from (" + fromX + ", " + fromY + ") to (" + toX + ", " + toY + ")";
+    
+    // Calculate elapsed time and add delay if needed (minimum 1 second)
+    var endTime = call date.now();
+    var endMs: long = call date.toEpochMs(endTime);
+    var elapsedMs: long = endMs - startMs;
+    
+    if elapsedMs < 1000 then {
+        var delayMs: long = 1000 - elapsedMs;
+        print "Adding delay of " + delayMs + "ms to reach 1 second minimum";
+        call thread.sleep(delayMs);
+    }
     
     // Get information about the move before executing it
     var sourceCellValue: int = call getPieceAt(fromX, fromY);
@@ -1674,6 +1734,9 @@ makeComputerMove() {
     
     // Move the piece
     call movePiece(fromX, fromY, toX, toY);
+    
+    // Show the last move with blue arrows
+    call showLastMove(fromX, fromY, toX, toY);
     
     // Format and add move to history
     var moveNotation: string = call formatMove(fromX, fromY, toX, toY, movingPieceType, movingPieceColor, isCapture, capturedPieceType, capturedPieceColor);
