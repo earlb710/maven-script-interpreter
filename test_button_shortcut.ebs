@@ -1,0 +1,87 @@
+// Test script for button shortcut property
+// This script creates a screen with buttons that have keyboard shortcuts
+
+var message: string = "No button clicked yet";
+
+screen testButtonShortcut = {
+    "title": "Button Shortcut Test",
+    "width": 500,
+    "height": 400,
+    "areas": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": 10,
+            "padding": 20,
+            "items": [
+                {
+                    "name": "messageLabel",
+                    "varRef": "message",
+                    "display": {
+                        "type": "label",
+                        "labelText": "Status: Click a button or use a shortcut key"
+                    }
+                },
+                {
+                    "name": "separator1",
+                    "display": {
+                        "type": "separator"
+                    }
+                },
+                {
+                    "name": "saveButton",
+                    "display": {
+                        "type": "button",
+                        "labelText": "Save",
+                        "shortcut": "Alt+S",
+                        "onClick": "message = 'Save button clicked! (Alt+S)';"
+                    }
+                },
+                {
+                    "name": "loadButton",
+                    "display": {
+                        "type": "button",
+                        "labelText": "Load",
+                        "shortcut": "Alt+L",
+                        "onClick": "message = 'Load button clicked! (Alt+L)';"
+                    }
+                },
+                {
+                    "name": "runButton",
+                    "display": {
+                        "type": "button",
+                        "labelText": "Run",
+                        "shortcut": "Ctrl+R",
+                        "onClick": "message = 'Run button clicked! (Ctrl+R)';"
+                    }
+                },
+                {
+                    "name": "exportButton",
+                    "display": {
+                        "type": "button",
+                        "labelText": "Export",
+                        "shortcut": "Alt+E",
+                        "onClick": "message = 'Export button clicked! (Alt+E)';"
+                    }
+                },
+                {
+                    "name": "separator2",
+                    "display": {
+                        "type": "separator"
+                    }
+                },
+                {
+                    "name": "exitButton",
+                    "display": {
+                        "type": "button",
+                        "labelText": "Exit",
+                        "shortcut": "Alt+X",
+                        "onClick": "close screen testButtonShortcut;"
+                    }
+                }
+            ]
+        }
+    ]
+};
+
+show screen testButtonShortcut;

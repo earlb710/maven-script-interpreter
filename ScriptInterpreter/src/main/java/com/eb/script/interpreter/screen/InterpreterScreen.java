@@ -1893,6 +1893,13 @@ public class InterpreterScreen {
             metadata.labelPosition = String.valueOf(displayDef.get("labelposition")).toLowerCase();
         }
 
+        // Extract shortcut key combination for buttons - check both camelCase and lowercase
+        if (displayDef.containsKey("shortcut")) {
+            metadata.shortcut = String.valueOf(displayDef.get("shortcut"));
+        } else if (displayDef.containsKey("shortcut")) {
+            metadata.shortcut = String.valueOf(displayDef.get("shortcut"));
+        }
+
         // Extract onClick event handler for buttons - check both camelCase and lowercase
         if (displayDef.containsKey("onClick")) {
             metadata.onClick = String.valueOf(displayDef.get("onClick"));

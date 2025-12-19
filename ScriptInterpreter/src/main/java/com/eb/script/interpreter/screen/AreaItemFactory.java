@@ -13,6 +13,8 @@ import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.web.WebView;
+import javafx.scene.input.KeyCode;
+import com.eb.ui.util.ButtonShortcutHelper;
 
 /**
  * Factory class for creating JavaFX UI controls from AreaItem definitions.
@@ -504,7 +506,13 @@ public class AreaItemFactory {
                 // Apply label text styling (color, bold, italic)
                 applyPromptTextStyling(label, metadata);
             } else if (control instanceof Button) {
-                ((Button) control).setText(metadata.labelText);
+                Button button = (Button) control;
+                button.setText(metadata.labelText);
+                
+                // Apply shortcut key if specified
+                if (metadata.shortcut != null && !metadata.shortcut.isEmpty()) {
+                    applyButtonShortcut(button, metadata.shortcut);
+                }
             } else if (control instanceof javafx.scene.text.Text) {
                 ((javafx.scene.text.Text) control).setText(metadata.labelText);
             } else if (control instanceof javafx.scene.control.Hyperlink) {
@@ -1236,6 +1244,84 @@ public class AreaItemFactory {
         item.setExpanded(true);
         for (TreeItem<String> child : item.getChildren()) {
             expandAllNodes(child);
+        }
+    }
+    
+    /**
+     * Applies a keyboard shortcut to a button using the shortcut string format.
+     * Parses the shortcut string (e.g., "Alt+S", "Ctrl+R", "Alt+Ctrl+X") and applies
+     * the appropriate keyboard shortcut using ButtonShortcutHelper.
+     * 
+     * @param button The button to apply the shortcut to
+     * @param shortcut The shortcut string (e.g., "Alt+S", "Ctrl+R")
+     */
+    private static void applyButtonShortcut(Button button, String shortcut) {
+        if (button == null || shortcut == null || shortcut.isEmpty()) {
+            return;
+        }
+        
+        // Parse the shortcut string to extract modifier and key
+        // Format: "Modifier+Key" or "Modifier1+Modifier2+Key"
+        // Examples: "Alt+S", "Ctrl+R", "Alt+Ctrl+X"
+        String[] parts = shortcut.split("\\+");
+        if (parts.length < 2) {
+            System.err.println("Warning: Invalid shortcut format '" + shortcut + "'. Expected format: 'Modifier+Key' (e.g., 'Alt+S')");
+            return;
+        }
+        
+        boolean useAlt = false;
+        boolean useCtrl = false;
+        String keyStr = parts[parts.length - 1].trim(); // Last part is the key
+        
+        // Check each part except the last for modifiers
+        for (int i = 0; i < parts.length - 1; i++) {
+            String modifier = parts[i].trim().toUpperCase();
+            if (modifier.equals("ALT")) {
+                useAlt = true;
+            } else if (modifier.equals("CTRL") || modifier.equals("CONTROL")) {
+                useCtrl = true;
+            }
+        }
+        
+        // Parse the key code
+        KeyCode keyCode = parseKeyCode(keyStr);
+        if (keyCode == null) {
+            System.err.println("Warning: Could not parse key '" + keyStr + "' from shortcut '" + shortcut + "'");
+            return;
+        }
+        
+        // Apply the shortcut using ButtonShortcutHelper
+        ButtonShortcutHelper.addShortcut(button, keyCode, useAlt, useCtrl);
+    }
+    
+    /**
+     * Parses a key string to a JavaFX KeyCode.
+     * Supports single characters (A-Z, 0-9) and special key names.
+     * 
+     * @param keyStr The key string to parse (e.g., "S", "Enter", "F1")
+     * @return The corresponding KeyCode, or null if parsing fails
+     */
+    private static KeyCode parseKeyCode(String keyStr) {
+        if (keyStr == null || keyStr.isEmpty()) {
+            return null;
+        }
+        
+        String key = keyStr.trim().toUpperCase();
+        
+        // Try to parse as a named KeyCode first
+        try {
+            return KeyCode.valueOf(key);
+        } catch (IllegalArgumentException e) {
+            // Not a named key, try single character
+            if (key.length() == 1) {
+                char c = key.charAt(0);
+                if (c >= 'A' && c <= 'Z') {
+                    return KeyCode.valueOf(String.valueOf(c));
+                } else if (c >= '0' && c <= '9') {
+                    return KeyCode.valueOf("DIGIT" + c);
+                }
+            }
+            return null;
         }
     }
 }
