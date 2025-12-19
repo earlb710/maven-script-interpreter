@@ -219,7 +219,7 @@ public class FtpConfigDialog extends Stage {
         
         // Add keyboard shortcuts to buttons
         ButtonShortcutHelper.addAltShortcut(btnAdd, KeyCode.A);
-        ButtonShortcutHelper.addAltShortcut(btnRemove, KeyCode.R);
+        ButtonShortcutHelper.addAltShortcut(btnRemove, KeyCode.M); // Alt+M for reMove
         ButtonShortcutHelper.addAltShortcut(btnSave, KeyCode.S);
         ButtonShortcutHelper.addAltShortcut(btnClose, KeyCode.C);
         

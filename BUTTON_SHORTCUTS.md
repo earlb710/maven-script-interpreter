@@ -36,26 +36,26 @@ ButtonShortcutHelper.addCtrlShortcut(runBtn, KeyCode.R);
 #### Mail Configuration Dialog
 - **Alt+A**: Add Configuration
 - **Alt+G**: Add Gmail Template
-- **Alt+R**: Remove
+- **Alt+M**: Remove
 - **Alt+S**: Save
 - **Alt+C**: Close
 
 #### Database Configuration Dialog
 - **Alt+A**: Add Configuration
-- **Alt+R**: Remove
+- **Alt+M**: Remove
 - **Alt+O**: Copy Connection String
 - **Alt+S**: Save
 - **Alt+C**: Close
 
 #### FTP Configuration Dialog
 - **Alt+A**: Add Configuration
-- **Alt+R**: Remove
+- **Alt+M**: Remove
 - **Alt+S**: Save
 - **Alt+C**: Close
 
 #### Safe Directories Dialog
 - **Alt+A**: Add Directory
-- **Alt+R**: Remove
+- **Alt+M**: Remove
 - **Alt+O**: Copy to Clipboard
 - **Alt+B**: Browse
 - **Alt+S**: Save

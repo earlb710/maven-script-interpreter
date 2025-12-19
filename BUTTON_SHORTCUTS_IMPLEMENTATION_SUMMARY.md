@@ -40,26 +40,26 @@ ButtonShortcutHelper.addShortcut(button, KeyCode.S, true, true); // Alt+Ctrl+S
 1. **MailConfigDialog** - 5 buttons
    - Add Configuration (Alt+A)
    - Add Gmail Template (Alt+G)
-   - Remove (Alt+R)
+   - Remove (Alt+M)
    - Save (Alt+S)
    - Close (Alt+C)
 
 2. **DatabaseConfigDialog** - 5 buttons
    - Add Configuration (Alt+A)
-   - Remove (Alt+R)
+   - Remove (Alt+M)
    - Copy Connection String (Alt+O)
    - Save (Alt+S)
    - Close (Alt+C)
 
 3. **FtpConfigDialog** - 4 buttons
    - Add Configuration (Alt+A)
-   - Remove (Alt+R)
+   - Remove (Alt+M)
    - Save (Alt+S)
    - Close (Alt+C)
 
 4. **SafeDirectoriesDialog** - 6 buttons
    - Add Directory (Alt+A)
-   - Remove (Alt+R)
+   - Remove (Alt+M)
    - Copy to Clipboard (Alt+O)
    - Browse (Alt+B)
    - Save (Alt+S)

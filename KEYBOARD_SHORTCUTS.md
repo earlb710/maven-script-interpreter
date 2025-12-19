@@ -89,8 +89,9 @@ All buttons in the application now support keyboard shortcuts:
 - **Alt+S**: Save (in most dialogs)
 - **Alt+C**: Close/Cancel (in most dialogs)
 - **Alt+O**: OK (in dialogs)
-- **Alt+R**: Remove/Refresh (context-dependent)
+- **Alt+M**: Remove (in configuration dialogs)
 - **Alt+A**: Add (in configuration dialogs)
+- **Alt+R**: Replace/Refresh/Reset (context-dependent)
 
 For a complete list of button shortcuts, see [BUTTON_SHORTCUTS.md](BUTTON_SHORTCUTS.md).
 

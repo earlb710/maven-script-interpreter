@@ -37,7 +37,7 @@ Tooltip shows: "Shortcut: Alt+S"
 │  ┌────────────────┐  ┌─────────────────┐  ┌────────┐       │
 │  │ Add Configuration│  │ Add Gmail Template│  │ Remove │       │
 │  └────────────────┘  └─────────────────┘  └────────┘       │
-│     Alt+A                Alt+G                Alt+R          │
+│     Alt+A                Alt+G                Alt+M          │
 │                                                              │
 │                          ┌──────┐  ┌───────┐               │
 │                          │ Save │  │ Close │               │
@@ -99,7 +99,7 @@ Here's how the underlined characters appear in different buttons:
 | **C**lose    | C (uppercase)        | Alt+C    |
 | **O**K       | O (uppercase)        | Alt+O    |
 | **A**dd      | A (uppercase)        | Alt+A    |
-| **R**emove   | R (uppercase)        | Alt+R    |
+| Re**m**ove   | m (lowercase)        | Alt+M    |
 | **B**rowse   | B (uppercase)        | Alt+B    |
 | **E**xport   | E (uppercase)        | Alt+E    |
 | **T**est     | T (uppercase)        | Alt+T    |
@@ -182,7 +182,7 @@ Same operations use same shortcuts across dialogs:
 - OK → Alt+O
 - Cancel → Alt+C
 - Add → Alt+A
-- Remove → Alt+R
+- Remove → Alt+M
 ```
 
 ### 2. Visual Feedback
