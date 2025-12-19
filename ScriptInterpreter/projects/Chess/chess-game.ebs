@@ -1918,6 +1918,8 @@ showLastMove(fromX: int, fromY: int, toX: int, toY: int) {
     arrowPathCount = arrowPathCount + 1;
     
     // Draw arrow segments from source to destination
+    // Note: For knight moves (L-shaped), this draws a diagonal path showing the general direction
+    // rather than the actual L-shaped path, which is an acceptable approximation
     var currentX: int = fromX;
     var currentY: int = fromY;
     var stepX: int = dirX;
