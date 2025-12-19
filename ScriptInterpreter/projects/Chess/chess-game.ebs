@@ -1563,7 +1563,9 @@ findAllLegalMoves(playerColor: int) return array {
                         
                         if !exposesKing then {
                             // Create a move record with source and destination
-                            var jsonStr: string = '{"fromX": ' + x + ', "fromY": ' + y + ', "toX": ' + move.x + ', "toY": ' + move.y + ', "pieceType": ' + cell.pieceType + '}';
+                            var jsonStr: string = '{"fromX": ' + x + ', "fromY": ' + y + 
+                                                   ', "toX": ' + move.x + ', "toY": ' + move.y + 
+                                                   ', "pieceType": ' + cell.pieceType + '}';
                             var legalMove: json = call json.jsonfromstring(jsonStr);
                             call array.push(allMoves, legalMove);
                         }
@@ -1618,6 +1620,10 @@ selectBestMoveEasy(playerColor: int) return json {
     }
     
     // No captures available - select a random move
+    // Defensive check (should already be handled by moveCount check above)
+    if moveCount == 0 then {
+        return null;
+    }
     var randomIndex: int = call math.randomInt(0, moveCount - 1);
     print "Computer selecting random move (no captures available)";
     return allMoves[randomIndex];
@@ -1628,14 +1634,9 @@ makeComputerMove() {
     print "Computer is thinking...";
     
     // Select the best move based on difficulty
-    var selectedMove: json;
-    if selectedDifficulty == "Easy" then {
-        selectedMove = call selectBestMoveEasy(currentPlayer);
-    } else {
-        // For now, other difficulties also use Easy logic
-        // TODO: Implement Medium, Hard, and Expert later
-        selectedMove = call selectBestMoveEasy(currentPlayer);
-    }
+    // TODO: Implement Medium, Hard, and Expert difficulty levels
+    // For now, all difficulties use Easy logic
+    var selectedMove: json = call selectBestMoveEasy(currentPlayer);
     
     if selectedMove == null then {
         print "No legal moves available for computer!";
