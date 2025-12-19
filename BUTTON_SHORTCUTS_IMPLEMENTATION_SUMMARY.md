@@ -16,7 +16,7 @@ Successfully implemented a comprehensive button keyboard shortcut system for the
 Created `ButtonShortcutHelper` (`com.eb.ui.util.ButtonShortcutHelper`) with the following capabilities:
 
 1. **Automatic Character Detection**: Finds the first matching character in button text (case-insensitive)
-2. **Visual Feedback**: Underlines the shortcut character using JavaFX TextFlow
+2. **Visual Feedback**: Underlines the shortcut character using JavaFX mnemonic parsing
 3. **Tooltip Enhancement**: Adds or updates tooltips with shortcut information
 4. **Event Handling**: Scene-level event filtering with proper cleanup
 5. **Smart Activation**: Only fires when button is visible, managed, and enabled
@@ -133,7 +133,7 @@ Priority order:
 ```
 Button Text: "Save"
            ↓
-TextFlow:  Text("S").setUnderline(true) + Text("ave")
+Mnemonic:  "_Save" with setMnemonicParsing(true)
            ↓
 Button:    [S̲ave]
            ↓
@@ -207,7 +207,7 @@ mvn clean compile  # ✅ SUCCESS
 ### Manual Testing
 Cannot be performed in headless CI environment, but implementation follows JavaFX best practices:
 - Event handling is standard JavaFX pattern
-- TextFlow underlining is well-established technique
+- Mnemonic parsing is a built-in JavaFX feature
 - Scene-level filtering is recommended approach
 
 ## Benefits Delivered
@@ -235,7 +235,7 @@ Cannot be performed in headless CI environment, but implementation follows JavaF
 
 1. **Scene-level event filtering** is more reliable than button-level for keyboard shortcuts
 2. **Memory management** is critical when adding event handlers dynamically
-3. **TextFlow** provides flexible way to style parts of button text
+3. **Mnemonic parsing** is the preferred JavaFX approach for underlining text in buttons
 4. **Character matching** needs to be case-insensitive but prefer uppercase for visual appeal
 5. **Documentation** is crucial for feature adoption and maintenance
 

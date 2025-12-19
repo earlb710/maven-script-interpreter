@@ -166,10 +166,10 @@ The helper uses this priority for finding matching characters:
 
 ### Label Rendering
 
-- Original button text is cleared
-- A TextFlow graphic is created with Text nodes
-- The matching character is marked with `setUnderline(true)`
-- This preserves the original visual appearance while adding the underline
+- Original button text is modified with mnemonic parsing
+- An underscore is inserted before the matching character
+- JavaFX's built-in mnemonic parsing renders the underline
+- This preserves the original button size and styling while adding the underline
 
 ## Future Enhancements
 

@@ -4,8 +4,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.text.Text;
-import javafx.scene.text.TextFlow;
 
 /**
  * Utility class for adding keyboard shortcuts to buttons.
@@ -80,11 +78,12 @@ public class ButtonShortcutHelper {
         // Find the character in the button text (case-insensitive)
         int charIndex = findCharacterIndex(buttonText, keyChar);
         
-        // Create underlined text for the button label
+        // Use JavaFX mnemonic parsing to underline the character
         if (charIndex >= 0) {
-            TextFlow textFlow = createUnderlinedLabel(buttonText, charIndex);
-            button.setGraphic(textFlow);
-            button.setText(""); // Clear the text since we're using a graphic
+            // Insert underscore before the character to create a mnemonic
+            String mnemonicText = buttonText.substring(0, charIndex) + "_" + buttonText.substring(charIndex);
+            button.setText(mnemonicText);
+            button.setMnemonicParsing(true);
         }
         
         // Update or create tooltip with shortcut information
@@ -151,42 +150,7 @@ public class ButtonShortcutHelper {
         return -1;
     }
     
-    /**
-     * Create a TextFlow with the character at the specified index underlined.
-     * 
-     * @param text The full text
-     * @param underlineIndex The index of the character to underline
-     * @return A TextFlow with the underlined text
-     */
-    private static TextFlow createUnderlinedLabel(String text, int underlineIndex) {
-        TextFlow textFlow = new TextFlow();
-        
-        if (underlineIndex < 0 || underlineIndex >= text.length()) {
-            // No underlining, just return the text as is
-            textFlow.getChildren().add(new Text(text));
-            return textFlow;
-        }
-        
-        // Split text into three parts: before, underlined character, after
-        String before = text.substring(0, underlineIndex);
-        String underlined = text.substring(underlineIndex, underlineIndex + 1);
-        String after = text.substring(underlineIndex + 1);
-        
-        // Create text nodes
-        if (!before.isEmpty()) {
-            textFlow.getChildren().add(new Text(before));
-        }
-        
-        Text underlinedText = new Text(underlined);
-        underlinedText.setUnderline(true);
-        textFlow.getChildren().add(underlinedText);
-        
-        if (!after.isEmpty()) {
-            textFlow.getChildren().add(new Text(after));
-        }
-        
-        return textFlow;
-    }
+
     
     /**
      * Update or create the button's tooltip to include shortcut information.
