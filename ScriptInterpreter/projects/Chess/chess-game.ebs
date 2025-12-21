@@ -281,7 +281,7 @@ function updateCapturedPiecesDisplay() {
     // Update left side (captured white pieces)
     var i: int = 0;
     for (i = 0; i < 16; i = i + 1) {
-        var varName: string = "capturedWhite" + call string.from(i);
+        var varName: string = "capturedWhite" + i;
         if i < capturedWhiteCount then {
             var pieceType: int = capturedWhitePieces[i];
             var pieceImg: imagedata = call getNormalPiece(pieceType, WHITE);
@@ -293,7 +293,7 @@ function updateCapturedPiecesDisplay() {
     
     // Update right side (captured black pieces)
     for (i = 0; i < 16; i = i + 1) {
-        varName = "capturedBlack" + call string.from(i);
+        varName = "capturedBlack" + i;
         if i < capturedBlackCount then {
             pieceType = capturedBlackPieces[i];
             pieceImg = call getNormalPiece(pieceType, BLACK);
