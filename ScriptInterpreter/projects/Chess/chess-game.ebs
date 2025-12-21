@@ -1450,7 +1450,7 @@ handleCellClick(x: int, y: int) {
             
             // Prioritize orange indicator for capture + check combination
             if checksOpponent && isCapture then {
-                print "    (capture AND checks opponent)";
+                print "    (captures AND checks opponent)";
                 call setIndicator(move.x, move.y, "capture_check");
             } else if checksOpponent then {
                 print "    (checks opponent)";
