@@ -88,16 +88,16 @@ Destination:      [Blue Circle]
 5  ·  ·  ·  ·  ·  ·  ·  ·
 4  ·  ·  ·  ·  ·  ·  ·  ·
 3  ·  ·  ●  ·  ·  ·  ·  ·
-2  ·  ↗  ·  ·  ·  ·  ·  ·
+2  ·  ⌐  ·  ·  ·  ·  ·  ·
 1  ·  ●  ·  ·  ·  ·  ·  ·
    a  b  c  d  e  f  g  h
 
 ● = Blue Circle (source and destination)
 ↑ = Blue Arrow showing 1 square up
-↗ = Blue diagonal corner arrow showing the turn
+⌐ = Blue L-shaped arrow with 90-degree angle (up then right)
 ```
 
-Note: Knight moves (L-shaped) show the pattern: circle → 1 arrow → corner arrow → circle. In this example, the knight moves from b1: up arrow at b2 (1 square), diagonal corner arrow at b3 (showing the turn), and circle at c3 (destination). The corner arrow makes it clear where the L-shape turns.
+Note: Knight moves (L-shaped) show the pattern: circle → 1 arrow → 90° L-corner arrow → circle. In this example, the knight moves from b1: up arrow at b2 (1 square), L-shaped corner arrow at b3 (with a true 90-degree angle showing the turn from up to right), and circle at c3 (destination). The L-shaped arrow with its right angle precisely matches the knight's movement pattern.
 
 ## Technical Implementation
 
