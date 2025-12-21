@@ -2529,15 +2529,22 @@ public class Parser {
     private Statement whileStatement() throws ParseError {
         int line = previous().line; // the 'while' token we just matched
 
-        Expression condition;
-        if (match(EbsTokenType.LPAREN)) {
-            condition = expression();
-            consume(EbsTokenType.RPAREN, "Expected ')' after while condition.");
-        } else {
-            condition = expression();
-            // allow optional 'then' (for consistency with if ... then ...)
-            consumeOptional(EbsTokenType.THEN);
-        }
+        // Parse the condition expression
+        // The expression parser will handle parentheses naturally, allowing expressions like:
+        // - (currentX != toX || currentY != toY) && stepCount < maxSteps
+        // - x == 1 && y == 2
+        // - (x == 1)
+        // 
+        // Previously, the parser treated an opening '(' as a condition wrapper and consumed
+        // only up to the matching ')', which failed for complex expressions like:
+        //   while (x != 0 || y != 0) && count < max {...}
+        // 
+        // Now we always parse the full expression, which correctly handles all operator
+        // precedence and parenthesization (same fix applied to ifStatement).
+        Expression condition = expression();
+        
+        // Optionally consume 'then' keyword if present (for consistency with if...then syntax)
+        consumeOptional(EbsTokenType.THEN);
 
         // Body must be a block (while {})
         consume(EbsTokenType.LBRACE, "Expected '{' after while condition.");
