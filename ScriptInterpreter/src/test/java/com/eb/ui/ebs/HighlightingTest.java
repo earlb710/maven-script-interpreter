@@ -111,5 +111,45 @@ public class HighlightingTest {
                 System.out.println("  - Function call: " + matched + " -> funcName: " + funcName + " [" + type + "]");
             }
         }
+        
+        // Test case-insensitivity
+        System.out.println("\n=== Testing Case Insensitivity ===");
+        String caseTestCode = """
+            MyFunc() {
+                print "test"
+            }
+            
+            MyFunc()
+            myFunc()
+            MYFUNC()
+            #MyFunc
+            #myfunc
+            """;
+        
+        Set<String> caseFuncs = extractCustomFunctions(caseTestCode);
+        System.out.println("\nExtracted functions (should all be lowercase):");
+        for (String func : caseFuncs) {
+            System.out.println("  - " + func);
+        }
+        
+        Pattern casePattern = Pattern.compile(master, Pattern.MULTILINE);
+        Matcher caseM = casePattern.matcher(caseTestCode);
+        
+        System.out.println("\nCase-insensitive matches (all should be CUSTOM):");
+        while (caseM.find()) {
+            if (caseM.group("HASHCALL") != null) {
+                String matched = caseM.group("HASHCALL");
+                String funcName = matched.replaceFirst("^#\\s*", "");
+                String lowerName = funcName.toLowerCase();
+                String type = caseFuncs.contains(lowerName) ? "CUSTOM" : "UNDEFINED";
+                System.out.println("  - " + matched + " -> toLowerCase: " + lowerName + " [" + type + "]");
+            } else if (caseM.group("FUNCTION") != null) {
+                String matched = caseM.group("FUNCTION");
+                String funcName = matched.replaceFirst("\\s*\\($", "").trim();
+                String lowerName = funcName.toLowerCase();
+                String type = caseFuncs.contains(lowerName) ? "CUSTOM" : "UNDEFINED";
+                System.out.println("  - " + matched + " -> toLowerCase: " + lowerName + " [" + type + "]");
+            }
+        }
     }
 }
