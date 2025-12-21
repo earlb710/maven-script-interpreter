@@ -108,6 +108,10 @@ public class EbsTab extends Tab {
     
     // autocomplete
     private final AutocompletePopup autocompletePopup;
+    
+    // Cache for imported functions to avoid re-parsing on every keystroke
+    private Set<String> cachedImportedFunctions = new HashSet<>();
+    private String lastImportHash = ""; // Hash of import statements to detect changes
 
     public EbsTab(TabContext tabContext) throws IOException {
         this.tabContext = tabContext;
@@ -789,8 +793,10 @@ public class EbsTab extends Tab {
         String NUMBER = "\\b\\d+(?:_\\d+)*(?:\\.\\d+(?:_\\d+)*)?\\b";
         String BOOL = "\\b(?:true|false)\\b";
         String NULLL = "\\bnull\\b";
-        // Match all builtin prefixes: thread, string, array, json, file, http, etc.
-        String BUILTIN = "\\b(?:thread|string|array|json|file|http|ftp|mail|date|system|random|canvas|draw|effect|style|transform|vector|image|map|queue|crypto|css|custom|ai|timer|debug|echo|plugin|classtree|str|sys|scr)\\.[A-Za-z_][A-Za-z0-9_]*\\b";
+        
+        // Build BUILTIN pattern dynamically from actual builtin names
+        String BUILTIN = buildBuiltinPattern();
+        
         String FUNCNAME = "\\b([A-Za-z_][A-Za-z0-9_]*)\\s*(?=\\()";                 // foo( ... ) -> function-like
         String HASHCALL = "#\\s*([A-Za-z_][A-Za-z0-9_]*)";                         // #functionName or # functionName
 
@@ -808,6 +814,37 @@ public class EbsTab extends Tab {
                 + "|(?<FUNCTION>" + FUNCNAME + ")";
 
         return Pattern.compile(master, Pattern.MULTILINE);
+    }
+    
+    /**
+     * Build the BUILTIN pattern dynamically from the actual builtin registry.
+     * Extracts all unique prefixes from builtin names (e.g., "thread", "string", "json")
+     * and creates a regex pattern that matches prefix.functionName.
+     */
+    private static String buildBuiltinPattern() {
+        Set<String> builtins = Builtins.getBuiltins();
+        Set<String> prefixes = new HashSet<>();
+        
+        // Extract unique prefixes from builtin names
+        for (String builtin : builtins) {
+            int dotIndex = builtin.indexOf('.');
+            if (dotIndex > 0) {
+                prefixes.add(builtin.substring(0, dotIndex));
+            }
+        }
+        
+        // If no prefixes found (shouldn't happen), return a pattern that never matches
+        if (prefixes.isEmpty()) {
+            return "(?!)"; // Negative lookahead that never matches
+        }
+        
+        // Build regex alternation from prefixes: (?:thread|string|array|...)
+        String prefixAlternation = String.join("|", prefixes.stream()
+            .map(Pattern::quote) // Escape any special regex characters
+            .sorted()
+            .collect(java.util.stream.Collectors.toList()));
+        
+        return "\\b(?:" + prefixAlternation + ")\\.[A-Za-z_][A-Za-z0-9_]*\\b";
     }
 
     private void setupEbsSyntaxHighlighting() {
@@ -890,9 +927,86 @@ public class EbsTab extends Tab {
         return false;
     }
 
+    /**
+     * Extract import statements from the text and return list of imported file paths.
+     * Matches: import "filename.ebs";
+     */
+    private List<String> extractImports(String text) {
+        List<String> imports = new ArrayList<>();
+        Pattern importPattern = Pattern.compile("^\\s*import\\s+[\"']([^\"']+)[\"']\\s*;", Pattern.MULTILINE);
+        Matcher m = importPattern.matcher(text);
+        while (m.find()) {
+            imports.add(m.group(1));
+        }
+        return imports;
+    }
+    
+    /**
+     * Extract functions from all imported files and cache them.
+     * Returns a set of function names (lowercase) found in imported files.
+     */
+    private Set<String> extractImportedFunctions(String text) {
+        // Extract current import statements
+        List<String> imports = extractImports(text);
+        
+        // Create a hash of imports to detect changes
+        String importHash = String.join("|", imports);
+        
+        // If imports haven't changed, return cached functions
+        if (importHash.equals(lastImportHash)) {
+            return cachedImportedFunctions;
+        }
+        
+        // Imports changed, re-parse
+        lastImportHash = importHash;
+        Set<String> importedFunctions = new HashSet<>();
+        
+        // Get the directory of the current file
+        Path currentDir = tabContext.path.getParent();
+        if (currentDir == null) {
+            currentDir = Path.of(".");
+        }
+        
+        // Parse each imported file
+        for (String importFile : imports) {
+            try {
+                // Resolve the import path relative to the current file
+                Path importPath = currentDir.resolve(importFile).normalize();
+                
+                // Check if file exists
+                if (Files.exists(importPath)) {
+                    // Read the imported file
+                    String importedText = Files.readString(importPath, defaultCharset);
+                    
+                    // Extract functions from the imported file
+                    Set<String> functionsInImport = extractCustomFunctions(importedText);
+                    importedFunctions.addAll(functionsInImport);
+                    
+                    // Recursively extract functions from nested imports
+                    Set<String> nestedImports = extractImportedFunctions(importedText);
+                    importedFunctions.addAll(nestedImports);
+                }
+            } catch (Exception e) {
+                // If we can't read an import, just skip it (don't break highlighting)
+                // Could log this if needed: System.err.println("Could not read import: " + importFile);
+            }
+        }
+        
+        // Cache the results
+        cachedImportedFunctions = importedFunctions;
+        return importedFunctions;
+    }
+
     private StyleSpans<Collection<String>> computeEbsHighlighting(String text) {
         // First, extract all custom function definitions from the text
         Set<String> customFunctions = extractCustomFunctions(text);
+        
+        // Extract functions from imported files
+        Set<String> importedFunctions = extractImportedFunctions(text);
+        
+        // Combine local and imported functions
+        Set<String> allCustomFunctions = new HashSet<>(customFunctions);
+        allCustomFunctions.addAll(importedFunctions);
         
         // Get builtin function names
         Set<String> builtins = Builtins.getBuiltins();
@@ -932,10 +1046,10 @@ public class EbsTab extends Tab {
                     String lowerName = funcName.toLowerCase();
                     if (builtins.contains(lowerName)) {
                         styleClass = "tok-builtin";
-                    } else if (customFunctions.contains(lowerName)) {
+                    } else if (allCustomFunctions.contains(lowerName)) {
                         styleClass = "tok-custom-function";
                     }
-                    // Don't mark as undefined - could be imported from another file
+                    // Don't mark as undefined - could be from a file we couldn't parse
                     // Leave styleClass as null for default styling
                 }
             } else if (m.group("FUNCTION") != null) {
@@ -947,10 +1061,10 @@ public class EbsTab extends Tab {
                     String lowerName = funcName.toLowerCase();
                     if (builtins.contains(lowerName)) {
                         styleClass = "tok-builtin";
-                    } else if (customFunctions.contains(lowerName)) {
+                    } else if (allCustomFunctions.contains(lowerName)) {
                         styleClass = "tok-custom-function";
                     }
-                    // Don't mark as undefined - could be imported from another file
+                    // Don't mark as undefined - could be from a file we couldn't parse
                     // Leave styleClass as null for default styling
                 }
             }
