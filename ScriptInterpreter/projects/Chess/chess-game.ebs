@@ -278,13 +278,18 @@ function addCapturedPiece(pieceType: int, pieceColor: int) {
 
 // Update the captured pieces display on screen
 function updateCapturedPiecesDisplay() {
-    // Update left side (captured white pieces)
+    // Declare variables at function scope for reuse
     var i: int = 0;
+    var varName: string;
+    var pieceType: int;
+    var pieceImg: imagedata;
+    
+    // Update left side (captured white pieces)
     for (i = 0; i < 16; i = i + 1) {
-        var varName: string = "capturedWhite" + i;
+        varName = "capturedWhite" + i;
         if i < capturedWhiteCount then {
-            var pieceType: int = capturedWhitePieces[i];
-            var pieceImg: imagedata = call getNormalPiece(pieceType, WHITE);
+            pieceType = capturedWhitePieces[i];
+            pieceImg = call getNormalPiece(pieceType, WHITE);
             call scr.setvar("chessScreen", varName, pieceImg);
         } else {
             call scr.setvar("chessScreen", varName, transparentClear);
