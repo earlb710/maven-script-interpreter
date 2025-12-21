@@ -482,8 +482,10 @@ public class EbsTab extends Tab {
                 setupJsonHighlighting();
             } else if (isMd) {
                 setupMdHighlighting();
+            } else if (isEbs) {
+                setupEbsSyntaxHighlighting();         // Use custom function highlighting for .ebs files
             } else {
-                setupLexerHighlighting();             // <— hook the EbsLexer here
+                setupLexerHighlighting();             // Use basic lexer for other text files
             }
         } else {
             dispArea.getStyleClass().add("editor-text");
@@ -818,9 +820,27 @@ public class EbsTab extends Tab {
     }
 
     private void applyEbsHighlighting(String text) {
+        // When find bar is visible AND there are any active highlights (current or stale),
+        // skip all styling during editing. Styling will be reapplied after the timer fires.
+        if (findBar != null && findBar.isVisible() && 
+            (highlightsStale || !lastMatches.isEmpty() || !stalePendingClear.isEmpty())) {
+            return;
+        }
+        
         StyleSpans<Collection<String>> spans = computeEbsHighlighting(text);
+        
+        // Preserve scroll position when applying style spans
+        double scrollY = dispArea.getEstimatedScrollY();
+        
         // Apply to the area
         dispArea.setStyleSpans(0, spans);
+        
+        // Restore scroll position after style update
+        Platform.runLater(() -> {
+            dispArea.scrollYToPixel(scrollY);
+            // Reapply bracket highlighting after syntax highlighting to ensure it's visible
+            dispArea.highlightMatchingBrackets();
+        });
     }
 
     /**
