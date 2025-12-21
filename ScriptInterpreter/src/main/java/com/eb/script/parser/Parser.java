@@ -78,6 +78,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Parser {
 
     private static EbsLexer lexer = new EbsLexer();
+    // Cache for parsed files to avoid re-parsing the same file multiple times
+    private static final Map<String, RuntimeContext> parseCache = new ConcurrentHashMap<>();
     private final List<EbsToken> tokens;
     private int current;
     private EbsToken currToken;
@@ -92,10 +94,22 @@ public class Parser {
     private final Set<String> importedFiles; // Track imported files during parse phase
 
     public static RuntimeContext parse(Path file) throws IOException, ParseError {
+        // Normalize the file path for consistent cache keys
+        Path normalizedPath = file.toAbsolutePath().normalize();
+        String cacheKey = normalizedPath.toString();
+        
+        // Check if this file has already been parsed
+        RuntimeContext cached = parseCache.get(cacheKey);
+        if (cached != null) {
+            return cached;
+        }
+        
         // Check if this is a packaged .ebsp file
         if (RuntimeContextSerializer.isPackagedFile(file)) {
             try {
-                return RuntimeContextSerializer.deserialize(file);
+                RuntimeContext ctx = RuntimeContextSerializer.deserialize(file);
+                parseCache.put(cacheKey, ctx);
+                return ctx;
             } catch (ClassNotFoundException e) {
                 throw new ParseError("Error loading packaged script: " + e.getMessage());
             }
@@ -112,11 +126,26 @@ public class Parser {
         // Validate all imports before returning
         validateImports(ret, new HashSet<>());
         
+        // Echo total number of lines parsed
+        int totalLines = tokens.isEmpty() ? 0 : tokens.get(tokens.size() - 1).line;
+        System.out.println("Parsed " + totalLines + " lines from " + file.getFileName());
+        
+        // Cache the parsed result
+        parseCache.put(cacheKey, ret);
+        
         return ret;
+    }
+    
+    /**
+     * Clear the parse cache. This should be called when starting a new script execution
+     * to ensure files are re-parsed with fresh state.
+     */
+    public static void clearParseCache() {
+        parseCache.clear();
     }
 
     /**
-     * Parse a script from a string. 
+     * Parse a script from a string.
      * Note: Import statements are NOT validated at parse time for string-based parsing
      * because there is no file path context to resolve relative imports. Imports will
      * be validated at runtime when the interpreter executes the import statement.
@@ -127,6 +156,11 @@ public class Parser {
         Parser parser = new Parser(script, tokens, null, new HashSet<>());
         parser.parse();
         RuntimeContext ret = new RuntimeContext(name, parser.blocks, statementsToArray(parser.statements));
+        
+        // Echo total number of lines parsed
+        int totalLines = tokens.isEmpty() ? 0 : tokens.get(tokens.size() - 1).line;
+        System.out.println("Parsed " + totalLines + " lines from " + name);
+        
         return ret;
     }
 
@@ -141,6 +175,10 @@ public class Parser {
         parser.parse();
         context.blocks = parser.blocks;
         context.statements = statementsToArray(parser.statements);
+        
+        // Echo total number of lines parsed
+        int totalLines = tokens.isEmpty() ? 0 : tokens.get(tokens.size() - 1).line;
+        System.out.println("Parsed " + totalLines + " lines");
     }
 
     /**
@@ -157,6 +195,10 @@ public class Parser {
         parser.parse();
         context.blocks = parser.blocks;
         context.statements = statementsToArray(parser.statements);
+        
+        // Echo total number of lines parsed
+        int totalLines = tokens.isEmpty() ? 0 : tokens.get(tokens.size() - 1).line;
+        System.out.println("Parsed " + totalLines + " lines from " + (sourcePath != null ? sourcePath.getFileName() : "source"));
     }
     
     private Parser(String source, List<EbsToken> tokens, Path sourcePath, Set<String> importedFiles) {
