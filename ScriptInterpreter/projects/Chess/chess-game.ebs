@@ -1546,6 +1546,11 @@ timerCallback(timerName: string) {
         return;
     }
     
+    // If unlimited time is selected, don't decrement the timer
+    if initialTimerValue >= UNLIMITED_TIME * 10 then {
+        return;
+    }
+    
     // Decrement the active player's timer by 1 decisecond (0.1 seconds)
     if currentPlayer == 0 then {
         // White's turn
