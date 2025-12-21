@@ -84,29 +84,31 @@ public class HighlightingTest {
             System.out.println("  - " + func);
         }
         
-        // Test function call detection
+        // Test the regex patterns used in the actual highlighting code
         String HASHCALL = "#\\s*([A-Za-z_][A-Za-z0-9_]*)";
         String FUNCNAME = "\\b([A-Za-z_][A-Za-z0-9_]*)\\s*(?=\\()";
         
-        Pattern hashPattern = Pattern.compile(HASHCALL);
-        Pattern funcPattern = Pattern.compile(FUNCNAME);
+        // Build the master pattern similar to EbsTab
+        String master = "(?<HASHCALL>" + HASHCALL + ")"
+                + "|(?<FUNCTION>" + FUNCNAME + ")";
         
-        System.out.println("\nHash calls detected:");
-        Matcher hashMatcher = hashPattern.matcher(testCode);
-        while (hashMatcher.find()) {
-            String funcName = hashMatcher.group(1);
-            System.out.println("  - #" + funcName + " at position " + hashMatcher.start());
-        }
+        Pattern combinedPattern = Pattern.compile(master, Pattern.MULTILINE);
+        Matcher m = combinedPattern.matcher(testCode);
         
-        System.out.println("\nFunction calls detected:");
-        Matcher funcMatcher = funcPattern.matcher(testCode);
-        while (funcMatcher.find()) {
-            String funcName = funcMatcher.group(1);
-            String lowerName = funcName.toLowerCase();
-            if (customFunctions.contains(lowerName)) {
-                System.out.println("  - " + funcName + "() [CUSTOM] at position " + funcMatcher.start());
-            } else if (!isKeywordOrType(funcName)) {
-                System.out.println("  - " + funcName + "() [UNDEFINED] at position " + funcMatcher.start());
+        System.out.println("\nMatches found:");
+        while (m.find()) {
+            if (m.group("HASHCALL") != null) {
+                String matched = m.group("HASHCALL");
+                String funcName = matched.replaceFirst("^#\\s*", "");
+                String lowerName = funcName.toLowerCase();
+                String type = customFunctions.contains(lowerName) ? "CUSTOM" : "UNDEFINED";
+                System.out.println("  - Hash call: " + matched + " -> funcName: " + funcName + " [" + type + "]");
+            } else if (m.group("FUNCTION") != null) {
+                String matched = m.group("FUNCTION");
+                String funcName = matched.replaceFirst("\\s*\\($", "").trim();
+                String lowerName = funcName.toLowerCase();
+                String type = customFunctions.contains(lowerName) ? "CUSTOM" : "UNDEFINED";
+                System.out.println("  - Function call: " + matched + " -> funcName: " + funcName + " [" + type + "]");
             }
         }
     }

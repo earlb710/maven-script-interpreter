@@ -904,8 +904,10 @@ public class EbsTab extends Tab {
                 styleClass = "tok-builtin";
             } else if (m.group("HASHCALL") != null) {
                 // Handle # function calls
-                String funcName = m.group(1); // Capture group from HASHCALL
-                if (funcName != null) {
+                String matched = m.group("HASHCALL");
+                // Extract function name after the # and any whitespace
+                String funcName = matched.replaceFirst("^#\\s*", "");
+                if (funcName != null && !funcName.isEmpty()) {
                     String lowerName = funcName.toLowerCase();
                     if (builtins.contains(lowerName)) {
                         styleClass = "tok-builtin";
@@ -917,8 +919,10 @@ public class EbsTab extends Tab {
                 }
             } else if (m.group("FUNCTION") != null) {
                 // Handle regular function calls (with parentheses)
-                String funcName = m.group(1); // Capture group from FUNCTION
-                if (funcName != null) {
+                String matched = m.group("FUNCTION");
+                // Extract function name (everything before whitespace and opening paren)
+                String funcName = matched.replaceFirst("\\s*\\($", "").trim();
+                if (funcName != null && !funcName.isEmpty()) {
                     String lowerName = funcName.toLowerCase();
                     if (builtins.contains(lowerName)) {
                         styleClass = "tok-builtin";
