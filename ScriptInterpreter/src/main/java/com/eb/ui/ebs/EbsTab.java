@@ -768,7 +768,7 @@ public class EbsTab extends Tab {
 
 // ---------- EBS syntax highlighting ----------
     private static final String[] EBS_KEYWORDS = new String[]{
-        "var", "print", "call", "return",
+        "var", "print", "call", "return", "function",
         "if", "then", "else", "while", "do", "foreach", "in", "break", "continue",
         // SQL-ish tokens you support in the language:
         "connect", "use", "cursor", "open", "close", "connection",
