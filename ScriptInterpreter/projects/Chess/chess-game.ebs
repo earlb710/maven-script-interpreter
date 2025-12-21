@@ -279,6 +279,12 @@ function addCapturedPiece(pieceType: int, pieceColor: int) {
 
 // Update the captured pieces display on screen
 function updateCapturedPiecesDisplay() {
+    // Safety check - only update if transparentClear is initialized
+    if transparentClear == null then {
+        print "Warning: transparentClear is null, skipping captured pieces update";
+        return;
+    }
+    
     // Update left side (captured white pieces) - use explicit slot assignments
     if capturedWhiteCount > 0 then { chessScreen.capturedWhite0 = call getNormalPiece(capturedWhitePieces[0], WHITE); } else { chessScreen.capturedWhite0 = transparentClear; }
     if capturedWhiteCount > 1 then { chessScreen.capturedWhite1 = call getNormalPiece(capturedWhitePieces[1], WHITE); } else { chessScreen.capturedWhite1 = transparentClear; }
