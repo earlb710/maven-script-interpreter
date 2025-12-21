@@ -6,11 +6,13 @@ This document provides a visual explanation of how the custom function highlight
 
 | Function Type | Color | CSS Class | Description |
 |--------------|-------|-----------|-------------|
-| Built-in Functions | Yellow (#DCDCAA) | `tok-builtin` | Functions provided by the EBS runtime |
+| Built-in Functions | Yellow (#DCDCAA) | `tok-builtin` | Functions provided by the EBS runtime (thread.*, string.*, json.*, etc.) |
 | Custom Functions | Orange (#FFB86C) | `tok-custom-function` | User-defined functions in the current script |
-| Undefined Functions | Red (#FF5555) with underline | `tok-undefined-function` | Function calls with no definition (potential errors) |
+| Unknown Functions | White (default) | default | Function calls that may be imported from other files |
 | Keywords | Cyan (#00FFFF) | `tok-keyword` | Language keywords (if, while, print, etc.) |
 | Normal Text | White (#FFFFFF) | `info` | Default text color |
+
+**Note**: Functions that are not found in the current file are shown with default styling (white) since they may be imported from other files via `import` statements. Only builtins and locally-defined functions are highlighted in color.
 
 ## Example with Highlighting
 
@@ -30,23 +32,43 @@ print result                      // print: CYAN (keyword)
 // Call a built-in function
 var upper string = string.toUpper("test")  // string.toUpper: YELLOW (built-in)
 var data json = json.parse("{}")           // json.parse: YELLOW (built-in)
+thread.timerStop("myTimer")                // thread.timerStop: YELLOW (built-in)
 
-// Call an undefined function
-undefinedFunc()                   // undefinedFunc: RED with underline (ERROR!)
-#anotherUndefined                 // anotherUndefined: RED with underline (ERROR!)
+// Call a function that may be imported
+importedFunc()                    // importedFunc: WHITE (could be from import)
+#anotherImported                  // anotherImported: WHITE (could be from import)
 ```
+
+## Supported Built-in Prefixes
+
+The highlighting recognizes these built-in function prefixes:
+- `thread.*` - Threading and timer functions
+- `string.*` / `str.*` - String manipulation
+- `array.*` - Array operations
+- `json.*` - JSON parsing and manipulation
+- `file.*` - File I/O operations
+- `http.*` - HTTP requests
+- `ftp.*` - FTP operations
+- `mail.*` - Email operations
+- `date.*` - Date/time functions
+- `system.*` / `sys.*` - System operations
+- `random.*` - Random number generation
+- `canvas.*`, `draw.*`, `effect.*`, `style.*`, `transform.*`, `vector.*`, `image.*` - Graphics
+- `map.*`, `queue.*` - Data structures
+- `crypto.*`, `css.*` - Utilities
+- `custom.*`, `ai.*`, `timer.*`, `debug.*`, `echo.*`, `plugin.*`, `classtree.*`, `scr.*` - Misc
 
 ## How the Highlighting Updates
 
 1. **As You Type**: The highlighting updates automatically with a 100ms debounce
 2. **After Defining a Function**: Once you complete typing a function definition (e.g., `functionName() {`), subsequent calls to that function will be highlighted in orange
-3. **Real-time Error Detection**: If you call a function before defining it, it will show as red/underlined until you add the definition
+3. **Built-in Detection**: Built-in functions are always recognized by their prefix (e.g., `thread.`, `string.`)
 
 ## Example Workflow
 
 ### Step 1: Start writing code
 ```ebs
-myFunc()  // RED with underline (undefined)
+myFunc()  // WHITE (not yet defined, could be imported)
 ```
 
 ### Step 2: Define the function
@@ -95,17 +117,18 @@ The feature detects function definitions in these formats:
 ### Before Custom Highlighting:
 - All function calls looked the same (white)
 - No way to distinguish custom vs built-in functions
-- No indication of undefined function errors
+- No indication of which functions are defined locally
 
 ### After Custom Highlighting:
-- ✅ **Custom functions** stand out in orange
-- ✅ **Built-in functions** are clearly yellow
-- ✅ **Errors** are immediately visible in red with underline
-- ✅ Better code readability and error detection
+- ✅ **Custom functions** stand out in orange (defined in current file)
+- ✅ **Built-in functions** are clearly yellow (EBS runtime)
+- ✅ **Unknown functions** remain white (may be imported)
+- ✅ Better code readability
 
 ## Technical Details
 
 - **Case Insensitive**: `myFunc`, `MyFunc`, `MYFUNC` all refer to the same function
-- **Scope**: Only functions defined in the current file are tracked (imports not yet supported)
+- **Scope**: Only functions defined in the current file are highlighted as custom (orange)
+- **Imports**: Functions imported from other files are shown with default styling
 - **Performance**: Minimal overhead - uses efficient regex patterns with debouncing
 - **Keywords Excluded**: Language keywords like `if`, `while`, `print` cannot be used as function names

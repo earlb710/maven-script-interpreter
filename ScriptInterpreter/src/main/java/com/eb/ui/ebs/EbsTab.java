@@ -789,7 +789,8 @@ public class EbsTab extends Tab {
         String NUMBER = "\\b\\d+(?:_\\d+)*(?:\\.\\d+(?:_\\d+)*)?\\b";
         String BOOL = "\\b(?:true|false)\\b";
         String NULLL = "\\bnull\\b";
-        String BUILTIN = "\\b(?:(?:json|file|http)\\.[A-Za-z_][A-Za-z0-9_]*)\\b"; // json.get, http.getjson, file.open, etc.
+        // Match all builtin prefixes: thread, string, array, json, file, http, etc.
+        String BUILTIN = "\\b(?:thread|string|array|json|file|http|ftp|mail|date|system|random|canvas|draw|effect|style|transform|vector|image|map|queue|crypto|css|custom|ai|timer|debug|echo|plugin|classtree|str|sys|scr)\\.[A-Za-z_][A-Za-z0-9_]*\\b";
         String FUNCNAME = "\\b([A-Za-z_][A-Za-z0-9_]*)\\s*(?=\\()";                 // foo( ... ) -> function-like
         String HASHCALL = "#\\s*([A-Za-z_][A-Za-z0-9_]*)";                         // #functionName or # functionName
 
@@ -933,9 +934,9 @@ public class EbsTab extends Tab {
                         styleClass = "tok-builtin";
                     } else if (customFunctions.contains(lowerName)) {
                         styleClass = "tok-custom-function";
-                    } else {
-                        styleClass = "tok-undefined-function";
                     }
+                    // Don't mark as undefined - could be imported from another file
+                    // Leave styleClass as null for default styling
                 }
             } else if (m.group("FUNCTION") != null) {
                 // Handle regular function calls (with parentheses)
@@ -948,9 +949,9 @@ public class EbsTab extends Tab {
                         styleClass = "tok-builtin";
                     } else if (customFunctions.contains(lowerName)) {
                         styleClass = "tok-custom-function";
-                    } else {
-                        styleClass = "tok-undefined-function";
                     }
+                    // Don't mark as undefined - could be imported from another file
+                    // Leave styleClass as null for default styling
                 }
             }
 
