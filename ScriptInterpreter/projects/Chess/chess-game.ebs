@@ -235,7 +235,8 @@ function getNormalPiece(pieceType: int, pieceColor: int) return imagedata {
         if pieceType == QUEEN then { return normalBlackQueen; }
         if pieceType == KING then { return normalBlackKing; }
     }
-    return null;
+    // If piece type doesn't match, return transparent clear instead of null
+    return transparentClear;
 }
 
 // Get the yellow version of a piece image based on piece type and color
@@ -278,12 +279,7 @@ function addCapturedPiece(pieceType: int, pieceColor: int) {
 
 // Update the captured pieces display on screen
 function updateCapturedPiecesDisplay() {
-    // Declare variables at function scope for reuse
-    var i: int = 0;
-    var pieceType: int;
-    var pieceImg: imagedata;
-    
-    // Update left side (captured white pieces)
+    // Update left side (captured white pieces) - use explicit slot assignments
     if capturedWhiteCount > 0 then { chessScreen.capturedWhite0 = call getNormalPiece(capturedWhitePieces[0], WHITE); } else { chessScreen.capturedWhite0 = transparentClear; }
     if capturedWhiteCount > 1 then { chessScreen.capturedWhite1 = call getNormalPiece(capturedWhitePieces[1], WHITE); } else { chessScreen.capturedWhite1 = transparentClear; }
     if capturedWhiteCount > 2 then { chessScreen.capturedWhite2 = call getNormalPiece(capturedWhitePieces[2], WHITE); } else { chessScreen.capturedWhite2 = transparentClear; }
@@ -301,7 +297,7 @@ function updateCapturedPiecesDisplay() {
     if capturedWhiteCount > 14 then { chessScreen.capturedWhite14 = call getNormalPiece(capturedWhitePieces[14], WHITE); } else { chessScreen.capturedWhite14 = transparentClear; }
     if capturedWhiteCount > 15 then { chessScreen.capturedWhite15 = call getNormalPiece(capturedWhitePieces[15], WHITE); } else { chessScreen.capturedWhite15 = transparentClear; }
     
-    // Update right side (captured black pieces)
+    // Update right side (captured black pieces) - use explicit slot assignments
     if capturedBlackCount > 0 then { chessScreen.capturedBlack0 = call getNormalPiece(capturedBlackPieces[0], BLACK); } else { chessScreen.capturedBlack0 = transparentClear; }
     if capturedBlackCount > 1 then { chessScreen.capturedBlack1 = call getNormalPiece(capturedBlackPieces[1], BLACK); } else { chessScreen.capturedBlack1 = transparentClear; }
     if capturedBlackCount > 2 then { chessScreen.capturedBlack2 = call getNormalPiece(capturedBlackPieces[2], BLACK); } else { chessScreen.capturedBlack2 = transparentClear; }
