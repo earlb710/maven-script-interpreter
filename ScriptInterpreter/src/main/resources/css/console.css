@@ -616,3 +616,23 @@
     -fx-fill: #DCDCAA; /* yellow for functions */
 }
 
+/* Custom user-defined functions */
+.tok-custom-function,
+.text.tok-custom-function,
+.styled-text-area .text.tok-custom-function,
+.editor-ebs .text.tok-custom-function,
+.editor-text .text.tok-custom-function {
+    -fx-fill: #FFB86C; /* orange for custom functions */
+}
+
+/* Undefined function calls (error) */
+.tok-undefined-function,
+.text.tok-undefined-function,
+.styled-text-area .text.tok-undefined-function,
+.editor-ebs .text.tok-undefined-function,
+.editor-text .text.tok-undefined-function {
+    -fx-fill: #FF5555; /* red for undefined functions */
+    -rtfx-underline-color: red;
+    -rtfx-underline-width: 2;
+}
+

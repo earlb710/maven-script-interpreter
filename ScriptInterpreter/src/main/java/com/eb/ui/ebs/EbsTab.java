@@ -4,6 +4,7 @@ package com.eb.ui.ebs;
 import com.eb.ui.tabs.*;
 import com.eb.ui.util.ButtonShortcutHelper;
 import com.eb.script.RuntimeContext;
+import com.eb.script.interpreter.builtins.Builtins;
 import com.eb.script.interpreter.builtins.BuiltinsFile;
 import com.eb.script.file.FileData;
 import com.eb.script.token.ebs.EbsLexer;
@@ -44,7 +45,9 @@ import org.fxmisc.flowless.VirtualizedScrollPane;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import javafx.geometry.Pos;
@@ -786,6 +789,7 @@ public class EbsTab extends Tab {
         String NULLL = "\\bnull\\b";
         String BUILTIN = "\\b(?:(?:json|file|http)\\.[A-Za-z_][A-Za-z0-9_]*)\\b"; // json.get, http.getjson, file.open, etc.
         String FUNCNAME = "\\b([A-Za-z_][A-Za-z0-9_]*)\\s*(?=\\()";                 // foo( ... ) -> function-like
+        String HASHCALL = "#\\s*([A-Za-z_][A-Za-z0-9_]*)";                         // #functionName or # functionName
 
         // Use named groups
         String master
@@ -797,6 +801,7 @@ public class EbsTab extends Tab {
                 + "|(?<BOOL>" + BOOL + ")"
                 + "|(?<NULL>" + NULLL + ")"
                 + "|(?<BUILTIN>" + BUILTIN + ")"
+                + "|(?<HASHCALL>" + HASHCALL + ")"
                 + "|(?<FUNCTION>" + FUNCNAME + ")";
 
         return Pattern.compile(master, Pattern.MULTILINE);
@@ -818,7 +823,59 @@ public class EbsTab extends Tab {
         dispArea.setStyleSpans(0, spans);
     }
 
+    /**
+     * Extract custom function names defined in the text.
+     * Looks for function definitions like: functionName(...) { or functionName { or function functionName
+     */
+    private Set<String> extractCustomFunctions(String text) {
+        Set<String> functions = new HashSet<>();
+        
+        // Pattern to match function definitions:
+        // 1. functionName(...) return type { or functionName(...) {
+        // 2. functionName { 
+        // 3. function functionName
+        Pattern funcDefPattern = Pattern.compile(
+            "(?:^|\\s)(?:function\\s+)?([A-Za-z_][A-Za-z0-9_]*)\\s*(?:\\([^)]*\\))?\\s*(?:return\\s+[A-Za-z_][A-Za-z0-9_]*)?\\s*\\{",
+            Pattern.MULTILINE
+        );
+        
+        Matcher m = funcDefPattern.matcher(text);
+        while (m.find()) {
+            String funcName = m.group(1);
+            // Exclude keywords and types from being considered as function names
+            if (funcName != null && !isKeywordOrType(funcName)) {
+                functions.add(funcName.toLowerCase());
+            }
+        }
+        
+        return functions;
+    }
+    
+    /**
+     * Check if a name is a keyword or type
+     */
+    private boolean isKeywordOrType(String name) {
+        String lowerName = name.toLowerCase();
+        for (String kw : EBS_KEYWORDS) {
+            if (kw.equals(lowerName)) {
+                return true;
+            }
+        }
+        for (String tp : EBS_TYPES) {
+            if (tp.equals(lowerName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private StyleSpans<Collection<String>> computeEbsHighlighting(String text) {
+        // First, extract all custom function definitions from the text
+        Set<String> customFunctions = extractCustomFunctions(text);
+        
+        // Get builtin function names
+        Set<String> builtins = Builtins.getBuiltins();
+        
         Matcher m = EBS_PATTERN.matcher(text);
         int last = 0;
         StyleSpansBuilder<Collection<String>> builder = new StyleSpansBuilder<>();
@@ -827,16 +884,51 @@ public class EbsTab extends Tab {
             // gap (unstyled)
             builder.add(Collections.emptyList(), m.start() - last);
 
-            String styleClass
-                    = m.group("COMMENT") != null ? "tok-comment"
-                    : m.group("STRING") != null ? "tok-string"
-                    : m.group("NUMBER") != null ? "tok-number"
-                    : m.group("KEYWORD") != null ? "tok-keyword"
-                    : m.group("TYPE") != null ? "tok-type"
-                    : m.group("BOOL") != null ? "tok-bool"
-                    : m.group("NULL") != null ? "tok-null"
-                    : m.group("BUILTIN") != null ? "tok-builtin"
-                    : m.group("FUNCTION") != null ? "tok-function" : null;
+            String styleClass = null;
+            
+            if (m.group("COMMENT") != null) {
+                styleClass = "tok-comment";
+            } else if (m.group("STRING") != null) {
+                styleClass = "tok-string";
+            } else if (m.group("NUMBER") != null) {
+                styleClass = "tok-number";
+            } else if (m.group("KEYWORD") != null) {
+                styleClass = "tok-keyword";
+            } else if (m.group("TYPE") != null) {
+                styleClass = "tok-type";
+            } else if (m.group("BOOL") != null) {
+                styleClass = "tok-bool";
+            } else if (m.group("NULL") != null) {
+                styleClass = "tok-null";
+            } else if (m.group("BUILTIN") != null) {
+                styleClass = "tok-builtin";
+            } else if (m.group("HASHCALL") != null) {
+                // Handle # function calls
+                String funcName = m.group(1); // Capture group from HASHCALL
+                if (funcName != null) {
+                    String lowerName = funcName.toLowerCase();
+                    if (builtins.contains(lowerName)) {
+                        styleClass = "tok-builtin";
+                    } else if (customFunctions.contains(lowerName)) {
+                        styleClass = "tok-custom-function";
+                    } else {
+                        styleClass = "tok-undefined-function";
+                    }
+                }
+            } else if (m.group("FUNCTION") != null) {
+                // Handle regular function calls (with parentheses)
+                String funcName = m.group(1); // Capture group from FUNCTION
+                if (funcName != null) {
+                    String lowerName = funcName.toLowerCase();
+                    if (builtins.contains(lowerName)) {
+                        styleClass = "tok-builtin";
+                    } else if (customFunctions.contains(lowerName)) {
+                        styleClass = "tok-custom-function";
+                    } else {
+                        styleClass = "tok-undefined-function";
+                    }
+                }
+            }
 
             builder.add(styleClass == null ? Collections.emptyList()
                     : Collections.singleton(styleClass),
