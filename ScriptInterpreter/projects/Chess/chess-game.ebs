@@ -1446,6 +1446,9 @@ handleCellClick(x: int, y: int) {
             // Check if this move would check the opponent's king
             var checksOpponent: bool = call wouldMoveCheckOpponent(x, y, move.x, move.y, currentPlayer);
             
+            // Debug: Show the state of both conditions
+            print "    isCapture=" + isCapture + ", checksOpponent=" + checksOpponent;
+            
             // Prioritize orange indicator for capture + check combination
             if checksOpponent && isCapture then {
                 print "    (captures AND checks opponent)";
