@@ -41,3 +41,6 @@ ScriptInterpreter/test-images-resized/
 # Generated console configuration CSS
 console-config.css
 *.backup
+
+# Test EBS scripts in root directory
+test*.ebs
