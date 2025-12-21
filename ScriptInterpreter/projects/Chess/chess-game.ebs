@@ -102,6 +102,7 @@ var selectedY: int = -1;
 var greenIndicator: imagedata;  // Green circle for valid moves
 var redIndicator: imagedata;    // Red circle for capture moves
 var yellowCircleIndicator: imagedata; // Yellow circle for moves that check opponent's king
+var orangeCircleIndicator: imagedata; // Orange circle for moves that capture AND check
 var redCrossIndicator: imagedata;     // Red cross for invalid moves (expose own king)
 var redCrossBigIndicator: imagedata;  // Larger red cross for checkmate
 var transparentClear: imagedata; // Transparent rectangle for clearing piece positions
@@ -295,6 +296,16 @@ createIndicators() {
     call style.setStroke(yellowCanvas, "#AAAA00", 2.0);
     call draw.circle(yellowCanvas, 30, 30, 20, false);
     yellowCircleIndicator = call canvas.toImage(yellowCanvas);
+    
+    // Create orange circle indicator for moves that capture AND check opponent's king
+    // Canvas size matches cell size (60x60) for proper centering
+    var orangeCanvas: canvas = call canvas.create(60, 60, "orange_indicator");
+    call canvas.clear(orangeCanvas);  // Make canvas transparent
+    call style.setFill(orangeCanvas, "#FFA50080");  // Semi-transparent orange
+    call draw.circle(orangeCanvas, 30, 30, 20, true);
+    call style.setStroke(orangeCanvas, "#CC8400", 2.0);
+    call draw.circle(orangeCanvas, 30, 30, 20, false);
+    orangeCircleIndicator = call canvas.toImage(orangeCanvas);
     
     // Create red cross indicator for invalid moves (that would expose own king)
     // Canvas size matches cell size (60x60) for proper centering
@@ -631,10 +642,12 @@ clearIndicators() {
 }
 
 // Set indicator for a specific cell
-// indicatorType can be: "normal", "capture", "check", "invalid", "checkmate"
+// indicatorType can be: "normal", "capture", "check", "capture_check", "invalid", "checkmate"
 setIndicator(x: int, y: int, indicatorType: string) {
     var indicator: imagedata;
-    if indicatorType == "capture" then {
+    if indicatorType == "capture_check" then {
+        indicator = orangeCircleIndicator;
+    } else if indicatorType == "capture" then {
         indicator = redIndicator;
     } else if indicatorType == "check" then {
         indicator = yellowCircleIndicator;
@@ -1435,7 +1448,11 @@ handleCellClick(x: int, y: int) {
             // Check if this move would check the opponent's king
             var checksOpponent: bool = call wouldMoveCheckOpponent(x, y, move.x, move.y, currentPlayer);
             
-            if checksOpponent then {
+            // Prioritize orange indicator for capture + check combination
+            if checksOpponent && isCapture then {
+                print "    (capture AND checks opponent)";
+                call setIndicator(move.x, move.y, "capture_check");
+            } else if checksOpponent then {
                 print "    (checks opponent)";
                 call setIndicator(move.x, move.y, "check");
             } else if isCapture then {
