@@ -1931,51 +1931,91 @@ showLastMove(fromX: int, fromY: int, toX: int, toY: int) {
     // Handle knight moves with L-shaped arrow path
     if isKnightMove then {
         // Knight moves in an L-shape: 2 squares in one direction, 1 in perpendicular
-        // Draw arrows along the L-shaped path
-        var longDir: int = 0;   // Direction of the 2-square movement (x or y)
-        var shortDir: int = 0;  // Direction of the 1-square movement
+        // Draw: circle -> 1 arrow -> corner arrow -> circle
         
         // Determine which direction has 2 squares and which has 1
         if absDx == 2 then {
-            // Move 2 squares horizontally first, then 1 vertically
-            // First leg: horizontal arrows
-            var step1: int = 0;
-            while step1 < 2 && arrowPathCount < 63 {
-                var midX: int = fromX + (dirX * (step1 + 1));
-                var arrow: imagedata;
+            // Move 2 squares horizontally: draw 1 horizontal arrow, then corner arrow
+            if arrowPathCount < 63 then {
+                // First arrow: horizontal (after 1 square)
+                var mid1X: int = fromX + dirX;
+                var arrow1: imagedata;
                 if dirX == 1 then {
-                    arrow = blueArrowRight;
+                    arrow1 = blueArrowRight;
                 } else {
-                    arrow = blueArrowLeft;
+                    arrow1 = blueArrowLeft;
                 }
-                call setCustomIndicator(midX, fromY, arrow);
-                arrowPathX[arrowPathCount] = midX;
+                call setCustomIndicator(mid1X, fromY, arrow1);
+                arrowPathX[arrowPathCount] = mid1X;
                 arrowPathY[arrowPathCount] = fromY;
                 arrowPathCount = arrowPathCount + 1;
-                step1 = step1 + 1;
             }
             
-            // Second leg: vertical arrow at destination (already at toX, toY)
-        } else if absDy == 2 then {
-            // Move 2 squares vertically first, then 1 horizontally
-            // First leg: vertical arrows
-            var step1: int = 0;
-            while step1 < 2 && arrowPathCount < 63 {
-                var midY: int = fromY + (dirY * (step1 + 1));
-                var arrow: imagedata;
-                if dirY == 1 then {
-                    arrow = blueArrowDown;
+            if arrowPathCount < 63 then {
+                // Corner arrow: at the turn point (2 squares horizontal from start)
+                var cornerX: int = fromX + (dirX * 2);
+                var cornerY: int = fromY;
+                var cornerArrow: imagedata;
+                
+                // Select diagonal arrow based on both directions
+                if dirX == 1 && dirY == -1 then {
+                    cornerArrow = blueArrowUpRight;
+                } else if dirX == 1 && dirY == 1 then {
+                    cornerArrow = blueArrowDownRight;
+                } else if dirX == -1 && dirY == -1 then {
+                    cornerArrow = blueArrowUpLeft;
+                } else if dirX == -1 && dirY == 1 then {
+                    cornerArrow = blueArrowDownLeft;
                 } else {
-                    arrow = blueArrowUp;
+                    cornerArrow = blueCircleIndicator;
                 }
-                call setCustomIndicator(fromX, midY, arrow);
-                arrowPathX[arrowPathCount] = fromX;
-                arrowPathY[arrowPathCount] = midY;
+                
+                call setCustomIndicator(cornerX, cornerY, cornerArrow);
+                arrowPathX[arrowPathCount] = cornerX;
+                arrowPathY[arrowPathCount] = cornerY;
                 arrowPathCount = arrowPathCount + 1;
-                step1 = step1 + 1;
+            }
+        } else if absDy == 2 then {
+            // Move 2 squares vertically: draw 1 vertical arrow, then corner arrow
+            if arrowPathCount < 63 then {
+                // First arrow: vertical (after 1 square)
+                var mid1Y: int = fromY + dirY;
+                var arrow1: imagedata;
+                if dirY == 1 then {
+                    arrow1 = blueArrowDown;
+                } else {
+                    arrow1 = blueArrowUp;
+                }
+                call setCustomIndicator(fromX, mid1Y, arrow1);
+                arrowPathX[arrowPathCount] = fromX;
+                arrowPathY[arrowPathCount] = mid1Y;
+                arrowPathCount = arrowPathCount + 1;
             }
             
-            // Second leg: horizontal arrow at destination (already at toX, toY)
+            if arrowPathCount < 63 then {
+                // Corner arrow: at the turn point (2 squares vertical from start)
+                var cornerX: int = fromX;
+                var cornerY: int = fromY + (dirY * 2);
+                var cornerArrow: imagedata;
+                
+                // Select diagonal arrow based on both directions
+                if dirX == 1 && dirY == -1 then {
+                    cornerArrow = blueArrowUpRight;
+                } else if dirX == 1 && dirY == 1 then {
+                    cornerArrow = blueArrowDownRight;
+                } else if dirX == -1 && dirY == -1 then {
+                    cornerArrow = blueArrowUpLeft;
+                } else if dirX == -1 && dirY == 1 then {
+                    cornerArrow = blueArrowDownLeft;
+                } else {
+                    cornerArrow = blueCircleIndicator;
+                }
+                
+                call setCustomIndicator(cornerX, cornerY, cornerArrow);
+                arrowPathX[arrowPathCount] = cornerX;
+                arrowPathY[arrowPathCount] = cornerY;
+                arrowPathCount = arrowPathCount + 1;
+            }
         }
     } else {
         // Draw arrow segments from source to destination
