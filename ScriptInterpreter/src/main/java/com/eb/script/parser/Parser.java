@@ -112,6 +112,10 @@ public class Parser {
         // Validate all imports before returning
         validateImports(ret, new HashSet<>());
         
+        // Echo total number of lines parsed
+        int totalLines = tokens.isEmpty() ? 0 : tokens.get(tokens.size() - 1).line;
+        System.out.println("Parsed " + totalLines + " lines from " + file.getFileName());
+        
         return ret;
     }
 
@@ -127,6 +131,11 @@ public class Parser {
         Parser parser = new Parser(script, tokens, null, new HashSet<>());
         parser.parse();
         RuntimeContext ret = new RuntimeContext(name, parser.blocks, statementsToArray(parser.statements));
+        
+        // Echo total number of lines parsed
+        int totalLines = tokens.isEmpty() ? 0 : tokens.get(tokens.size() - 1).line;
+        System.out.println("Parsed " + totalLines + " lines from " + name);
+        
         return ret;
     }
 
@@ -141,6 +150,10 @@ public class Parser {
         parser.parse();
         context.blocks = parser.blocks;
         context.statements = statementsToArray(parser.statements);
+        
+        // Echo total number of lines parsed
+        int totalLines = tokens.isEmpty() ? 0 : tokens.get(tokens.size() - 1).line;
+        System.out.println("Parsed " + totalLines + " lines");
     }
 
     /**
@@ -157,6 +170,10 @@ public class Parser {
         parser.parse();
         context.blocks = parser.blocks;
         context.statements = statementsToArray(parser.statements);
+        
+        // Echo total number of lines parsed
+        int totalLines = tokens.isEmpty() ? 0 : tokens.get(tokens.size() - 1).line;
+        System.out.println("Parsed " + totalLines + " lines from " + (sourcePath != null ? sourcePath.getFileName() : "source"));
     }
     
     private Parser(String source, List<EbsToken> tokens, Path sourcePath, Set<String> importedFiles) {
