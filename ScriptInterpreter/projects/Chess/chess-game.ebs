@@ -114,6 +114,14 @@ var blueArrowUpRight: imagedata;   // Blue arrow pointing up-right (diagonal)
 var blueArrowUpLeft: imagedata;    // Blue arrow pointing up-left (diagonal)
 var blueArrowDownRight: imagedata; // Blue arrow pointing down-right (diagonal)
 var blueArrowDownLeft: imagedata;  // Blue arrow pointing down-left (diagonal)
+var blueLShapeUpRight: imagedata;  // Blue L-shaped arrow (up then right, 90-degree angle)
+var blueLShapeUpLeft: imagedata;   // Blue L-shaped arrow (up then left, 90-degree angle)
+var blueLShapeDownRight: imagedata; // Blue L-shaped arrow (down then right, 90-degree angle)
+var blueLShapeDownLeft: imagedata;  // Blue L-shaped arrow (down then left, 90-degree angle)
+var blueLShapeRightUp: imagedata;  // Blue L-shaped arrow (right then up, 90-degree angle)
+var blueLShapeRightDown: imagedata; // Blue L-shaped arrow (right then down, 90-degree angle)
+var blueLShapeLeftUp: imagedata;   // Blue L-shaped arrow (left then up, 90-degree angle)
+var blueLShapeLeftDown: imagedata;  // Blue L-shaped arrow (left then down, 90-degree angle)
 
 // Game state tracking
 var gameOver: bool = false;  // Track if game has ended
@@ -389,6 +397,88 @@ createIndicators() {
     call draw.line(arrowDownLeftCanvas, 10, 50, 14, 42);  // Arrow head
     call draw.line(arrowDownLeftCanvas, 10, 50, 18, 46);  // Arrow head
     blueArrowDownLeft = call canvas.toImage(arrowDownLeftCanvas);
+    
+    // Create L-shaped arrows with 90-degree angles for knight moves
+    // L-shape: Up then Right (vertical then horizontal)
+    var lShapeUpRightCanvas: canvas = call canvas.create(60, 60, "blue_l_up_right");
+    call canvas.clear(lShapeUpRightCanvas);
+    call style.setStroke(lShapeUpRightCanvas, "#0060CC", 3.5);
+    call draw.line(lShapeUpRightCanvas, 30, 55, 30, 30);  // Vertical line (up)
+    call draw.line(lShapeUpRightCanvas, 30, 30, 55, 30);  // Horizontal line (right)
+    call draw.line(lShapeUpRightCanvas, 48, 23, 55, 30);  // Arrow head top
+    call draw.line(lShapeUpRightCanvas, 48, 37, 55, 30);  // Arrow head bottom
+    blueLShapeUpRight = call canvas.toImage(lShapeUpRightCanvas);
+    
+    // L-shape: Up then Left (vertical then horizontal)
+    var lShapeUpLeftCanvas: canvas = call canvas.create(60, 60, "blue_l_up_left");
+    call canvas.clear(lShapeUpLeftCanvas);
+    call style.setStroke(lShapeUpLeftCanvas, "#0060CC", 3.5);
+    call draw.line(lShapeUpLeftCanvas, 30, 55, 30, 30);  // Vertical line (up)
+    call draw.line(lShapeUpLeftCanvas, 30, 30, 5, 30);   // Horizontal line (left)
+    call draw.line(lShapeUpLeftCanvas, 12, 23, 5, 30);   // Arrow head top
+    call draw.line(lShapeUpLeftCanvas, 12, 37, 5, 30);   // Arrow head bottom
+    blueLShapeUpLeft = call canvas.toImage(lShapeUpLeftCanvas);
+    
+    // L-shape: Down then Right (vertical then horizontal)
+    var lShapeDownRightCanvas: canvas = call canvas.create(60, 60, "blue_l_down_right");
+    call canvas.clear(lShapeDownRightCanvas);
+    call style.setStroke(lShapeDownRightCanvas, "#0060CC", 3.5);
+    call draw.line(lShapeDownRightCanvas, 30, 5, 30, 30);   // Vertical line (down)
+    call draw.line(lShapeDownRightCanvas, 30, 30, 55, 30);  // Horizontal line (right)
+    call draw.line(lShapeDownRightCanvas, 48, 23, 55, 30);  // Arrow head top
+    call draw.line(lShapeDownRightCanvas, 48, 37, 55, 30);  // Arrow head bottom
+    blueLShapeDownRight = call canvas.toImage(lShapeDownRightCanvas);
+    
+    // L-shape: Down then Left (vertical then horizontal)
+    var lShapeDownLeftCanvas: canvas = call canvas.create(60, 60, "blue_l_down_left");
+    call canvas.clear(lShapeDownLeftCanvas);
+    call style.setStroke(lShapeDownLeftCanvas, "#0060CC", 3.5);
+    call draw.line(lShapeDownLeftCanvas, 30, 5, 30, 30);   // Vertical line (down)
+    call draw.line(lShapeDownLeftCanvas, 30, 30, 5, 30);   // Horizontal line (left)
+    call draw.line(lShapeDownLeftCanvas, 12, 23, 5, 30);   // Arrow head top
+    call draw.line(lShapeDownLeftCanvas, 12, 37, 5, 30);   // Arrow head bottom
+    blueLShapeDownLeft = call canvas.toImage(lShapeDownLeftCanvas);
+    
+    // L-shape: Right then Up (horizontal then vertical)
+    var lShapeRightUpCanvas: canvas = call canvas.create(60, 60, "blue_l_right_up");
+    call canvas.clear(lShapeRightUpCanvas);
+    call style.setStroke(lShapeRightUpCanvas, "#0060CC", 3.5);
+    call draw.line(lShapeRightUpCanvas, 5, 30, 30, 30);   // Horizontal line (right)
+    call draw.line(lShapeRightUpCanvas, 30, 30, 30, 5);   // Vertical line (up)
+    call draw.line(lShapeRightUpCanvas, 23, 12, 30, 5);   // Arrow head left
+    call draw.line(lShapeRightUpCanvas, 37, 12, 30, 5);   // Arrow head right
+    blueLShapeRightUp = call canvas.toImage(lShapeRightUpCanvas);
+    
+    // L-shape: Right then Down (horizontal then vertical)
+    var lShapeRightDownCanvas: canvas = call canvas.create(60, 60, "blue_l_right_down");
+    call canvas.clear(lShapeRightDownCanvas);
+    call style.setStroke(lShapeRightDownCanvas, "#0060CC", 3.5);
+    call draw.line(lShapeRightDownCanvas, 5, 30, 30, 30);   // Horizontal line (right)
+    call draw.line(lShapeRightDownCanvas, 30, 30, 30, 55);  // Vertical line (down)
+    call draw.line(lShapeRightDownCanvas, 23, 48, 30, 55);  // Arrow head left
+    call draw.line(lShapeRightDownCanvas, 37, 48, 30, 55);  // Arrow head right
+    blueLShapeRightDown = call canvas.toImage(lShapeRightDownCanvas);
+    
+    // L-shape: Left then Up (horizontal then vertical)
+    var lShapeLeftUpCanvas: canvas = call canvas.create(60, 60, "blue_l_left_up");
+    call canvas.clear(lShapeLeftUpCanvas);
+    call style.setStroke(lShapeLeftUpCanvas, "#0060CC", 3.5);
+    call draw.line(lShapeLeftUpCanvas, 55, 30, 30, 30);   // Horizontal line (left)
+    call draw.line(lShapeLeftUpCanvas, 30, 30, 30, 5);    // Vertical line (up)
+    call draw.line(lShapeLeftUpCanvas, 23, 12, 30, 5);    // Arrow head left
+    call draw.line(lShapeLeftUpCanvas, 37, 12, 30, 5);    // Arrow head right
+    blueLShapeLeftUp = call canvas.toImage(lShapeLeftUpCanvas);
+    
+    // L-shape: Left then Down (horizontal then vertical)
+    var lShapeLeftDownCanvas: canvas = call canvas.create(60, 60, "blue_l_left_down");
+    call canvas.clear(lShapeLeftDownCanvas);
+    call style.setStroke(lShapeLeftDownCanvas, "#0060CC", 3.5);
+    call draw.line(lShapeLeftDownCanvas, 55, 30, 30, 30);   // Horizontal line (left)
+    call draw.line(lShapeLeftDownCanvas, 30, 30, 30, 55);   // Vertical line (down)
+    call draw.line(lShapeLeftDownCanvas, 23, 48, 30, 55);   // Arrow head left
+    call draw.line(lShapeLeftDownCanvas, 37, 48, 30, 55);   // Arrow head right
+    blueLShapeLeftDown = call canvas.toImage(lShapeLeftDownCanvas);
+
     
     // Create transparent rectangle for clearing piece positions
     // Canvas size matches cell size (60x60)
@@ -1952,20 +2042,20 @@ showLastMove(fromX: int, fromY: int, toX: int, toY: int) {
             }
             
             if arrowPathCount < 63 then {
-                // Corner arrow: at the turn point (2 squares horizontal from start)
+                // Corner arrow: L-shaped with 90-degree angle at the turn point
                 var cornerX: int = fromX + (dirX * 2);
                 var cornerY: int = fromY;
                 var cornerArrow: imagedata;
                 
-                // Select diagonal arrow based on both directions
+                // Select L-shaped arrow: horizontal first, then vertical
                 if dirX == 1 && dirY == -1 then {
-                    cornerArrow = blueArrowUpRight;
+                    cornerArrow = blueLShapeRightUp;  // Right then up
                 } else if dirX == 1 && dirY == 1 then {
-                    cornerArrow = blueArrowDownRight;
+                    cornerArrow = blueLShapeRightDown;  // Right then down
                 } else if dirX == -1 && dirY == -1 then {
-                    cornerArrow = blueArrowUpLeft;
+                    cornerArrow = blueLShapeLeftUp;  // Left then up
                 } else if dirX == -1 && dirY == 1 then {
-                    cornerArrow = blueArrowDownLeft;
+                    cornerArrow = blueLShapeLeftDown;  // Left then down
                 } else {
                     cornerArrow = blueCircleIndicator;
                 }
@@ -1993,20 +2083,20 @@ showLastMove(fromX: int, fromY: int, toX: int, toY: int) {
             }
             
             if arrowPathCount < 63 then {
-                // Corner arrow: at the turn point (2 squares vertical from start)
+                // Corner arrow: L-shaped with 90-degree angle at the turn point
                 var cornerX: int = fromX;
                 var cornerY: int = fromY + (dirY * 2);
                 var cornerArrow: imagedata;
                 
-                // Select diagonal arrow based on both directions
+                // Select L-shaped arrow: vertical first, then horizontal
                 if dirX == 1 && dirY == -1 then {
-                    cornerArrow = blueArrowUpRight;
+                    cornerArrow = blueLShapeUpRight;  // Up then right
                 } else if dirX == 1 && dirY == 1 then {
-                    cornerArrow = blueArrowDownRight;
+                    cornerArrow = blueLShapeDownRight;  // Down then right
                 } else if dirX == -1 && dirY == -1 then {
-                    cornerArrow = blueArrowUpLeft;
+                    cornerArrow = blueLShapeUpLeft;  // Up then left
                 } else if dirX == -1 && dirY == 1 then {
-                    cornerArrow = blueArrowDownLeft;
+                    cornerArrow = blueLShapeDownLeft;  // Down then left
                 } else {
                     cornerArrow = blueCircleIndicator;
                 }
