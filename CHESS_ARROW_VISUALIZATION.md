@@ -88,15 +88,16 @@ Destination:      [Blue Circle]
 5  ·  ·  ·  ·  ·  ·  ·  ·
 4  ·  ·  ·  ·  ·  ·  ·  ·
 3  ·  ·  ●  ·  ·  ·  ·  ·
-2  ·  ↑  ·  ·  ·  ·  ·  ·
+2  ·  ↗  ·  ·  ·  ·  ·  ·
 1  ·  ●  ·  ·  ·  ·  ·  ·
    a  b  c  d  e  f  g  h
 
 ● = Blue Circle (source and destination)
-↑ = Blue Arrow showing the 2-square vertical movement
+↑ = Blue Arrow showing 1 square up
+↗ = Blue diagonal corner arrow showing the turn
 ```
 
-Note: Knight moves (L-shaped) show arrows along the longer part of the L-shape (2 squares), with the destination circle completing the L visually. This clearly shows how the knight moved: 2 squares up from b1 to b3, then the destination at c3 shows the 1-square horizontal movement.
+Note: Knight moves (L-shaped) show the pattern: circle → 1 arrow → corner arrow → circle. In this example, the knight moves from b1: up arrow at b2 (1 square), diagonal corner arrow at b3 (showing the turn), and circle at c3 (destination). The corner arrow makes it clear where the L-shape turns.
 
 ## Technical Implementation
 

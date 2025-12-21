@@ -81,15 +81,16 @@ Queens can move in any of the 8 directions, so you'll see:
 **Knight Move**: Knight from b1 to c3
 ```
   ●
-  ↑
+  ↗
   ↑
 ●
 ```
 - Blue circle at b1 (start)
-- Two up arrows showing the 2-square vertical movement
-- Blue circle at c3 (end, completing the L-shape with 1 square right)
+- Up arrow at b2 (1 square up)
+- Up-right diagonal arrow at b3 (corner, showing the turn)
+- Blue circle at c3 (end)
 
-**Note**: Knights move in an L-shape (e.g., 2 squares up and 1 square right). The arrows show the longer part of the L (2 squares), and the destination circle completes the L-shape visually, making it clear how the knight moved.
+**Note**: Knights move in an L-shape (e.g., 2 squares up and 1 square right). The visualization shows: circle → 1 straight arrow → corner diagonal arrow → circle. The diagonal corner arrow clearly marks where the L-shape turns, making the movement pattern intuitive and easy to understand.
 
 ### Pawn Moves
 
