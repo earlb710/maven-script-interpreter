@@ -1299,7 +1299,6 @@ handleCellClick(x: int, y: int) {
                 
                 // Stop the game timer
                 call thread.timerStop("chessScreen.chessTimer");
-                print "Game timer stopped.";
                 
                 // Mark the losing king with a larger red cross
                 var kingPos: posType = call findKing(currentPlayer);
@@ -1325,7 +1324,6 @@ handleCellClick(x: int, y: int) {
                 
                 // Stop the game timer
                 call thread.timerStop("chessScreen.chessTimer");
-                print "Game timer stopped.";
                 
                 // Mark both kings with red crosses
                 var whiteKingPos: posType = call findKing(WHITE);
@@ -1554,11 +1552,6 @@ timerCallback(timerName: string) {
             
             // Update screen variable which is bound to the label via varRef
             chessScreen.whiteTimer = timerText;
-            
-            // Debug: Print every 10 deciseconds (1 second)
-            if call modulo(timerWhite, 10) == 0 then {
-                print "Timer: White " + timerText + " | Screen updated via variable binding";
-            }
         }
     } else {
         // Black's turn
@@ -1568,20 +1561,13 @@ timerCallback(timerName: string) {
             
             // Update screen variable which is bound to the label via varRef
             chessScreen.blackTimer = timerText;
-            
-            // Debug: Print every 10 deciseconds (1 second)
-            if call modulo(timerBlack, 10) == 0 then {
-                print "Timer: Black " + timerText + " | Screen updated via variable binding";
-            }
         }
     }
 }
 
 // Cleanup function called when chess screen is closed
 cleanupChessScreen() {
-    print "Chess screen cleanup: Stopping timer...";
     call thread.timerStop("chessTimer");
-    print "Chess screen cleanup complete.";
 }
 
 initializeBoard() {
@@ -1722,7 +1708,6 @@ printBoard() {
         currentPlayerStr = "Black";
     }
     
-    print "   Timer: White " + whiteTimerStr + " | Black " + blackTimerStr;
     print "   Current Turn: " + currentPlayerStr;
     print "";
     
@@ -1859,7 +1844,7 @@ handleStartGame() {
     // Close the startup dialog
     close screen startupDialog;
     
-    print "Starting chess game - Mode: " + selectedGameMode + ", Timer: " + selectedTimeLimit;
+    print "Starting chess game - Mode: " + selectedGameMode;
     print "";
     print "Initializing chess board...";
     
@@ -1969,12 +1954,10 @@ handleStartGame() {
 handleExitGame() {
     print "=== handleExitGame() EXECUTED ===";
     print "Exit button clicked!";
-    print "Stopping game timer...";
     gameStarted = false;
     
     // Stop the timer if it's running
     call thread.timerStop("chessScreen.chessTimer");
-    print "Timer stopped.";
     
     // Close the startup dialog
     close screen startupDialog;
@@ -2406,7 +2389,6 @@ makeComputerMove() {
         
         // Stop the game timer
         call thread.timerStop("chessScreen.chessTimer");
-        print "Game timer stopped.";
         
         // Mark the losing king with a larger red cross
         var kingPos: posType = call findKing(currentPlayer);
@@ -2432,7 +2414,6 @@ makeComputerMove() {
         
         // Stop the game timer
         call thread.timerStop("chessScreen.chessTimer");
-        print "Game timer stopped.";
         
         // Mark both kings with red crosses
         var whiteKingPos: posType = call findKing(WHITE);
