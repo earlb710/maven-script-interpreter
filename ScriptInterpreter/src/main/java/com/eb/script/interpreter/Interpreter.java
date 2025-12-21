@@ -1953,7 +1953,8 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             context.getImportedFiles().add(importKey);
             
             // Parse the imported file with its full path so nested imports can resolve correctly
-            RuntimeContext importContext = Parser.parse(importPath);
+            // Use parseForImport to suppress duplicate echo messages
+            RuntimeContext importContext = Parser.parseForImport(importPath);
             
             // Set the current import file so that screen/function declarations know their source
             String previousImportFile = currentImportFile;

@@ -92,6 +92,22 @@ public class Parser {
     private final Set<String> importedFiles; // Track imported files during parse phase
 
     public static RuntimeContext parse(Path file) throws IOException, ParseError {
+        return parse(file, true);
+    }
+    
+    /**
+     * Parse a file for import execution without echo output.
+     * Used when parsing imported files to avoid duplicate messages.
+     */
+    public static RuntimeContext parseForImport(Path file) throws IOException, ParseError {
+        return parse(file, false);
+    }
+    
+    /**
+     * Internal parse method with option to suppress echo output.
+     * Used during import validation and runtime import execution to avoid duplicate echo messages.
+     */
+    private static RuntimeContext parse(Path file, boolean echo) throws IOException, ParseError {
         // Check if this is a packaged .ebsp file
         if (RuntimeContextSerializer.isPackagedFile(file)) {
             try {
@@ -112,9 +128,11 @@ public class Parser {
         // Validate all imports before returning
         validateImports(ret, new HashSet<>());
         
-        // Echo total number of lines parsed
-        int totalLines = tokens.isEmpty() ? 0 : tokens.get(tokens.size() - 1).line;
-        System.out.println("Parsed " + totalLines + " lines from " + file.getFileName());
+        // Echo total number of lines parsed (only if echo is enabled)
+        if (echo) {
+            int totalLines = tokens.isEmpty() ? 0 : tokens.get(tokens.size() - 1).line;
+            System.out.println("Parsed " + totalLines + " lines from " + file.getFileName());
+        }
         
         return ret;
     }
@@ -605,8 +623,9 @@ public class Parser {
             // The parse() method will recursively process any imports in the imported file
             // Note: We discard the returned RuntimeContext because we only need the side effect
             // of registering typedefs. The imported code will be executed later at runtime by the Interpreter.
+            // Use parseForImport to suppress duplicate echo messages
             try {
-                Parser.parse(importPath);
+                Parser.parseForImport(importPath);
             } catch (ParseError e) {
                 // Re-throw with context about which import failed
                 throw new ParseError("[line " + line + "] Failed to parse import '" + filename + "': " + e.getMessage());
@@ -3664,8 +3683,8 @@ public class Parser {
                 visitedFiles.add(importKey);
                 
                 try {
-                    // Parse the imported file to validate its syntax
-                    RuntimeContext importContext = Parser.parse(importPath);
+                    // Parse the imported file to validate its syntax (without echo to avoid duplicates)
+                    RuntimeContext importContext = parse(importPath, false);
                     
                     // Recursively validate imports in the imported file
                     validateImports(importContext, visitedFiles);
