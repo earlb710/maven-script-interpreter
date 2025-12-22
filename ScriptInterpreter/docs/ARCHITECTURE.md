@@ -1,0 +1,901 @@
+# Maven Script Interpreter - Architecture & Flow Documentation
+
+## Overview
+
+The Maven Script Interpreter is a custom scripting language interpreter with a JavaFX-based interactive development environment. It provides a complete execution environment for the EBS (Earl Bosch Script) language, featuring a rich console interface, syntax highlighting, autocomplete, and integrated database capabilities.
+
+## System Architecture
+
+### High-Level Components
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        User Interface Layer                 │
+│  ┌───────────────┐  ┌──────────────┐  ┌──────────────────┐  │
+│  │  EbsApp       │  │  MainApp     │  │  EbsTab          │  │
+│  │  (JavaFX UI)  │  │  (Entry)     │  │  (Tab Manager)   │  │
+│  └───────┬───────┘  └──────┬───────┘  └────────┬─────────┘  │
+│          │                 │                   │            │
+│          └─────────────────┴───────────────────┘            │
+└──────────────────────────────┬──────────────────────────────┘
+                               │
+┌──────────────────────────────┴──────────────────────────────┐
+│                     Console & Interaction Layer             │
+│  ┌────────────────────────────────────────────────────────┐ │
+│  │  Console (Handler → EbsConsoleHandler)                 │ │
+│  │  - Command processing                                  │ │
+│  │  - Script area management                              │ │
+│  │  - Output handling                                     │ │
+│  └────────────────────────────┬───────────────────────────┘ │
+└────────────────────────────────┴────────────────────────────┘
+                                 │
+┌────────────────────────────────┴─────────────────────────────┐
+│                       Script Processing Layer                │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐    │
+│  │   Lexer      │─▶│   Parser     │─▶│  Interpreter    │    │
+│  │  (Tokenize)  │  │  (AST Build) │  │  (Execute)       │    │
+│  └──────────────┘  └──────────────┘  └──────┬───────────┘    │
+│                                             │                │
+└───────────────────────────────────────────────┼──────────────┘
+                                                │
+┌───────────────────────────────────────────────┴──────────────┐
+│                    Runtime & Support Layer                   │
+│  ┌────────────┐  ┌──────────┐  ┌─────────────────────────┐   │
+│  │ Environment│  │ Builtins │  │   Database Support      │   │
+│  │ (Variables)│  │(Functions)  │   - DbAdapter           │   │
+│  └────────────┘  └──────────┘  │   - DbConnection        │   │
+│                                │   - DbCursor            │   │
+│                                └─────────────────────────┘   │
+│  ┌────────────┐  ┌──────────┐  ┌─────────────────────────┐   │
+│  │   Arrays   │  │   JSON   │  │   File I/O              │   │
+│  │            │  │ Support  │  │                         │   │
+│  └────────────┘  └──────────┘  └─────────────────────────┘   │
+└──────────────────────────────────────────────────────────────┘
+```
+
+## Detailed Component Flow
+
+### 1. Application Startup Flow
+
+```
+MainApp.main()
+    │
+    └─▶ MainApp.start(Stage)
+            │
+            └─▶ EbsApp.start(Stage)
+                    │
+                    ├─▶ Initialize sandbox directory
+                    ├─▶ Create EbsConsoleHandler
+                    ├─▶ Create Console with handler
+                    ├─▶ Setup UI (BorderPane + MenuBar + TabPane)
+                    ├─▶ Apply CSS styling
+                    └─▶ Display window and wait for user input
+```
+
+**Key Classes:**
+- `MainApp`: JavaFX Application entry point
+- `EbsApp`: Main application controller, sets up UI and runtime context
+- `Console`: Interactive console with script area and output
+- `EbsConsoleHandler`: Handles command execution and script submission
+
+### 2. Script Execution Flow
+
+```
+User Input (Console)
+    │
+    └─▶ Console.submit(text)
+            │
+            └─▶ Handler.execute(script)
+                    │
+                    └─▶ EbsConsoleHandler.execute(script)
+                            │
+                            ├─▶ Check for special commands (/open, /save, /help, etc.)
+                            │   └─▶ Execute command and return
+                            │
+                            └─▶ Script execution path:
+                                    │
+                                    ├─▶ Parser.parse(name, script)
+                                    │       │
+                                    │       ├─▶ EbsLexer.tokenize(script)
+                                    │       │       │
+                                    │       │       └─▶ Returns List<EbsToken>
+                                    │       │
+                                    │       ├─▶ Parser.parse()
+                                    │       │       │
+                                    │       │       ├─▶ Build AST (statements & expressions)
+                                    │       │       ├─▶ Resolve blocks/functions
+                                    │       │       └─▶ Return parsed structure
+                                    │       │
+                                    │       └─▶ Create RuntimeContext
+                                    │               - name: script identifier
+                                    │               - blocks: function definitions
+                                    │               - statements: executable statements
+                                    │
+                                    └─▶ Interpreter.interpret(RuntimeContext)
+                                            │
+                                            ├─▶ Initialize Environment
+                                            ├─▶ Register built-in functions
+                                            ├─▶ Execute statements sequentially
+                                            │       │
+                                            │       └─▶ Visit each statement:
+                                            │           - VarStatement
+                                            │           - AssignStatement
+                                            │           - PrintStatement
+                                            │           - IfStatement
+                                            │           - WhileStatement
+                                            │           - CallStatement
+                                            │           - etc.
+                                            │
+                                            └─▶ Handle control flow:
+                                                - ReturnSignal (function return)
+                                                - BreakSignal (loop break)
+                                                - ContinueSignal (loop continue)
+```
+
+### 3. Parsing Pipeline
+
+#### 3.1 Lexical Analysis (Tokenization)
+
+```
+Source Code (String)
+    │
+    └─▶ EbsLexer.tokenize()
+            │
+            ├─▶ Scan character by character
+            ├─▶ Recognize token patterns:
+            │   - Keywords (var, if, while, print, etc.)
+            │   - Identifiers (variable/function names)
+            │   - Literals (numbers, strings, booleans)
+            │   - Operators (+, -, *, /, ==, !=, etc.)
+            │   - Separators (parentheses, brackets, semicolons)
+            │   - Comments (// line comments)
+            │
+            └─▶ Returns List<EbsToken>
+                Each token contains:
+                - Type (EbsTokenType enum)
+                - Value (lexeme/text)
+                - Position (line, column)
+```
+
+#### 3.2 Syntax Analysis (Parsing)
+
+```
+List<EbsToken>
+    │
+    └─▶ Parser.parse()
+            │
+            ├─▶ Initialize parser state
+            │   - Current token index
+            │   - Block/function registry
+            │
+            ├─▶ Parse program structure:
+            │   │
+            │   ├─▶ Named blocks (functions):
+            │   │   - Function name
+            │   │   - Parameters (optional)
+            │   │   - Return type (optional)
+            │   │   - Body statements
+            │   │
+            │   └─▶ Top-level statements:
+            │       - Variable declarations
+            │       - Assignments
+            │       - Control flow
+            │       - Function calls
+            │       - Print statements
+            │
+            ├─▶ Build Abstract Syntax Tree (AST):
+            │   │
+            │   ├─▶ Statements (inherit from Statement):
+            │   │   - VarStatement
+            │   │   - AssignStatement
+            │   │   - IfStatement
+            │   │   - WhileStatement
+            │   │   - DoWhileStatement
+            │   │   - ForEachStatement
+            │   │   - BlockStatement
+            │   │   - CallStatement
+            │   │   - ReturnStatement
+            │   │   - BreakStatement
+            │   │   - ContinueStatement
+            │   │   - PrintStatement
+            │   │   - Database statements (Connect, Cursor, etc.)
+            │   │
+            │   └─▶ Expressions (inherit from Expression):
+            │       - LiteralExpression (constants)
+            │       - VariableExpression (variable access)
+            │       - BinaryExpression (a + b, a == b, etc.)
+            │       - UnaryExpression (!a, -a)
+            │       - CallExpression (function calls)
+            │       - IndexExpression (array[index])
+            │       - ArrayExpression/ArrayLiteralExpression
+            │       - LengthExpression (array.length)
+            │       - SQL expressions
+            │
+            └─▶ Returns RuntimeContext
+                - Parsed blocks (functions)
+                - Parsed statements (program)
+                - Environment placeholder
+```
+
+#### 3.3 Operator Precedence (in Parser)
+
+```
+Highest Precedence:
+    │
+    ├─▶ Postfix: array[index], property.length
+    ├─▶ Unary: !, -, +
+    ├─▶ Exponentiation: ^ (right-associative)
+    ├─▶ Multiplication/Division: *, /
+    ├─▶ Addition/Subtraction: +, -
+    ├─▶ Comparison: ==, !=, <, >, <=, >=
+    ├─▶ Logical AND: and
+    └─▶ Logical OR: or
+    │
+Lowest Precedence
+```
+
+### 4. Interpretation & Execution Flow
+
+```
+RuntimeContext
+    │
+    └─▶ Interpreter.interpret(RuntimeContext)
+            │
+            ├─▶ Setup execution environment:
+            │   │
+            │   ├─▶ Create Environment
+            │   │   - Variable storage (Map<String, Object>)
+            │   │   - Scope management (stack of environments)
+            │   │   - Echo mode (print executed statements)
+            │   │
+            │   ├─▶ Register built-in functions:
+            │   │   - Type conversion (toInt, toFloat, toString, etc.)
+            │   │   - String operations (substring, length, etc.)
+            │   │   - Array operations
+            │   │   - File I/O (read, write, etc.)
+            │   │   - JSON operations (parse, stringify)
+            │   │   - Math functions
+            │   │   - Date/time functions
+            │   │   - AI functions (if configured)
+            │   │
+            │   └─▶ Initialize database adapter (OracleDbAdapter by default)
+            │
+            ├─▶ Execute statements using Visitor pattern:
+            │   │
+            │   ├─▶ VarStatement:
+            │   │   - Evaluate initializer expression
+            │   │   - Declare variable in environment
+            │   │   - Handle arrays with specified dimensions
+            │   │
+            │   ├─▶ AssignStatement:
+            │   │   - Evaluate right-hand expression
+            │   │   - Update variable in environment
+            │   │
+            │   ├─▶ PrintStatement:
+            │   │   - Evaluate expression
+            │   │   - Convert to string
+            │   │   - Output to console
+            │   │
+            │   ├─▶ IfStatement:
+            │   │   - Evaluate condition expression
+            │   │   - Execute then-branch or else-branch
+            │   │   - Handle nested blocks
+            │   │
+            │   ├─▶ WhileStatement/DoWhileStatement:
+            │   │   - Loop while condition is true
+            │   │   - Execute body statements
+            │   │   - Handle break/continue signals
+            │   │
+            │   ├─▶ ForEachStatement:
+            │   │   - Iterate over array/collection
+            │   │   - Bind loop variable
+            │   │   - Execute body for each element
+            │   │
+            │   ├─▶ CallStatement:
+            │   │   - Resolve function (built-in or user-defined)
+            │   │   - Evaluate arguments
+            │   │   - Execute function:
+            │   │       │
+            │   │       ├─▶ Built-in function:
+            │   │       │   - Direct Java method invocation
+            │   │       │
+            │   │       └─▶ User-defined block:
+            │   │           - Create new scope
+            │   │           - Bind parameters
+            │   │           - Execute block statements
+            │   │           - Capture return value
+            │   │           - Restore scope
+            │   │
+            │   ├─▶ BlockStatement:
+            │   │   - Execute statements in sequence
+            │   │   - Manage scope
+            │   │
+            │   ├─▶ ReturnStatement:
+            │   │   - Evaluate return expression
+            │   │   - Throw ReturnSignal (exception-based control)
+            │   │
+            │   ├─▶ BreakStatement/ContinueStatement:
+            │   │   - Throw BreakSignal/ContinueSignal
+            │   │
+            │   └─▶ Database statements:
+            │       - ConnectStatement: establish DB connection
+            │       - CursorStatement: declare cursor
+            │       - OpenCursorStatement: open cursor with query
+            │       - CloseCursorStatement: close cursor
+            │       - UseConnectionStatement: switch active connection
+            │       - CloseConnectionStatement: close connection
+            │
+            │   ├─▶ ImportStatement:
+            │   │   - Parse import path (e.g., import "utils.ebs")
+            │   │   - Resolve file path relative to current script
+            │   │   - Parse and execute imported file
+            │   │   - Register imported functions in current environment
+            │   │   - Imports are processed before other statements
+            │   │
+            │   └─▶ ScreenStatement:
+            │       - Parse screen definition from JSON configuration
+            │       - Process screen variables (vars)
+            │       - Process area definitions with items
+            │       - Support for button onClick handlers:
+            │           │
+            │           ├─▶ Parse onClick property from button display metadata
+            │           ├─▶ Create OnClickHandler that executes EBS code
+            │           ├─▶ Parse EBS code when button is clicked
+            │           └─▶ Execute in current interpreter context
+            │       - Create JavaFX Stage with controls
+            │       - Set up two-way data binding for varRef items
+            │       - Display screen window
+            │
+            └─▶ Expression evaluation using Visitor pattern:
+                │
+                ├─▶ LiteralExpression:
+                │   - Return constant value directly
+                │
+                ├─▶ VariableExpression:
+                │   - Look up variable in environment
+                │   - Throw error if undefined
+                │
+                ├─▶ BinaryExpression:
+                │   - Evaluate left operand
+                │   - Evaluate right operand
+                │   - Apply operator:
+                │       - Arithmetic: +, -, *, /, ^
+                │       - Comparison: ==, !=, <, >, <=, >=
+                │       - Logical: and, or
+                │   - Return result
+                │
+                ├─▶ UnaryExpression:
+                │   - Evaluate operand
+                │   - Apply operator: !, -, +
+                │   - Return result
+                │
+                ├─▶ CallExpression:
+                │   - Same as CallStatement but returns value
+                │
+                ├─▶ IndexExpression:
+                │   - Evaluate array expression
+                │   - Evaluate index expressions
+                │   - Access array element(s)
+                │   - Return value
+                │
+                ├─▶ ArrayLiteralExpression:
+                │   - Evaluate element expressions
+                │   - Create array instance
+                │   - Return array
+                │
+                └─▶ LengthExpression:
+                    - Evaluate target expression
+                    - Return array/string length
+```
+
+### 5. Environment & Scope Management
+
+```
+Environment Structure:
+    │
+    ├─▶ Global Scope (root)
+    │   - Variables declared at top level
+    │   - Built-in functions
+    │   - User-defined blocks/functions
+    │
+    └─▶ Local Scopes (stack)
+        - Function call parameters
+        - Local variables
+        - Block-scoped variables
+        
+Scope Resolution:
+    │
+    └─▶ Variable lookup:
+        - Search current scope
+        - If not found, search parent scope
+        - Continue up to global scope
+        - Throw error if not found
+        
+    └─▶ Variable assignment:
+        - Search for existing variable
+        - Update in the scope where found
+        - If new variable, declare in current scope
+```
+
+### 6. Database Integration Flow
+
+```
+Database Operations:
+    │
+    ├─▶ Connection Management:
+    │   │
+    │   ├─▶ ConnectStatement:
+    │   │   - Parse connection spec (URL/JSON)
+    │   │   - Create DbConnection
+    │   │   - Store in connections map
+    │   │
+    │   ├─▶ UseConnectionStatement:
+    │   │   - Push connection to stack
+    │   │   - Execute statements in block
+    │   │   - Pop connection from stack
+    │   │
+    │   └─▶ CloseConnectionStatement:
+    │       - Remove from connections map
+    │       - Close database connection
+    │
+    └─▶ Cursor Operations:
+        │
+        ├─▶ CursorStatement:
+        │   - Define cursor with SQL SELECT
+        │   - Store cursor spec
+        │
+        ├─▶ OpenCursorStatement:
+        │   - Get active connection
+        │   - Prepare SQL statement
+        │   - Bind parameters
+        │   - Execute query
+        │   - Create DbCursor
+        │
+        ├─▶ Cursor iteration:
+        │   - CursorHasNextExpression: check for more rows
+        │   - CursorNextExpression: fetch next row
+        │   - Access columns via cursor object
+        │
+        └─▶ CloseCursorStatement:
+            - Close cursor
+            - Release resources
+```
+
+### 7. Array Support
+
+```
+Array Types:
+    │
+    ├─▶ ArrayFixed: Fixed-size, single type
+    │   - Pre-allocated storage
+    │   - Bounds checking
+    │
+    ├─▶ ArrayFixedByte: Optimized byte array
+    │   - Memory-efficient storage
+    │
+    └─▶ ArrayDynamic: Variable-size, any type
+        - Grows as needed
+        - Mixed-type elements
+
+Array Operations:
+    │
+    ├─▶ Declaration: var arr: int[10];
+    ├─▶ Initialization: var arr = [1, 2, 3, 4, 5];
+    ├─▶ Access: arr[index]
+    ├─▶ Assignment: arr[index] = value;
+    ├─▶ Multi-dimensional: arr[i][j] or arr[i,j]
+    └─▶ Length: arr.length
+```
+
+### 8. JSON Support
+
+```
+JSON Operations:
+    │
+    ├─▶ Parsing:
+    │   - Json.parse(string) → Map/List
+    │   - Automatic type detection
+    │
+    ├─▶ Serialization:
+    │   - Json.stringify(object) → String
+    │   - Pretty printing support
+    │
+    ├─▶ Schema:
+    │   - JsonSchema: define structure
+    │   - JsonValidate: validate against schema
+    │   - JsonSchemaDeriver: infer schema from data
+    │
+    └─▶ Variable declaration:
+        - var data: json = {"key": "value"};
+        - Direct JSON literal in source
+```
+
+**Important: JSON Case-Insensitive Key Lookup**
+
+The EBS JSON parser supports case-insensitive key lookup for screen definitions through a special parsing mode. This feature enables flexible JSON key naming while maintaining backward compatibility.
+
+**How It Works:**
+
+The `Json.parse()` method accepts an optional `lowerCaseKey` parameter:
+- `Json.parse(input)` - Default mode: preserves original key casing
+- `Json.parse(input, true)` - Case-insensitive mode: converts all keys to lowercase
+
+**When parsing screen definitions**, the parser automatically uses case-insensitive mode (`lowerCaseKey=true`) to allow flexible property naming.
+
+**Key Normalization Example:**
+```javascript
+// Input JSON (for screen definitions):
+{
+    "promptHelp": "Click Me",
+    "onClick": "print 'Hello';",
+    "varRef": "myVariable"
+}
+
+// Parsed with lowerCaseKey=true (screen definitions):
+{
+    "prompttext": "Click Me",         // Key lowercased, value preserved
+    "onclick": "print 'Hello';",      // Key lowercased, value preserved
+    "varref": "myVariable"            // Key lowercased, value preserved
+}
+```
+
+**Important Notes:**
+- **Keys only**: Only JSON object keys are converted to lowercase; string values remain unchanged
+- **Screen-specific**: Case-insensitive parsing is used specifically for screen definitions
+- **Regular JSON**: Other JSON parsing (via `parseJson()` builtin) uses default case-sensitive mode
+
+**Affected Areas:**
+- **Screen Definitions**: Screen configuration JSON uses case-insensitive keys
+  - `varRef`, `VarRef`, or `varref` all map to `"varref"`
+  - `promptHelp`, `PromptText`, or `prompttext` all map to `"prompttext"`
+  - `onClick`, `OnClick`, or `onclick` all map to `"onclick"`
+- **Display Metadata**: All display property keys are normalized to lowercase
+- **Area/Item Definitions**: Container and UI control properties use lowercase keys
+
+**Code Implementation:**
+The parser implementation in `InterpreterScreen.java` handles this by checking for lowercase versions of keys since the JSON parser has already normalized them:
+- Looks up properties using lowercase names: `prompttext`, `onclick`, `varref`
+- Maintains backward compatibility by checking both camelCase and lowercase variants
+
+**Developer Note:** When adding new JSON-based screen features, always use lowercase property names in lookups since the parser normalizes all keys. For general JSON usage outside of screens, keys preserve their original casing.
+
+### 9. UI Console Interaction
+
+```
+Console Components:
+    │
+    ├─▶ ScriptArea (extends StyleClassedTextArea):
+    │   - Syntax highlighting
+    │   - Line numbers
+    │   - Code editing with rich text support
+    │
+    ├─▶ Console Output:
+    │   - StyledTextAreaOutputStream
+    │   - Colored output (info, error, success)
+    │   - System.out/err redirection
+    │
+    ├─▶ Command History:
+    │   - Up/Down arrow navigation
+    │   - Previous commands recall
+    │
+    └─▶ Special Commands:
+        - /open <file>: Load script from file
+        - /save <file>: Save current script
+        - /help: Show command reference
+        - /clear: Clear console output
+        - /echo on|off: Toggle statement echo
+        - /ai setup: Configure AI integration
+        - /safe-dirs: Configure safe directories
+
+Tab Management:
+    │
+    ├─▶ Console Tab: Main interactive console
+    ├─▶ Script Tabs: Open script files
+    └─▶ TabHandler: Manage multiple tabs
+```
+
+### 10. Error Handling
+
+```
+Error Types:
+    │
+    ├─▶ Lexer Errors:
+    │   - Invalid characters
+    │   - Unclosed strings
+    │   - Invalid number formats
+    │
+    ├─▶ Parser Errors (ParseError):
+    │   - Syntax errors
+    │   - Unexpected tokens
+    │   - Missing semicolons/braces
+    │
+    ├─▶ Interpreter Errors (InterpreterError):
+    │   - Undefined variables
+    │   - Type mismatches
+    │   - Division by zero
+    │   - Array index out of bounds
+    │
+    └─▶ Control Flow Signals:
+        - ReturnSignal: Function return
+        - BreakSignal: Loop break
+        - ContinueSignal: Loop continue
+        
+Error Reporting:
+    - Line/column information from tokens
+    - Stack trace for nested calls
+    - Formatted error messages in console
+```
+
+## Module Relationships
+
+### Core Packages
+
+#### `com.eb.script`
+- **Purpose**: Top-level script execution and runtime context
+- **Key Classes**: `Run`, `RuntimeContext`
+
+#### `com.eb.script.token`
+- **Purpose**: Token definitions and lexical analysis
+- **Key Classes**: `EbsLexer`, `EbsToken`, `EbsTokenType`, `DataType`
+
+#### `com.eb.script.parser`
+- **Purpose**: Syntax analysis and AST construction
+- **Key Classes**: `Parser`, `ParseError`
+
+#### `com.eb.script.interpreter`
+- **Purpose**: Runtime execution and interpretation
+- **Key Classes**: `Interpreter`, `Environment`, `Builtins`, `InterpreterError`
+
+#### `com.eb.script.interpreter.expression`
+- **Purpose**: Expression AST nodes
+- **Key Classes**: `Expression`, various expression implementations
+
+#### `com.eb.script.interpreter.statement`
+- **Purpose**: Statement AST nodes
+- **Key Classes**: `Statement`, various statement implementations
+
+#### `com.eb.script.interpreter.db`
+- **Purpose**: Database integration
+- **Key Classes**: `DbAdapter`, `DbConnection`, `DbCursor`, `OracleDbAdapter`
+
+#### `com.eb.script.arrays`
+- **Purpose**: Array implementations
+- **Key Classes**: `ArrayDef`, `ArrayFixed`, `ArrayDynamic`, `ArrayFixedByte`
+
+#### `com.eb.script.json`
+- **Purpose**: JSON parsing, validation, and schema
+- **Key Classes**: `Json`, `JsonSchema`, `JsonValidate`, `JsonSchemaDeriver`
+
+#### `com.eb.script.file`
+- **Purpose**: File I/O operations
+- **Key Classes**: `FileContext`, `FileData`, `BuiltinsFile`
+
+#### `com.eb.ui.cli`
+- **Purpose**: Console UI components
+- **Key Classes**: `Console`, `Handler`, `ScriptArea`, `MainApp`
+
+#### `com.eb.ui.ebs`
+- **Purpose**: Main application UI
+- **Key Classes**: `EbsApp`, `EbsConsoleHandler`, `EbsMenu`, `EbsTab`
+
+#### `com.eb.ui.tabs`
+- **Purpose**: Tab management
+- **Key Classes**: `TabHandler`, `TabOpener`, `TabContext`, `EbsTab`
+
+#### `com.eb.util`
+- **Purpose**: Utility functions
+- **Key Classes**: `Util`, `Debugger`, `ClassTreeLister`, `EmbeddingSearch`
+
+## Data Flow Summary
+
+```
+┌──────────────┐
+│  User Input  │
+└──────┬───────┘
+       │
+       ▼
+┌──────────────┐      ┌────────────┐      ┌──────────────┐
+│   Console    │─────▶│  Handler   │─────▶│    Parser    │
+└──────────────┘      └────────────┘      └──────┬───────┘
+                                                  │
+                                                  ▼
+                                         ┌─────────────────┐
+                                         │  RuntimeContext │
+                                         │  (AST + Blocks) │
+                                         └────────┬────────┘
+                                                  │
+                                                  ▼
+                                         ┌─────────────────┐
+                                         │  Interpreter    │
+                                         │  (Execute)      │
+                                         └────────┬────────┘
+                                                  │
+                      ┌───────────────────────────┼───────────────────────┐
+                      │                           │                       │
+                      ▼                           ▼                       ▼
+              ┌───────────────┐         ┌─────────────────┐    ┌─────────────┐
+              │  Environment  │         │  Built-ins      │    │  Database   │
+              │  (Variables)  │         │  (Functions)    │    │  Adapter    │
+              └───────────────┘         └─────────────────┘    └─────────────┘
+                      │
+                      ▼
+              ┌───────────────┐
+              │  Console      │
+              │  Output       │
+              └───────────────┘
+```
+
+## Key Design Patterns
+
+1. **Visitor Pattern**: Used for traversing and executing AST nodes (statements and expressions)
+2. **Strategy Pattern**: DbAdapter allows different database implementations
+3. **Command Pattern**: Console commands are processed through Handler interface
+4. **Factory Pattern**: Token and expression/statement creation
+5. **Singleton**: Global utilities and built-in function registry
+
+## Extension Points
+
+- **Custom Built-in Functions**: Add to `Builtins` class
+- **Database Adapters**: Implement `DbAdapter` interface
+- **Expression Types**: Extend `Expression` class and update parser
+- **Statement Types**: Extend `Statement` class and update parser
+- **UI Commands**: Add handlers in `EbsConsoleHandler`
+
+## Performance Considerations
+
+- **Token List**: Pre-tokenized for fast parsing
+- **Array Types**: Specialized implementations for common cases
+- **Scope Management**: Stack-based for efficient lookup
+- **AST Caching**: RuntimeContext can be reused for repeated execution
+- **Database Connections**: Pooled and reused across operations
+
+## Security Features
+
+- **Sandbox Root**: Scripts execute in designated safe directory
+- **Safe Directories Dialog**: Configure trusted directories for file operations
+- **Input Validation**: Type checking and bounds checking
+- **Error Isolation**: Exceptions don't crash the application
+
+## Future Enhancements
+
+- Additional database adapters (MySQL, PostgreSQL, etc.)
+- Debugger integration with breakpoints
+- Performance profiling tools
+- Native library integration
+- More built-in functions
+- Enhanced error messages with suggestions
+
+## JavaFX UI Patterns
+
+### Avoiding Cell Factory Timing Issues
+
+When using JavaFX TableView cell factories, timing issues can occur where the cell factory is called before data is fully initialized or after `Platform.runLater()` tasks have completed. This can result in incorrect visual state.
+
+**Problem:**
+```java
+// Cell factory determines visual state by inspecting data
+col.setCellFactory(col -> new TableCell<>() {
+    @Override
+    protected void updateItem(String item, boolean empty) {
+        super.updateItem(item, empty);
+        // This may be called at unpredictable times due to JavaFX internals
+        boolean isChanged = checkIfChanged(item);  // May race with other updates
+        setStyle(isChanged ? changedStyle : normalStyle);
+    }
+});
+```
+
+**Solution: Pre-compute display state in data**
+```java
+// Pre-compute the display text with all visual indicators
+String displayText = typeIcon + (isChanged ? " ⚠️ " : " ") + name;
+tableData.add(new String[]{displayText, value, ...});
+
+// Cell factory just reads pre-computed state from the string
+col.setCellFactory(col -> new TableCell<>() {
+    @Override
+    protected void updateItem(String item, boolean empty) {
+        super.updateItem(item, empty);
+        setText(item);
+        // Check for indicator in the pre-computed string
+        if (item != null && item.contains("⚠️")) {
+            setStyle(changedStyle);
+        } else {
+            setStyle(normalStyle);
+        }
+    }
+});
+
+// When state changes, update the pre-computed display text
+row[0] = typeIcon + " ⚠️ " + name;  // Update data directly
+tableView.refresh();  // Force re-render
+```
+
+**Key principles:**
+1. Store all visual state indicators in the data model (pre-computed strings)
+2. Cell factory reads state from the data, doesn't compute it
+3. State changes update the data model, then call `tableView.refresh()`
+4. Use chained `Platform.runLater()` calls when multiple async operations must complete before final state
+
+### Thread-Safe JavaFX Updates with Util.runOnFx()
+
+All JavaFX UI updates must happen on the JavaFX Application Thread. Instead of manually checking the thread with `Platform.runLater()`, use the utility function `com.eb.util.Util.runOnFx()` for consistent, thread-safe execution.
+
+**Function Signature:**
+```java
+public static void runOnFx(Runnable r)
+```
+
+**Behavior:**
+- If already on JavaFX thread: executes the Runnable immediately
+- If not on JavaFX thread: uses `Platform.runLater()` to queue execution on JavaFX thread
+- Prevents nested `Platform.runLater()` calls that can cause UI update delays
+
+**Usage Examples:**
+
+```java
+import com.eb.util.Util;
+
+// ❌ DON'T: Manual Platform.runLater() (may cause nested queuing issues)
+Platform.runLater(() -> {
+    label.setText("Updated");
+});
+
+// ✅ DO: Use Util.runOnFx() instead
+Util.runOnFx(() -> {
+    label.setText("Updated");
+});
+
+// ✅ DO: Use for screen variable refresh callbacks
+context.getScreenRefreshCallbacks().put(screenName, () -> {
+    Util.runOnFx(() -> refreshBoundControls(controls, vars));
+});
+
+// ✅ DO: Use for control property updates
+Util.runOnFx(() -> {
+    control.setDisable(false);
+    control.setVisible(true);
+});
+```
+
+**Why This Matters:**
+
+Timer callbacks and other background operations already run on the JavaFX thread via `Platform.runLater()`. If UI update code unconditionally wraps operations in another `Platform.runLater()`, it creates nested queuing:
+
+```java
+// Timer callback runs on JavaFX thread
+Platform.runLater(() -> {
+    // Inside callback, update UI
+    Platform.runLater(() -> {  // ❌ Nested! Update is queued instead of immediate
+        label.setText("Timer: " + time);
+    });
+});
+```
+
+Using `Util.runOnFx()` prevents this issue:
+
+```java
+// Timer callback runs on JavaFX thread
+Platform.runLater(() -> {
+    // Inside callback, update UI
+    Util.runOnFx(() -> {  // ✅ Executes immediately (already on FX thread)
+        label.setText("Timer: " + time);
+    });
+});
+```
+
+**When to Use:**
+- Timer callbacks that update UI
+- Screen variable refresh operations
+- Any code that might be called from both JavaFX and non-JavaFX threads
+- Replace all `Platform.runLater()` calls with `Util.runOnFx()` for consistency
+
+**Location:** `com.eb.util.Util.java` (line 729)
+
+## Java Requirements
+
+- Java 21 or higher
+- Maven 3.x
+- Source code must be valid Java syntax
+- Keep ARCHITECTURE.md up to date when changes are made.
+- Keep system-lookup.json up to date when changes are made to keywords or builtin functions.

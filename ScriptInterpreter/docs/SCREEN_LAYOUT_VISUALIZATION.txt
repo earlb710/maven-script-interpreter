@@ -1,0 +1,107 @@
+┌────────────────────────────────────────────────────────────────────────────┐
+│  Two Column Layout Test                                             [ _ □ X ]│
+├────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│    ┌──────────────────────────────────┐  ┌──────────────────────────────┐  │
+│    │ LEFT COLUMN                      │  │ RIGHT COLUMN                 │  │
+│    └──────────────────────────────────┘  └──────────────────────────────┘  │
+│                                                                              │
+│    First Name:                            Address:                          │
+│    ┌──────────────────────────────────┐  ┌──────────────────────────────┐  │
+│    │ John                    ▌        │  │ 123 Main Street     ▌        │  │
+│    └──────────────────────────────────┘  └──────────────────────────────┘  │
+│    sequence: 1  (Tab order: 1st)         sequence: 6  (Tab order: 6th)     │
+│                                                                              │
+│    Last Name:                             City:                             │
+│    ┌──────────────────────────────────┐  ┌──────────────────────────────┐  │
+│    │ Doe                     ▌        │  │ Springfield         ▌        │  │
+│    └──────────────────────────────────┘  └──────────────────────────────┘  │
+│    sequence: 2  (Tab order: 2nd)         sequence: 7  (Tab order: 7th)     │
+│                                                                              │
+│    Email:                                 State:                            │
+│    ┌──────────────────────────────────┐  ┌──────────────────────────────┐  │
+│    │ john.doe@example.com    ▌        │  │ Illinois             ▼       │  │
+│    └──────────────────────────────────┘  └──────────────────────────────┘  │
+│    sequence: 3  (Tab order: 3rd)         sequence: 8  (Tab order: 8th)     │
+│                                                                              │
+│    Phone:                                 Zip Code:                         │
+│    ┌──────────────────────────────────┐  ┌──────────────────────────────┐  │
+│    │ 555-1234                ▌        │  │ 62701               ▌        │  │
+│    └──────────────────────────────────┘  └──────────────────────────────┘  │
+│    sequence: 4  (Tab order: 4th)         sequence: 9  (Tab order: 9th)     │
+│                                                                              │
+│    Age:                                   Country:                          │
+│    ┌──────────────────────────────────┐  ┌──────────────────────────────┐  │
+│    │ 30                      ▲▼       │  │ USA                  ▼       │  │
+│    └──────────────────────────────────┘  └──────────────────────────────┘  │
+│    sequence: 5  (Tab order: 5th)         sequence: 10 (Tab order: 10th)    │
+│                                                                              │
+│                                                                              │
+└────────────────────────────────────────────────────────────────────────────┘
+
+NAVIGATION FLOW (using Tab key):
+═════════════════════════════════════
+
+Press Tab to navigate in this order:
+
+  1st → First Name    (TextField)    │  Left Column
+  2nd → Last Name     (TextField)    │  Top to Bottom
+  3rd → Email         (TextField)    ↓
+  4th → Phone         (TextField)    │
+  5th → Age           (Spinner)      ↓
+         └─────────────────────────────────────┐
+                                               ↓
+  6th → Address       (TextField)    │  Right Column
+  7th → City          (TextField)    │  Top to Bottom
+  8th → State         (ComboBox)     ↓
+  9th → Zip Code      (TextField)    │
+ 10th → Country       (ChoiceBox)    ↓
+
+LAYOUT DETAILS:
+═══════════════
+
+Container Type:  GridPane
+Columns:         2 (column 0 = left, column 1 = right)
+Rows:            5 (rows 0-4)
+Horizontal Gap:  20px
+Vertical Gap:    15px
+Padding:         30px
+Window Size:     800 x 600 pixels
+
+LEFT COLUMN ITEMS (Column 0):
+────────────────────────────
+Row 0: First Name   - TextField  (sequence: 1, layoutPos: "0,0")
+Row 1: Last Name    - TextField  (sequence: 2, layoutPos: "1,0")
+Row 2: Email        - TextField  (sequence: 3, layoutPos: "2,0")
+Row 3: Phone        - TextField  (sequence: 4, layoutPos: "3,0")
+Row 4: Age          - Spinner    (sequence: 5, layoutPos: "4,0")
+
+RIGHT COLUMN ITEMS (Column 1):
+─────────────────────────────
+Row 0: Address      - TextField  (sequence: 6, layoutPos: "0,1")
+Row 1: City         - TextField  (sequence: 7, layoutPos: "1,1")
+Row 2: State        - ComboBox   (sequence: 8, layoutPos: "2,1")
+Row 3: Zip Code     - TextField  (sequence: 9, layoutPos: "3,1")
+Row 4: Country      - ChoiceBox  (sequence: 10, layoutPos: "4,1")
+
+KEY FEATURES:
+════════════
+
+✓ All items fit on screen (no scrolling required)
+✓ Consistent control width (300px for all fields)
+✓ Labels displayed on the left side of each control
+✓ Prompt text provides helpful hints
+✓ Tab navigation follows natural reading order:
+  - Top to bottom in left column (1-5)
+  - Then top to bottom in right column (6-10)
+✓ Mixed control types demonstrate versatility
+✓ Data binding for all variables
+✓ Professional form layout with proper spacing
+
+CONTROL TYPES USED:
+═══════════════════
+
+TextField:    First Name, Last Name, Email, Phone, Address, City, Zip Code
+Spinner:      Age (numeric input with +/- buttons, range 18-100)
+ComboBox:     State (editable dropdown with predefined options)
+ChoiceBox:    Country (non-editable dropdown with predefined options)
