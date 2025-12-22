@@ -261,17 +261,20 @@ function getYellowPiece(pieceType: int, pieceColor: int) return imagedata {
 
 // Add a captured piece to the tracking arrays
 function addCapturedPiece(pieceType: int, pieceColor: int) {
+    print "DEBUG: addCapturedPiece called - pieceType: " + string.valueOf(pieceType) + ", pieceColor: " + string.valueOf(pieceColor);
     if pieceColor == WHITE then {
         // White piece captured by black - add to left side
         if capturedWhiteCount < 16 then {
             capturedWhitePieces[capturedWhiteCount] = pieceType;
             capturedWhiteCount = capturedWhiteCount + 1;
+            print "DEBUG: Added white piece, new count: " + string.valueOf(capturedWhiteCount);
         }
     } else {
         // Black piece captured by white - add to right side
         if capturedBlackCount < 16 then {
             capturedBlackPieces[capturedBlackCount] = pieceType;
             capturedBlackCount = capturedBlackCount + 1;
+            print "DEBUG: Added black piece, new count: " + string.valueOf(capturedBlackCount);
         }
     }
     call updateCapturedPiecesDisplay();
@@ -285,8 +288,14 @@ function updateCapturedPiecesDisplay() {
         return;
     }
     
+    print "DEBUG: Updating captured pieces display - White count: " + string.valueOf(capturedWhiteCount) + ", Black count: " + string.valueOf(capturedBlackCount);
+    
     // Update left side (captured white pieces) - use explicit slot assignments
-    if capturedWhiteCount > 0 then { chessScreen.capturedWhite0 = call getNormalPiece(capturedWhitePieces[0], WHITE); } else { chessScreen.capturedWhite0 = transparentClear; }
+    if capturedWhiteCount > 0 then { 
+        var pieceImg: imagedata = call getNormalPiece(capturedWhitePieces[0], WHITE); 
+        print "DEBUG: Setting capturedWhite0 to piece type " + string.valueOf(capturedWhitePieces[0]) + ", image is null: " + string.valueOf(pieceImg == null);
+        chessScreen.capturedWhite0 = pieceImg; 
+    } else { chessScreen.capturedWhite0 = transparentClear; }
     if capturedWhiteCount > 1 then { chessScreen.capturedWhite1 = call getNormalPiece(capturedWhitePieces[1], WHITE); } else { chessScreen.capturedWhite1 = transparentClear; }
     if capturedWhiteCount > 2 then { chessScreen.capturedWhite2 = call getNormalPiece(capturedWhitePieces[2], WHITE); } else { chessScreen.capturedWhite2 = transparentClear; }
     if capturedWhiteCount > 3 then { chessScreen.capturedWhite3 = call getNormalPiece(capturedWhitePieces[3], WHITE); } else { chessScreen.capturedWhite3 = transparentClear; }
@@ -304,7 +313,11 @@ function updateCapturedPiecesDisplay() {
     if capturedWhiteCount > 15 then { chessScreen.capturedWhite15 = call getNormalPiece(capturedWhitePieces[15], WHITE); } else { chessScreen.capturedWhite15 = transparentClear; }
     
     // Update right side (captured black pieces) - use explicit slot assignments
-    if capturedBlackCount > 0 then { chessScreen.capturedBlack0 = call getNormalPiece(capturedBlackPieces[0], BLACK); } else { chessScreen.capturedBlack0 = transparentClear; }
+    if capturedBlackCount > 0 then { 
+        var pieceImgB: imagedata = call getNormalPiece(capturedBlackPieces[0], BLACK); 
+        print "DEBUG: Setting capturedBlack0 to piece type " + string.valueOf(capturedBlackPieces[0]) + ", image is null: " + string.valueOf(pieceImgB == null);
+        chessScreen.capturedBlack0 = pieceImgB; 
+    } else { chessScreen.capturedBlack0 = transparentClear; }
     if capturedBlackCount > 1 then { chessScreen.capturedBlack1 = call getNormalPiece(capturedBlackPieces[1], BLACK); } else { chessScreen.capturedBlack1 = transparentClear; }
     if capturedBlackCount > 2 then { chessScreen.capturedBlack2 = call getNormalPiece(capturedBlackPieces[2], BLACK); } else { chessScreen.capturedBlack2 = transparentClear; }
     if capturedBlackCount > 3 then { chessScreen.capturedBlack3 = call getNormalPiece(capturedBlackPieces[3], BLACK); } else { chessScreen.capturedBlack3 = transparentClear; }
