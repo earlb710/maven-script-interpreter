@@ -350,6 +350,7 @@ var dataColor: string = call json.getstring(colors, "data", "");
 var keywordColor: string = call json.getstring(colors, "keyword", "");
 var builtinColor: string = call json.getstring(colors, "builtin", "");
 var functionColor: string = call json.getstring(colors, "function", "");
+var jsonkeyColor: string = call json.getstring(colors, "jsonkey", "");
 var literalColor: string = call json.getstring(colors, "literal", "");
 var identifierColor: string = call json.getstring(colors, "identifier", "");
 var sqlColor: string = call json.getstring(colors, "sql", "");
@@ -383,6 +384,7 @@ var defaultDataColor: string = "pink";
 var defaultKeywordColor: string = "#569CD6";
 var defaultBuiltinColor: string = "#DCDCAA";
 var defaultFunctionColor: string = "#FFB86C";
+var defaultJsonkeyColor: string = "#4EC9B0";
 var defaultLiteralColor: string = "blue";
 var defaultIdentifierColor: string = "white";
 var defaultSqlColor: string = "#00ee66";
@@ -452,6 +454,7 @@ function setColorsToDefaults {
     colorEditorScreen.keyword = defaultKeywordColor;
     colorEditorScreen.builtin = defaultBuiltinColor;
     colorEditorScreen["function"] = defaultFunctionColor;
+    colorEditorScreen.jsonkey = defaultJsonkeyColor;
     colorEditorScreen.literal = defaultLiteralColor;
     colorEditorScreen.identifier = defaultIdentifierColor;
     colorEditorScreen.sql = defaultSqlColor;
@@ -486,6 +489,7 @@ function setColorsToOriginal {
     colorEditorScreen.keyword = keywordColor;
     colorEditorScreen.builtin = builtinColor;
     colorEditorScreen["function"] = functionColor;
+    colorEditorScreen.jsonkey = jsonkeyColor;
     colorEditorScreen.literal = literalColor;
     colorEditorScreen.identifier = identifierColor;
     colorEditorScreen.sql = sqlColor;
@@ -521,6 +525,7 @@ function buildProfileColorsJson(pName: string) return string {
     colorsJson = colorsJson + "      \"keyword\": \"" + colorEditorScreen.keyword + "\",\n";
     colorsJson = colorsJson + "      \"builtin\": \"" + colorEditorScreen.builtin + "\",\n";
     colorsJson = colorsJson + "      \"function\": \"" + colorEditorScreen["function"] + "\",\n";
+    colorsJson = colorsJson + "      \"jsonkey\": \"" + colorEditorScreen.jsonkey + "\",\n";
     colorsJson = colorsJson + "      \"literal\": \"" + colorEditorScreen.literal + "\",\n";
     colorsJson = colorsJson + "      \"identifier\": \"" + colorEditorScreen.identifier + "\",\n";
     colorsJson = colorsJson + "      \"sql\": \"" + colorEditorScreen.sql + "\",\n";
@@ -584,7 +589,7 @@ function buildDefaultProfileColorsJson(pName: string) return string {
 // Function: Update a profile in the in-memory profiles object with current screen values
 function updateProfileInMemory(targetProfile: string) {
     // Build the colors JSON for the current screen values
-    var colorsStr: string = "{\"info\": \"" + colorEditorScreen.info + "\", \"comment\": \"" + colorEditorScreen.comment + "\", \"error\": \"" + colorEditorScreen.error + "\", \"warn\": \"" + colorEditorScreen.warn + "\", \"ok\": \"" + colorEditorScreen.ok + "\", \"code\": \"" + colorEditorScreen.code + "\", \"datatype\": \"" + colorEditorScreen.datatype + "\", \"data\": \"" + colorEditorScreen.data + "\", \"keyword\": \"" + colorEditorScreen.keyword + "\", \"builtin\": \"" + colorEditorScreen.builtin + "\", \"function\": \"" + colorEditorScreen["function"] + "\", \"literal\": \"" + colorEditorScreen.literal + "\", \"identifier\": \"" + colorEditorScreen.identifier + "\", \"sql\": \"" + colorEditorScreen.sql + "\", \"custom\": \"" + colorEditorScreen.custom + "\", \"background\": \"" + colorEditorScreen.background + "\", \"text\": \"" + colorEditorScreen.text + "\", \"caret\": \"" + colorEditorScreen.caret + "\", \"line-cursor\": \"" + colorEditorScreen.lineCursor + "\", \"line-numbers\": \"" + colorEditorScreen.lineNumbers + "\", \"console-background\": \"" + colorEditorScreen.consoleBackground + "\", \"tab-background\": \"" + colorEditorScreen.tabBackground + "\", \"tab-label-color\": \"" + colorEditorScreen.tabLabelColor + "\", \"tab-label-changed-color\": \"" + colorEditorScreen.tabLabelChangedColor + "\", \"tab-label-background\": \"" + colorEditorScreen.tabLabelBackground + "\", \"find-highlight-color\": \"" + colorEditorScreen.findHighlightColor + "\", \"find-highlight-background\": \"" + colorEditorScreen.findHighlightBackground + "\", \"current-find-highlight-bg\": \"" + colorEditorScreen.currentFindHighlightBg + "\", \"tab-select\": \"" + colorEditorScreen.tabSelect + "\", \"tab-content\": \"" + colorEditorScreen.tabContent + "\"}";
+    var colorsStr: string = "{\"info\": \"" + colorEditorScreen.info + "\", \"comment\": \"" + colorEditorScreen.comment + "\", \"error\": \"" + colorEditorScreen.error + "\", \"warn\": \"" + colorEditorScreen.warn + "\", \"ok\": \"" + colorEditorScreen.ok + "\", \"code\": \"" + colorEditorScreen.code + "\", \"datatype\": \"" + colorEditorScreen.datatype + "\", \"data\": \"" + colorEditorScreen.data + "\", \"keyword\": \"" + colorEditorScreen.keyword + "\", \"builtin\": \"" + colorEditorScreen.builtin + "\", \"function\": \"" + colorEditorScreen["function"] + "\", \"jsonkey\": \"" + colorEditorScreen.jsonkey + "\", \"literal\": \"" + colorEditorScreen.literal + "\", \"identifier\": \"" + colorEditorScreen.identifier + "\", \"sql\": \"" + colorEditorScreen.sql + "\", \"custom\": \"" + colorEditorScreen.custom + "\", \"background\": \"" + colorEditorScreen.background + "\", \"text\": \"" + colorEditorScreen.text + "\", \"caret\": \"" + colorEditorScreen.caret + "\", \"line-cursor\": \"" + colorEditorScreen.lineCursor + "\", \"line-numbers\": \"" + colorEditorScreen.lineNumbers + "\", \"console-background\": \"" + colorEditorScreen.consoleBackground + "\", \"tab-background\": \"" + colorEditorScreen.tabBackground + "\", \"tab-label-color\": \"" + colorEditorScreen.tabLabelColor + "\", \"tab-label-changed-color\": \"" + colorEditorScreen.tabLabelChangedColor + "\", \"tab-label-background\": \"" + colorEditorScreen.tabLabelBackground + "\", \"find-highlight-color\": \"" + colorEditorScreen.findHighlightColor + "\", \"find-highlight-background\": \"" + colorEditorScreen.findHighlightBackground + "\", \"current-find-highlight-bg\": \"" + colorEditorScreen.currentFindHighlightBg + "\", \"tab-select\": \"" + colorEditorScreen.tabSelect + "\", \"tab-content\": \"" + colorEditorScreen.tabContent + "\"}";
     
     // Parse to JSON and update the in-memory profiles object
     var colorsJson: json = call json.jsonFromString(colorsStr);
@@ -710,6 +715,7 @@ function saveConfigWithCurrentProfile {
     var pKeyword: string = "";
     var pBuiltin: string = "";
     var pFunction: string = "";
+    var pJsonkey: string = "";
     var pLiteral: string = "";
     var pIdentifier: string = "";
     var pSql: string = "";
@@ -752,6 +758,7 @@ function saveConfigWithCurrentProfile {
         pKeyword = "";
         pBuiltin = "";
         pFunction = "";
+        pJsonkey = "";
         pLiteral = "";
         pIdentifier = "";
         pSql = "";
@@ -785,6 +792,7 @@ function saveConfigWithCurrentProfile {
             pKeyword = colorEditorScreen.keyword;
             pBuiltin = colorEditorScreen.builtin;
             pFunction = colorEditorScreen["function"];
+            pJsonkey = colorEditorScreen.jsonkey;
             pLiteral = colorEditorScreen.literal;
             pIdentifier = colorEditorScreen.identifier;
             pSql = colorEditorScreen.sql;
@@ -817,6 +825,7 @@ function saveConfigWithCurrentProfile {
             pKeyword = call json.getstring(pColors, "keyword", "");
             pBuiltin = call json.getstring(pColors, "builtin", "");
             pFunction = call json.getstring(pColors, "function", "");
+            pJsonkey = call json.getstring(pColors, "jsonkey", "");
             pLiteral = call json.getstring(pColors, "literal", "");
             pIdentifier = call json.getstring(pColors, "identifier", "");
             pSql = call json.getstring(pColors, "sql", "");
@@ -1189,6 +1198,7 @@ function onProfileChange {
         if pKeyword != "" then { colorEditorScreen.keyword = pKeyword; } else { colorEditorScreen.keyword = defaultKeywordColor; }
         if pBuiltin != "" then { colorEditorScreen.builtin = pBuiltin; } else { colorEditorScreen.builtin = defaultBuiltinColor; }
         if pFunction != "" then { colorEditorScreen["function"] = pFunction; } else { colorEditorScreen["function"] = defaultFunctionColor; }
+        if pJsonkey != "" then { colorEditorScreen.jsonkey = pJsonkey; } else { colorEditorScreen.jsonkey = defaultJsonkeyColor; }
         if pLiteral != "" then { colorEditorScreen.literal = pLiteral; } else { colorEditorScreen.literal = defaultLiteralColor; }
         if pIdentifier != "" then { colorEditorScreen.identifier = pIdentifier; } else { colorEditorScreen.identifier = defaultIdentifierColor; }
         if pSql != "" then { colorEditorScreen.sql = pSql; } else { colorEditorScreen.sql = defaultSqlColor; }
@@ -1979,6 +1989,7 @@ screen colorEditorScreen = {
                                                             {"name": "keyword_item", "varref": "keyword"},
                                                             {"name": "builtin_item", "varref": "builtin"},
                                                             {"name": "function_item", "varref": "function"},
+                                                            {"name": "jsonkey_item", "varref": "jsonkey"},
                                                             {"name": "literal_item", "varref": "literal"},
                                                             {"name": "identifier_item", "varref": "identifier"},
                                                             {"name": "sql_item", "varref": "sql"},

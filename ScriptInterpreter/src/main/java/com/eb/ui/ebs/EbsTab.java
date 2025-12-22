@@ -1387,7 +1387,7 @@ public class EbsTab extends Tab {
             String styleClass =
                     m.group("COMMENTSINGLE") != null ? "tok-comment"
                     : m.group("COMMENTMULTI") != null ? "tok-comment"
-                    : m.group("KEY") != null ? "tok-builtin"
+                    : m.group("KEY") != null ? "tok-jsonkey"
                     : m.group("STRING") != null ? "tok-string"
                     : m.group("NUMBER") != null ? "tok-number"
                     : m.group("BOOLEAN") != null ? "tok-bool"
