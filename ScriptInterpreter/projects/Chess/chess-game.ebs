@@ -261,20 +261,17 @@ function getYellowPiece(pieceType: int, pieceColor: int) return imagedata {
 
 // Add a captured piece to the tracking arrays
 function addCapturedPiece(pieceType: int, pieceColor: int) {
-    print "DEBUG: addCapturedPiece called - pieceType: " + pieceType + ", pieceColor: " + pieceColor;
     if pieceColor == WHITE then {
         // White piece captured by black - add to left side
         if capturedWhiteCount < 16 then {
             capturedWhitePieces[capturedWhiteCount] = pieceType;
             capturedWhiteCount = capturedWhiteCount + 1;
-            print "DEBUG: Added white piece, new count: " + capturedWhiteCount;
         }
     } else {
         // Black piece captured by white - add to right side
         if capturedBlackCount < 16 then {
             capturedBlackPieces[capturedBlackCount] = pieceType;
             capturedBlackCount = capturedBlackCount + 1;
-            print "DEBUG: Added black piece, new count: " + capturedBlackCount;
         }
     }
     call updateCapturedPiecesDisplay();
@@ -288,13 +285,9 @@ function updateCapturedPiecesDisplay() {
         return;
     }
     
-    print "DEBUG: Updating captured pieces display - White count: " + capturedWhiteCount + ", Black count: " + capturedBlackCount;
-    
     // Update left side (captured white pieces) - use explicit slot assignments
     if capturedWhiteCount > 0 then { 
-        var pieceImg: imagedata = call getNormalPiece(capturedWhitePieces[0], WHITE); 
-        print "DEBUG: Setting capturedWhite0 to piece type " + capturedWhitePieces[0] + ", image is null: " + (pieceImg == null);
-        chessScreen.capturedWhite0 = pieceImg; 
+        chessScreen.capturedWhite0 = call getNormalPiece(capturedWhitePieces[0], WHITE); 
     } else { chessScreen.capturedWhite0 = transparentClear; }
     if capturedWhiteCount > 1 then { chessScreen.capturedWhite1 = call getNormalPiece(capturedWhitePieces[1], WHITE); } else { chessScreen.capturedWhite1 = transparentClear; }
     if capturedWhiteCount > 2 then { chessScreen.capturedWhite2 = call getNormalPiece(capturedWhitePieces[2], WHITE); } else { chessScreen.capturedWhite2 = transparentClear; }
@@ -314,9 +307,7 @@ function updateCapturedPiecesDisplay() {
     
     // Update right side (captured black pieces) - use explicit slot assignments
     if capturedBlackCount > 0 then { 
-        var pieceImgB: imagedata = call getNormalPiece(capturedBlackPieces[0], BLACK); 
-        print "DEBUG: Setting capturedBlack0 to piece type " + capturedBlackPieces[0] + ", image is null: " + (pieceImgB == null);
-        chessScreen.capturedBlack0 = pieceImgB; 
+        chessScreen.capturedBlack0 = call getNormalPiece(capturedBlackPieces[0], BLACK); 
     } else { chessScreen.capturedBlack0 = transparentClear; }
     if capturedBlackCount > 1 then { chessScreen.capturedBlack1 = call getNormalPiece(capturedBlackPieces[1], BLACK); } else { chessScreen.capturedBlack1 = transparentClear; }
     if capturedBlackCount > 2 then { chessScreen.capturedBlack2 = call getNormalPiece(capturedBlackPieces[2], BLACK); } else { chessScreen.capturedBlack2 = transparentClear; }
@@ -1329,15 +1320,12 @@ handleCellClick(x: int, y: int) {
             var capturedPieceColor: int = WHITE;
             
             // Check if this is a capture move and store captured piece info
-            print "DEBUG: destCellValue = " + destCellValue;
             if destCellValue != -1 then {
                 var destCell = ChessCell(destCellValue);
-                print "DEBUG: destCell.pieceType = " + destCell.pieceType + ", EMPTY = " + EMPTY;
                 if destCell.pieceType != EMPTY then {
                     isCapture = true;
                     capturedPieceType = destCell.pieceType;
                     capturedPieceColor = destCell.pieceColor;
-                    print "DEBUG: About to call addCapturedPiece with type=" + capturedPieceType + ", color=" + capturedPieceColor;
                     // Track the captured piece for display
                     call addCapturedPiece(capturedPieceType, capturedPieceColor);
                 }
