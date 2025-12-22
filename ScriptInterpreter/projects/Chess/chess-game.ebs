@@ -310,7 +310,9 @@ function updateCapturedPiecesDisplay() {
     
     // Update right side (captured black pieces) - use explicit slot assignments
     if capturedBlackCount > 0 then { 
-        chessScreen.capturedBlack0 = call getNormalPiece(capturedBlackPieces[0], BLACK); 
+        var img: imagedata = call getNormalPiece(capturedBlackPieces[0], BLACK);
+        print "[ASSIGN] Assigning capturedBlack0 - pieceType: " + capturedBlackPieces[0] + ", img null? " + (img == null);
+        chessScreen.capturedBlack0 = img; 
     } else { chessScreen.capturedBlack0 = transparentClear; }
     if capturedBlackCount > 1 then { chessScreen.capturedBlack1 = call getNormalPiece(capturedBlackPieces[1], BLACK); } else { chessScreen.capturedBlack1 = transparentClear; }
     if capturedBlackCount > 2 then { chessScreen.capturedBlack2 = call getNormalPiece(capturedBlackPieces[2], BLACK); } else { chessScreen.capturedBlack2 = transparentClear; }
