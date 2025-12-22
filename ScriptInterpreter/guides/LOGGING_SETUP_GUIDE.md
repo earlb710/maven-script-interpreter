@@ -121,6 +121,35 @@ debug.traceon();
 debug.traceoff();
 ```
 
+### debug.linesWritten()
+
+Returns the total number of log lines written since the debugger was created or since the last reset.
+
+```ebs
+var count: long = call debug.linesWritten();
+print "Total lines logged: " + string.tostr(count);
+```
+
+**Returns:** `LONG` - The total number of lines written
+
+**Notes:**
+- Counter is maintained per script execution (per Environment/Debugger instance)
+- Counter increments for each call to `debug.log()`, `debugWriteStart()`, and `debugWriteEnd()`
+- Includes lines written to both files and console
+
+### debug.resetLineCount()
+
+Resets the line counter back to zero.
+
+```ebs
+call debug.resetLineCount();
+var count: long = call debug.linesWritten();  // Will be 0
+```
+
+**Notes:**
+- Useful for measuring log output for specific sections of code
+- Does not affect the actual log file content, only the internal counter
+
 ### echo.on() / echo.off()
 
 Controls whether console commands and script output are echoed to the console.
@@ -328,13 +357,34 @@ debug.log("DEBUG", "Detailed debug information here");
 debug.on();
 
 // Create log file with date in filename
-string logFileName = "logs/app-" + date.now("yyyy-MM-dd") + ".log";
+var logFileName: string = "logs/app-" + date.now("yyyy-MM-dd") + ".log";
 debug.file(logFileName);
 
 debug.log("INFO", "Logging to: " + logFileName);
 ```
 
-### Pattern 6: Screen Event Logging
+### Pattern 6: Tracking Log Volume
+
+```ebs
+call debug.on();
+call debug.file("logs/app.log");
+
+// Reset counter at start
+call debug.resetLineCount();
+
+// Your application code with logging
+for var i: int = 0; i < recordCount; i++ {
+    call debug.log("DEBUG", "Processing record " + string.tostr(i));
+    call processRecord(i);
+}
+
+// Report how many lines were logged
+var linesLogged: long = call debug.linesWritten();
+call debug.log("INFO", "Total log lines written: " + string.tostr(linesLogged));
+print "Logged " + string.tostr(linesLogged) + " lines to file";
+```
+
+### Pattern 7: Screen Event Logging
 
 ```ebs
 // In a screen event handler
