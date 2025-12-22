@@ -174,6 +174,9 @@ public class AreaContainerFactory {
             applyAlignment(container, areaDef.alignment);
         }
 
+        // Apply size constraints (width/height min/pref/max)
+        applySizeConstraints(container, areaDef);
+
         // Apply layout configuration if provided
         if (areaDef.layout != null && !areaDef.layout.isEmpty()) {
             applyLayoutConfiguration(container, areaDef.layout);
@@ -660,6 +663,68 @@ public class AreaContainerFactory {
             updateStyleProperty(container, "-fx-alignment", toCssAlignment(alignment));
         }
         // Other container types don't have a direct alignment property
+    }
+
+    /**
+     * Applies size constraints (width and height min/pref/max) from AreaDefinition to the container.
+     * These constraints control how the container sizes itself within its parent layout.
+     */
+    private static void applySizeConstraints(Region container, AreaDefinition areaDef) {
+        // Apply width constraints
+        if (areaDef.minWidth != null && !areaDef.minWidth.isEmpty()) {
+            try {
+                double minWidth = Double.parseDouble(areaDef.minWidth);
+                container.setMinWidth(minWidth);
+            } catch (NumberFormatException e) {
+                System.err.println("Warning: Invalid minWidth value '" + areaDef.minWidth + "'");
+            }
+        }
+        
+        if (areaDef.prefWidth != null && !areaDef.prefWidth.isEmpty()) {
+            try {
+                double prefWidth = Double.parseDouble(areaDef.prefWidth);
+                container.setPrefWidth(prefWidth);
+            } catch (NumberFormatException e) {
+                System.err.println("Warning: Invalid prefWidth value '" + areaDef.prefWidth + "'");
+            }
+        }
+        
+        if (areaDef.maxWidth != null && !areaDef.maxWidth.isEmpty()) {
+            try {
+                double maxWidth = Double.parseDouble(areaDef.maxWidth);
+                container.setMaxWidth(maxWidth);
+            } catch (NumberFormatException e) {
+                System.err.println("Warning: Invalid maxWidth value '" + areaDef.maxWidth + "'");
+            }
+        }
+        
+        // Apply height constraints
+        if (areaDef.minHeight != null && !areaDef.minHeight.isEmpty()) {
+            try {
+                double minHeight = Double.parseDouble(areaDef.minHeight);
+                container.setMinHeight(minHeight);
+            } catch (NumberFormatException e) {
+                System.err.println("Warning: Invalid minHeight value '" + areaDef.minHeight + "'");
+            }
+        }
+        
+        if (areaDef.prefHeight != null && !areaDef.prefHeight.isEmpty()) {
+            try {
+                double prefHeight = Double.parseDouble(areaDef.prefHeight);
+                container.setPrefHeight(prefHeight);
+            } catch (NumberFormatException e) {
+                System.err.println("Warning: Invalid prefHeight value '" + areaDef.prefHeight + "'");
+            }
+        }
+        
+        if (areaDef.maxHeight != null && !areaDef.maxHeight.isEmpty()) {
+            try {
+                double maxHeight = Double.parseDouble(areaDef.maxHeight);
+                container.setMaxHeight(maxHeight);
+            } catch (NumberFormatException e) {
+                System.err.println("Warning: Invalid maxHeight value '" + areaDef.maxHeight + "'");
+            }
+        }
     }
 
     /**
