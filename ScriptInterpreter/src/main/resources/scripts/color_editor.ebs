@@ -592,6 +592,10 @@ function buildDefaultProfileColorsJson(pName: string) return string {
 
 // Function: Update a profile in the in-memory profiles object with current screen values
 function updateProfileInMemory(targetProfile: string) {
+    // Extract function color using bracket notation before string building to avoid parser issues
+    var funcColor: string = "";
+    call screen.get(colorEditorScreen, "function", funcColor);
+    
     // Build the colors JSON for the current screen values incrementally to avoid parser issues
     var colorsStr: string = "{";
     colorsStr = colorsStr + "\"info\": \"" + colorEditorScreen.info + "\", ";
@@ -604,7 +608,7 @@ function updateProfileInMemory(targetProfile: string) {
     colorsStr = colorsStr + "\"data\": \"" + colorEditorScreen.data + "\", ";
     colorsStr = colorsStr + "\"keyword\": \"" + colorEditorScreen.keyword + "\", ";
     colorsStr = colorsStr + "\"builtin\": \"" + colorEditorScreen.builtin + "\", ";
-    colorsStr = colorsStr + "\"function\": \"" + colorEditorScreen["function"] + "\", ";
+    colorsStr = colorsStr + "\"function\": \"" + funcColor + "\", ";
     colorsStr = colorsStr + "\"jsonkey\": \"" + colorEditorScreen.jsonkey + "\", ";
     colorsStr = colorsStr + "\"literal\": \"" + colorEditorScreen.literal + "\", ";
     colorsStr = colorsStr + "\"identifier\": \"" + colorEditorScreen.identifier + "\", ";
