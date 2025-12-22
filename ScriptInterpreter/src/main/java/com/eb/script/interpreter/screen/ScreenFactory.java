@@ -5099,6 +5099,17 @@ public class ScreenFactory {
 
         // Extract area name (required)
         area.name = getStringValue(areaDef, "name", "area");
+        
+        // DEBUG: Print all keys in areaDef for capturedWhiteContainer and capturedBlackContainer
+        if (area.name != null && (area.name.equals("capturedWhiteContainer") || area.name.equals("capturedBlackContainer"))) {
+            System.out.println("DEBUG parseAreaDefinition: area name = " + area.name);
+            System.out.println("  areaDef keys: " + areaDef.keySet());
+            System.out.println("  minHeight key present? " + areaDef.containsKey("minHeight"));
+            System.out.println("  minheight key present? " + areaDef.containsKey("minheight"));
+            if (areaDef.containsKey("minHeight")) {
+                System.out.println("  minHeight value: " + areaDef.get("minHeight"));
+            }
+        }
 
         // Extract area type and convert to enum
         String typeStr = getStringValue(areaDef, "type", "pane");
