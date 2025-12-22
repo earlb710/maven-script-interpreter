@@ -176,12 +176,13 @@ public class ConsoleConfig {
         defaultColors.put("code", "white");
         defaultColors.put("datatype", "#D070FF");
         defaultColors.put("data", "pink");
-        defaultColors.put("keyword", "#00FFFF");
-        defaultColors.put("builtin", "#99e0e0");
+        defaultColors.put("keyword", "#569CD6");
+        defaultColors.put("builtin", "#DCDCAA");
         defaultColors.put("literal", "blue");
         defaultColors.put("identifier", "white");
         defaultColors.put("sql", "#00ee66");
         defaultColors.put("custom", "#eeee90");
+        defaultColors.put("function", "#FFB86C");
         defaultColors.put("background", "#000000");
         defaultColors.put("text", "#e6e6e6");
         defaultColors.put("caret", "white");
@@ -327,6 +328,45 @@ public class ConsoleConfig {
                 css.append("    -fx-background-color: transparent !important;\n");
                 css.append("}\n\n");
             }
+        }
+        
+        // Add syntax highlighting token mappings from console.cfg colors to tok-* classes
+        // These map console.cfg color names to the CSS classes used by the syntax highlighter
+        if (colors.containsKey("keyword")) {
+            String keywordColor = colors.get("keyword");
+            css.append("/* Syntax highlighting: keywords (from console.cfg 'keyword' color) */\n");
+            css.append(".tok-keyword,\n");
+            css.append(".text.tok-keyword,\n");
+            css.append(".styled-text-area .text.tok-keyword,\n");
+            css.append(".editor-ebs .text.tok-keyword,\n");
+            css.append(".editor-text .text.tok-keyword {\n");
+            css.append("    -fx-fill: ").append(keywordColor).append(" !important;\n");
+            css.append("    -fx-font-weight: bold;\n");
+            css.append("}\n\n");
+        }
+        
+        if (colors.containsKey("builtin")) {
+            String builtinColor = colors.get("builtin");
+            css.append("/* Syntax highlighting: builtins (from console.cfg 'builtin' color) */\n");
+            css.append(".tok-builtin,\n");
+            css.append(".text.tok-builtin,\n");
+            css.append(".styled-text-area .text.tok-builtin,\n");
+            css.append(".editor-ebs .text.tok-builtin,\n");
+            css.append(".editor-text .text.tok-builtin {\n");
+            css.append("    -fx-fill: ").append(builtinColor).append(" !important;\n");
+            css.append("}\n\n");
+        }
+        
+        if (colors.containsKey("function")) {
+            String functionColor = colors.get("function");
+            css.append("/* Syntax highlighting: custom functions (from console.cfg 'function' color) */\n");
+            css.append(".tok-custom-function,\n");
+            css.append(".text.tok-custom-function,\n");
+            css.append(".styled-text-area .text.tok-custom-function,\n");
+            css.append(".editor-ebs .text.tok-custom-function,\n");
+            css.append(".editor-text .text.tok-custom-function {\n");
+            css.append("    -fx-fill: ").append(functionColor).append(" !important;\n");
+            css.append("}\n\n");
         }
         
         // Find highlighting styles - these override all other text styles
