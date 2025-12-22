@@ -1,0 +1,17 @@
+// Test script to verify error when creating timer with qualified name for non-existent screen
+// This should throw an error
+
+print "=== Testing Timer Error: Invalid Screen Name ===";
+print "";
+print "Attempting to create timer with qualified name for non-existent screen...";
+print "Expected: Error should be thrown";
+print "";
+
+timerCallback(timerName: string) {
+    print "Timer fired";
+}
+
+// This should fail with error message about screen not existing
+call thread.timerStart("nonExistentScreen.timer1", 1000, "timerCallback");
+
+print "ERROR: Should not reach this line!";

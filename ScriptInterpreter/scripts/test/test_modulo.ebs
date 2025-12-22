@@ -1,0 +1,39 @@
+// Test script for modulo operator (%)
+print("Testing modulo operator in EBS");
+print("================================");
+
+// Test 1: Basic modulo
+var a: int = 10;
+var b: int = 3;
+var result: int = a % b;
+print("10 % 3 = " + result);
+
+// Test 2: Even check
+var num: int = 17;
+if num % 2 == 0 then {
+    print(num + " is even");
+} else {
+    print(num + " is odd");
+}
+
+// Test 3: Modulo with different data types
+var x: long = 1000000;
+var y: long = 7;
+print("1000000 % 7 = " + (x % y));
+
+var f1: double = 15.5;
+var f2: double = 4.0;
+print("15.5 % 4.0 = " + (f1 % f2));
+
+// Test 4: Use in loop
+print("Numbers 0-20 divisible by 5:");
+var i: int = 0;
+while i <= 20 {
+    if i % 5 == 0 then {
+        print("  " + i);
+    }
+    i = i + 1;
+}
+
+print("");
+print("All modulo tests completed successfully!");

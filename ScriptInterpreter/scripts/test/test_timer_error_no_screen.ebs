@@ -1,0 +1,17 @@
+// Test script to verify error when creating timer outside screen without qualified name
+// This should throw an error
+
+print "=== Testing Timer Error: No Screen Context ===";
+print "";
+print "Attempting to create timer outside screen without qualified name...";
+print "Expected: Error should be thrown";
+print "";
+
+timerCallback(timerName: string) {
+    print "Timer fired";
+}
+
+// This should fail with error message about needing qualified name
+call thread.timerStart("timer1", 1000, "timerCallback");
+
+print "ERROR: Should not reach this line!";

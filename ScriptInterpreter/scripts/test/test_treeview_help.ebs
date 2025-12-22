@@ -1,0 +1,31 @@
+// Test TreeView help functions
+call println("=== Testing TreeView Help Functions ===");
+call println("");
+
+// Test icon functions
+call println("Help for scr.setTreeItemIcon:");
+call system.help("scr.setTreeItemIcon");
+call println("");
+
+call println("Help for scr.setTreeItemIcons:");
+call system.help("scr.setTreeItemIcons");
+call println("");
+
+call println("Help for scr.getTreeItemIcon:");
+call system.help("scr.getTreeItemIcon");
+call println("");
+
+// Test styling functions
+call println("Help for scr.setTreeItemBold:");
+call system.help("scr.setTreeItemBold");
+call println("");
+
+call println("Help for scr.setTreeItemItalic:");
+call system.help("scr.setTreeItemItalic");
+call println("");
+
+call println("Help for scr.setTreeItemColor:");
+call system.help("scr.setTreeItemColor");
+call println("");
+
+call println("=== All TreeView help entries loaded successfully ===");

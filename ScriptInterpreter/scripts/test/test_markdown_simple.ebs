@@ -1,0 +1,44 @@
+// Simple markdown to HTML test (no GUI required)
+
+// Test 1: Basic markdown
+var markdown1: string = "# Hello World\n\nThis is **bold** and this is *italic*.\n\n## List\n\n- Item 1\n- Item 2";
+var html1: string = call file.markdownToHtml(markdown1);
+
+print "=== Test 1: Basic Markdown ===";
+print "Input:";
+print markdown1;
+print "";
+print "Output (first 200 chars):";
+print call string.substring(html1, 0, 200);
+print "...";
+print "";
+
+// Test 2: Without styles
+var html2: string = call file.markdownToHtml(markdown1, false);
+print "=== Test 2: Without Styles ===";
+print "Output:";
+print html2;
+print "";
+
+// Test 3: Read and convert actual guide file
+var guidePath: string = "ScriptInterpreter/guides/FUNCTIONS_IMPORTS_QUICK_REF.md";
+if call file.exists(guidePath) then {
+    print "=== Test 3: Convert Guide File ===";
+    var mdContent: string = call file.readTextFile(guidePath);
+    var guideHtml: string = call file.markdownToHtml(mdContent);
+    
+    // Save to file
+    var outputPath: string = "/tmp/quick_ref.html";
+    var success: bool = call file.writeTextFile(outputPath, guideHtml);
+    
+    if success then {
+        print "Successfully converted guide to HTML";
+        print "Saved to: " + outputPath;
+        var fileSize: long = call file.size(outputPath);
+        print "Output file size: " + fileSize + " bytes";
+    } else {
+        print "Failed to save HTML file";
+    }
+} else {
+    print "Guide file not found: " + guidePath;
+}

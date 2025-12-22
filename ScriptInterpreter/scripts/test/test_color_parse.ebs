@@ -1,0 +1,157 @@
+// Test script to verify color properties are parsed correctly
+// This script does not show screens, just creates them and prints confirmation
+
+print "=== Screen Item Color Properties Parsing Test ===";
+print "";
+
+// Test 1: Create a screen with all color properties
+print "TEST 1: Creating screen with all color properties...";
+
+screen colorTest = {
+    "title": "Color Properties Test",
+    "width": 600,
+    "height": 500,
+    "sets": [
+        {
+            "setname": "main",
+            "vars": [
+                {
+                    "name": "field1",
+                    "type": "string",
+                    "default": "Test",
+                    "display": {
+                        "type": "textfield",
+                        "labelText": "Field 1:",
+                        "labelColor": "#FF0000",
+                        "labelBackgroundColor": "#FFFF00",
+                        "textColor": "#0000FF",
+                        "labelPosition": "left"
+                    }
+                },
+                {
+                    "name": "field2",
+                    "type": "string",
+                    "default": "Test",
+                    "display": {
+                        "type": "textfield",
+                        "labelText": "Field 2:",
+                        "labelColor": "#00FF00",
+                        "labelBackgroundColor": "#FFE0E0",
+                        "itemColor": "#FF00FF",
+                        "labelPosition": "left"
+                    }
+                }
+            ]
+        }
+    ],
+    "areas": [
+        {
+            "areaname": "main_area",
+            "containerType": "vbox",
+            "items": [
+                {"name": "field1", "varRef": "field1"},
+                {"name": "field2", "varRef": "field2"}
+            ]
+        }
+    ]
+};
+
+print "✓ Screen created successfully with labelColor and labelBackgroundColor";
+print "";
+
+// Test 2: Snake_case property names
+print "TEST 2: Creating screen with snake_case property names...";
+
+screen snakeCaseTest = {
+    "title": "Snake Case Test",
+    "width": 500,
+    "height": 300,
+    "sets": [
+        {
+            "setname": "main",
+            "vars": [
+                {
+                    "name": "field_snake",
+                    "type": "string",
+                    "default": "Test",
+                    "display": {
+                        "type": "textfield",
+                        "labelText": "Field:",
+                        "label_color": "#800000",
+                        "label_background_color": "#FFFFCC",
+                        "text_color": "#000080",
+                        "labelPosition": "left"
+                    }
+                }
+            ]
+        }
+    ],
+    "areas": [
+        {
+            "areaname": "main_area",
+            "containerType": "vbox",
+            "items": [
+                {"name": "field_snake", "varRef": "field_snake"}
+            ]
+        }
+    ]
+};
+
+print "✓ Screen created successfully with snake_case properties";
+print "";
+
+// Test 3: Item-level color properties
+print "TEST 3: Creating screen with item-level color overrides...";
+
+screen itemLevelTest = {
+    "title": "Item Level Test",
+    "width": 500,
+    "height": 300,
+    "sets": [
+        {
+            "setname": "main",
+            "vars": [
+                {
+                    "name": "base_field",
+                    "type": "string",
+                    "default": "Test",
+                    "display": {
+                        "type": "textfield",
+                        "labelText": "Field:",
+                        "labelColor": "#000000",
+                        "labelBackgroundColor": "#E0E0E0",
+                        "textColor": "#000000",
+                        "labelPosition": "left"
+                    }
+                }
+            ]
+        }
+    ],
+    "areas": [
+        {
+            "areaname": "main_area",
+            "containerType": "vbox",
+            "items": [
+                {
+                    "name": "base_field", 
+                    "varRef": "base_field",
+                    "textColor": "#FF0000",
+                    "backgroundColor": "#FFFFE0"
+                }
+            ]
+        }
+    ]
+};
+
+print "✓ Screen created successfully with item-level property overrides";
+print "";
+
+print "=== All Tests Passed ===";
+print "";
+print "Summary of Color Properties Successfully Parsed:";
+print "1. labelColor - Label text color (camelCase and snake_case)";
+print "2. labelBackgroundColor - Label background color (camelCase and snake_case) [NEW]";
+print "3. textColor / itemColor - Item/control text color";
+print "4. backgroundColor - Item/control background color";
+print "";
+print "All properties were parsed without errors!";

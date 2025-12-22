@@ -1,0 +1,131 @@
+// Test script for button shortcut property
+// This script creates a screen with buttons that have keyboard shortcuts
+
+screen testButtonShortcut = {
+    "title": "Button Shortcut Test",
+    "width": 500,
+    "height": 450,
+    "areas": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "10",
+            "padding": "20"
+        }
+    ],
+    "vars": [
+        {
+            "name": "message",
+            "type": "string",
+            "default": "No button clicked yet",
+            "area": "mainArea",
+            "display": {
+                "type": "label",
+                "labelText": "Status Message",
+                "itemColor": "#0066cc",
+                "labelBold": true
+            }
+        },
+        {
+            "name": "separator1",
+            "type": "string",
+            "default": "",
+            "area": "mainArea",
+            "display": {
+                "type": "separator"
+            }
+        },
+        {
+            "name": "saveButton",
+            "type": "string",
+            "default": "",
+            "area": "mainArea",
+            "display": {
+                "type": "button",
+                "labelText": "Save",
+                "shortcut": "Alt+S",
+                "onClick": "message = 'Save button clicked! (Alt+S)';"
+            }
+        },
+        {
+            "name": "loadButton",
+            "type": "string",
+            "default": "",
+            "area": "mainArea",
+            "display": {
+                "type": "button",
+                "labelText": "Load",
+                "shortcut": "Alt+L",
+                "onClick": "message = 'Load button clicked! (Alt+L)';"
+            }
+        },
+        {
+            "name": "runButton",
+            "type": "string",
+            "default": "",
+            "area": "mainArea",
+            "display": {
+                "type": "button",
+                "labelText": "Run",
+                "shortcut": "Ctrl+R",
+                "onClick": "message = 'Run button clicked! (Ctrl+R)';"
+            }
+        },
+        {
+            "name": "exportButton",
+            "type": "string",
+            "default": "",
+            "area": "mainArea",
+            "display": {
+                "type": "button",
+                "labelText": "Export",
+                "shortcut": "Alt+E",
+                "onClick": "message = 'Export button clicked! (Alt+E)';"
+            }
+        },
+        {
+            "name": "separator2",
+            "type": "string",
+            "default": "",
+            "area": "mainArea",
+            "display": {
+                "type": "separator"
+            }
+        },
+        {
+            "name": "exitButton",
+            "type": "string",
+            "default": "",
+            "area": "mainArea",
+            "display": {
+                "type": "button",
+                "labelText": "Exit",
+                "shortcut": "Alt+X",
+                "onClick": "close screen testButtonShortcut;"
+            }
+        }
+    ]
+};
+
+print "=================================================================";
+print "Button Shortcut Test";
+print "=================================================================";
+print "";
+print "This test demonstrates the new button shortcut property.";
+print "";
+print "Available shortcuts:";
+print "  - Alt+S : Save";
+print "  - Alt+L : Load";
+print "  - Ctrl+R : Run";
+print "  - Alt+E : Export";
+print "  - Alt+X : Exit";
+print "";
+print "Notice:";
+print "  - Buttons show underlined characters (S̲ave, L̲oad, etc.)";
+print "  - Tooltips display the keyboard shortcuts";
+print "  - Pressing the shortcuts activates the buttons";
+print "";
+print "=================================================================";
+print "";
+
+show screen testButtonShortcut;

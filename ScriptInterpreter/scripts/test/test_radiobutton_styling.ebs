@@ -1,0 +1,47 @@
+// Test RadioButton styling with itemColor, itemBold, and itemFontSize
+screen testRadioScreen = {
+    "title": "RadioButton Styling Test",
+    "width": 500,
+    "height": 400,
+    "showMenu": false,
+    "vars": [
+        {
+            "name": "testMode",
+            "type": "string",
+            "default": "2",
+            "display": {
+                "type": "radiobutton",
+                "labelText": "Test Mode (styled white bold):",
+                "labelColor": "#ffcc00",
+                "labelFontSize": "14px",
+                "labelBold": true,
+                "options": ["1:Option 1", "2:Option 2", "3:Option 3"],
+                "itemColor": "#ffffff",
+                "itemBold": true,
+                "itemFontSize": "14px"
+            }
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "alignment": "center",
+            "spacing": "20",
+            "padding": "20",
+            "style": "-fx-background-color: #2c2c2c;",
+            "items": [
+                {"name": "testModeRadio", "varRef": "testMode"},
+                {"name": "closeBtn", "display": {"type": "button", "labelText": "Close", "onClick": "close screen testRadioScreen;", "style": "-fx-font-size: 14px; -fx-padding: 10 30 10 30;"}}
+            ]
+        }
+    ]
+};
+
+print "Test RadioButton Styling";
+print "========================";
+print "This test demonstrates RadioButton option text styling.";
+print "The radio button options should be white and bold.";
+print "";
+
+show screen testRadioScreen;

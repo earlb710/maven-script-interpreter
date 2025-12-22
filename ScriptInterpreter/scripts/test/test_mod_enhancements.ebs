@@ -1,0 +1,49 @@
+// Test script for modulo enhancements: "mod" keyword and %= operator
+print("Testing modulo enhancements");
+print("============================");
+
+// Test 1: Using "mod" keyword instead of %
+var a: int = 10;
+var b: int = 3;
+var result1: int = a mod b;
+print("10 mod 3 = " + result1);
+
+// Test 2: Using % operator (should still work)
+var result2: int = a % b;
+print("10 % 3 = " + result2);
+
+// Test 3: Using %= compound assignment
+var x: int = 17;
+print("x = " + x);
+x %= 5;
+print("After x %= 5: x = " + x);
+
+// Test 4: %= with different types
+var y: long = 100;
+y %= 7;
+print("100 %= 7: y = " + y);
+
+var z: double = 15.5;
+z %= 4.0;
+print("15.5 %= 4.0: z = " + z);
+
+// Test 5: Mix mod keyword with %= operator
+var count: int = 25;
+if count mod 2 == 1 then {
+    print(count + " is odd");
+    count %= 10;
+    print("After count %= 10: count = " + count);
+}
+
+// Test 6: Use in loop
+print("Numbers where i mod 3 == 0:");
+var i: int = 0;
+while i < 15 {
+    if i mod 3 == 0 then {
+        print("  " + i);
+    }
+    i = i + 1;
+}
+
+print("");
+print("All modulo enhancement tests completed!");
