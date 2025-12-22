@@ -9,8 +9,8 @@ This guide explains how to add new syntax highlighting colors to the EBS Script 
 3. **CSS** - Define visual appearance (color, weight, style)
 
 **Related Documentation:**
-- [ARCHITECTURE.md](../../ARCHITECTURE.md) - System architecture
-- [EBS_SCRIPT_SYNTAX.md](../../EBS_SCRIPT_SYNTAX.md) - Language syntax
+- [ARCHITECTURE.md](../../docs/ARCHITECTURE.md) - System architecture
+- [EBS_SCRIPT_SYNTAX.md](../../docs/EBS_SCRIPT_SYNTAX.md) - Language syntax
 
 ---
 
@@ -497,7 +497,7 @@ textArea.setStyleClass(otherStart, otherEnd, "bracket-match");
 
 ### Console-Specific Styling
 
-The console has two lexers:
+The console uses two lexer instances:
 - `lexer` - for general EBS code
 - `lexerConsole` - for console commands
 
@@ -524,8 +524,8 @@ To add a new syntax highlighting color:
 - Document your changes
 
 For more information, see:
-- [ARCHITECTURE.md](../../ARCHITECTURE.md) - Overall system design
-- [EBS_SCRIPT_SYNTAX.md](../../EBS_SCRIPT_SYNTAX.md) - Language syntax
+- [ARCHITECTURE.md](../../docs/ARCHITECTURE.md) - Overall system design
+- [EBS_SCRIPT_SYNTAX.md](../../docs/EBS_SCRIPT_SYNTAX.md) - Language syntax
 - [RichTextFX Documentation](https://github.com/FXMisc/RichTextFX) - Text area library
 
 ---
