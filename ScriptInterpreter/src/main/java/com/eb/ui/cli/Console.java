@@ -4,6 +4,7 @@ import com.eb.ui.ebs.EbsStyled;
 import com.eb.ui.util.ButtonShortcutHelper;
 import com.eb.script.interpreter.InterpreterError;
 import com.eb.script.parser.ParseError;
+import com.eb.script.parser.Parser;
 import com.eb.script.token.ebs.EbsToken;
 import com.eb.util.Util;
 import java.io.UnsupportedEncodingException;
@@ -173,7 +174,7 @@ public final class Console {
         
         Button btnReset = new Button(" Reset ");
         btnReset.setOnAction(e -> resetConsole());
-        Tooltip resetTooltip = new Tooltip("Clear console, close all screens, stop all threads, and clear all globals");
+        Tooltip resetTooltip = new Tooltip("Clear console, close all screens, stop all threads, clear all globals, and clear parse cache");
         resetTooltip.setShowDelay(javafx.util.Duration.millis(500));
         btnReset.setTooltip(resetTooltip);
         ButtonShortcutHelper.addAltShortcut(btnReset, KeyCode.R);
@@ -443,7 +444,7 @@ public final class Console {
 
     /**
      * Reset the console by clearing output, closing all screens, stopping all threads,
-     * and clearing all global variables.
+     * clearing all global variables, and clearing the parse cache.
      */
     private void resetConsole() {
         // Ensure we're on the JavaFX thread
@@ -506,12 +507,15 @@ public final class Console {
                     }
                 }
                 
+                // Clear the parse cache
+                Parser.clearParseCache();
+                
                 // Clear console output and input
                 outputArea.clear();
                 inputArea.clear();
                 
                 // Print confirmation message
-                outputArea.printlnOk("Console reset: output cleared, screens closed, threads stopped, globals cleared.");
+                outputArea.printlnOk("Console reset: output cleared, screens closed, threads stopped, globals cleared, parse cache cleared.");
             } else {
                 outputArea.printlnWarn("Cannot perform full reset: handler type not supported.");
             }

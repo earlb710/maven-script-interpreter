@@ -8,6 +8,7 @@ import com.eb.script.interpreter.builtins.Builtins;
 import com.eb.script.interpreter.InterpreterError;
 import com.eb.script.json.Json;
 import com.eb.script.parser.ParseError;
+import com.eb.script.parser.Parser;
 import com.eb.ui.cli.ScriptArea;
 import com.eb.ui.tabs.TabContext;
 import com.eb.util.Util;
@@ -610,6 +611,9 @@ public class EbsConsoleHandler extends EbsHandler {
             }
             callBuiltin("file.writeTextFile", contex.path.toString(), tab.getEditorText());
             tab.markCleanTitle();
+            
+            // Remove from parse cache since the file has been edited
+            Parser.removeFromParseCache(contex.path);
         } catch (Exception ex) {
             submitErrors("Save failed: " + ex.getMessage());
         }
@@ -691,6 +695,9 @@ public class EbsConsoleHandler extends EbsHandler {
                     if (newPath.getFileName() != null) {
                         tab.setText(newPath.getFileName().toString());
                     }
+                    
+                    // Remove from parse cache since the file has been edited
+                    Parser.removeFromParseCache(newPath);
                 }
             }
         } catch (Exception ex) {
@@ -851,6 +858,9 @@ public class EbsConsoleHandler extends EbsHandler {
                         callBuiltin("file.writeTextFile", context.path.toString(), tab.getEditorText());
                         tab.markCleanTitle();
                         addRecentFile(context.path);
+                        
+                        // Remove from parse cache since the file has been edited
+                        Parser.removeFromParseCache(context.path);
                     } catch (Exception ex) {
                         submitErrors("Save failed: " + ex.getMessage());
                         return false; // Don't close if save failed
