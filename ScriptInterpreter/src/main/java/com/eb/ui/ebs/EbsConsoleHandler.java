@@ -610,6 +610,9 @@ public class EbsConsoleHandler extends EbsHandler {
             }
             callBuiltin("file.writeTextFile", contex.path.toString(), tab.getEditorText());
             tab.markCleanTitle();
+            
+            // Remove from parse cache since the file has been edited
+            com.eb.script.parser.Parser.removeFromParseCache(contex.path);
         } catch (Exception ex) {
             submitErrors("Save failed: " + ex.getMessage());
         }
@@ -691,6 +694,9 @@ public class EbsConsoleHandler extends EbsHandler {
                     if (newPath.getFileName() != null) {
                         tab.setText(newPath.getFileName().toString());
                     }
+                    
+                    // Remove from parse cache since the file has been edited
+                    com.eb.script.parser.Parser.removeFromParseCache(newPath);
                 }
             }
         } catch (Exception ex) {
@@ -851,6 +857,9 @@ public class EbsConsoleHandler extends EbsHandler {
                         callBuiltin("file.writeTextFile", context.path.toString(), tab.getEditorText());
                         tab.markCleanTitle();
                         addRecentFile(context.path);
+                        
+                        // Remove from parse cache since the file has been edited
+                        com.eb.script.parser.Parser.removeFromParseCache(context.path);
                     } catch (Exception ex) {
                         submitErrors("Save failed: " + ex.getMessage());
                         return false; // Don't close if save failed

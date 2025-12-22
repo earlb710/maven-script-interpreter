@@ -143,6 +143,20 @@ public class Parser {
     public static void clearParseCache() {
         parseCache.clear();
     }
+    
+    /**
+     * Remove a specific file from the parse cache. This should be called when a file
+     * is edited and saved to ensure it will be re-parsed on the next import or execution.
+     * 
+     * @param file The file path to remove from the cache
+     */
+    public static void removeFromParseCache(Path file) {
+        if (file != null) {
+            Path normalizedPath = file.toAbsolutePath().normalize();
+            String cacheKey = normalizedPath.toString();
+            parseCache.remove(cacheKey);
+        }
+    }
 
     /**
      * Parse a script from a string.
