@@ -8,6 +8,8 @@ This guide explains how to add new syntax highlighting colors to the EBS Script 
 2. **TokenType** - Map tokens to styles (token type definitions)
 3. **CSS** - Define visual appearance (color, weight, style)
 
+**Scope Note:** This guide covers **visual syntax highlighting only** (lexer-based token coloring in the UI). It does NOT cover the Parser or Interpreter, which handle code execution and semantic analysis. Adding new highlighting colors requires no changes to Parser or Interpreter code.
+
 **Related Documentation:**
 - [ARCHITECTURE.md](../../docs/ARCHITECTURE.md) - System architecture
 - [EBS_SCRIPT_SYNTAX.md](../../docs/EBS_SCRIPT_SYNTAX.md) - Language syntax
@@ -50,8 +52,12 @@ console.css (visual rendering)
 | **PrintStyle** | `src/main/java/com/eb/script/token/PrintStyle.java` | Enum defining semantic style names |
 | **EbsTokenType** | `src/main/java/com/eb/script/token/ebs/EbsTokenType.java` | Enum mapping token types to PrintStyle |
 | **EbsToken** | `src/main/java/com/eb/script/token/ebs/EbsToken.java` | Token class containing style information |
-| **EbsStyled** | `src/main/java/com/eb/ui/ebs/EbsStyled.java` | Applies styles to text areas |
+| **EbsLexer** | `src/main/java/com/eb/script/token/ebs/EbsLexer.java` | Tokenizes text and generates styled tokens |
+| **EbsTab** | `src/main/java/com/eb/ui/ebs/EbsTab.java` | Applies lexer-generated styles to editor |
+| **EbsStyled** | `src/main/java/com/eb/ui/ebs/EbsStyled.java` | Utility methods for style application |
 | **console.css** | `src/main/resources/css/console.css` | CSS definitions for colors and formatting |
+
+**Important Note:** Syntax highlighting is a **lexical/UI concern only**. The Parser and Interpreter are NOT involved in the highlighting process. They handle code execution, not visual styling. Adding new highlighting colors requires no changes to Parser or Interpreter code.
 
 ---
 
