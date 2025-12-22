@@ -83,6 +83,7 @@ if configIsValid == false then {
         defaultConfig = defaultConfig + "      \"keyword\": \"#569CD6\",\n";
         defaultConfig = defaultConfig + "      \"builtin\": \"#DCDCAA\",\n";
         defaultConfig = defaultConfig + "      \"function\": \"#FFB86C\",\n";
+        defaultConfig = defaultConfig + "      \"jsonkey\": \"#4EC9B0\",\n";
         defaultConfig = defaultConfig + "      \"literal\": \"blue\",\n";
         defaultConfig = defaultConfig + "      \"identifier\": \"white\",\n";
         defaultConfig = defaultConfig + "      \"sql\": \"#00ee66\",\n";
@@ -145,6 +146,7 @@ if call json.isempty(config) then {
         defaultConfig2 = defaultConfig2 + "      \"keyword\": \"#569CD6\",\n";
         defaultConfig2 = defaultConfig2 + "      \"builtin\": \"#DCDCAA\",\n";
         defaultConfig2 = defaultConfig2 + "      \"function\": \"#FFB86C\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"jsonkey\": \"#4EC9B0\",\n";
         defaultConfig2 = defaultConfig2 + "      \"literal\": \"blue\",\n";
         defaultConfig2 = defaultConfig2 + "      \"identifier\": \"white\",\n";
         defaultConfig2 = defaultConfig2 + "      \"sql\": \"#00ee66\",\n";
@@ -417,6 +419,7 @@ if dataColor == "" then { dataColor = defaultDataColor; }
 if keywordColor == "" then { keywordColor = defaultKeywordColor; }
 if builtinColor == "" then { builtinColor = defaultBuiltinColor; }
 if functionColor == "" then { functionColor = defaultFunctionColor; }
+if jsonkeyColor == "" then { jsonkeyColor = defaultJsonkeyColor; }
 if literalColor == "" then { literalColor = defaultLiteralColor; }
 if identifierColor == "" then { identifierColor = defaultIdentifierColor; }
 if sqlColor == "" then { sqlColor = defaultSqlColor; }
@@ -563,6 +566,7 @@ function buildDefaultProfileColorsJson(pName: string) return string {
     colorsJson = colorsJson + "      \"keyword\": \"" + defaultKeywordColor + "\",\n";
     colorsJson = colorsJson + "      \"builtin\": \"" + defaultBuiltinColor + "\",\n";
     colorsJson = colorsJson + "      \"function\": \"" + defaultFunctionColor + "\",\n";
+    colorsJson = colorsJson + "      \"jsonkey\": \"" + defaultJsonkeyColor + "\",\n";
     colorsJson = colorsJson + "      \"literal\": \"" + defaultLiteralColor + "\",\n";
     colorsJson = colorsJson + "      \"identifier\": \"" + defaultIdentifierColor + "\",\n";
     colorsJson = colorsJson + "      \"sql\": \"" + defaultSqlColor + "\",\n";
@@ -1101,6 +1105,7 @@ function addProfileToConfig(newProfileName: string) {
     profilesStr = profilesStr + "      \"keyword\": \"" + defaultKeywordColor + "\",\n";
     profilesStr = profilesStr + "      \"builtin\": \"" + defaultBuiltinColor + "\",\n";
     profilesStr = profilesStr + "      \"function\": \"" + defaultFunctionColor + "\",\n";
+    profilesStr = profilesStr + "      \"jsonkey\": \"" + defaultJsonkeyColor + "\",\n";
     profilesStr = profilesStr + "      \"literal\": \"" + defaultLiteralColor + "\",\n";
     profilesStr = profilesStr + "      \"identifier\": \"" + defaultIdentifierColor + "\",\n";
     profilesStr = profilesStr + "      \"sql\": \"" + defaultSqlColor + "\",\n";
@@ -1166,6 +1171,7 @@ function onProfileChange {
         var pKeyword: string = call json.getstring(profileColors, "keyword", "");
         var pBuiltin: string = call json.getstring(profileColors, "builtin", "");
         var pFunction: string = call json.getstring(profileColors, "function", "");
+        var pJsonkey: string = call json.getstring(profileColors, "jsonkey", "");
         var pLiteral: string = call json.getstring(profileColors, "literal", "");
         var pIdentifier: string = call json.getstring(profileColors, "identifier", "");
         var pSql: string = call json.getstring(profileColors, "sql", "");
