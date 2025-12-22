@@ -5100,9 +5100,12 @@ public class ScreenFactory {
         // Extract area name (required)
         area.name = getStringValue(areaDef, "name", "area");
         
-        // DEBUG: Print all keys in areaDef for capturedWhiteContainer and capturedBlackContainer
+        // DEBUG: Print ALL area names to see what's being parsed
+        System.out.println("DEBUG parseAreaDefinition: parsing area name = '" + area.name + "'");
+        
+        // DEBUG: Print detailed info for captured pieces containers
         if (area.name != null && (area.name.equals("capturedWhiteContainer") || area.name.equals("capturedBlackContainer"))) {
-            System.out.println("DEBUG parseAreaDefinition: area name = " + area.name);
+            System.out.println("  *** FOUND TARGET AREA: " + area.name + " ***");
             System.out.println("  areaDef keys: " + areaDef.keySet());
             System.out.println("  minHeight key present? " + areaDef.containsKey("minHeight"));
             System.out.println("  minheight key present? " + areaDef.containsKey("minheight"));
