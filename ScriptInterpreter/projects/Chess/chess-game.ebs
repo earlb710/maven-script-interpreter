@@ -1623,39 +1623,32 @@ formatElapsedTime() return string {
 // Note: This callback is already executed on JavaFX Platform.runLater by thread.timerStart
 timerCallback(timerName: string) {
     // Only update if game has started - exit early if not
-    if !gameStarted then {
-        return;
-    }
-    
-    // Safety check for null values
-    if initialTimerValue == null then {
-        print "Warning: initialTimerValue is null in timerCallback";
-        return;
-    }
-    
-    // If unlimited time is selected, don't decrement the timer
-    if initialTimerValue >= UNLIMITED_TIME * 10 then {
-        return;
-    }
-    
-    // Decrement the active player's timer by 1 decisecond (0.1 seconds)
-    if currentPlayer == 0 then {
-        // White's turn
-        if timerWhite > 0 then {
-            timerWhite = timerWhite - 1;
-            var timerText: string = call formatTimerDecimal(timerWhite);
-            
-            // Update screen variable which is bound to the label via varRef
-            chessScreen.whiteTimer = timerText;
-        }
-    } else {
-        // Black's turn
-        if timerBlack > 0 then {
-            timerBlack = timerBlack - 1;
-            var timerText: string = call formatTimerDecimal(timerBlack);
-            
-            // Update screen variable which is bound to the label via varRef
-            chessScreen.blackTimer = timerText;
+    if gameStarted then {
+        // Safety check for null values
+        if initialTimerValue != null then {
+            // Only process timer updates if not unlimited time
+            if initialTimerValue < UNLIMITED_TIME * 10 then {
+                // Decrement the active player's timer by 1 decisecond (0.1 seconds)
+                if currentPlayer == 0 then {
+                    // White's turn
+                    if timerWhite > 0 then {
+                        timerWhite = timerWhite - 1;
+                        var timerText: string = call formatTimerDecimal(timerWhite);
+                        
+                        // Update screen variable which is bound to the label via varRef
+                        chessScreen.whiteTimer = timerText;
+                    }
+                } else {
+                    // Black's turn
+                    if timerBlack > 0 then {
+                        timerBlack = timerBlack - 1;
+                        var timerText: string = call formatTimerDecimal(timerBlack);
+                        
+                        // Update screen variable which is bound to the label via varRef
+                        chessScreen.blackTimer = timerText;
+                    }
+                }
+            }
         }
     }
 }
