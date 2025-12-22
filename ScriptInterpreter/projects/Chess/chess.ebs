@@ -109,14 +109,11 @@ print "==============================================";
 print "";
 
 // Load piece images once at startup (used throughout the game)
-print "Loading normal and yellow piece images...";
 call loadPieceImages();
 
 // Show startup dialog first
 // All game initialization happens in handleStartGame() when user clicks Start
-print "Loading chess logo...";
 startupDialog.logo = call image.load(imgPath + "chess_logo.svg");
-print "Showing startup dialog...";
 show screen startupDialog;
 
 // Initially disable difficulty selection (default is 2 Player mode)

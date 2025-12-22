@@ -3464,16 +3464,11 @@ public class ScreenFactory {
         BorderPane screenRoot = new BorderPane();
         
         // Only add menu bar if showMenu is true
-        System.out.println("    About to check showMenu flag...");
-        System.out.println("    showMenu = " + showMenu);
         if (showMenu) {
-            System.out.println("    ADDING MENU BAR (showMenu is true)");
             javafx.scene.control.MenuBar menuBar = createScreenMenuBar(stage);
             screenRoot.setTop(menuBar);
             // Store the MenuBar reference for dynamic menu manipulation
             screenMenuBars.put(screenName.toLowerCase(), menuBar);
-        } else {
-            System.out.println("    NOT ADDING MENU BAR (showMenu is false)");
         }
         
         screenRoot.setCenter(scrollPane);
