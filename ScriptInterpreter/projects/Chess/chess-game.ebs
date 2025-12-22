@@ -1627,6 +1627,12 @@ timerCallback(timerName: string) {
         return;
     }
     
+    // Safety check for null values
+    if initialTimerValue == null then {
+        print "Warning: initialTimerValue is null in timerCallback";
+        return;
+    }
+    
     // If unlimited time is selected, don't decrement the timer
     if initialTimerValue >= UNLIMITED_TIME * 10 then {
         return;
