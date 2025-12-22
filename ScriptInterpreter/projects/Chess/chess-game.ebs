@@ -2856,7 +2856,6 @@ screen chessScreen = {
                             "maxHeight": "530",
                             "style": "-fx-background-color: #3c3c3c; -fx-background-radius: 5; -fx-alignment: top-center;",
                             "items": [
-                                {"name": "capturedWhiteTitle", "display": {"type": "label", "labelText": "⬜", "labelColor": "#ffffff", "labelFontSize": "12px", "labelBold": true, "style": "-fx-alignment: center;"}},
                                 {"name": "captPieceW0", "varRef": "capturedWhite0", "display": {"type": "image", "fitWidth": 30, "fitHeight": 30, "preserveRatio": true}},
                                 {"name": "captPieceW1", "varRef": "capturedWhite1", "display": {"type": "image", "fitWidth": 30, "fitHeight": 30, "preserveRatio": true}},
                                 {"name": "captPieceW2", "varRef": "capturedWhite2", "display": {"type": "image", "fitWidth": 30, "fitHeight": 30, "preserveRatio": true}},
@@ -3146,7 +3145,6 @@ screen chessScreen = {
                     "maxHeight": "530",
                     "style": "-fx-background-color: #3c3c3c; -fx-background-radius: 5; -fx-alignment: top-center;",
                     "items": [
-                        {"name": "capturedBlackTitle", "display": {"type": "label", "labelText": "⬛", "labelColor": "#ffffff", "labelFontSize": "12px", "labelBold": true, "style": "-fx-alignment: center;"}},
                         {"name": "captPieceB0", "varRef": "capturedBlack0", "display": {"type": "image", "fitWidth": 30, "fitHeight": 30, "preserveRatio": true}},
                         {"name": "captPieceB1", "varRef": "capturedBlack1", "display": {"type": "image", "fitWidth": 30, "fitHeight": 30, "preserveRatio": true}},
                         {"name": "captPieceB2", "varRef": "capturedBlack2", "display": {"type": "image", "fitWidth": 30, "fitHeight": 30, "preserveRatio": true}},
