@@ -1323,12 +1323,15 @@ handleCellClick(x: int, y: int) {
             var capturedPieceColor: int = WHITE;
             
             // Check if this is a capture move and store captured piece info
+            print "[DEBUG] destCellValue = " + destCellValue;
             if destCellValue != -1 then {
                 var destCell = ChessCell(destCellValue);
+                print "[DEBUG] destCell.pieceType = " + destCell.pieceType + ", EMPTY = " + EMPTY;
                 if destCell.pieceType != EMPTY then {
                     isCapture = true;
                     capturedPieceType = destCell.pieceType;
                     capturedPieceColor = destCell.pieceColor;
+                    print "[DEBUG] About to call addCapturedPiece with type=" + capturedPieceType + ", color=" + capturedPieceColor;
                     // Track the captured piece for display
                     call addCapturedPiece(capturedPieceType, capturedPieceColor);
                 }
