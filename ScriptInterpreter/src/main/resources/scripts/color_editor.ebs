@@ -592,40 +592,8 @@ function buildDefaultProfileColorsJson(pName: string) return string {
 
 // Function: Update a profile in the in-memory profiles object with current screen values
 function updateProfileInMemory(targetProfile: string) {
-    // Build the colors JSON for the current screen values incrementally
-    // Use bracket notation for "function" (reserved keyword), dot notation for others
-    var colorsStr: string = "{";
-    colorsStr = colorsStr + "\"info\": \"" + colorEditorScreen.info + "\", ";
-    colorsStr = colorsStr + "\"comment\": \"" + colorEditorScreen.comment + "\", ";
-    colorsStr = colorsStr + "\"error\": \"" + colorEditorScreen.error + "\", ";
-    colorsStr = colorsStr + "\"warn\": \"" + colorEditorScreen.warn + "\", ";
-    colorsStr = colorsStr + "\"ok\": \"" + colorEditorScreen.ok + "\", ";
-    colorsStr = colorsStr + "\"code\": \"" + colorEditorScreen.code + "\", ";
-    colorsStr = colorsStr + "\"datatype\": \"" + colorEditorScreen.datatype + "\", ";
-    colorsStr = colorsStr + "\"data\": \"" + colorEditorScreen.data + "\", ";
-    colorsStr = colorsStr + "\"keyword\": \"" + colorEditorScreen.keyword + "\", ";
-    colorsStr = colorsStr + "\"builtin\": \"" + colorEditorScreen.builtin + "\", ";
-    colorsStr = colorsStr + "\"function\": \"" + colorEditorScreen["function"] + "\", ";
-    colorsStr = colorsStr + "\"jsonkey\": \"" + colorEditorScreen.jsonkey + "\", ";
-    colorsStr = colorsStr + "\"literal\": \"" + colorEditorScreen.literal + "\", ";
-    colorsStr = colorsStr + "\"identifier\": \"" + colorEditorScreen.identifier + "\", ";
-    colorsStr = colorsStr + "\"sql\": \"" + colorEditorScreen.sql + "\", ";
-    colorsStr = colorsStr + "\"custom\": \"" + colorEditorScreen.custom + "\", ";
-    colorsStr = colorsStr + "\"background\": \"" + colorEditorScreen.background + "\", ";
-    colorsStr = colorsStr + "\"text\": \"" + colorEditorScreen.text + "\", ";
-    colorsStr = colorsStr + "\"caret\": \"" + colorEditorScreen.caret + "\", ";
-    colorsStr = colorsStr + "\"line-cursor\": \"" + colorEditorScreen.lineCursor + "\", ";
-    colorsStr = colorsStr + "\"line-numbers\": \"" + colorEditorScreen.lineNumbers + "\", ";
-    colorsStr = colorsStr + "\"console-background\": \"" + colorEditorScreen.consoleBackground + "\", ";
-    colorsStr = colorsStr + "\"tab-background\": \"" + colorEditorScreen.tabBackground + "\", ";
-    colorsStr = colorsStr + "\"tab-label-color\": \"" + colorEditorScreen.tabLabelColor + "\", ";
-    colorsStr = colorsStr + "\"tab-label-changed-color\": \"" + colorEditorScreen.tabLabelChangedColor + "\", ";
-    colorsStr = colorsStr + "\"tab-label-background\": \"" + colorEditorScreen.tabLabelBackground + "\", ";
-    colorsStr = colorsStr + "\"find-highlight-color\": \"" + colorEditorScreen.findHighlightColor + "\", ";
-    colorsStr = colorsStr + "\"find-highlight-background\": \"" + colorEditorScreen.findHighlightBackground + "\", ";
-    colorsStr = colorsStr + "\"current-find-highlight-bg\": \"" + colorEditorScreen.currentFindHighlightBg + "\", ";
-    colorsStr = colorsStr + "\"tab-select\": \"" + colorEditorScreen.tabSelect + "\", ";
-    colorsStr = colorsStr + "\"tab-content\": \"" + colorEditorScreen.tabContent + "\"}";
+    // Build the colors JSON for the current screen values
+    var colorsStr: string = "{\"info\": \"" + colorEditorScreen.info + "\", \"comment\": \"" + colorEditorScreen.comment + "\", \"error\": \"" + colorEditorScreen.error + "\", \"warn\": \"" + colorEditorScreen.warn + "\", \"ok\": \"" + colorEditorScreen.ok + "\", \"code\": \"" + colorEditorScreen.code + "\", \"datatype\": \"" + colorEditorScreen.datatype + "\", \"data\": \"" + colorEditorScreen.data + "\", \"keyword\": \"" + colorEditorScreen.keyword + "\", \"builtin\": \"" + colorEditorScreen.builtin + "\", \"function\": \"" + colorEditorScreen["function"] + "\", \"jsonkey\": \"" + colorEditorScreen.jsonkey + "\", \"literal\": \"" + colorEditorScreen.literal + "\", \"identifier\": \"" + colorEditorScreen.identifier + "\", \"sql\": \"" + colorEditorScreen.sql + "\", \"custom\": \"" + colorEditorScreen.custom + "\", \"background\": \"" + colorEditorScreen.background + "\", \"text\": \"" + colorEditorScreen.text + "\", \"caret\": \"" + colorEditorScreen.caret + "\", \"line-cursor\": \"" + colorEditorScreen.lineCursor + "\", \"line-numbers\": \"" + colorEditorScreen.lineNumbers + "\", \"console-background\": \"" + colorEditorScreen.consoleBackground + "\", \"tab-background\": \"" + colorEditorScreen.tabBackground + "\", \"tab-label-color\": \"" + colorEditorScreen.tabLabelColor + "\", \"tab-label-changed-color\": \"" + colorEditorScreen.tabLabelChangedColor + "\", \"tab-label-background\": \"" + colorEditorScreen.tabLabelBackground + "\", \"find-highlight-color\": \"" + colorEditorScreen.findHighlightColor + "\", \"find-highlight-background\": \"" + colorEditorScreen.findHighlightBackground + "\", \"current-find-highlight-bg\": \"" + colorEditorScreen.currentFindHighlightBg + "\", \"tab-select\": \"" + colorEditorScreen.tabSelect + "\", \"tab-content\": \"" + colorEditorScreen.tabContent + "\"}";
     
     // Parse to JSON and update the in-memory profiles object
     var colorsJson: json = call json.jsonFromString(colorsStr);
