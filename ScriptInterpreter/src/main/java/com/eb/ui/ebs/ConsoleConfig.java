@@ -183,7 +183,6 @@ public class ConsoleConfig {
         defaultColors.put("sql", "#00ee66");
         defaultColors.put("custom", "#eeee90");
         defaultColors.put("function", "#FFB86C");
-        defaultColors.put("jsonkey", "#4EC9B0");
         defaultColors.put("background", "#000000");
         defaultColors.put("text", "#e6e6e6");
         defaultColors.put("caret", "white");
@@ -367,18 +366,6 @@ public class ConsoleConfig {
             css.append(".editor-ebs .text.tok-custom-function,\n");
             css.append(".editor-text .text.tok-custom-function {\n");
             css.append("    -fx-fill: ").append(functionColor).append(" !important;\n");
-            css.append("}\n\n");
-        }
-        
-        if (colors.containsKey("jsonkey")) {
-            String jsonkeyColor = colors.get("jsonkey");
-            css.append("/* Syntax highlighting: JSON keys (from console.cfg 'jsonkey' color) */\n");
-            css.append(".tok-jsonkey,\n");
-            css.append(".text.tok-jsonkey,\n");
-            css.append(".styled-text-area .text.tok-jsonkey,\n");
-            css.append(".editor-ebs .text.tok-jsonkey,\n");
-            css.append(".editor-text .text.tok-jsonkey {\n");
-            css.append("    -fx-fill: ").append(jsonkeyColor).append(" !important;\n");
             css.append("}\n\n");
         }
         
