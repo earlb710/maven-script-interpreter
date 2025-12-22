@@ -261,6 +261,7 @@ function getYellowPiece(pieceType: int, pieceColor: int) return imagedata {
 
 // Add a captured piece to the tracking arrays
 function addCapturedPiece(pieceType: int, pieceColor: int) {
+    print "[CAPTURE] Piece captured - Type: " + pieceType + ", Color: " + pieceColor;
     if pieceColor == WHITE then {
         // White piece captured by black - add to left side
         if capturedWhiteCount < 16 then {
@@ -284,6 +285,8 @@ function updateCapturedPiecesDisplay() {
         print "Warning: transparentClear is null, skipping captured pieces update";
         return;
     }
+    
+    print "[UPDATE] Updating display - White pieces captured: " + capturedWhiteCount + ", Black pieces captured: " + capturedBlackCount;
     
     // Update left side (captured white pieces) - use explicit slot assignments
     if capturedWhiteCount > 0 then { 
