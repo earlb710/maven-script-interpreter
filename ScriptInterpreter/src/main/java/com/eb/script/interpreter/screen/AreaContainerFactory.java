@@ -670,23 +670,11 @@ public class AreaContainerFactory {
      * These constraints control how the container sizes itself within its parent layout.
      */
     private static void applySizeConstraints(Region container, AreaDefinition areaDef) {
-        // Debug logging to see what's happening
-        String areaName = areaDef.name != null ? areaDef.name : "unnamed";
-        System.out.println("DEBUG: applySizeConstraints called for area: " + areaName);
-        System.out.println("  Container type: " + container.getClass().getSimpleName());
-        System.out.println("  AreaDef minWidth: " + areaDef.minWidth);
-        System.out.println("  AreaDef prefWidth: " + areaDef.prefWidth);
-        System.out.println("  AreaDef maxWidth: " + areaDef.maxWidth);
-        System.out.println("  AreaDef minHeight: " + areaDef.minHeight);
-        System.out.println("  AreaDef prefHeight: " + areaDef.prefHeight);
-        System.out.println("  AreaDef maxHeight: " + areaDef.maxHeight);
-        
         // Apply width constraints
         if (areaDef.minWidth != null && !areaDef.minWidth.isEmpty()) {
             try {
                 double minWidth = Double.parseDouble(areaDef.minWidth);
                 container.setMinWidth(minWidth);
-                System.out.println("  -> Set minWidth to: " + minWidth);
             } catch (NumberFormatException e) {
                 System.err.println("Warning: Invalid minWidth value '" + areaDef.minWidth + "'");
             }
@@ -696,7 +684,6 @@ public class AreaContainerFactory {
             try {
                 double prefWidth = Double.parseDouble(areaDef.prefWidth);
                 container.setPrefWidth(prefWidth);
-                System.out.println("  -> Set prefWidth to: " + prefWidth);
             } catch (NumberFormatException e) {
                 System.err.println("Warning: Invalid prefWidth value '" + areaDef.prefWidth + "'");
             }
@@ -706,7 +693,6 @@ public class AreaContainerFactory {
             try {
                 double maxWidth = Double.parseDouble(areaDef.maxWidth);
                 container.setMaxWidth(maxWidth);
-                System.out.println("  -> Set maxWidth to: " + maxWidth);
             } catch (NumberFormatException e) {
                 System.err.println("Warning: Invalid maxWidth value '" + areaDef.maxWidth + "'");
             }
@@ -717,7 +703,6 @@ public class AreaContainerFactory {
             try {
                 double minHeight = Double.parseDouble(areaDef.minHeight);
                 container.setMinHeight(minHeight);
-                System.out.println("  -> Set minHeight to: " + minHeight);
             } catch (NumberFormatException e) {
                 System.err.println("Warning: Invalid minHeight value '" + areaDef.minHeight + "'");
             }
@@ -727,7 +712,6 @@ public class AreaContainerFactory {
             try {
                 double prefHeight = Double.parseDouble(areaDef.prefHeight);
                 container.setPrefHeight(prefHeight);
-                System.out.println("  -> Set prefHeight to: " + prefHeight);
             } catch (NumberFormatException e) {
                 System.err.println("Warning: Invalid prefHeight value '" + areaDef.prefHeight + "'");
             }
@@ -737,20 +721,10 @@ public class AreaContainerFactory {
             try {
                 double maxHeight = Double.parseDouble(areaDef.maxHeight);
                 container.setMaxHeight(maxHeight);
-                System.out.println("  -> Set maxHeight to: " + maxHeight);
             } catch (NumberFormatException e) {
                 System.err.println("Warning: Invalid maxHeight value '" + areaDef.maxHeight + "'");
             }
         }
-        
-        // Verify what was actually set
-        System.out.println("  Final container values:");
-        System.out.println("    minWidth: " + container.getMinWidth());
-        System.out.println("    prefWidth: " + container.getPrefWidth());
-        System.out.println("    maxWidth: " + container.getMaxWidth());
-        System.out.println("    minHeight: " + container.getMinHeight());
-        System.out.println("    prefHeight: " + container.getPrefHeight());
-        System.out.println("    maxHeight: " + container.getMaxHeight());
     }
 
     /**
