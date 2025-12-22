@@ -80,6 +80,8 @@ public class Parser {
     private static EbsLexer lexer = new EbsLexer();
     // Cache for parsed files to avoid re-parsing the same file multiple times
     private static final Map<String, RuntimeContext> parseCache = new ConcurrentHashMap<>();
+    // Thread-local to track whether current parsing is for an import (to control echo output)
+    private static final ThreadLocal<Boolean> isParsingImport = ThreadLocal.withInitial(() -> false);
     private final List<EbsToken> tokens;
     private int current;
     private EbsToken currToken;
@@ -126,9 +128,11 @@ public class Parser {
         // Validate all imports before returning
         validateImports(ret, new HashSet<>());
         
-        // Echo total number of lines parsed
-        int totalLines = tokens.isEmpty() ? 0 : tokens.get(tokens.size() - 1).line;
-        System.out.println("Parsed " + totalLines + " lines from " + file.getFileName());
+        // Echo total number of lines parsed (only for imports, not main files)
+        if (isParsingImport.get()) {
+            int totalLines = tokens.isEmpty() ? 0 : tokens.get(tokens.size() - 1).line;
+            System.out.println("Parsed " + totalLines + " lines from " + file.getFileName());
+        }
         
         // Cache the parsed result
         parseCache.put(cacheKey, ret);
@@ -142,6 +146,26 @@ public class Parser {
      */
     public static void clearParseCache() {
         parseCache.clear();
+    }
+    
+    /**
+     * Check if currently parsing an import file.
+     * Used internally to control echo output.
+     * 
+     * @return true if currently parsing an import, false otherwise
+     */
+    public static boolean isParsingImport() {
+        return isParsingImport.get();
+    }
+    
+    /**
+     * Set whether currently parsing an import file.
+     * Used internally to control echo output.
+     * 
+     * @param parsing true if parsing an import, false otherwise
+     */
+    public static void setParsingImport(boolean parsing) {
+        isParsingImport.set(parsing);
     }
     
     /**
@@ -171,9 +195,11 @@ public class Parser {
         parser.parse();
         RuntimeContext ret = new RuntimeContext(name, parser.blocks, statementsToArray(parser.statements));
         
-        // Echo total number of lines parsed
-        int totalLines = tokens.isEmpty() ? 0 : tokens.get(tokens.size() - 1).line;
-        System.out.println("Parsed " + totalLines + " lines from " + name);
+        // Echo total number of lines parsed (only for imports, not main files)
+        if (isParsingImport.get()) {
+            int totalLines = tokens.isEmpty() ? 0 : tokens.get(tokens.size() - 1).line;
+            System.out.println("Parsed " + totalLines + " lines from " + name);
+        }
         
         return ret;
     }
@@ -190,9 +216,11 @@ public class Parser {
         context.blocks = parser.blocks;
         context.statements = statementsToArray(parser.statements);
         
-        // Echo total number of lines parsed
-        int totalLines = tokens.isEmpty() ? 0 : tokens.get(tokens.size() - 1).line;
-        System.out.println("Parsed " + totalLines + " lines");
+        // Echo total number of lines parsed (only for imports, not main files)
+        if (isParsingImport.get()) {
+            int totalLines = tokens.isEmpty() ? 0 : tokens.get(tokens.size() - 1).line;
+            System.out.println("Parsed " + totalLines + " lines");
+        }
     }
 
     /**
@@ -210,9 +238,11 @@ public class Parser {
         context.blocks = parser.blocks;
         context.statements = statementsToArray(parser.statements);
         
-        // Echo total number of lines parsed
-        int totalLines = tokens.isEmpty() ? 0 : tokens.get(tokens.size() - 1).line;
-        System.out.println("Parsed " + totalLines + " lines from " + (sourcePath != null ? sourcePath.getFileName() : "source"));
+        // Echo total number of lines parsed (only for imports, not main files)
+        if (isParsingImport.get()) {
+            int totalLines = tokens.isEmpty() ? 0 : tokens.get(tokens.size() - 1).line;
+            System.out.println("Parsed " + totalLines + " lines from " + (sourcePath != null ? sourcePath.getFileName() : "source"));
+        }
     }
     
     private Parser(String source, List<EbsToken> tokens, Path sourcePath, Set<String> importedFiles) {
@@ -645,7 +675,15 @@ public class Parser {
             // Note: We discard the returned RuntimeContext because we only need the side effect
             // of registering typedefs. The imported code will be executed later at runtime by the Interpreter.
             try {
-                Parser.parse(importPath);
+                // Set flag to indicate we're parsing an import (for echo control)
+                boolean wasParsingImport = isParsingImport.get();
+                isParsingImport.set(true);
+                try {
+                    Parser.parse(importPath);
+                } finally {
+                    // Restore the previous state
+                    isParsingImport.set(wasParsingImport);
+                }
             } catch (ParseError e) {
                 // Re-throw with context about which import failed
                 throw new ParseError("[line " + line + "] Failed to parse import '" + filename + "': " + e.getMessage());
@@ -3711,7 +3749,16 @@ public class Parser {
                 
                 try {
                     // Parse the imported file to validate its syntax
-                    RuntimeContext importContext = Parser.parse(importPath);
+                    // Set flag to indicate we're parsing an import (for echo control)
+                    boolean wasParsingImport = isParsingImport.get();
+                    isParsingImport.set(true);
+                    RuntimeContext importContext;
+                    try {
+                        importContext = Parser.parse(importPath);
+                    } finally {
+                        // Restore the previous state
+                        isParsingImport.set(wasParsingImport);
+                    }
                     
                     // Recursively validate imports in the imported file
                     validateImports(importContext, visitedFiles);
