@@ -2853,10 +2853,10 @@ screen chessScreen = {
                             "type": "vbox",
                             "spacing": "0",
                             "padding": "10",
-                            "minWidth": "624",
-                            "maxWidth": "624",
-                            "minHeight": "624",
-                            "maxHeight": "624",
+                            "minWidth": "550",
+                            "maxWidth": "550",
+                            "minHeight": "550",
+                            "maxHeight": "550",
                             "style": "-fx-background-color: $COLOR_BG_BOARD; -fx-background-radius: 5;",
                             "areas": [
                                 {
