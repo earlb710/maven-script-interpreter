@@ -863,6 +863,7 @@ function saveConfigWithCurrentProfile {
         profilesStr = profilesStr + "      \"keyword\": \"" + pKeyword + "\",\n";
         profilesStr = profilesStr + "      \"builtin\": \"" + pBuiltin + "\",\n";
         profilesStr = profilesStr + "      \"function\": \"" + pFunction + "\",\n";
+        profilesStr = profilesStr + "      \"jsonkey\": \"" + pJsonkey + "\",\n";
         profilesStr = profilesStr + "      \"literal\": \"" + pLiteral + "\",\n";
         profilesStr = profilesStr + "      \"identifier\": \"" + pIdentifier + "\",\n";
         profilesStr = profilesStr + "      \"sql\": \"" + pSql + "\",\n";
@@ -1065,6 +1066,7 @@ function addProfileToConfig(newProfileName: string) {
         profilesStr = profilesStr + "      \"keyword\": \"" + pKeyword + "\",\n";
         profilesStr = profilesStr + "      \"builtin\": \"" + pBuiltin + "\",\n";
         profilesStr = profilesStr + "      \"function\": \"" + pFunction + "\",\n";
+        profilesStr = profilesStr + "      \"jsonkey\": \"" + pJsonkey + "\",\n";
         profilesStr = profilesStr + "      \"literal\": \"" + pLiteral + "\",\n";
         profilesStr = profilesStr + "      \"identifier\": \"" + pIdentifier + "\",\n";
         profilesStr = profilesStr + "      \"sql\": \"" + pSql + "\",\n";
@@ -1715,6 +1717,15 @@ screen colorEditorScreen = {
             "display": {
                 "type": "colorpicker",
                 "labelText": "Function Color:"
+            }
+        },
+        {
+            "name": "jsonkey",
+            "type": "string",
+            "default": $jsonkeyColor,
+            "display": {
+                "type": "colorpicker",
+                "labelText": "JSON Key Color:"
             }
         },
         {
