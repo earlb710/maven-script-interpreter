@@ -261,7 +261,6 @@ function getYellowPiece(pieceType: int, pieceColor: int) return imagedata {
 
 // Add a captured piece to the tracking arrays
 function addCapturedPiece(pieceType: int, pieceColor: int) {
-    print "[CAPTURE] Piece captured - Type: " + pieceType + ", Color: " + pieceColor;
     if pieceColor == WHITE then {
         // White piece captured by black - add to left side
         if capturedWhiteCount < 16 then {
@@ -286,8 +285,6 @@ function updateCapturedPiecesDisplay() {
         return;
     }
     
-    print "[UPDATE] Updating display - White pieces captured: " + capturedWhiteCount + ", Black pieces captured: " + capturedBlackCount;
-    
     // Update left side (captured white pieces) - use explicit slot assignments
     if capturedWhiteCount > 0 then { 
         chessScreen.capturedWhite0 = call getNormalPiece(capturedWhitePieces[0], WHITE); 
@@ -310,9 +307,7 @@ function updateCapturedPiecesDisplay() {
     
     // Update right side (captured black pieces) - use explicit slot assignments
     if capturedBlackCount > 0 then { 
-        var img: imagedata = call getNormalPiece(capturedBlackPieces[0], BLACK);
-        print "[ASSIGN] Assigning capturedBlack0 - pieceType: " + capturedBlackPieces[0] + ", img null? " + (img == null);
-        chessScreen.capturedBlack0 = img; 
+        chessScreen.capturedBlack0 = call getNormalPiece(capturedBlackPieces[0], BLACK); 
     } else { chessScreen.capturedBlack0 = transparentClear; }
     if capturedBlackCount > 1 then { chessScreen.capturedBlack1 = call getNormalPiece(capturedBlackPieces[1], BLACK); } else { chessScreen.capturedBlack1 = transparentClear; }
     if capturedBlackCount > 2 then { chessScreen.capturedBlack2 = call getNormalPiece(capturedBlackPieces[2], BLACK); } else { chessScreen.capturedBlack2 = transparentClear; }
@@ -329,6 +324,9 @@ function updateCapturedPiecesDisplay() {
     if capturedBlackCount > 13 then { chessScreen.capturedBlack13 = call getNormalPiece(capturedBlackPieces[13], BLACK); } else { chessScreen.capturedBlack13 = transparentClear; }
     if capturedBlackCount > 14 then { chessScreen.capturedBlack14 = call getNormalPiece(capturedBlackPieces[14], BLACK); } else { chessScreen.capturedBlack14 = transparentClear; }
     if capturedBlackCount > 15 then { chessScreen.capturedBlack15 = call getNormalPiece(capturedBlackPieces[15], BLACK); } else { chessScreen.capturedBlack15 = transparentClear; }
+    
+    // Refresh the screen to update the UI with the new captured piece images
+    call scr.refreshScreen("chessscreen");
 }
 
 // Clear captured pieces (for new game)
@@ -1325,15 +1323,12 @@ handleCellClick(x: int, y: int) {
             var capturedPieceColor: int = WHITE;
             
             // Check if this is a capture move and store captured piece info
-            print "[DEBUG] destCellValue = " + destCellValue;
             if destCellValue != -1 then {
                 var destCell = ChessCell(destCellValue);
-                print "[DEBUG] destCell.pieceType = " + destCell.pieceType + ", EMPTY = " + EMPTY;
                 if destCell.pieceType != EMPTY then {
                     isCapture = true;
                     capturedPieceType = destCell.pieceType;
                     capturedPieceColor = destCell.pieceColor;
-                    print "[DEBUG] About to call addCapturedPiece with type=" + capturedPieceType + ", color=" + capturedPieceColor;
                     // Track the captured piece for display
                     call addCapturedPiece(capturedPieceType, capturedPieceColor);
                 }

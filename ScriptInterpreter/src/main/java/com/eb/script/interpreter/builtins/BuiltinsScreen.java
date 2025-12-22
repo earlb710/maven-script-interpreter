@@ -228,6 +228,47 @@ public class BuiltinsScreen {
     }
 
     /**
+     * scr.refreshScreen(screenName?) -> BOOL
+     * Refreshes all bound controls on a screen, updating their displayed values from the current variable values.
+     * This is useful when screen variables are modified and you want to immediately update the UI.
+     * If screenName is null or empty, uses the current screen from context.
+     * Returns true on success.
+     */
+    public static Object screenRefresh(InterpreterContext context, Object[] args) throws InterpreterError {
+        String screenName = (args.length > 0 && args[0] != null) ? (String) args[0] : null;
+
+        // If no screen name provided, determine from thread context
+        if (screenName == null || screenName.isEmpty()) {
+            screenName = context.getCurrentScreen();
+            if (screenName == null) {
+                throw new InterpreterError(
+                        "scr.refreshScreen: No screen name specified and not executing in a screen context. "
+                        + "Provide a screen name or call from within screen event handlers.");
+            }
+        }
+        
+        // Normalize screen name to lowercase to match how screens are stored
+        screenName = screenName.toLowerCase();
+
+        // Check if screen exists
+        if (!context.getScreens().containsKey(screenName)) {
+            throw new InterpreterError("scr.refreshScreen: Screen '" + screenName + "' does not exist or has not been shown yet.");
+        }
+
+        // Get the refresh callback for the screen
+        Runnable refreshCallback = context.getScreenRefreshCallbacks().get(screenName);
+        if (refreshCallback == null) {
+            // Screen exists but has no refresh callback (no bound controls)
+            return true;
+        }
+
+        // Execute the refresh callback on the JavaFX Application Thread
+        javafx.application.Platform.runLater(refreshCallback);
+        
+        return true;
+    }
+
+    /**
      * scr.showMenu(screenName?) -> BOOL
      * Shows the menu bar at the top of a screen.
      * If screenName is null or empty, uses the current screen from context.
