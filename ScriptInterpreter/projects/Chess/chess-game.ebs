@@ -2802,7 +2802,7 @@ screen chessScreen = {
                     "type": "hbox",
                     "spacing": "0",
                     "padding": "0",
-                    "style": "-fx-background-color: $COLOR_BG_MAIN;",
+                    "style": "-fx-background-color: $COLOR_BG_MAIN; -fx-fill-height: false;",
                     "areas": [
                         {
                             "name": "capturedWhiteContainer",
