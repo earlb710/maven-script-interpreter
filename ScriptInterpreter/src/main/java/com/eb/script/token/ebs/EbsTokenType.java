@@ -56,7 +56,7 @@ public enum EbsTokenType implements LexerToken {
     IDENTIFIER(PrintStyle.INFO, ""),
     BUILTIN(PrintStyle.BUILTIN, ""),
     DATATYPE(PrintStyle.DATATYPE, ""),
-    NULL(Category.KEYWORD, "null"), //null
+    NULL(PrintStyle.KEYWORD, Category.KEYWORD, "null"), //null
     // Boolean Operators
     BOOL_TRUE(PrintStyle.DATA, Category.KEYWORD, "true"), //true
     BOOL_FALSE(PrintStyle.DATA, Category.KEYWORD, "false"), //false
