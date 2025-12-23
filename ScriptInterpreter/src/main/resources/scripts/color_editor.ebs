@@ -87,7 +87,7 @@ if configIsValid == false then {
         defaultConfig = defaultConfig + "      \"sql\": \"#00ee66\",\n";
         defaultConfig = defaultConfig + "      \"custom\": \"#eeee90\",\n";
         defaultConfig = defaultConfig + "      \"function\": \"#DCDCAA\",\n";
-        defaultConfig = defaultConfig + "      \"function-error\": \"#DCDCAA\",\n";
+        defaultConfig = defaultConfig + "      \"syntax-error\": \"#DCDCAA\",\n";
         defaultConfig = defaultConfig + "      \"background\": \"#000000\",\n";
         defaultConfig = defaultConfig + "      \"text\": \"#e6e6e6\",\n";
         defaultConfig = defaultConfig + "      \"caret\": \"white\",\n";
@@ -795,6 +795,7 @@ function saveConfigWithCurrentProfile {
             pIdentifier = colorEditorScreen.identifier;
             pSql = colorEditorScreen.sql;
             pFunction = colorEditorScreen.functionClr;
+            pErrorColor = colorEditorScreen.errorClr;
             pBackground = colorEditorScreen.background;
             pText = colorEditorScreen.text;
             pCaret = colorEditorScreen.caret;
@@ -1193,7 +1194,6 @@ function onProfileChange {
         if pLiteral != "" then { colorEditorScreen.literal = pLiteral; } else { colorEditorScreen.literal = defaultLiteralColor; }
         if pIdentifier != "" then { colorEditorScreen.identifier = pIdentifier; } else { colorEditorScreen.identifier = defaultIdentifierColor; }
         if pSql != "" then { colorEditorScreen.sql = pSql; } else { colorEditorScreen.sql = defaultSqlColor; }
-        if pFunction != "" then { colorEditorScreen.functionClr = pFunction; } else { colorEditorScreen.functionClr = defaultFunctionColor; }
         if pFunction != "" then { colorEditorScreen.functionClr = pFunction; } else { colorEditorScreen.functionClr = defaultFunctionColor; }
         if pErrorColor != "" then { colorEditorScreen.errorClr = pErrorColor; } else { colorEditorScreen.errorClr = defaultErrorColor; }
         if pBackground != "" then { colorEditorScreen.background = pBackground; } else { colorEditorScreen.background = defaultBackgroundColor; }
