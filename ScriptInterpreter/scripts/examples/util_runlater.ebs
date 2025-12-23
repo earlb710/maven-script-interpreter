@@ -1,0 +1,90 @@
+// EBS Language Reference - util.runlater Example
+// Example: util.runlater - Execute callbacks asynchronously on JavaFX thread
+// Syntax: call util.runlater(callback);
+//
+// IMPORTANT: When a screen update is required, use util.runlater to ensure
+// the UI renders immediately before executing the callback. This allows screen
+// elements (status messages, move indicators, progress updates) to display
+// instantly, then schedules the callback to run after the screen has updated.
+
+print "=== util.runlater Examples ===";
+print "";
+print "KEY CONCEPT: When screen updates are required, util.runlater ensures";
+print "             UI elements render before executing callbacks.";
+print "";
+
+// Example 1: Basic callback
+print "Example 1: Basic callback";
+var callbackExecuted: bool = false;
+
+myCallback() {
+    print "  Callback executed on JavaFX thread!";
+    callbackExecuted = true;
+}
+
+print "  Scheduling callback with util.runlater...";
+call util.runlater("myCallback");
+print "  util.runlater returned immediately";
+
+// Give callback time to execute
+call thread.sleep(100);
+print "  Callback executed: " + string(callbackExecuted);
+print "";
+
+// Example 2: No callback (empty string)
+print "Example 2: No callback (empty string)";
+print "  Calling util.runlater with empty callback...";
+call util.runlater("");
+print "  Function returned immediately without scheduling";
+print "";
+
+// Example 3: UI responsiveness (simulated)
+print "Example 3: UI responsiveness pattern";
+var counter: int = 0;
+
+incrementCounter() {
+    counter = counter + 1;
+    print "  Counter incremented to: " + string(counter);
+}
+
+print "  Scheduling multiple async operations...";
+call util.runlater("incrementCounter");
+call util.runlater("incrementCounter");
+call util.runlater("incrementCounter");
+print "  All operations scheduled immediately";
+
+// Wait for all to complete
+call thread.sleep(200);
+print "  Final counter value: " + string(counter);
+print "";
+
+// Example 4: Comparison with thread.sleep
+print "Example 4: UI Responsiveness Comparison";
+print "";
+print "  Old approach (blocking):";
+print "    1. Update UI";
+print "    2. call thread.sleep(100);  // Blocks thread!";
+print "    3. Do computation";
+print "";
+print "  New approach (non-blocking):";
+print "    1. Update UI";
+print "    2. call util.runlater(\"doComputation\");  // Returns immediately!";
+print "    3. UI renders, then computation executes";
+print "";
+
+// Example 5: Practical use case - Chess game
+print "Example 5: Practical Use Case";
+print "  Chess game after human player's move:";
+print "    - Display blue move circles (UI update)";
+print "    - call util.runlater(\"makeComputerMove\");";
+print "    - Screen updates immediately";
+print "    - Computer calculates move asynchronously";
+print "";
+
+print "=== Examples Complete ===";
+print "";
+print "Key Benefits:";
+print "  ✓ UI updates render immediately";
+print "  ✓ No thread blocking";
+print "  ✓ Better responsiveness";
+print "  ✓ Clean async pattern";

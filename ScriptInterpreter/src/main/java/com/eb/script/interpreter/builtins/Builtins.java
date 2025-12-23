@@ -894,6 +894,11 @@ public final class Builtins {
         ));
 
         addBuiltin(info(
+                "util.runlater", DataType.STRING,
+                newParam("callback", DataType.STRING) // optional: callback function name
+        ));
+
+        addBuiltin(info(
                 "thread.timerStart", DataType.STRING,
                 newParam("name", DataType.STRING, true), // required: timer name
                 newParam("period", DataType.LONG, true), // required: period in milliseconds
@@ -2105,7 +2110,7 @@ public final class Builtins {
             return BuiltinsThread.dispatch(context, name, args);
         }
         if (BuiltinsSystem.handles(name)) {
-            return BuiltinsSystem.dispatch(env, name, args);
+            return BuiltinsSystem.dispatch(context, name, args);
         }
         
         // Queue builtins

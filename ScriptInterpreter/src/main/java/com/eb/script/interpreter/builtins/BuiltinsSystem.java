@@ -1,6 +1,8 @@
 package com.eb.script.interpreter.builtins;
 
 import com.eb.script.interpreter.Environment;
+import com.eb.script.interpreter.Interpreter;
+import com.eb.script.interpreter.InterpreterContext;
 import com.eb.script.interpreter.InterpreterError;
 
 import com.eb.script.arrays.ArrayDef;
@@ -8,6 +10,9 @@ import com.eb.script.arrays.ArrayDynamic;
 import com.eb.script.arrays.ArrayFixedByte;
 import com.eb.script.arrays.ArrayFixedInt;
 import com.eb.script.arrays.ReverseArrayWrapper;
+import com.eb.script.interpreter.statement.CallStatement;
+import com.eb.script.interpreter.statement.Parameter;
+import com.eb.script.interpreter.expression.LiteralExpression;
 import com.eb.script.token.DataType;
 import com.eb.ui.ebs.EbsApp;
 import java.nio.charset.StandardCharsets;
@@ -23,7 +28,7 @@ import javafx.application.Platform;
 
 /**
  * Built-in functions for System operations.
- * Handles system.*, sleep, and array.* builtins.
+ * Handles system.*, sleep, util.*, and array.* builtins.
  *
  * @author Earl Bosch
  */
@@ -35,13 +40,14 @@ public class BuiltinsSystem {
     /**
      * Dispatch a System builtin by name.
      *
-     * @param env The execution environment
+     * @param context The interpreter context
      * @param name Lowercase builtin name (e.g., "system.command")
      * @param args Arguments passed to the builtin
      * @return Result of the builtin call
      * @throws InterpreterError if the call fails
      */
-    public static Object dispatch(Environment env, String name, Object[] args) throws InterpreterError {
+    public static Object dispatch(InterpreterContext context, String name, Object[] args) throws InterpreterError {
+        Environment env = context.getEnvironment();
         return switch (name) {
             case "system.command" -> command(args);
             case "system.wincommand" -> winCommand(args);
@@ -52,6 +58,7 @@ public class BuiltinsSystem {
             case "system.reloadconfig" -> reloadConfig();
             case "sys.geteventcount" -> getEventCount(args);
             case "thread.sleep" -> sleep(args);
+            case "util.runlater" -> runLater(context, args);
             case "array.expand" -> arrayExpand(args);
             case "array.sort" -> arraySort(args);
             case "array.fill" -> arrayFill(args);
@@ -69,10 +76,10 @@ public class BuiltinsSystem {
     }
 
     /**
-     * Checks if the given builtin name is a System/Array/Sleep builtin.
+     * Checks if the given builtin name is a System/Array/Sleep/Util builtin.
      */
     public static boolean handles(String name) {
-        return name.startsWith("system.") || name.startsWith("sys.") || name.startsWith("array.") || name.equals("thread.sleep");
+        return name.startsWith("system.") || name.startsWith("sys.") || name.startsWith("array.") || name.equals("thread.sleep") || name.startsWith("util.");
     }
 
     // --- Individual builtin implementations ---
@@ -208,6 +215,78 @@ public class BuiltinsSystem {
                 throw new InterpreterError("sleep interrupted: " + e.getMessage());
             }
         }
+        return "";
+    }
+    
+    /**
+     * util.runlater(callback) - Execute a callback function on the JavaFX Application Thread
+     * 
+     * This function schedules the execution of an EBS callback function on the JavaFX Application Thread.
+     * If a callback is provided, it will be executed after the runLater completes.
+     * The callback receives no parameters.
+     * 
+     * @param context The interpreter context for executing callbacks
+     * @param args Arguments: callback (STRING, optional) - the name of the callback function to execute
+     * @return Empty string
+     * @throws InterpreterError if the callback execution fails
+     */
+    private static Object runLater(InterpreterContext context, Object[] args) throws InterpreterError {
+        // Extract optional callback name
+        String callbackName = null;
+        if (args.length > 0 && args[0] != null) {
+            callbackName = args[0].toString();
+            if (callbackName.isBlank()) {
+                callbackName = null;
+            }
+        }
+        
+        // If no callback provided, just return immediately
+        if (callbackName == null) {
+            return "";
+        }
+        
+        // Lowercase the callback name to match how the lexer stores identifiers
+        final String finalCallbackName = callbackName.toLowerCase();
+        
+        // Get the current screen context for the callback (if in a screen)
+        final String currentScreen = context.getCurrentScreen();
+        
+        // Schedule the callback execution on the JavaFX Application Thread
+        Platform.runLater(() -> {
+            try {
+                // Set screen context if we were in a screen
+                if (currentScreen != null) {
+                    context.setCurrentScreen(currentScreen);
+                }
+                
+                try {
+                    // Get the main interpreter that has access to the script's functions
+                    Interpreter mainInterpreter = context.getMainInterpreter();
+                    if (mainInterpreter == null) {
+                        throw new InterpreterError("No main interpreter available for callback execution");
+                    }
+                    
+                    // Create a CallStatement to invoke the callback function with no parameters
+                    List<Parameter> paramsList = new ArrayList<>();
+                    CallStatement callStmt = new CallStatement(0, finalCallbackName, paramsList);
+                    
+                    // Execute the call statement using the main interpreter
+                    mainInterpreter.visitCallStatement(callStmt);
+                } finally {
+                    if (currentScreen != null) {
+                        context.clearCurrentScreen();
+                    }
+                }
+            } catch (Exception e) {
+                // Log error to output if available
+                if (context.getOutput() != null) {
+                    context.getOutput().printlnError("Error executing util.runlater callback '" + finalCallbackName + "': " + e.getMessage());
+                } else {
+                    System.err.println("Error executing util.runlater callback '" + finalCallbackName + "': " + e.getMessage());
+                }
+            }
+        });
+        
         return "";
     }
     

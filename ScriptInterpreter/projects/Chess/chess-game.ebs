@@ -1681,10 +1681,10 @@ handleCellClick(x: int, y: int) {
             if selectedGameMode == "1 player" && !gameOver then {
                 // Check if current player is the computer
                 if currentPlayer != humanPlayerColor then {
-                    // Use a short delay to allow UI to update and show human player's blue circles
-                    // before computer starts calculating (100ms is enough for screen refresh)
-                    call thread.sleep(100);
-                    call makeComputerMove();
+                    // Use util.runlater to allow UI to update and show human player's blue circles
+                    // before computer starts calculating. This gives the JavaFX thread a chance
+                    // to render the screen updates, then schedules the computer move asynchronously.
+                    call util.runlater("makeComputerMove");
                 }
             }
             
@@ -2178,6 +2178,30 @@ handleGameModeChange() {
 handleStartGame() {
     print "Start button clicked!";
     
+    // Reset all game state variables to ensure clean start
+    // White always starts in chess
+    currentPlayer = WHITE;
+    gameOver = false;
+    selectedX = -1;
+    selectedY = -1;
+    lastMoveFromX = -1;
+    lastMoveFromY = -1;
+    lastMoveToX = -1;
+    lastMoveToY = -1;
+    arrowPathCount = 0;
+    whiteKingMoved = false;
+    blackKingMoved = false;
+    whiteKingsideRookMoved = false;
+    whiteQueensideRookMoved = false;
+    blackKingsideRookMoved = false;
+    blackQueensideRookMoved = false;
+    enPassantTargetX = -1;
+    enPassantTargetY = -1;
+    lastOpponentX = -1;
+    lastOpponentY = -1;
+    capturedWhiteCount = 0;
+    capturedBlackCount = 0;
+    
     // Determine game mode from radio button
     // The gameMode variable stores "1" or "2"
     if startupDialog.gameMode == "1" then {
@@ -2279,6 +2303,7 @@ handleStartGame() {
     chessScreen.whiteTimer = call formatTimerDecimal(timerWhite);
     chessScreen.blackTimer = call formatTimerDecimal(timerBlack);
     chessScreen.statusMessage = "White to move";
+    chessScreen.moveHistory = "Game started.\nWhite's turn.\n";
     call updateTimerColors();
     
     // Initialize captured pieces display variables BEFORE showing screen
@@ -2319,10 +2344,6 @@ handleStartGame() {
     // Show the chess screen
     show screen chessScreen;
     
-    // Reset captured pieces counters (variables already initialized above)
-    capturedWhiteCount = 0;
-    capturedBlackCount = 0;
-    
     // Timer display is automatically updated via varRef binding to whiteTimer and blackTimer variables
     
     // Start the game timer (updates every 100ms = 0.1 seconds)
@@ -2332,9 +2353,9 @@ handleStartGame() {
     print "";
     
     // In 1-player mode, if computer plays white (currentPlayer=WHITE and humanPlayerColor=BLACK), 
-    // trigger computer move immediately
+    // trigger computer move immediately after screen renders
     if selectedGameMode == "1 player" && humanPlayerColor == BLACK then {
-        call makeComputerMove();
+        call util.runlater("makeComputerMove");
     }
 }
 

@@ -5345,6 +5345,20 @@
       "example": "<b>call</b> <b>thread.sleep</b>(millis=1000);<br>// Pauses for 1 second<br><b>print</b> \"Resumed after 1 second delay\";"
     },
     {
+      "function": "util.runlater",
+      "short_description": "Executes a callback asynchronously on JavaFX Application Thread",
+      "long_help": "Schedules a callback function to execute asynchronously on the JavaFX Application Thread. <b>When a screen update is required</b>, use util.runlater to ensure the UI renders immediately before executing the callback. This allows screen elements (status messages, move indicators, progress updates) to display instantly, then schedules the callback to run after the screen has updated. The callback is executed after the current event cycle completes, giving the UI a chance to render any pending changes. If no callback is provided (empty string), the function returns immediately without scheduling anything. The callback receives no parameters.<br><br><b>Use Cases:</b><br>- Update UI immediately before starting lengthy calculations<br>- Allow screen updates to render before triggering next action<br>- Replace blocking thread.sleep() calls for better UI responsiveness<br>- Schedule async operations that need to run on the UI thread<br>- Display visual feedback before computationally intensive operations",
+      "parameters": [
+        {
+          "name": "callback",
+          "type": "string",
+          "description": "Optional callback function name (EBS string). Empty string or null returns immediately."
+        }
+      ],
+      "return_type": "string",
+      "example": "<b>// Basic callback</b><br><b>myCallback</b>() {<br>&nbsp;&nbsp;<b>print</b> \"Callback executed on JavaFX thread!\";<br>}<br><b>call</b> <b>util.runlater</b>(callback=\"myCallback\");<br><br><b>// UI update before computation</b><br>chessScreen.statusMessage = \"Thinking...\";<br><b>call</b> <b>util.runlater</b>(callback=\"makeComputerMove\");<br>// Screen updates immediately, then computer calculates<br><br><b>// No callback (returns immediately)</b><br><b>call</b> <b>util.runlater</b>(callback=\"\");"
+    },
+    {
       "function": "thread.timerStart",
       "short_description": "Starts a repeating timer with callback linked to a screen",
       "long_help": "Starts a repeating timer that invokes a callback function at fixed intervals. The timer runs asynchronously in the background<br>and continues until explicitly stopped with thread.timerStop. The callback function receives the timer name as a parameter.<br>Multiple timers can run concurrently with unique names. Returns the timer name for convenience.<br><br><b>IMPORTANT - Timer-Screen Linkage:</b><br>- Timers created inside a screen are automatically linked to that screen<br>- Timers created outside a screen must use qualified name format 'screenName.timerName'<br>- If no screen can be identified, an error is thrown",
