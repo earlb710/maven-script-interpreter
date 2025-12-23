@@ -1167,8 +1167,16 @@ selectOpponentPiece(x: int, y: int) {
                 var pieceCanvas: canvas = call canvas.create(60, 60, "opponent_piece_select");
                 call canvas.clear(pieceCanvas);
                 
-                // Draw the normal piece at its actual size (no scaling)
-                call draw.image(pieceCanvas, normalPiece, 0, 0);
+                // Get the actual size of the piece image to center it
+                var pieceWidth: int = call image.getWidth(normalPiece);
+                var pieceHeight: int = call image.getHeight(normalPiece);
+                
+                // Calculate center position
+                var centerX: int = (60 - pieceWidth) / 2;
+                var centerY: int = (60 - pieceHeight) / 2;
+                
+                // Draw the normal piece centered
+                call draw.image(pieceCanvas, normalPiece, centerX, centerY);
                 
                 // Add a semi-transparent gray overlay
                 call style.setFill(pieceCanvas, "#80808060");  // Gray with 37% opacity
@@ -1177,7 +1185,7 @@ selectOpponentPiece(x: int, y: int) {
                 // Convert to image and set
                 var grayPiece: imagedata = call canvas.toImage(pieceCanvas);
                 call setPieceImage(x, y, grayPiece);
-                print "Opponent piece highlighted with gray at (" + x + ", " + y + ")";
+                print "Opponent piece highlighted with gray at (" + x + ", " + y + ") - centered at (" + centerX + ", " + centerY + ")";
             }
         }
     }
@@ -1588,23 +1596,54 @@ handleCellClick(x: int, y: int) {
     
     // Check if clicking on opponent's piece - show defenders
     if cell.pieceColor != currentPlayer then {
-        print "Opponent's piece clicked - showing defenders";
+        print "===== OPPONENT PIECE CLICKED =====";
+        print "Position: (" + x + ", " + y + ")";
+        print "Piece type: " + cell.pieceType + ", color: " + cell.pieceColor;
         
         // Highlight the opponent piece with gray overlay to show it's "selected"
         call selectOpponentPiece(x, y);
         
         // Get all defenders of this piece
+        print "Calling getDefenders(" + x + ", " + y + ")...";
         var defenders = call getDefenders(x, y);
         var defenderCount: int = defenders.length;
-        print "Found " + defenderCount + " defenders";
+        print "Found " + defenderCount + " defenders for piece at (" + x + ", " + y + ")";
+        
+        // Build a detailed debug message
+        var debugMsg: string = "Defenders for piece at (" + x + ", " + y + "):\n";
         
         // Show purple circles on all defender positions
         var i: int = 0;
         for (i = 0; i < defenderCount; i = i + 1) {
             var defender: posType = defenders[i];
+            print "  Setting purple indicator at defender position (" + defender.x + ", " + defender.y + ")";
             call setIndicator(defender.x, defender.y, "defender");
-            print "  Defender at (" + defender.x + ", " + defender.y + ")";
+            
+            // Get info about the defender piece
+            var defenderCellValue: int = call getPieceAt(defender.x, defender.y);
+            if defenderCellValue != -1 then {
+                var defenderCell = ChessCell(defenderCellValue);
+                var pieceTypeName: string = "Unknown";
+                if defenderCell.pieceType == PAWN then { pieceTypeName = "Pawn"; }
+                else if defenderCell.pieceType == ROOK then { pieceTypeName = "Rook"; }
+                else if defenderCell.pieceType == KNIGHT then { pieceTypeName = "Knight"; }
+                else if defenderCell.pieceType == BISHOP then { pieceTypeName = "Bishop"; }
+                else if defenderCell.pieceType == QUEEN then { pieceTypeName = "Queen"; }
+                else if defenderCell.pieceType == KING then { pieceTypeName = "King"; }
+                
+                debugMsg = debugMsg + "  " + (i + 1) + ". " + pieceTypeName + " at (" + defender.x + ", " + defender.y + ")\n";
+            }
         }
+        
+        if defenderCount == 0 then {
+            debugMsg = debugMsg + "  (No defenders found)\n";
+        }
+        
+        print debugMsg;
+        print "===== END DEFENDER INFO =====";
+        
+        // Show dialog with defender information
+        call dialog.info("Defender Information", debugMsg);
         
         // Update status message to show defender count
         var defenderText: string;
