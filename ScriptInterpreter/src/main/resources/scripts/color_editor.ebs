@@ -1161,6 +1161,8 @@ function onProfileChange {
         var pIdentifier: string = call json.getstring(profileColors, "identifier", "");
         var pSql: string = call json.getstring(profileColors, "sql", "");
         var pCustom: string = call json.getstring(profileColors, "custom", "");
+        var pFunction: string = call json.getstring(profileColors, "function", "");
+        var pFunctionError: string = call json.getstring(profileColors, "function-error", "");
         var pBackground: string = call json.getstring(profileColors, "background", "");
         var pText: string = call json.getstring(profileColors, "text", "");
         var pCaret: string = call json.getstring(profileColors, "caret", "");
@@ -1192,6 +1194,8 @@ function onProfileChange {
         if pIdentifier != "" then { colorEditorScreen.identifier = pIdentifier; } else { colorEditorScreen.identifier = defaultIdentifierColor; }
         if pSql != "" then { colorEditorScreen.sql = pSql; } else { colorEditorScreen.sql = defaultSqlColor; }
         if pCustom != "" then { colorEditorScreen.custom = pCustom; } else { colorEditorScreen.custom = defaultCustomColor; }
+        if pFunction != "" then { colorEditorScreen.functionClr = pFunction; } else { colorEditorScreen.functionClr = defaultFunctionColor; }
+        if pFunctionError != "" then { colorEditorScreen.functionError = pFunctionError; } else { colorEditorScreen.functionError = defaultFunctionErrorColor; }
         if pBackground != "" then { colorEditorScreen.background = pBackground; } else { colorEditorScreen.background = defaultBackgroundColor; }
         if pText != "" then { colorEditorScreen.text = pText; } else { colorEditorScreen.text = defaultTextColor; }
         if pCaret != "" then { colorEditorScreen.caret = pCaret; } else { colorEditorScreen.caret = defaultCaretColor; }
