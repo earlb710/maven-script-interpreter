@@ -1593,20 +1593,20 @@ public class EbsTab extends Tab {
                                      customFunctionNames.contains(funcName) ||
                                      isKeyword(funcName);
                     
-                    // Adjust start and end positions to match the actual identifier bounds
-                    // Skip leading whitespace to ensure underlines start at the first letter
+                    // Adjust positions to exclude whitespace and match exact function name
+                    // Find the actual position of the function name in the source
                     int adjustedStart = token.start;
+                    int adjustedEnd = token.end;
+                    
+                    // Skip leading whitespace
                     while (adjustedStart < source.length() && 
                            Character.isWhitespace(source.charAt(adjustedStart))) {
                         adjustedStart++;
                     }
                     
-                    // Find the end of the identifier (stops at first non-identifier character)
-                    int adjustedEnd = adjustedStart;
-                    while (adjustedEnd < source.length() && 
-                           (Character.isLetterOrDigit(source.charAt(adjustedEnd)) || 
-                            source.charAt(adjustedEnd) == '_')) {
-                        adjustedEnd++;
+                    // Set end position based on function name length
+                    if (!funcName.isEmpty()) {
+                        adjustedEnd = adjustedStart + funcName.length();
                     }
                     
                     if (!isKnown && !funcName.isEmpty()) {
