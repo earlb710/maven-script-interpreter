@@ -459,7 +459,7 @@ function setColorsToDefaults {
     colorEditorScreen.literal = defaultLiteralColor;
     colorEditorScreen.identifier = defaultIdentifierColor;
     colorEditorScreen.sql = defaultSqlColor;
-    colorEditorScreen.custom = defaultCustomColor;
+    colorEditorScreen.functionClr = defaultFunctionColor;
     colorEditorScreen.functionClr = defaultFunctionColor;
     colorEditorScreen.errorClr = defaultErrorColor;
     colorEditorScreen.background = defaultBackgroundColor;
@@ -494,7 +494,7 @@ function setColorsToOriginal {
     colorEditorScreen.literal = literalColor;
     colorEditorScreen.identifier = identifierColor;
     colorEditorScreen.sql = sqlColor;
-    colorEditorScreen.custom = customColor;
+    colorEditorScreen.functionClr = functionColor;
     colorEditorScreen.functionClr = functionColor;
     colorEditorScreen.errorClr = errorColor;
     colorEditorScreen.background = backgroundColor;
@@ -530,7 +530,7 @@ function buildProfileColorsJson(pName: string) return string {
     colorsJson = colorsJson + "      \"literal\": \"" + colorEditorScreen.literal + "\",\n";
     colorsJson = colorsJson + "      \"identifier\": \"" + colorEditorScreen.identifier + "\",\n";
     colorsJson = colorsJson + "      \"sql\": \"" + colorEditorScreen.sql + "\",\n";
-    colorsJson = colorsJson + "      \"custom\": \"" + colorEditorScreen.custom + "\",\n";
+    colorsJson = colorsJson + "      \"custom\": \"" + colorEditorScreen.functionClr + "\",\n";
     colorsJson = colorsJson + "      \"function\": \"" + colorEditorScreen.functionClr + "\",\n";
     colorsJson = colorsJson + "      \"syntax-error\": \"" + colorEditorScreen.errorClr + "\",\n";
     colorsJson = colorsJson + "      \"background\": \"" + colorEditorScreen.background + "\",\n";
@@ -593,7 +593,7 @@ function buildDefaultProfileColorsJson(pName: string) return string {
 // Function: Update a profile in the in-memory profiles object with current screen values
 function updateProfileInMemory(targetProfile: string) {
     // Build the colors JSON for the current screen values
-    var colorsStr: string = "{\"info\": \"" + colorEditorScreen.info + "\", \"comment\": \"" + colorEditorScreen.comment + "\", \"error\": \"" + colorEditorScreen.error + "\", \"warn\": \"" + colorEditorScreen.warn + "\", \"ok\": \"" + colorEditorScreen.ok + "\", \"code\": \"" + colorEditorScreen.code + "\", \"datatype\": \"" + colorEditorScreen.datatype + "\", \"data\": \"" + colorEditorScreen.data + "\", \"keyword\": \"" + colorEditorScreen.keyword + "\", \"builtin\": \"" + colorEditorScreen.builtin + "\", \"literal\": \"" + colorEditorScreen.literal + "\", \"identifier\": \"" + colorEditorScreen.identifier + "\", \"sql\": \"" + colorEditorScreen.sql + "\", \"custom\": \"" + colorEditorScreen.custom + "\", \"function\": \"" + colorEditorScreen.functionClr + "\", \"syntax-error\": \"" + colorEditorScreen.errorClr + "\", \"background\": \"" + colorEditorScreen.background + "\", \"text\": \"" + colorEditorScreen.text + "\", \"caret\": \"" + colorEditorScreen.caret + "\", \"line-cursor\": \"" + colorEditorScreen.lineCursor + "\", \"line-numbers\": \"" + colorEditorScreen.lineNumbers + "\", \"console-background\": \"" + colorEditorScreen.consoleBackground + "\", \"tab-background\": \"" + colorEditorScreen.tabBackground + "\", \"tab-label-color\": \"" + colorEditorScreen.tabLabelColor + "\", \"tab-label-changed-color\": \"" + colorEditorScreen.tabLabelChangedColor + "\", \"tab-label-background\": \"" + colorEditorScreen.tabLabelBackground + "\", \"find-highlight-color\": \"" + colorEditorScreen.findHighlightColor + "\", \"find-highlight-background\": \"" + colorEditorScreen.findHighlightBackground + "\", \"current-find-highlight-bg\": \"" + colorEditorScreen.currentFindHighlightBg + "\", \"tab-select\": \"" + colorEditorScreen.tabSelect + "\", \"tab-content\": \"" + colorEditorScreen.tabContent + "\"}";
+    var colorsStr: string = "{\"info\": \"" + colorEditorScreen.info + "\", \"comment\": \"" + colorEditorScreen.comment + "\", \"error\": \"" + colorEditorScreen.error + "\", \"warn\": \"" + colorEditorScreen.warn + "\", \"ok\": \"" + colorEditorScreen.ok + "\", \"code\": \"" + colorEditorScreen.code + "\", \"datatype\": \"" + colorEditorScreen.datatype + "\", \"data\": \"" + colorEditorScreen.data + "\", \"keyword\": \"" + colorEditorScreen.keyword + "\", \"builtin\": \"" + colorEditorScreen.builtin + "\", \"literal\": \"" + colorEditorScreen.literal + "\", \"identifier\": \"" + colorEditorScreen.identifier + "\", \"sql\": \"" + colorEditorScreen.sql + "\", \"custom\": \"" + colorEditorScreen.functionClr + "\", \"function\": \"" + colorEditorScreen.functionClr + "\", \"syntax-error\": \"" + colorEditorScreen.errorClr + "\", \"background\": \"" + colorEditorScreen.background + "\", \"text\": \"" + colorEditorScreen.text + "\", \"caret\": \"" + colorEditorScreen.caret + "\", \"line-cursor\": \"" + colorEditorScreen.lineCursor + "\", \"line-numbers\": \"" + colorEditorScreen.lineNumbers + "\", \"console-background\": \"" + colorEditorScreen.consoleBackground + "\", \"tab-background\": \"" + colorEditorScreen.tabBackground + "\", \"tab-label-color\": \"" + colorEditorScreen.tabLabelColor + "\", \"tab-label-changed-color\": \"" + colorEditorScreen.tabLabelChangedColor + "\", \"tab-label-background\": \"" + colorEditorScreen.tabLabelBackground + "\", \"find-highlight-color\": \"" + colorEditorScreen.findHighlightColor + "\", \"find-highlight-background\": \"" + colorEditorScreen.findHighlightBackground + "\", \"current-find-highlight-bg\": \"" + colorEditorScreen.currentFindHighlightBg + "\", \"tab-select\": \"" + colorEditorScreen.tabSelect + "\", \"tab-content\": \"" + colorEditorScreen.tabContent + "\"}";
     
     // Parse to JSON and update the in-memory profiles object
     var colorsJson: json = call json.jsonFromString(colorsStr);
@@ -794,7 +794,7 @@ function saveConfigWithCurrentProfile {
             pLiteral = colorEditorScreen.literal;
             pIdentifier = colorEditorScreen.identifier;
             pSql = colorEditorScreen.sql;
-            pCustom = colorEditorScreen.custom;
+            pFunction = colorEditorScreen.functionClr;
             pBackground = colorEditorScreen.background;
             pText = colorEditorScreen.text;
             pCaret = colorEditorScreen.caret;
@@ -1193,7 +1193,7 @@ function onProfileChange {
         if pLiteral != "" then { colorEditorScreen.literal = pLiteral; } else { colorEditorScreen.literal = defaultLiteralColor; }
         if pIdentifier != "" then { colorEditorScreen.identifier = pIdentifier; } else { colorEditorScreen.identifier = defaultIdentifierColor; }
         if pSql != "" then { colorEditorScreen.sql = pSql; } else { colorEditorScreen.sql = defaultSqlColor; }
-        if pCustom != "" then { colorEditorScreen.custom = pCustom; } else { colorEditorScreen.custom = defaultCustomColor; }
+        if pFunction != "" then { colorEditorScreen.functionClr = pFunction; } else { colorEditorScreen.functionClr = defaultFunctionColor; }
         if pFunction != "" then { colorEditorScreen.functionClr = pFunction; } else { colorEditorScreen.functionClr = defaultFunctionColor; }
         if pErrorColor != "" then { colorEditorScreen.errorClr = pErrorColor; } else { colorEditorScreen.errorClr = defaultErrorColor; }
         if pBackground != "" then { colorEditorScreen.background = pBackground; } else { colorEditorScreen.background = defaultBackgroundColor; }
@@ -1469,7 +1469,7 @@ function setColorsFromCss {
     colorEditorScreen.literal = call css.getValue(cssPath, ".literal", "-fx-fill");
     colorEditorScreen.identifier = call css.getValue(cssPath, ".identifier", "-fx-fill");
     colorEditorScreen.sql = call css.getValue(cssPath, ".sql", "-fx-fill");
-    colorEditorScreen.custom = call css.getValue(cssPath, ".custom", "-fx-fill");
+    colorEditorScreen.functionClr = call css.getValue(cssPath, ".custom", "-fx-fill");
     
     // Get tab and editor colors from CSS file
     colorEditorScreen.tabLabelColor = call css.getValue(cssPath, ".tab-file .tab-label", "-fx-text-fill");
@@ -1720,15 +1720,6 @@ screen colorEditorScreen = {
             "display": {
                 "type": "colorpicker",
                 "labelText": "SQL Color:"
-            }
-        },
-        {
-            "name": "custom",
-            "type": "string",
-            "default": $customColor,
-            "display": {
-                "type": "colorpicker",
-                "labelText": "Custom Color:"
             }
         },
         {
