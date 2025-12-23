@@ -1153,6 +1153,36 @@ selectPiece(x: int, y: int) {
     }
 }
 
+// Select an opponent piece (highlight with gray overlay)
+selectOpponentPiece(x: int, y: int) {
+    print "Selecting opponent piece at (" + x + ", " + y + ")";
+    var cellValue: int = call getPieceAt(x, y);
+    if cellValue != -1 then {
+        var cell = ChessCell(cellValue);
+        if cell.pieceType != EMPTY then {
+            // Get the normal piece image
+            var normalPiece: imagedata = call getNormalPiece(cell.pieceType, cell.pieceColor);
+            if normalPiece != null then {
+                // Create a canvas with the piece and gray overlay
+                var pieceCanvas: canvas = call canvas.create(60, 60, "opponent_piece_select");
+                call canvas.clear(pieceCanvas);
+                
+                // Draw the normal piece
+                call draw.image(pieceCanvas, normalPiece, 0, 0, 60, 60);
+                
+                // Add a semi-transparent gray overlay
+                call style.setFill(pieceCanvas, "#80808060");  // Gray with 37% opacity
+                call draw.rect(pieceCanvas, 0, 0, 60, 60, true);
+                
+                // Convert to image and set
+                var grayPiece: imagedata = call canvas.toImage(pieceCanvas);
+                call setPieceImage(x, y, grayPiece);
+                print "Opponent piece highlighted with gray at (" + x + ", " + y + ")";
+            }
+        }
+    }
+}
+
 // Deselect a piece (change back to normal)
 deselectPiece(x: int, y: int) {
     print "Deselecting piece at (" + x + ", " + y + ")";
@@ -1560,8 +1590,8 @@ handleCellClick(x: int, y: int) {
     if cell.pieceColor != currentPlayer then {
         print "Opponent's piece clicked - showing defenders";
         
-        // Highlight the opponent piece in yellow to show it's "selected"
-        call selectPiece(x, y);
+        // Highlight the opponent piece with gray overlay to show it's "selected"
+        call selectOpponentPiece(x, y);
         
         // Get all defenders of this piece
         var defenders = call getDefenders(x, y);
