@@ -2856,6 +2856,7 @@ screen chessScreen = {
                             "minHeight": "100",
                             "prefHeight": "530",
                             "maxHeight": "530",
+                            "disableLabelAlignment": true,
                             "style": "-fx-background-color: #3c3c3c; -fx-background-radius: 5; -fx-alignment: top-center;",
                             "items": [
                                 {"name": "captPieceW0", "varRef": "capturedWhite0", "display": {"type": "image", "fitWidth": 30, "fitHeight": 30, "preserveRatio": true}},
@@ -3145,6 +3146,7 @@ screen chessScreen = {
                     "minHeight": "100",
                     "prefHeight": "530",
                     "maxHeight": "530",
+                    "disableLabelAlignment": true,
                     "style": "-fx-background-color: #3c3c3c; -fx-background-radius: 5; -fx-alignment: top-center;",
                     "items": [
                         {"name": "captPieceB0", "varRef": "capturedBlack0", "display": {"type": "image", "fitWidth": 30, "fitHeight": 30, "preserveRatio": true}},
