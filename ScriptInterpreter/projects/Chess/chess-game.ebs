@@ -1772,6 +1772,16 @@ handleCellClick(x: int, y: int) {
         }
     }
     
+    // Show defenders of the selected piece with purple circles
+    var defenders = call getDefenders(x, y);
+    var defenderCount: int = defenders.length;
+    
+    var j: int = 0;
+    for (j = 0; j < defenderCount; j = j + 1) {
+        var defender: posType = defenders[j];
+        call setIndicator(defender.x, defender.y, "defender");
+    }
+    
     print "handleCellClick complete";
 }
 
