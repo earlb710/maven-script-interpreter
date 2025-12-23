@@ -164,33 +164,14 @@ var capturedBlackCount: int = 0;
 var lightSquare: imagedata;     // Light square for board
 var darkSquare: imagedata;      // Dark square for board
 
+// Piece image arrays - indexed by piece type (0=empty, 1=pawn, 2=rook, 3=knight, 4=bishop, 5=queen, 6=king)
 // Normal (original) piece images - stored for restoring after deselection
-var normalWhitePawn: imagedata;
-var normalWhiteRook: imagedata;
-var normalWhiteKnight: imagedata;
-var normalWhiteBishop: imagedata;
-var normalWhiteQueen: imagedata;
-var normalWhiteKing: imagedata;
-var normalBlackPawn: imagedata;
-var normalBlackRook: imagedata;
-var normalBlackKnight: imagedata;
-var normalBlackBishop: imagedata;
-var normalBlackQueen: imagedata;
-var normalBlackKing: imagedata;
+var normalWhitePieces: imagedata[7];  // [0]=empty, [1]=pawn, [2]=rook, [3]=knight, [4]=bishop, [5]=queen, [6]=king
+var normalBlackPieces: imagedata[7];
 
 // Yellow piece images - used when a piece is selected/clicked
-var yellowWhitePawn: imagedata;
-var yellowWhiteRook: imagedata;
-var yellowWhiteKnight: imagedata;
-var yellowWhiteBishop: imagedata;
-var yellowWhiteQueen: imagedata;
-var yellowWhiteKing: imagedata;
-var yellowBlackPawn: imagedata;
-var yellowBlackRook: imagedata;
-var yellowBlackKnight: imagedata;
-var yellowBlackBishop: imagedata;
-var yellowBlackQueen: imagedata;
-var yellowBlackKing: imagedata;
+var yellowWhitePieces: imagedata[7];
+var yellowBlackPieces: imagedata[7];
 
 // Helper functions
 boardIndex(row: int, col: int) return int {
@@ -230,43 +211,22 @@ function isOccupiedByColor(x: int, y: int, color: int) return bool {
 
 // Get the normal (original) version of a piece image based on piece type and color
 function getNormalPiece(pieceType: int, pieceColor: int) return imagedata {
+    // Use array indexing for O(1) lookup instead of if-else chain
     if pieceColor == WHITE then {
-        if pieceType == PAWN then { return normalWhitePawn; }
-        if pieceType == ROOK then { return normalWhiteRook; }
-        if pieceType == KNIGHT then { return normalWhiteKnight; }
-        if pieceType == BISHOP then { return normalWhiteBishop; }
-        if pieceType == QUEEN then { return normalWhiteQueen; }
-        if pieceType == KING then { return normalWhiteKing; }
+        return normalWhitePieces[pieceType];
     } else {
-        if pieceType == PAWN then { return normalBlackPawn; }
-        if pieceType == ROOK then { return normalBlackRook; }
-        if pieceType == KNIGHT then { return normalBlackKnight; }
-        if pieceType == BISHOP then { return normalBlackBishop; }
-        if pieceType == QUEEN then { return normalBlackQueen; }
-        if pieceType == KING then { return normalBlackKing; }
+        return normalBlackPieces[pieceType];
     }
-    // If piece type doesn't match, return transparent clear instead of null
-    return transparentClear;
 }
 
 // Get the yellow version of a piece image based on piece type and color
 function getYellowPiece(pieceType: int, pieceColor: int) return imagedata {
+    // Use array indexing for O(1) lookup instead of if-else chain
     if pieceColor == WHITE then {
-        if pieceType == PAWN then { return yellowWhitePawn; }
-        if pieceType == ROOK then { return yellowWhiteRook; }
-        if pieceType == KNIGHT then { return yellowWhiteKnight; }
-        if pieceType == BISHOP then { return yellowWhiteBishop; }
-        if pieceType == QUEEN then { return yellowWhiteQueen; }
-        if pieceType == KING then { return yellowWhiteKing; }
+        return yellowWhitePieces[pieceType];
     } else {
-        if pieceType == PAWN then { return yellowBlackPawn; }
-        if pieceType == ROOK then { return yellowBlackRook; }
-        if pieceType == KNIGHT then { return yellowBlackKnight; }
-        if pieceType == BISHOP then { return yellowBlackBishop; }
-        if pieceType == QUEEN then { return yellowBlackQueen; }
-        if pieceType == KING then { return yellowBlackKing; }
+        return yellowBlackPieces[pieceType];
     }
-    return null;
 }
 
 // Add a captured piece to the tracking arrays
@@ -619,35 +579,35 @@ createIndicators() {
     transparentClear = call canvas.toImage(clearCanvas);
 }
 
-// Load normal and yellow piece images
+// Load normal and yellow piece images using loops for efficiency
 loadPieceImages() {
-    // Load normal (original) piece images
-    normalWhitePawn = call image.load(imgPath + "white_pawn.svg");
-    normalWhiteRook = call image.load(imgPath + "white_rook.svg");
-    normalWhiteKnight = call image.load(imgPath + "white_knight.svg");
-    normalWhiteBishop = call image.load(imgPath + "white_bishop.svg");
-    normalWhiteQueen = call image.load(imgPath + "white_queen.svg");
-    normalWhiteKing = call image.load(imgPath + "white_king.svg");
-    normalBlackPawn = call image.load(imgPath + "black_pawn.svg");
-    normalBlackRook = call image.load(imgPath + "black_rook.svg");
-    normalBlackKnight = call image.load(imgPath + "black_knight.svg");
-    normalBlackBishop = call image.load(imgPath + "black_bishop.svg");
-    normalBlackQueen = call image.load(imgPath + "black_queen.svg");
-    normalBlackKing = call image.load(imgPath + "black_king.svg");
+    // Define piece names in order: [0]=empty, [1]=pawn, [2]=rook, [3]=knight, [4]=bishop, [5]=queen, [6]=king
+    var pieceNames: string[7];
+    pieceNames[0] = "";  // Empty - no image to load
+    pieceNames[1] = "pawn";
+    pieceNames[2] = "rook";
+    pieceNames[3] = "knight";
+    pieceNames[4] = "bishop";
+    pieceNames[5] = "queen";
+    pieceNames[6] = "king";
     
-    // Load yellow piece images (for highlighting selected pieces)
-    yellowWhitePawn = call image.load(imgPath + "yellow_white_pawn.svg");
-    yellowWhiteRook = call image.load(imgPath + "yellow_white_rook.svg");
-    yellowWhiteKnight = call image.load(imgPath + "yellow_white_knight.svg");
-    yellowWhiteBishop = call image.load(imgPath + "yellow_white_bishop.svg");
-    yellowWhiteQueen = call image.load(imgPath + "yellow_white_queen.svg");
-    yellowWhiteKing = call image.load(imgPath + "yellow_white_king.svg");
-    yellowBlackPawn = call image.load(imgPath + "yellow_black_pawn.svg");
-    yellowBlackRook = call image.load(imgPath + "yellow_black_rook.svg");
-    yellowBlackKnight = call image.load(imgPath + "yellow_black_knight.svg");
-    yellowBlackBishop = call image.load(imgPath + "yellow_black_bishop.svg");
-    yellowBlackQueen = call image.load(imgPath + "yellow_black_queen.svg");
-    yellowBlackKing = call image.load(imgPath + "yellow_black_king.svg");
+    // Load normal (original) piece images using loops
+    for (var i: int = 1; i < 7; i++) {  // Start at 1 to skip empty
+        normalWhitePieces[i] = call image.load(imgPath + "white_" + pieceNames[i] + ".svg");
+        normalBlackPieces[i] = call image.load(imgPath + "black_" + pieceNames[i] + ".svg");
+    }
+    
+    // Load yellow piece images (for highlighting selected pieces) using loops
+    for (var i: int = 1; i < 7; i++) {  // Start at 1 to skip empty
+        yellowWhitePieces[i] = call image.load(imgPath + "yellow_white_" + pieceNames[i] + ".svg");
+        yellowBlackPieces[i] = call image.load(imgPath + "yellow_black_" + pieceNames[i] + ".svg");
+    }
+    
+    // Set empty slots to transparent clear (will be set after transparentClear is created)
+    normalWhitePieces[0] = null;
+    normalBlackPieces[0] = null;
+    yellowWhitePieces[0] = null;
+    yellowBlackPieces[0] = null;
 }
 
 // Helper function to set a piece cell at a specific board position
@@ -730,44 +690,44 @@ function setPieceCell(x: int, y: int, pieceImage: imagedata) {
 
 // Initialize board pieces on screen using already-loaded piece images
 initializeBoardPieces() {
-    // Row 0 (black back row) - using array for piece types
-    var blackBackRowPieces: imagedata[8];
-    blackBackRowPieces[0] = normalBlackRook;
-    blackBackRowPieces[1] = normalBlackKnight;
-    blackBackRowPieces[2] = normalBlackBishop;
-    blackBackRowPieces[3] = normalBlackQueen;
-    blackBackRowPieces[4] = normalBlackKing;
-    blackBackRowPieces[5] = normalBlackBishop;
-    blackBackRowPieces[6] = normalBlackKnight;
-    blackBackRowPieces[7] = normalBlackRook;
+    // Row 0 (black back row) - using piece type constants as indices
+    var blackBackRowTypes: int[8];
+    blackBackRowTypes[0] = ROOK;
+    blackBackRowTypes[1] = KNIGHT;
+    blackBackRowTypes[2] = BISHOP;
+    blackBackRowTypes[3] = QUEEN;
+    blackBackRowTypes[4] = KING;
+    blackBackRowTypes[5] = BISHOP;
+    blackBackRowTypes[6] = KNIGHT;
+    blackBackRowTypes[7] = ROOK;
     
     for (var x: int = 0; x < 8; x++) {
-        call setPieceCell(x, 0, blackBackRowPieces[x]);
+        call setPieceCell(x, 0, normalBlackPieces[blackBackRowTypes[x]]);
     }
     
     // Row 1 (black pawns) - use loop
     for (var x: int = 0; x < 8; x++) {
-        call setPieceCell(x, 1, normalBlackPawn);
+        call setPieceCell(x, 1, normalBlackPieces[PAWN]);
     }
     
     // Row 6 (white pawns) - use loop
     for (var x: int = 0; x < 8; x++) {
-        call setPieceCell(x, 6, normalWhitePawn);
+        call setPieceCell(x, 6, normalWhitePieces[PAWN]);
     }
     
-    // Row 7 (white back row) - using array for piece types
-    var whiteBackRowPieces: imagedata[8];
-    whiteBackRowPieces[0] = normalWhiteRook;
-    whiteBackRowPieces[1] = normalWhiteKnight;
-    whiteBackRowPieces[2] = normalWhiteBishop;
-    whiteBackRowPieces[3] = normalWhiteQueen;
-    whiteBackRowPieces[4] = normalWhiteKing;
-    whiteBackRowPieces[5] = normalWhiteBishop;
-    whiteBackRowPieces[6] = normalWhiteKnight;
-    whiteBackRowPieces[7] = normalWhiteRook;
+    // Row 7 (white back row) - using piece type constants as indices
+    var whiteBackRowTypes: int[8];
+    whiteBackRowTypes[0] = ROOK;
+    whiteBackRowTypes[1] = KNIGHT;
+    whiteBackRowTypes[2] = BISHOP;
+    whiteBackRowTypes[3] = QUEEN;
+    whiteBackRowTypes[4] = KING;
+    whiteBackRowTypes[5] = BISHOP;
+    whiteBackRowTypes[6] = KNIGHT;
+    whiteBackRowTypes[7] = ROOK;
     
     for (var x: int = 0; x < 8; x++) {
-        call setPieceCell(x, 7, whiteBackRowPieces[x]);
+        call setPieceCell(x, 7, normalWhitePieces[whiteBackRowTypes[x]]);
     }
 }
 
