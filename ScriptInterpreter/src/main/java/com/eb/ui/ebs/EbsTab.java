@@ -1593,12 +1593,20 @@ public class EbsTab extends Tab {
                                      customFunctionNames.contains(funcName) ||
                                      isKeyword(funcName);
                     
-                    // Adjust start position to skip leading whitespace
-                    // This ensures underlines start at the first letter, not at preceding spaces
+                    // Adjust start and end positions to match the actual identifier bounds
+                    // Skip leading whitespace to ensure underlines start at the first letter
                     int adjustedStart = token.start;
-                    while (adjustedStart < token.end && adjustedStart < source.length() && 
+                    while (adjustedStart < source.length() && 
                            Character.isWhitespace(source.charAt(adjustedStart))) {
                         adjustedStart++;
+                    }
+                    
+                    // Find the end of the identifier (stops at first non-identifier character)
+                    int adjustedEnd = adjustedStart;
+                    while (adjustedEnd < source.length() && 
+                           (Character.isLetterOrDigit(source.charAt(adjustedEnd)) || 
+                            source.charAt(adjustedEnd) == '_')) {
+                        adjustedEnd++;
                     }
                     
                     if (!isKnown && !funcName.isEmpty()) {
@@ -1608,7 +1616,7 @@ public class EbsTab extends Tab {
                             token.literal,
                             token.line,
                             adjustedStart,
-                            token.end,
+                            adjustedEnd,
                             "tok-function-error"
                         );
                         result.add(errorToken);
@@ -1620,7 +1628,7 @@ public class EbsTab extends Tab {
                             token.literal,
                             token.line,
                             adjustedStart,
-                            token.end,
+                            adjustedEnd,
                             "tok-function"
                         );
                         result.add(funcToken);
