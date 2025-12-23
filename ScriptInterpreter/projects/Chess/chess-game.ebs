@@ -1560,6 +1560,9 @@ handleCellClick(x: int, y: int) {
     if cell.pieceColor != currentPlayer then {
         print "Opponent's piece clicked - showing defenders";
         
+        // Highlight the opponent piece in yellow to show it's "selected"
+        call selectPiece(x, y);
+        
         // Get all defenders of this piece
         var defenders = call getDefenders(x, y);
         var defenderCount: int = defenders.length;
@@ -1584,8 +1587,9 @@ handleCellClick(x: int, y: int) {
         }
         chessScreen.statusMessage = "Opponent piece: " + defenderText;
         
-        selectedX = -1;
-        selectedY = -1;
+        // Store the selected opponent piece position so it can be deselected on next click
+        selectedX = x;
+        selectedY = y;
         return;
     }
     
