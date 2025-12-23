@@ -1593,30 +1593,14 @@ public class EbsTab extends Tab {
                                      customFunctionNames.contains(funcName) ||
                                      isKeyword(funcName);
                     
-                    // Adjust positions to exclude whitespace and match exact function name
-                    // Find the actual position of the function name in the source
-                    int adjustedStart = token.start;
-                    int adjustedEnd = token.end;
-                    
-                    // Skip leading whitespace
-                    while (adjustedStart < source.length() && 
-                           Character.isWhitespace(source.charAt(adjustedStart))) {
-                        adjustedStart++;
-                    }
-                    
-                    // Set end position based on function name length
-                    if (!funcName.isEmpty()) {
-                        adjustedEnd = adjustedStart + funcName.length();
-                    }
-                    
                     if (!isKnown && !funcName.isEmpty()) {
                         // Mark as unknown function with error style
                         EbsToken errorToken = new EbsToken(
                             token.type,
                             token.literal,
                             token.line,
-                            adjustedStart,
-                            adjustedEnd,
+                            token.start,
+                            token.end,
                             "tok-function-error"
                         );
                         result.add(errorToken);
@@ -1627,8 +1611,8 @@ public class EbsTab extends Tab {
                             token.type,
                             token.literal,
                             token.line,
-                            adjustedStart,
-                            adjustedEnd,
+                            token.start,
+                            token.end,
                             "tok-function"
                         );
                         result.add(funcToken);
