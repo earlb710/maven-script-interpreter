@@ -1593,9 +1593,9 @@ public class EbsTab extends Tab {
                                      customFunctionNames.contains(funcName) ||
                                      isKeyword(funcName);
                     
-                    // Adjust start position if it points to whitespace
+                    // Adjust start position to skip all leading whitespace
                     int adjustedStart = token.start;
-                    if (adjustedStart < source.length() && Character.isWhitespace(source.charAt(adjustedStart))) {
+                    while (adjustedStart < source.length() && Character.isWhitespace(source.charAt(adjustedStart))) {
                         adjustedStart++;
                     }
                     
