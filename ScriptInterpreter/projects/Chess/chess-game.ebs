@@ -2329,6 +2329,25 @@ handleStartGame() {
     // Clear all indicators before showing screen to ensure clean state
     call clearIndicators();
     
+    // Explicitly initialize all 64 indicator variables BEFORE showing screen
+    // This ensures ImageViews are created with valid initial values (transparent)
+    chessScreen.i00 = transparentClear; chessScreen.i01 = transparentClear; chessScreen.i02 = transparentClear; chessScreen.i03 = transparentClear;
+    chessScreen.i04 = transparentClear; chessScreen.i05 = transparentClear; chessScreen.i06 = transparentClear; chessScreen.i07 = transparentClear;
+    chessScreen.i10 = transparentClear; chessScreen.i11 = transparentClear; chessScreen.i12 = transparentClear; chessScreen.i13 = transparentClear;
+    chessScreen.i14 = transparentClear; chessScreen.i15 = transparentClear; chessScreen.i16 = transparentClear; chessScreen.i17 = transparentClear;
+    chessScreen.i20 = transparentClear; chessScreen.i21 = transparentClear; chessScreen.i22 = transparentClear; chessScreen.i23 = transparentClear;
+    chessScreen.i24 = transparentClear; chessScreen.i25 = transparentClear; chessScreen.i26 = transparentClear; chessScreen.i27 = transparentClear;
+    chessScreen.i30 = transparentClear; chessScreen.i31 = transparentClear; chessScreen.i32 = transparentClear; chessScreen.i33 = transparentClear;
+    chessScreen.i34 = transparentClear; chessScreen.i35 = transparentClear; chessScreen.i36 = transparentClear; chessScreen.i37 = transparentClear;
+    chessScreen.i40 = transparentClear; chessScreen.i41 = transparentClear; chessScreen.i42 = transparentClear; chessScreen.i43 = transparentClear;
+    chessScreen.i44 = transparentClear; chessScreen.i45 = transparentClear; chessScreen.i46 = transparentClear; chessScreen.i47 = transparentClear;
+    chessScreen.i50 = transparentClear; chessScreen.i51 = transparentClear; chessScreen.i52 = transparentClear; chessScreen.i53 = transparentClear;
+    chessScreen.i54 = transparentClear; chessScreen.i55 = transparentClear; chessScreen.i56 = transparentClear; chessScreen.i57 = transparentClear;
+    chessScreen.i60 = transparentClear; chessScreen.i61 = transparentClear; chessScreen.i62 = transparentClear; chessScreen.i63 = transparentClear;
+    chessScreen.i64 = transparentClear; chessScreen.i65 = transparentClear; chessScreen.i66 = transparentClear; chessScreen.i67 = transparentClear;
+    chessScreen.i70 = transparentClear; chessScreen.i71 = transparentClear; chessScreen.i72 = transparentClear; chessScreen.i73 = transparentClear;
+    chessScreen.i74 = transparentClear; chessScreen.i75 = transparentClear; chessScreen.i76 = transparentClear; chessScreen.i77 = transparentClear;
+    
     // Update screen variables before showing
     chessScreen.whiteTimer = call formatTimerDecimal(timerWhite);
     chessScreen.blackTimer = call formatTimerDecimal(timerBlack);
