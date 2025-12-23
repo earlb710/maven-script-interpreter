@@ -1007,85 +1007,54 @@ public class ScriptArea extends StyleClassedTextArea {
     }
     
     /**
-     * Highlight all occurrences of a function name when cursor is on it.
-     * Uses stored function position information from RuntimeContext for accurate detection.
+     * Highlight the word under cursor if it's a function name.
+     * Only highlights the word under cursor, not all occurrences.
+     * Uses case-insensitive function name lookup.
      * @param text The text to search in
      * @param caretPos The current caret position
      */
     private void highlightFunctionName(String text, int caretPos) {
-        // Check if we have RuntimeContext with function position information
+        // Check if we have RuntimeContext with function information
         if (runtimeContext == null || runtimeContext.blocks == null) {
             return;
         }
         
-        // Find which function (if any) the cursor is on by checking stored positions
-        String targetFunctionName = null;
-        for (java.util.Map.Entry<String, com.eb.script.interpreter.statement.BlockStatement> entry : runtimeContext.blocks.entrySet()) {
-            com.eb.script.interpreter.statement.BlockStatement block = entry.getValue();
-            int startPos = block.getNameStartPosition();
-            int endPos = block.getNameEndPosition();
-            
-            // Check if cursor is within this function name's character range
-            if (startPos >= 0 && endPos >= 0 && caretPos >= startPos && caretPos <= endPos) {
-                targetFunctionName = entry.getKey();
-                break;
-            }
+        // Find the word boundaries at the caret position
+        int wordStart = caretPos;
+        int wordEnd = caretPos;
+        
+        // Expand left to find word start
+        while (wordStart > 0 && isIdentifierChar(text.charAt(wordStart - 1))) {
+            wordStart--;
         }
         
-        // If cursor is not on any function name, don't highlight
-        if (targetFunctionName == null) {
+        // Expand right to find word end
+        while (wordEnd < text.length() && isIdentifierChar(text.charAt(wordEnd))) {
+            wordEnd++;
+        }
+        
+        // Check if we actually have a word
+        if (wordStart >= wordEnd) {
             return;
         }
         
-        // Highlight all occurrences of this function name
-        lastHighlightedFunctions = new java.util.ArrayList<>();
+        // Extract the word under cursor
+        String wordUnderCursor = text.substring(wordStart, wordEnd);
         
-        // First, highlight the declaration
-        for (java.util.Map.Entry<String, com.eb.script.interpreter.statement.BlockStatement> entry : runtimeContext.blocks.entrySet()) {
-            if (entry.getKey().equals(targetFunctionName)) {
-                com.eb.script.interpreter.statement.BlockStatement block = entry.getValue();
-                int startPos = block.getNameStartPosition();
-                int endPos = block.getNameEndPosition();
-                
-                if (startPos >= 0 && endPos >= 0) {
-                    addStyleToRange(startPos, endPos + 1, "function-highlight");
-                    lastHighlightedFunctions.add(new int[]{startPos, endPos + 1});
-                }
+        // Check if this word matches any function name (case-insensitive)
+        boolean isFunction = false;
+        for (String functionName : runtimeContext.blocks.keySet()) {
+            if (functionName.equalsIgnoreCase(wordUnderCursor)) {
+                isFunction = true;
                 break;
             }
         }
         
-        // Then find and highlight all call sites using whole-word matching
-        int searchPos = 0;
-        while (searchPos < text.length()) {
-            int foundPos = text.indexOf(targetFunctionName, searchPos);
-            if (foundPos == -1) {
-                break;
-            }
-            
-            // Check if this is a whole word match (not part of another identifier)
-            boolean isWholeWord = 
-                (foundPos == 0 || !isIdentifierChar(text.charAt(foundPos - 1))) &&
-                (foundPos + targetFunctionName.length() >= text.length() || 
-                 !isIdentifierChar(text.charAt(foundPos + targetFunctionName.length())));
-            
-            if (isWholeWord) {
-                // Avoid re-highlighting the declaration if we already did it
-                boolean alreadyHighlighted = false;
-                for (int[] range : lastHighlightedFunctions) {
-                    if (foundPos >= range[0] && foundPos < range[1]) {
-                        alreadyHighlighted = true;
-                        break;
-                    }
-                }
-                
-                if (!alreadyHighlighted) {
-                    addStyleToRange(foundPos, foundPos + targetFunctionName.length(), "function-highlight");
-                    lastHighlightedFunctions.add(new int[]{foundPos, foundPos + targetFunctionName.length()});
-                }
-            }
-            
-            searchPos = foundPos + 1;
+        // If the word under cursor is a function, highlight it
+        if (isFunction) {
+            lastHighlightedFunctions = new java.util.ArrayList<>();
+            addStyleToRange(wordStart, wordEnd, "function-highlight");
+            lastHighlightedFunctions.add(new int[]{wordStart, wordEnd});
         }
     }
     
