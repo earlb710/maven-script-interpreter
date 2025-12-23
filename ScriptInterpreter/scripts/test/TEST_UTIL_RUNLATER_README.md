@@ -2,6 +2,9 @@
 
 This test script validates the `util.runlater` builtin function that executes callbacks asynchronously on the JavaFX Application Thread.
 
+## Key Use Case: Screen Updates Required
+**Important**: When a screen update is required, `util.runlater` can be used to ensure the UI renders immediately before executing the next operation. This allows visual feedback (such as move indicators, status messages, or progress updates) to display instantly, then schedules the callback to run after the screen has updated.
+
 ## Test File
 
 ### test_util_runlater.ebs
@@ -90,6 +93,26 @@ call util.runlater("updateUI");
 2. **No Parameters**: Callbacks receive no parameters (unlike timers which receive timer name)
 3. **Error Handling**: Errors in callbacks are caught and logged without crashing the application
 4. **Screen Integration**: Works seamlessly with screen-based UI operations
+5. **Screen Update Pattern**: **When a screen update is required**, use `util.runlater` to ensure UI elements render before executing callbacks. This prevents blocking the JavaFX thread and ensures smooth visual feedback.
+
+## When to Use util.runlater for Screen Updates
+
+Use `util.runlater` when you need to:
+- **Update screen elements and then execute logic**: Display status messages, move indicators, or progress updates, then trigger the next operation
+- **Replace blocking delays**: Instead of `thread.sleep()` which blocks the UI thread, use `util.runlater` to schedule async execution
+- **Ensure visual feedback**: When the user needs to see UI changes immediately before a computation begins
+- **Maintain UI responsiveness**: For operations that might take time, schedule them asynchronously after UI updates
+
+**Example Pattern:**
+```javascript
+// Update screen first
+chessScreen.statusMessage = "Computer thinking...";
+call showLastMove(fromX, fromY, toX, toY);  // Display blue circles
+
+// Then schedule async callback
+call util.runlater("makeComputerMove");
+// Screen updates render immediately, computation happens after
+```
 
 ## Timing Considerations
 

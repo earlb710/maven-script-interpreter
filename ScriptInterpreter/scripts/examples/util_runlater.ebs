@@ -1,8 +1,16 @@
 // EBS Language Reference - util.runlater Example
 // Example: util.runlater - Execute callbacks asynchronously on JavaFX thread
 // Syntax: call util.runlater(callback);
+//
+// IMPORTANT: When a screen update is required, use util.runlater to ensure
+// the UI renders immediately before executing the callback. This allows screen
+// elements (status messages, move indicators, progress updates) to display
+// instantly, then schedules the callback to run after the screen has updated.
 
 print "=== util.runlater Examples ===";
+print "";
+print "KEY CONCEPT: When screen updates are required, util.runlater ensures";
+print "             UI elements render before executing callbacks.";
 print "";
 
 // Example 1: Basic callback

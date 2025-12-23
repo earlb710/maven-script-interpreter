@@ -3,6 +3,13 @@
 ## Request
 @earlb710 requested enhancement to create a util function for runlater that takes an optional callback function (EBS string), and when the runlater completes, it must run the callback function.
 
+## Key Use Case: Screen Updates
+**Important**: When a screen update is required, `util.runlater` can be used to ensure the UI renders immediately before executing the next operation. This is particularly useful when:
+- Displaying move indicators or status messages before computationally intensive operations
+- Updating UI elements and then triggering async callbacks
+- Replacing blocking `thread.sleep()` calls that prevent screen rendering
+- Ensuring smooth UI responsiveness in interactive applications
+
 ## Implementation
 
 ### 1. Added util.runlater Builtin Registration
