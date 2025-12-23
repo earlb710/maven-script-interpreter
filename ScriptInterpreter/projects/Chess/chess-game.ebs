@@ -1447,6 +1447,15 @@ handleCellClick(x: int, y: int) {
                 print "Invalid move - would expose king to check!";
                 chessScreen.statusMessage = "Invalid move - would expose your king!";
                 call clearIndicators();
+                
+                // Redraw last move blue arrows and circles if they exist
+                if lastMoveFromX >= 0 && lastMoveFromY >= 0 && lastMoveToX >= 0 && lastMoveToY >= 0 then {
+                    call showLastMove(lastMoveFromX, lastMoveFromY, lastMoveToX, lastMoveToY);
+                }
+                
+                // Show check indicators if king is in check
+                call showCheckIndicators();
+                
                 call deselectPiece(selectedX, selectedY);
                 selectedX = -1;
                 selectedY = -1;
@@ -1603,6 +1612,11 @@ handleCellClick(x: int, y: int) {
     
     // Clear previous indicators
     call clearIndicators();
+    
+    // Redraw last move blue arrows and circles if they exist
+    if lastMoveFromX >= 0 && lastMoveFromY >= 0 && lastMoveToX >= 0 && lastMoveToY >= 0 then {
+        call showLastMove(lastMoveFromX, lastMoveFromY, lastMoveToX, lastMoveToY);
+    }
     
     // Show check indicators if king is in check
     call showCheckIndicators();
