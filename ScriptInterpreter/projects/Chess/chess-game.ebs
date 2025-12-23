@@ -2675,20 +2675,47 @@ selectBestMoveEasy(playerColor: int) return json {
                 var attackerPieceType: int = move.pieceType;
                 var attackerValue: int = call getPieceValue(attackerPieceType);
                 
-                // Check if the target square has defenders
-                var defenders = call getDefenders(move.toX, move.toY);
-                var defenderCount: int = defenders.length;
+                // Check if opponent pieces can attack the destination square (potential recapture)
+                // Get the opponent's color
+                var opponentColor: int = WHITE;
+                if playerColor == WHITE then {
+                    opponentColor = BLACK;
+                }
+                
+                // Find all opponent pieces that could recapture at the destination
+                var recapturers = call getAttackers(move.toX, move.toY, opponentColor);
+                var recapturerCount: int = recapturers.length;
                 
                 // Decide if this capture is safe
                 var isSafeCapture: bool = false;
                 
-                if defenderCount == 0 then {
-                    // No defenders - safe to capture
+                if recapturerCount == 0 then {
+                    // No one can recapture - safe to capture
                     isSafeCapture = true;
                 } else {
-                    // Has defenders - only capture if target value >= attacker value
-                    // (i.e., we gain equal or more value than we might lose)
-                    if captureValue >= attackerValue then {
+                    // Find the least valuable recapturer (opponent will use cheapest piece)
+                    var minRecapturerValue: int = 1000;  // Start with king value
+                    var j: int = 0;
+                    for (j = 0; j < recapturerCount; j = j + 1) {
+                        var recapturer: posType = recapturers[j];
+                        var recapturerCellValue: int = call getPieceAt(recapturer.x, recapturer.y);
+                        if recapturerCellValue != -1 then {
+                            var recapturerCell = ChessCell(recapturerCellValue);
+                            var recapturerValue: int = call getPieceValue(recapturerCell.pieceType);
+                            if recapturerValue < minRecapturerValue then {
+                                minRecapturerValue = recapturerValue;
+                            }
+                        }
+                    }
+                    
+                    // Calculate net material gain/loss
+                    // We gain: captureValue
+                    // We lose: attackerValue (if opponent recaptures with their cheapest piece)
+                    // Net gain = captureValue - attackerValue (if positive, we gain material)
+                    var netGain: int = captureValue - attackerValue;
+                    
+                    // Only capture if we gain material or break even
+                    if netGain >= 0 then {
                         isSafeCapture = true;
                     }
                 }
