@@ -37,8 +37,9 @@ These are three independent color systems with different purposes and implementa
 12. [Color Editor System Architecture](#part-3-color-editor-screen)
 13. [Adding a New Color to the Editor](#adding-a-new-color-to-the-editor)
 14. [Complete Color Editor Example](#complete-color-editor-example)
-15. [Color Editor Best Practices](#color-editor-best-practices)
-16. [Color Editor Troubleshooting](#color-editor-troubleshooting)
+15. [How Color Editor Affects Syntax Highlighting](#how-color-editor-affects-syntax-highlighting)
+16. [Color Editor Best Practices](#color-editor-best-practices)
+17. [Color Editor Troubleshooting](#color-editor-troubleshooting)
 
 ---
 
@@ -1402,6 +1403,149 @@ mvn javafx:run
 # Change the color and click "Save and Apply"
 # Verify the color is saved to console.cfg
 ```
+
+---
+
+## How Color Editor Affects Syntax Highlighting
+
+**Important Connection:** The Color Editor Screen directly controls syntax highlighting colors through the "Apply" mechanism.
+
+### The Apply Process
+
+When you click **"Save and Apply"** in the color editor:
+
+1. **Save**: Colors are saved to `console.cfg` JSON file
+2. **Apply**: `system.reloadConfig()` is called, which triggers:
+   - `EbsApp.reloadConfig()` - Java method that handles the reload
+   - `ConsoleConfig` instance created - Reads colors from `console.cfg`
+   - `generateCSS()` - Generates CSS rules from the color configuration
+   - CSS written to file and applied to the UI
+
+### Syntax Highlighting Integration
+
+The generated CSS includes rules for **all syntax highlighting classes** defined in Part 1:
+
+```css
+/* Generated from console.cfg */
+
+.keyword,
+.text.keyword,
+.styled-text-area .text.keyword,
+.console-out .text.keyword,
+.editor-ebs .text.keyword {
+    -fx-fill: #00FFFF !important;
+    -fx-background-color: transparent !important;
+}
+
+.builtin,
+.text.builtin,
+.styled-text-area .text.builtin {
+    -fx-fill: #99e0e0 !important;
+    -fx-background-color: transparent !important;
+}
+```
+
+### Color Mapping
+
+Colors from `console.cfg` map to syntax highlighting classes:
+
+| console.cfg Property | Syntax Highlighting Class | Part 1 PrintStyle |
+|---------------------|---------------------------|-------------------|
+| `keyword` | `.keyword` | `KEYWORD` |
+| `builtin` | `.builtin` | `BUILTIN` |
+| `literal` | `.literal` | `LITERAL` |
+| `datatype` | `.datatype` | `DATATYPE` |
+| `identifier` | `.identifier` | `IDENTIFIER` |
+| `comment` | `.comment` | `COMMENT` |
+| `error` | `.error` | `ERROR` |
+| `info` | `.info` | `INFO` |
+| `sql` | `.sql` | `SQL` |
+| `custom` | `.custom` | `CUSTOM` |
+
+### Complete Flow Diagram
+
+```
+User edits color in Color Editor
+        ↓
+Click "Save and Apply"
+        ↓
+color_editor.ebs saves to console.cfg
+        ↓
+system.reloadConfig() called
+        ↓
+EbsApp.reloadConfig()
+        ↓
+ConsoleConfig reads console.cfg
+        ↓
+generateCSS() creates CSS rules
+        ↓
+CSS written to file
+        ↓
+CSS applied to UI with !important
+        ↓
+Syntax highlighting colors updated immediately
+```
+
+### Why This Matters
+
+1. **Runtime Updates**: Colors change immediately without restarting the application
+2. **Persistence**: Color changes are saved and persist across sessions
+3. **Profile Management**: Multiple color profiles can be managed and switched
+4. **Unified System**: One config file controls both UI colors and syntax highlighting
+
+### Adding New Syntax Highlight Colors
+
+When adding a new syntax highlighting color (Part 1), you should also:
+
+1. **Add to color_editor.ebs** (Part 3):
+   - Add the color variable and ColorPicker
+   - Add to all profile functions
+   - Users can then customize the color through the GUI
+
+2. **Update ConsoleConfig.java**:
+   - The `generateCSS()` method automatically handles standard class names
+   - Custom handling only needed for special cases (like `background`, `caret`)
+
+3. **Default in console.css**:
+   - Provide a default color in `console.css` for first-time users
+   - The color editor will override this when users customize
+
+### Example: Adding a New "operator" Color
+
+**Part 1** (Syntax Highlighting):
+```java
+// PrintStyle.java
+OPERATOR("operator")
+
+// EbsTokenType.java
+PLUS(PrintStyle.OPERATOR, Category.OPERATOR, "+")
+
+// console.css (default)
+.text.operator { -fx-fill: #b4b4b4; }
+```
+
+**Part 3** (Color Editor):
+```javascript
+// color_editor.ebs
+var defaultOperatorColor: string = "#b4b4b4";
+var operatorColor: string = call json.getstring(colors, "operator", "");
+
+// Add to screen vars
+{
+    "name": "operator",
+    "type": "string",
+    "default": $operatorColor,
+    "display": {"type": "colorpicker", "labelText": "Operator Color:"}
+}
+```
+
+**ConsoleConfig.java** (automatic):
+```java
+// No changes needed! generateCSS() automatically creates:
+// .operator, .text.operator, .styled-text-area .text.operator { -fx-fill: <color> !important; }
+```
+
+When users click "Save and Apply", the operator color from the editor overrides the default in console.css.
 
 ---
 
