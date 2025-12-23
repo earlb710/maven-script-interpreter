@@ -288,44 +288,44 @@ function updateCapturedPiecesDisplay() {
     // Update left side (captured white pieces) - use explicit slot assignments
     // capturedWhitePieces stores WHITE pieces that were captured, so display them as WHITE pieces
     if capturedWhiteCount > 0 then { 
-        chessScreen.capturedWhite0 = call getPieceImage(capturedWhitePieces[0], WHITE); 
+        chessScreen.capturedWhite0 = call getNormalPiece(capturedWhitePieces[0], WHITE); 
     } else { chessScreen.capturedWhite0 = transparentClear; }
-    if capturedWhiteCount > 1 then { chessScreen.capturedWhite1 = call getPieceImage(capturedWhitePieces[1], WHITE); } else { chessScreen.capturedWhite1 = transparentClear; }
-    if capturedWhiteCount > 2 then { chessScreen.capturedWhite2 = call getPieceImage(capturedWhitePieces[2], WHITE); } else { chessScreen.capturedWhite2 = transparentClear; }
-    if capturedWhiteCount > 3 then { chessScreen.capturedWhite3 = call getPieceImage(capturedWhitePieces[3], WHITE); } else { chessScreen.capturedWhite3 = transparentClear; }
-    if capturedWhiteCount > 4 then { chessScreen.capturedWhite4 = call getPieceImage(capturedWhitePieces[4], WHITE); } else { chessScreen.capturedWhite4 = transparentClear; }
-    if capturedWhiteCount > 5 then { chessScreen.capturedWhite5 = call getPieceImage(capturedWhitePieces[5], WHITE); } else { chessScreen.capturedWhite5 = transparentClear; }
-    if capturedWhiteCount > 6 then { chessScreen.capturedWhite6 = call getPieceImage(capturedWhitePieces[6], WHITE); } else { chessScreen.capturedWhite6 = transparentClear; }
-    if capturedWhiteCount > 7 then { chessScreen.capturedWhite7 = call getPieceImage(capturedWhitePieces[7], WHITE); } else { chessScreen.capturedWhite7 = transparentClear; }
-    if capturedWhiteCount > 8 then { chessScreen.capturedWhite8 = call getPieceImage(capturedWhitePieces[8], WHITE); } else { chessScreen.capturedWhite8 = transparentClear; }
-    if capturedWhiteCount > 9 then { chessScreen.capturedWhite9 = call getPieceImage(capturedWhitePieces[9], WHITE); } else { chessScreen.capturedWhite9 = transparentClear; }
-    if capturedWhiteCount > 10 then { chessScreen.capturedWhite10 = call getPieceImage(capturedWhitePieces[10], WHITE); } else { chessScreen.capturedWhite10 = transparentClear; }
-    if capturedWhiteCount > 11 then { chessScreen.capturedWhite11 = call getPieceImage(capturedWhitePieces[11], WHITE); } else { chessScreen.capturedWhite11 = transparentClear; }
-    if capturedWhiteCount > 12 then { chessScreen.capturedWhite12 = call getPieceImage(capturedWhitePieces[12], WHITE); } else { chessScreen.capturedWhite12 = transparentClear; }
-    if capturedWhiteCount > 13 then { chessScreen.capturedWhite13 = call getPieceImage(capturedWhitePieces[13], WHITE); } else { chessScreen.capturedWhite13 = transparentClear; }
-    if capturedWhiteCount > 14 then { chessScreen.capturedWhite14 = call getPieceImage(capturedWhitePieces[14], WHITE); } else { chessScreen.capturedWhite14 = transparentClear; }
-    if capturedWhiteCount > 15 then { chessScreen.capturedWhite15 = call getPieceImage(capturedWhitePieces[15], WHITE); } else { chessScreen.capturedWhite15 = transparentClear; }
+    if capturedWhiteCount > 1 then { chessScreen.capturedWhite1 = call getNormalPiece(capturedWhitePieces[1], WHITE); } else { chessScreen.capturedWhite1 = transparentClear; }
+    if capturedWhiteCount > 2 then { chessScreen.capturedWhite2 = call getNormalPiece(capturedWhitePieces[2], WHITE); } else { chessScreen.capturedWhite2 = transparentClear; }
+    if capturedWhiteCount > 3 then { chessScreen.capturedWhite3 = call getNormalPiece(capturedWhitePieces[3], WHITE); } else { chessScreen.capturedWhite3 = transparentClear; }
+    if capturedWhiteCount > 4 then { chessScreen.capturedWhite4 = call getNormalPiece(capturedWhitePieces[4], WHITE); } else { chessScreen.capturedWhite4 = transparentClear; }
+    if capturedWhiteCount > 5 then { chessScreen.capturedWhite5 = call getNormalPiece(capturedWhitePieces[5], WHITE); } else { chessScreen.capturedWhite5 = transparentClear; }
+    if capturedWhiteCount > 6 then { chessScreen.capturedWhite6 = call getNormalPiece(capturedWhitePieces[6], WHITE); } else { chessScreen.capturedWhite6 = transparentClear; }
+    if capturedWhiteCount > 7 then { chessScreen.capturedWhite7 = call getNormalPiece(capturedWhitePieces[7], WHITE); } else { chessScreen.capturedWhite7 = transparentClear; }
+    if capturedWhiteCount > 8 then { chessScreen.capturedWhite8 = call getNormalPiece(capturedWhitePieces[8], WHITE); } else { chessScreen.capturedWhite8 = transparentClear; }
+    if capturedWhiteCount > 9 then { chessScreen.capturedWhite9 = call getNormalPiece(capturedWhitePieces[9], WHITE); } else { chessScreen.capturedWhite9 = transparentClear; }
+    if capturedWhiteCount > 10 then { chessScreen.capturedWhite10 = call getNormalPiece(capturedWhitePieces[10], WHITE); } else { chessScreen.capturedWhite10 = transparentClear; }
+    if capturedWhiteCount > 11 then { chessScreen.capturedWhite11 = call getNormalPiece(capturedWhitePieces[11], WHITE); } else { chessScreen.capturedWhite11 = transparentClear; }
+    if capturedWhiteCount > 12 then { chessScreen.capturedWhite12 = call getNormalPiece(capturedWhitePieces[12], WHITE); } else { chessScreen.capturedWhite12 = transparentClear; }
+    if capturedWhiteCount > 13 then { chessScreen.capturedWhite13 = call getNormalPiece(capturedWhitePieces[13], WHITE); } else { chessScreen.capturedWhite13 = transparentClear; }
+    if capturedWhiteCount > 14 then { chessScreen.capturedWhite14 = call getNormalPiece(capturedWhitePieces[14], WHITE); } else { chessScreen.capturedWhite14 = transparentClear; }
+    if capturedWhiteCount > 15 then { chessScreen.capturedWhite15 = call getNormalPiece(capturedWhitePieces[15], WHITE); } else { chessScreen.capturedWhite15 = transparentClear; }
     
     // Update right side (captured black pieces) - use explicit slot assignments
     // capturedBlackPieces stores BLACK pieces that were captured, so display them as BLACK pieces
     if capturedBlackCount > 0 then { 
-        chessScreen.capturedBlack0 = call getPieceImage(capturedBlackPieces[0], BLACK); 
+        chessScreen.capturedBlack0 = call getNormalPiece(capturedBlackPieces[0], BLACK); 
     } else { chessScreen.capturedBlack0 = transparentClear; }
-    if capturedBlackCount > 1 then { chessScreen.capturedBlack1 = call getPieceImage(capturedBlackPieces[1], BLACK); } else { chessScreen.capturedBlack1 = transparentClear; }
-    if capturedBlackCount > 2 then { chessScreen.capturedBlack2 = call getPieceImage(capturedBlackPieces[2], BLACK); } else { chessScreen.capturedBlack2 = transparentClear; }
-    if capturedBlackCount > 3 then { chessScreen.capturedBlack3 = call getPieceImage(capturedBlackPieces[3], BLACK); } else { chessScreen.capturedBlack3 = transparentClear; }
-    if capturedBlackCount > 4 then { chessScreen.capturedBlack4 = call getPieceImage(capturedBlackPieces[4], BLACK); } else { chessScreen.capturedBlack4 = transparentClear; }
-    if capturedBlackCount > 5 then { chessScreen.capturedBlack5 = call getPieceImage(capturedBlackPieces[5], BLACK); } else { chessScreen.capturedBlack5 = transparentClear; }
-    if capturedBlackCount > 6 then { chessScreen.capturedBlack6 = call getPieceImage(capturedBlackPieces[6], BLACK); } else { chessScreen.capturedBlack6 = transparentClear; }
-    if capturedBlackCount > 7 then { chessScreen.capturedBlack7 = call getPieceImage(capturedBlackPieces[7], BLACK); } else { chessScreen.capturedBlack7 = transparentClear; }
-    if capturedBlackCount > 8 then { chessScreen.capturedBlack8 = call getPieceImage(capturedBlackPieces[8], BLACK); } else { chessScreen.capturedBlack8 = transparentClear; }
-    if capturedBlackCount > 9 then { chessScreen.capturedBlack9 = call getPieceImage(capturedBlackPieces[9], BLACK); } else { chessScreen.capturedBlack9 = transparentClear; }
-    if capturedBlackCount > 10 then { chessScreen.capturedBlack10 = call getPieceImage(capturedBlackPieces[10], BLACK); } else { chessScreen.capturedBlack10 = transparentClear; }
-    if capturedBlackCount > 11 then { chessScreen.capturedBlack11 = call getPieceImage(capturedBlackPieces[11], BLACK); } else { chessScreen.capturedBlack11 = transparentClear; }
-    if capturedBlackCount > 12 then { chessScreen.capturedBlack12 = call getPieceImage(capturedBlackPieces[12], BLACK); } else { chessScreen.capturedBlack12 = transparentClear; }
-    if capturedBlackCount > 13 then { chessScreen.capturedBlack13 = call getPieceImage(capturedBlackPieces[13], BLACK); } else { chessScreen.capturedBlack13 = transparentClear; }
-    if capturedBlackCount > 14 then { chessScreen.capturedBlack14 = call getPieceImage(capturedBlackPieces[14], BLACK); } else { chessScreen.capturedBlack14 = transparentClear; }
-    if capturedBlackCount > 15 then { chessScreen.capturedBlack15 = call getPieceImage(capturedBlackPieces[15], BLACK); } else { chessScreen.capturedBlack15 = transparentClear; }
+    if capturedBlackCount > 1 then { chessScreen.capturedBlack1 = call getNormalPiece(capturedBlackPieces[1], BLACK); } else { chessScreen.capturedBlack1 = transparentClear; }
+    if capturedBlackCount > 2 then { chessScreen.capturedBlack2 = call getNormalPiece(capturedBlackPieces[2], BLACK); } else { chessScreen.capturedBlack2 = transparentClear; }
+    if capturedBlackCount > 3 then { chessScreen.capturedBlack3 = call getNormalPiece(capturedBlackPieces[3], BLACK); } else { chessScreen.capturedBlack3 = transparentClear; }
+    if capturedBlackCount > 4 then { chessScreen.capturedBlack4 = call getNormalPiece(capturedBlackPieces[4], BLACK); } else { chessScreen.capturedBlack4 = transparentClear; }
+    if capturedBlackCount > 5 then { chessScreen.capturedBlack5 = call getNormalPiece(capturedBlackPieces[5], BLACK); } else { chessScreen.capturedBlack5 = transparentClear; }
+    if capturedBlackCount > 6 then { chessScreen.capturedBlack6 = call getNormalPiece(capturedBlackPieces[6], BLACK); } else { chessScreen.capturedBlack6 = transparentClear; }
+    if capturedBlackCount > 7 then { chessScreen.capturedBlack7 = call getNormalPiece(capturedBlackPieces[7], BLACK); } else { chessScreen.capturedBlack7 = transparentClear; }
+    if capturedBlackCount > 8 then { chessScreen.capturedBlack8 = call getNormalPiece(capturedBlackPieces[8], BLACK); } else { chessScreen.capturedBlack8 = transparentClear; }
+    if capturedBlackCount > 9 then { chessScreen.capturedBlack9 = call getNormalPiece(capturedBlackPieces[9], BLACK); } else { chessScreen.capturedBlack9 = transparentClear; }
+    if capturedBlackCount > 10 then { chessScreen.capturedBlack10 = call getNormalPiece(capturedBlackPieces[10], BLACK); } else { chessScreen.capturedBlack10 = transparentClear; }
+    if capturedBlackCount > 11 then { chessScreen.capturedBlack11 = call getNormalPiece(capturedBlackPieces[11], BLACK); } else { chessScreen.capturedBlack11 = transparentClear; }
+    if capturedBlackCount > 12 then { chessScreen.capturedBlack12 = call getNormalPiece(capturedBlackPieces[12], BLACK); } else { chessScreen.capturedBlack12 = transparentClear; }
+    if capturedBlackCount > 13 then { chessScreen.capturedBlack13 = call getNormalPiece(capturedBlackPieces[13], BLACK); } else { chessScreen.capturedBlack13 = transparentClear; }
+    if capturedBlackCount > 14 then { chessScreen.capturedBlack14 = call getNormalPiece(capturedBlackPieces[14], BLACK); } else { chessScreen.capturedBlack14 = transparentClear; }
+    if capturedBlackCount > 15 then { chessScreen.capturedBlack15 = call getNormalPiece(capturedBlackPieces[15], BLACK); } else { chessScreen.capturedBlack15 = transparentClear; }
 }
 
 // Clear captured pieces (for new game)
