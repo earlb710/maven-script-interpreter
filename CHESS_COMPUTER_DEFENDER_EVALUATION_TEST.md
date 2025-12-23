@@ -6,9 +6,8 @@ Enhanced the easy difficulty computer player to evaluate defenders before captur
 ### Logic Implemented
 When the computer considers capturing a piece:
 1. **Check for recapturers**: Use `getAttackers()` to find opponent pieces that could recapture at the destination square
-2. **If NO recapturers**: Capture is safe - consider it
+2. **If NO recapturers**: Capture is safe - consider it (pure gain)
 3. **If recapturers exist**: 
-   - Find the least valuable recapturer (opponent will use cheapest piece)
    - Calculate net material gain: `captureValue - attackerValue`
    - Only capture if net gain >= 0 (we gain material or break even)
 4. **Select best safe capture**: Among all safe captures, pick the highest value
@@ -24,7 +23,7 @@ Examples:
 - Knight (3) captures defended pawn (1): Net = 1 - 3 = -2 (BAD - don't capture)
 - Knight (3) captures defended knight (3): Net = 3 - 3 = 0 (NEUTRAL - OK to capture)
 - Knight (3) captures defended rook (5): Net = 5 - 3 = +2 (GOOD - capture!)
-- Knight (3) captures undefended pawn (1): Net = 1 - 0 = +1 (GOOD - capture!)
+- Knight (3) captures undefended pawn (1): Net = 1 - 0 = +1 (GOOD - pure gain, no recapture risk)
 
 ### Piece Values
 - Pawn: 1
@@ -61,10 +60,10 @@ Examples:
 - Option B: Capture defended queen (value 9) with knight (value 3), queen defended by pawn
 **Expected**: Computer should choose Option B (higher value capture: 9 vs 1, net gain = +6)
 
-### Scenario 6: Multiple Defenders
+### Scenario 6: Multiple Defenders (Any Can Recapture)
 **Setup**: Computer can capture a rook (value 5) with knight (value 3)
 - Rook is defended by both a pawn (value 1) and a bishop (value 3)
-**Expected**: Computer SHOULD capture (uses cheapest defender=pawn, net gain = 5-3 = +2)
+**Expected**: Computer SHOULD capture (net gain = 5-3 = +2, gains material even with recapture)
 
 ## Manual Testing Instructions
 
@@ -91,12 +90,11 @@ Examples:
 
 ## Code Changes
 - **File**: `ScriptInterpreter/projects/Chess/chess-game.ebs`
-- **Function**: `selectBestMoveEasy` (lines 2648-2744)
+- **Function**: `selectBestMoveEasy` (lines 2648-2727)
 - **Key additions**:
   - Get attacking piece type and value from move
   - Determine opponent color
-  - Call `getAttackers()` to find potential recapturers
-  - Find least valuable recapturer (opponent uses cheapest piece)
+  - Call `getAttackers()` to find pieces that can recapture
   - Calculate net material gain/loss
   - Only consider captures with net gain >= 0 as "safe"
   - Select highest value safe capture
@@ -111,9 +109,8 @@ For each legal move:
     recapturers = getAttackers(destination, opponentColor)
     
     If no recapturers:
-      isSafe = true  (gain = captureValue)
+      isSafe = true  (pure gain = captureValue)
     Else:
-      minRecapturerValue = find cheapest recapturer
       netGain = captureValue - attackerValue
       isSafe = (netGain >= 0)
     
