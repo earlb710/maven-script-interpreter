@@ -183,7 +183,7 @@ public class ConsoleConfig {
         defaultColors.put("sql", "#00ee66");
         defaultColors.put("custom", "#eeee90");
         defaultColors.put("function", "#DCDCAA");
-        defaultColors.put("function-error", "#DCDCAA");
+        defaultColors.put("error-color", "#DCDCAA");
         defaultColors.put("background", "#000000");
         defaultColors.put("text", "#e6e6e6");
         defaultColors.put("caret", "white");
