@@ -111,7 +111,6 @@ function getPawnMoves(x: int, y: int, color: int) return array {
                 var enPassantCaptureY: int = y + direction;
                 var enPassantCapture: posType = call createPos(enPassantCaptureX, enPassantCaptureY);
                 call array.add(moves, enPassantCapture);
-                print "En passant move available from (" + x + ", " + y + ") to (" + enPassantCaptureX + ", " + enPassantCaptureY + ")";
             }
         }
     }
