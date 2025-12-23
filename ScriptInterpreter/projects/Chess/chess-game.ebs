@@ -1191,7 +1191,6 @@ selectPiece(x: int, y: int) {
 
 // Select an opponent piece (highlight with gray overlay)
 selectOpponentPiece(x: int, y: int) {
-    print "Selecting opponent piece at (" + x + ", " + y + ")";
     var cellValue: int = call getPieceAt(x, y);
     if cellValue != -1 then {
         var cell = ChessCell(cellValue);
@@ -1221,7 +1220,6 @@ selectOpponentPiece(x: int, y: int) {
                 // Convert to image and set
                 var grayPiece: imagedata = call canvas.toImage(pieceCanvas);
                 call setPieceImage(x, y, grayPiece);
-                print "Opponent piece highlighted with gray at (" + x + ", " + y + ") - centered at (" + centerX + ", " + centerY + ")";
             }
         }
     }
@@ -1229,7 +1227,6 @@ selectOpponentPiece(x: int, y: int) {
 
 // Deselect a piece (change back to normal)
 deselectPiece(x: int, y: int) {
-    print "Deselecting piece at (" + x + ", " + y + ")";
     var cellValue: int = call getPieceAt(x, y);
     if cellValue != -1 then {
         var cell = ChessCell(cellValue);
@@ -1237,7 +1234,6 @@ deselectPiece(x: int, y: int) {
             var normalPiece: imagedata = call getNormalPiece(cell.pieceType, cell.pieceColor);
             if normalPiece != null then {
                 call setPieceImage(x, y, normalPiece);
-                print "Piece returned to normal at (" + x + ", " + y + ")";
             }
         }
     }
