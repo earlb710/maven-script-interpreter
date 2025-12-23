@@ -616,3 +616,15 @@
     -fx-fill: #DCDCAA; /* yellow for functions */
 }
 
+/* Unknown/undefined functions - red underline */
+.tok-function-error,
+.text.tok-function-error,
+.styled-text-area .text.tok-function-error,
+.editor-ebs .text.tok-function-error,
+.editor-text .text.tok-function-error {
+    -fx-fill: #DCDCAA; /* same yellow as functions */
+    -rtfx-underline-color: red;
+    -rtfx-underline-width: 2;
+    -rtfx-underline-dash-array: none; /* solid line */
+}
+
