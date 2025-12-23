@@ -212,6 +212,11 @@ function isOccupiedByColor(x: int, y: int, color: int) return bool {
 // Get the normal (original) version of a piece image based on piece type and color
 function getNormalPiece(pieceType: int, pieceColor: int) return imagedata {
     // Use array indexing for O(1) lookup instead of if-else chain
+    // For EMPTY (pieceType=0) or invalid types, return transparentClear
+    if pieceType == EMPTY || pieceType < 0 || pieceType > 6 then {
+        return transparentClear;
+    }
+    
     if pieceColor == WHITE then {
         return normalWhitePieces[pieceType];
     } else {
@@ -708,6 +713,13 @@ initializeBoardPieces() {
     // Row 1 (black pawns) - use loop
     for (var x: int = 0; x < 8; x++) {
         call setPieceCell(x, 1, normalBlackPieces[PAWN]);
+    }
+    
+    // Rows 2-5 (empty middle rows) - clear with null to avoid displaying stale images
+    for (var y: int = 2; y < 6; y++) {
+        for (var x: int = 0; x < 8; x++) {
+            call setPieceCell(x, y, null);
+        }
     }
     
     // Row 6 (white pawns) - use loop
@@ -2312,6 +2324,9 @@ handleStartGame() {
             }
         }
     }
+    
+    // Clear all indicators before showing screen to ensure clean state
+    call clearIndicators();
     
     // Update screen variables before showing
     chessScreen.whiteTimer = call formatTimerDecimal(timerWhite);
