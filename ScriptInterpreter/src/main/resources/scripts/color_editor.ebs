@@ -150,7 +150,7 @@ if call json.isempty(config) then {
         defaultConfig2 = defaultConfig2 + "      \"sql\": \"#00ee66\",\n";
         defaultConfig2 = defaultConfig2 + "      \"custom\": \"#eeee90\",\n";
         defaultConfig2 = defaultConfig2 + "      \"function\": \"#DCDCAA\",\n";
-        defaultConfig2 = defaultConfig2 + "      \"function-error\": \"#DCDCAA\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"syntax-error\": \"#DCDCAA\",\n";
         defaultConfig2 = defaultConfig2 + "      \"background\": \"#000000\",\n";
         defaultConfig2 = defaultConfig2 + "      \"text\": \"#e6e6e6\",\n";
         defaultConfig2 = defaultConfig2 + "      \"caret\": \"white\",\n";
@@ -356,7 +356,7 @@ var identifierColor: string = call json.getstring(colors, "identifier", "");
 var sqlColor: string = call json.getstring(colors, "sql", "");
 var customColor: string = call json.getstring(colors, "custom", "");
 var functionColor: string = call json.getstring(colors, "function", "");
-var errorColor: string = call json.getstring(colors, "syntax-error", "");
+var syntaxErrorColor: string = call json.getstring(colors, "syntax-error", "");
 var backgroundColor: string = call json.getstring(colors, "background", "");
 var textColor: string = call json.getstring(colors, "text", "");
 var caretColor: string = call json.getstring(colors, "caret", "");
@@ -390,7 +390,7 @@ var defaultIdentifierColor: string = "white";
 var defaultSqlColor: string = "#00ee66";
 var defaultCustomColor: string = "#eeee90";
 var defaultFunctionColor: string = "#DCDCAA";
-var defaultErrorColor: string = "#DCDCAA";
+var defaultSyntaxErrorColor: string = "#DCDCAA";
 var defaultBackgroundColor: string = "#000000";
 var defaultTextColor: string = "#e6e6e6";
 var defaultCaretColor: string = "white";
@@ -423,7 +423,7 @@ if identifierColor == "" then { identifierColor = defaultIdentifierColor; }
 if sqlColor == "" then { sqlColor = defaultSqlColor; }
 if customColor == "" then { customColor = defaultCustomColor; }
 if functionColor == "" then { functionColor = defaultFunctionColor; }
-if errorColor == "" then { errorColor = defaultErrorColor; }
+if syntaxErrorColor == "" then { syntaxErrorColor = defaultSyntaxErrorColor; }
 if backgroundColor == "" then { backgroundColor = defaultBackgroundColor; }
 if textColor == "" then { textColor = defaultTextColor; }
 if caretColor == "" then { caretColor = defaultCaretColor; }
@@ -460,8 +460,7 @@ function setColorsToDefaults {
     colorEditorScreen.identifier = defaultIdentifierColor;
     colorEditorScreen.sql = defaultSqlColor;
     colorEditorScreen.functionClr = defaultFunctionColor;
-    colorEditorScreen.functionClr = defaultFunctionColor;
-    colorEditorScreen.errorClr = defaultErrorColor;
+    colorEditorScreen.errorClr = defaultSyntaxErrorColor;
     colorEditorScreen.background = defaultBackgroundColor;
     colorEditorScreen.text = defaultTextColor;
     colorEditorScreen.caret = defaultCaretColor;
@@ -495,8 +494,7 @@ function setColorsToOriginal {
     colorEditorScreen.identifier = identifierColor;
     colorEditorScreen.sql = sqlColor;
     colorEditorScreen.functionClr = functionColor;
-    colorEditorScreen.functionClr = functionColor;
-    colorEditorScreen.errorClr = errorColor;
+    colorEditorScreen.errorClr = syntaxErrorColor;
     colorEditorScreen.background = backgroundColor;
     colorEditorScreen.text = textColor;
     colorEditorScreen.caret = caretColor;
@@ -1195,7 +1193,7 @@ function onProfileChange {
         if pIdentifier != "" then { colorEditorScreen.identifier = pIdentifier; } else { colorEditorScreen.identifier = defaultIdentifierColor; }
         if pSql != "" then { colorEditorScreen.sql = pSql; } else { colorEditorScreen.sql = defaultSqlColor; }
         if pFunction != "" then { colorEditorScreen.functionClr = pFunction; } else { colorEditorScreen.functionClr = defaultFunctionColor; }
-        if pErrorColor != "" then { colorEditorScreen.errorClr = pErrorColor; } else { colorEditorScreen.errorClr = defaultErrorColor; }
+        if pErrorColor != "" then { colorEditorScreen.errorClr = pErrorColor; } else { colorEditorScreen.errorClr = defaultSyntaxErrorColor; }
         if pBackground != "" then { colorEditorScreen.background = pBackground; } else { colorEditorScreen.background = defaultBackgroundColor; }
         if pText != "" then { colorEditorScreen.text = pText; } else { colorEditorScreen.text = defaultTextColor; }
         if pCaret != "" then { colorEditorScreen.caret = pCaret; } else { colorEditorScreen.caret = defaultCaretColor; }
@@ -1734,7 +1732,7 @@ screen colorEditorScreen = {
         {
             "name": "errorClr",
             "type": "string",
-            "default": $errorColor,
+            "default": $syntaxErrorColor,
             "display": {
                 "type": "colorpicker",
                 "labelText": "Error Color:"
