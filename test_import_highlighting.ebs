@@ -1,17 +1,26 @@
 // Test script for import function highlighting
 // This imports functions from imported_functions.ebs
 // Functions from the import should be recognized
+// Tests all three function definition formats
 
 import "imported_functions.ebs";
 
-// Use imported function - should be highlighted as known
+// Test Format 1: Function with parameters - should be highlighted as known
 var result: int = call importedAdd(10, 20);
 print("Imported add result: " + result);
 
-// Use another imported function - should be highlighted as known
+// Test Format 2: Function with return type only - should be highlighted as known
+var value: int = call importedGetValue();
+print("Imported value: " + value);
+
+// Test Format 3: Basic function without parameters - should be highlighted as known
+call importedHelper();
+
+// Test Format 4: Function with 'function' keyword - should be highlighted as known
 var mult: int = call importedMultiply(5, 6);
 print("Imported multiply result: " + mult);
 
 // Use unknown function - should have red underline
 var bad: int = call notDefinedAnywhere(1, 2);
 print("Bad result: " + bad);
+

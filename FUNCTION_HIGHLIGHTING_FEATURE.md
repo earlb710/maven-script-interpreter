@@ -8,10 +8,11 @@ The EBS script editor now provides intelligent syntax highlighting for custom (u
 ### 1. Custom Function Recognition
 - Functions defined in the current file are automatically detected
 - Functions from imported files are recursively collected
-- Function definitions are recognized in multiple formats:
-  - `functionName(params) { ... }`
-  - `functionName(params) return type { ... }`
-  - `function functionName(params) { ... }`
+- Function definitions are recognized in **all three formats per EBS syntax**:
+  - **namedBlock**: `functionName { ... }`
+  - **namedBlockWithReturn**: `functionName return type { ... }`
+  - **namedBlockWithParams**: `functionName(params) [return type] { ... }`
+  - All formats support optional `function` keyword: `function functionName ...`
 
 ### 2. Syntax Highlighting
 - **Known Functions**: Custom functions and builtins are highlighted in yellow (`tok-function` style)
@@ -27,7 +28,10 @@ The EBS script editor now provides intelligent syntax highlighting for custom (u
 ## How It Works
 
 1. **On File Load/Edit**: The editor parses the current file and all imported files
-2. **Function Collection**: Extracts all function definitions (name and parameters)
+2. **Function Collection**: Extracts all function definitions using three patterns:
+   - Pattern 1: `identifier(` - Functions with parameters
+   - Pattern 2: `identifier return` - Functions with return type only
+   - Pattern 3: `identifier {` - Basic functions without parameters
 3. **Token Processing**: During syntax highlighting, identifies function calls (identifier followed by `(`)
 4. **Validation**: Checks if each function call matches:
    - A builtin function (from `Builtins.java`)
@@ -54,38 +58,64 @@ The EBS script editor now provides intelligent syntax highlighting for custom (u
 }
 ```
 
-## Example
+## Examples
 
-### test_function_highlighting.ebs
+### All Function Definition Formats
+
 ```javascript
-// Define custom function
-myFunction(x: int, y: int) return int {
-    return x + y;
+// Format 1: Basic function (namedBlock)
+greet {
+    print("Hello!");
 }
 
-// Known function call - highlighted normally
-var result: int = call myFunction(10, 20);
+// Format 2: Function with return type (namedBlockWithReturn)
+getValue return int {
+    return 42;
+}
 
-// Unknown function call - red underline
-var bad: int = call unknownFunction(1, 2);
+// Format 3: Function with parameters (namedBlockWithParams)
+add(a: int, b: int) return int {
+    return a + b;
+}
+
+// Format 4: With optional 'function' keyword
+function multiply(x: int, y: int) return int {
+    return x * y;
+}
 ```
 
-### test_import_highlighting.ebs
+### Function Call Highlighting
+
 ```javascript
-import "imported_functions.ebs";
+// Known function calls - highlighted normally
+call greet();              // ✅ Yellow
+var x = call getValue();   // ✅ Yellow
+var sum = call add(5, 3);  // ✅ Yellow
 
-// Function from import - highlighted normally
-var result: int = call importedAdd(10, 20);
+// Unknown function call - red underline
+var bad = call unknownFunc(1); // ⚠️ Yellow + Red underline
+```
 
-// Unknown function - red underline
-var bad: int = call notDefined();
+### Import Example
+
+```javascript
+// custom-lib.ebs
+helper return string {
+    return "I'm a helper";
+}
+
+// main.ebs
+import "custom-lib.ebs";
+
+call helper();        // ✅ Highlighted normally
+call notDefined();    // ⚠️ Red underline
 ```
 
 ## Implementation Details
 
 ### Key Classes Modified
 - **EbsTab.java**: Main editor tab component
-  - `extractFunctionNames()`: Parses function definitions
+  - `extractFunctionNames()`: Parses all three function definition formats
   - `extractImportedFunctions()`: Recursively processes imports
   - `updateKnownFunctions()`: Maintains set of known functions
   - `markUnknownFunctions()`: Post-processes tokens for validation
@@ -95,18 +125,33 @@ var bad: int = call notDefined();
 
 ### Performance
 - Function extraction runs on each editor change (debounced 100ms)
+- Three regex patterns for comprehensive function detection
 - Import files are only read when changed
-- Regex-based parsing for efficiency
+- Set-based lookup for O(1) validation
 
 ## Benefits
 
 1. **Immediate Feedback**: Typos in function names are caught immediately
 2. **Import Validation**: Ensures imported functions exist
 3. **Better Code Navigation**: Easily distinguish custom vs builtin functions
-4. **Refactoring Support**: Renaming functions shows errors instantly
+4. **Syntax Compliance**: Correctly handles all EBS function definition formats per `syntax_ebnf.txt`
+
+## Alignment with EBS Syntax Guide
+
+This implementation follows the official EBS syntax as defined in:
+- `ScriptInterpreter/src/main/java/com/eb/script/syntax_ebnf.txt`
+- `docs/EBS_SCRIPT_SYNTAX.md`
+
+All three function definition formats are supported:
+```
+namedBlock           = identifier "{" ... "}"
+namedBlockWithReturn = identifier "return" typeName "{" ... "}"
+namedBlockWithParams = identifier "(" ... ")" ["return" typeName] "{" ... "}"
+```
 
 ## Future Enhancements
 - Cache imported file parsing results
 - Show function signature on hover
 - Jump to function definition
 - Auto-complete for custom functions
+

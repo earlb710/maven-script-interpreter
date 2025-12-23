@@ -4,14 +4,24 @@
 // - Known builtins highlighted as builtins
 // - Unknown functions with red underline (tok-function-error)
 
-// Define a custom function
+// Test Format 1: Basic function (namedBlock) - identifier {
+greet {
+    print("Hello from greet!");
+}
+
+// Test Format 2: Function with return type - identifier return type {
+getValue return int {
+    return 42;
+}
+
+// Test Format 3: Function with parameters - identifier(params) return type {
 myFunction(x: int, y: int) return int {
     var result: int = x + y;
     return result;
 }
 
-// Define another custom function
-calculateTotal(a: int, b: int) return int {
+// Test Format 4: With 'function' keyword
+function calculateTotal(a: int, b: int) return int {
     // This should be highlighted as known function
     var sum: int = call myFunction(a, b);
     return sum;
@@ -21,7 +31,11 @@ calculateTotal(a: int, b: int) return int {
 var x: int = 10;
 var y: int = 20;
 
-// This should be highlighted as known custom function
+// Test calling functions - all should be highlighted as known custom functions
+call greet();
+var value: int = call getValue();
+print("Value: " + value);
+
 var total: int = call calculateTotal(x, y);
 print("Total: " + total);
 
@@ -35,3 +49,4 @@ print("Unknown result: " + unknown);
 
 // This should show red underline (another unknown function)
 call anotherUnknownFunc();
+

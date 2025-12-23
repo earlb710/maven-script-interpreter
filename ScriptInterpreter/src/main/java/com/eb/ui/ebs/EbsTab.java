@@ -1373,10 +1373,11 @@ public class EbsTab extends Tab {
 
     /**
      * Extract function names from EBS source code.
-     * Looks for function definitions in the format:
-     * - functionName(params) { ... }
-     * - functionName(params) return type { ... }
-     * - function functionName(params) { ... }
+     * According to syntax_ebnf.txt, functions can be defined as:
+     * - namedBlock: identifier "{" ... "}" 
+     * - namedBlockWithReturn: identifier "return" typeName "{" ... "}"
+     * - namedBlockWithParams: identifier "(" ... ")" ["return" typeName] "{" ... "}"
+     * Optional "function" keyword is allowed before any of these.
      * 
      * @param source The source code to parse
      * @return Set of function names found
@@ -1384,19 +1385,60 @@ public class EbsTab extends Tab {
     private Set<String> extractFunctionNames(String source) {
         Set<String> functions = new HashSet<>();
         
-        // Pattern to match function definitions
+        // Pattern 1: identifier followed by "(" - namedBlockWithParams
         // Matches: [function] identifier(
-        Pattern functionDefPattern = Pattern.compile(
+        Pattern withParamsPattern = Pattern.compile(
             "(?:^|\\s)(?:function\\s+)?([a-zA-Z_][a-zA-Z0-9_]*)\\s*\\(",
             Pattern.MULTILINE
         );
         
-        Matcher matcher = functionDefPattern.matcher(source);
-        while (matcher.find()) {
-            String funcName = matcher.group(1).toLowerCase();
-            // Skip keywords and builtins
+        // Pattern 2: identifier followed by "return" - namedBlockWithReturn
+        // Matches: [function] identifier return
+        Pattern withReturnPattern = Pattern.compile(
+            "(?:^|\\s)(?:function\\s+)?([a-zA-Z_][a-zA-Z0-9_]*)\\s+return\\s+",
+            Pattern.MULTILINE
+        );
+        
+        // Pattern 3: identifier followed by "{" - namedBlock (basic function)
+        // Matches: [function] identifier {
+        // Must not be followed by return or ( to avoid duplicates
+        Pattern basicPattern = Pattern.compile(
+            "(?:^|\\s)(?:function\\s+)?([a-zA-Z_][a-zA-Z0-9_]*)\\s*\\{",
+            Pattern.MULTILINE
+        );
+        
+        // Collect from all patterns
+        Matcher matcher1 = withParamsPattern.matcher(source);
+        while (matcher1.find()) {
+            String funcName = matcher1.group(1).toLowerCase();
             if (!isKeyword(funcName) && !builtinFunctionNames.contains(funcName)) {
                 functions.add(funcName);
+            }
+        }
+        
+        Matcher matcher2 = withReturnPattern.matcher(source);
+        while (matcher2.find()) {
+            String funcName = matcher2.group(1).toLowerCase();
+            if (!isKeyword(funcName) && !builtinFunctionNames.contains(funcName)) {
+                functions.add(funcName);
+            }
+        }
+        
+        Matcher matcher3 = basicPattern.matcher(source);
+        while (matcher3.find()) {
+            String funcName = matcher3.group(1).toLowerCase();
+            // Check if this is already captured by other patterns
+            if (!isKeyword(funcName) && !builtinFunctionNames.contains(funcName)) {
+                // Verify it's not a screen, control structure, or other block
+                // by checking it's not preceded by keywords like "screen", "if", "while", etc.
+                int startPos = matcher3.start(1);
+                String before = source.substring(Math.max(0, startPos - 20), startPos).trim().toLowerCase();
+                if (!before.endsWith("screen") && !before.endsWith("subscreen") && 
+                    !before.endsWith("if") && !before.endsWith("else") && 
+                    !before.endsWith("while") && !before.endsWith("do") &&
+                    !before.endsWith("try")) {
+                    functions.add(funcName);
+                }
             }
         }
         
