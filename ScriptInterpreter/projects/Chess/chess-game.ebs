@@ -1681,10 +1681,10 @@ handleCellClick(x: int, y: int) {
             if selectedGameMode == "1 player" && !gameOver then {
                 // Check if current player is the computer
                 if currentPlayer != humanPlayerColor then {
-                    // Use a short delay to allow UI to update and show human player's blue circles
-                    // before computer starts calculating (100ms is enough for screen refresh)
-                    call thread.sleep(100);
-                    call makeComputerMove();
+                    // Use util.runlater to allow UI to update and show human player's blue circles
+                    // before computer starts calculating. This gives the JavaFX thread a chance
+                    // to render the screen updates, then schedules the computer move asynchronously.
+                    call util.runlater("makeComputerMove");
                 }
             }
             
@@ -2353,9 +2353,9 @@ handleStartGame() {
     print "";
     
     // In 1-player mode, if computer plays white (currentPlayer=WHITE and humanPlayerColor=BLACK), 
-    // trigger computer move immediately
+    // trigger computer move immediately after screen renders
     if selectedGameMode == "1 player" && humanPlayerColor == BLACK then {
-        call makeComputerMove();
+        call util.runlater("makeComputerMove");
     }
 }
 
