@@ -859,6 +859,84 @@ clearIndicators() {
     }
 }
 
+// Helper function to set a board square (background layer) at a specific position
+function setBoardSquare(x: int, y: int, squareImage: imagedata) {
+    // Set the appropriate screen variable based on x,y position
+    if y == 0 then {
+        if x == 0 then { chessScreen.b00 = squareImage; }
+        else if x == 1 then { chessScreen.b01 = squareImage; }
+        else if x == 2 then { chessScreen.b02 = squareImage; }
+        else if x == 3 then { chessScreen.b03 = squareImage; }
+        else if x == 4 then { chessScreen.b04 = squareImage; }
+        else if x == 5 then { chessScreen.b05 = squareImage; }
+        else if x == 6 then { chessScreen.b06 = squareImage; }
+        else if x == 7 then { chessScreen.b07 = squareImage; }
+    } else if y == 1 then {
+        if x == 0 then { chessScreen.b10 = squareImage; }
+        else if x == 1 then { chessScreen.b11 = squareImage; }
+        else if x == 2 then { chessScreen.b12 = squareImage; }
+        else if x == 3 then { chessScreen.b13 = squareImage; }
+        else if x == 4 then { chessScreen.b14 = squareImage; }
+        else if x == 5 then { chessScreen.b15 = squareImage; }
+        else if x == 6 then { chessScreen.b16 = squareImage; }
+        else if x == 7 then { chessScreen.b17 = squareImage; }
+    } else if y == 2 then {
+        if x == 0 then { chessScreen.b20 = squareImage; }
+        else if x == 1 then { chessScreen.b21 = squareImage; }
+        else if x == 2 then { chessScreen.b22 = squareImage; }
+        else if x == 3 then { chessScreen.b23 = squareImage; }
+        else if x == 4 then { chessScreen.b24 = squareImage; }
+        else if x == 5 then { chessScreen.b25 = squareImage; }
+        else if x == 6 then { chessScreen.b26 = squareImage; }
+        else if x == 7 then { chessScreen.b27 = squareImage; }
+    } else if y == 3 then {
+        if x == 0 then { chessScreen.b30 = squareImage; }
+        else if x == 1 then { chessScreen.b31 = squareImage; }
+        else if x == 2 then { chessScreen.b32 = squareImage; }
+        else if x == 3 then { chessScreen.b33 = squareImage; }
+        else if x == 4 then { chessScreen.b34 = squareImage; }
+        else if x == 5 then { chessScreen.b35 = squareImage; }
+        else if x == 6 then { chessScreen.b36 = squareImage; }
+        else if x == 7 then { chessScreen.b37 = squareImage; }
+    } else if y == 4 then {
+        if x == 0 then { chessScreen.b40 = squareImage; }
+        else if x == 1 then { chessScreen.b41 = squareImage; }
+        else if x == 2 then { chessScreen.b42 = squareImage; }
+        else if x == 3 then { chessScreen.b43 = squareImage; }
+        else if x == 4 then { chessScreen.b44 = squareImage; }
+        else if x == 5 then { chessScreen.b45 = squareImage; }
+        else if x == 6 then { chessScreen.b46 = squareImage; }
+        else if x == 7 then { chessScreen.b47 = squareImage; }
+    } else if y == 5 then {
+        if x == 0 then { chessScreen.b50 = squareImage; }
+        else if x == 1 then { chessScreen.b51 = squareImage; }
+        else if x == 2 then { chessScreen.b52 = squareImage; }
+        else if x == 3 then { chessScreen.b53 = squareImage; }
+        else if x == 4 then { chessScreen.b54 = squareImage; }
+        else if x == 5 then { chessScreen.b55 = squareImage; }
+        else if x == 6 then { chessScreen.b56 = squareImage; }
+        else if x == 7 then { chessScreen.b57 = squareImage; }
+    } else if y == 6 then {
+        if x == 0 then { chessScreen.b60 = squareImage; }
+        else if x == 1 then { chessScreen.b61 = squareImage; }
+        else if x == 2 then { chessScreen.b62 = squareImage; }
+        else if x == 3 then { chessScreen.b63 = squareImage; }
+        else if x == 4 then { chessScreen.b64 = squareImage; }
+        else if x == 5 then { chessScreen.b65 = squareImage; }
+        else if x == 6 then { chessScreen.b66 = squareImage; }
+        else if x == 7 then { chessScreen.b67 = squareImage; }
+    } else if y == 7 then {
+        if x == 0 then { chessScreen.b70 = squareImage; }
+        else if x == 1 then { chessScreen.b71 = squareImage; }
+        else if x == 2 then { chessScreen.b72 = squareImage; }
+        else if x == 3 then { chessScreen.b73 = squareImage; }
+        else if x == 4 then { chessScreen.b74 = squareImage; }
+        else if x == 5 then { chessScreen.b75 = squareImage; }
+        else if x == 6 then { chessScreen.b76 = squareImage; }
+        else if x == 7 then { chessScreen.b77 = squareImage; }
+    }
+}
+
 // Show check indicators: yellow circle on king and all attacking pieces
 showCheckIndicators() {
     // Check if current player's king is in check
@@ -2261,41 +2339,19 @@ handleStartGame() {
     print "";
     print "Initializing board layer (checkerboard pattern)...";
     
-    // Initialize all 64 board squares with the correct checkerboard pattern
-    // Note: Manual assignment is used because EBS screen variables (chessScreen.b##)
-    // cannot be accessed dynamically via computed names. While verbose, this approach
-    // ensures correct checkerboard pattern: light on (row+col)%2==0, dark on (row+col)%2==1
-    // Row 0 (board row 8)
-    chessScreen.b00 = lightSquare; chessScreen.b01 = darkSquare; chessScreen.b02 = lightSquare; chessScreen.b03 = darkSquare;
-    chessScreen.b04 = lightSquare; chessScreen.b05 = darkSquare; chessScreen.b06 = lightSquare; chessScreen.b07 = darkSquare;
-    
-    // Row 1 (board row 7)
-    chessScreen.b10 = darkSquare; chessScreen.b11 = lightSquare; chessScreen.b12 = darkSquare; chessScreen.b13 = lightSquare;
-    chessScreen.b14 = darkSquare; chessScreen.b15 = lightSquare; chessScreen.b16 = darkSquare; chessScreen.b17 = lightSquare;
-    
-    // Row 2 (board row 6)
-    chessScreen.b20 = lightSquare; chessScreen.b21 = darkSquare; chessScreen.b22 = lightSquare; chessScreen.b23 = darkSquare;
-    chessScreen.b24 = lightSquare; chessScreen.b25 = darkSquare; chessScreen.b26 = lightSquare; chessScreen.b27 = darkSquare;
-    
-    // Row 3 (board row 5)
-    chessScreen.b30 = darkSquare; chessScreen.b31 = lightSquare; chessScreen.b32 = darkSquare; chessScreen.b33 = lightSquare;
-    chessScreen.b34 = darkSquare; chessScreen.b35 = lightSquare; chessScreen.b36 = darkSquare; chessScreen.b37 = lightSquare;
-    
-    // Row 4 (board row 4)
-    chessScreen.b40 = lightSquare; chessScreen.b41 = darkSquare; chessScreen.b42 = lightSquare; chessScreen.b43 = darkSquare;
-    chessScreen.b44 = lightSquare; chessScreen.b45 = darkSquare; chessScreen.b46 = lightSquare; chessScreen.b47 = darkSquare;
-    
-    // Row 5 (board row 3)
-    chessScreen.b50 = darkSquare; chessScreen.b51 = lightSquare; chessScreen.b52 = darkSquare; chessScreen.b53 = lightSquare;
-    chessScreen.b54 = darkSquare; chessScreen.b55 = lightSquare; chessScreen.b56 = darkSquare; chessScreen.b57 = lightSquare;
-    
-    // Row 6 (board row 2)
-    chessScreen.b60 = lightSquare; chessScreen.b61 = darkSquare; chessScreen.b62 = lightSquare; chessScreen.b63 = darkSquare;
-    chessScreen.b64 = lightSquare; chessScreen.b65 = darkSquare; chessScreen.b66 = lightSquare; chessScreen.b67 = darkSquare;
-    
-    // Row 7 (board row 1)
-    chessScreen.b70 = darkSquare; chessScreen.b71 = lightSquare; chessScreen.b72 = darkSquare; chessScreen.b73 = lightSquare;
-    chessScreen.b74 = darkSquare; chessScreen.b75 = lightSquare; chessScreen.b76 = darkSquare; chessScreen.b77 = lightSquare;
+    // Initialize all 64 board squares with the correct checkerboard pattern using loops
+    // Checkerboard pattern: light on (row+col)%2==0, dark on (row+col)%2==1
+    for (var y: int = 0; y < 8; y++) {
+        for (var x: int = 0; x < 8; x++) {
+            var sum: int = x + y;
+            var remainder: int = call modulo(sum, 2);
+            if remainder == 0 then {
+                call setBoardSquare(x, y, lightSquare);
+            } else {
+                call setBoardSquare(x, y, darkSquare);
+            }
+        }
+    }
     
     // Update screen variables before showing
     chessScreen.whiteTimer = call formatTimerDecimal(timerWhite);
