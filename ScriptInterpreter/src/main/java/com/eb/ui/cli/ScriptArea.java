@@ -41,6 +41,9 @@ public class ScriptArea extends StyleClassedTextArea {
     // Quote matching state
     private int[] lastHighlightedQuotes = null; // [openPos, closePos] or null if no quotes highlighted
     
+    // Function highlighting state
+    private List<int[]> lastHighlightedFunctions = null; // List of [start, end] positions for highlighted functions
+    
     // Selection drag state - used to suppress bracket highlighting during selection
     // Volatile ensures visibility across potential concurrent access from different event handlers
     private volatile boolean isSelectionDragInProgress = false;
@@ -607,6 +610,7 @@ public class ScriptArea extends StyleClassedTextArea {
     
     /**
      * Highlight matching brackets and quotes when the caret is on or inside a pair.
+     * Also highlights all occurrences of a function name when cursor is on it.
      * Supports {}, (), [] brackets and single/double quotes.
      * This method is public to allow external triggering after syntax highlighting updates.
      */
@@ -614,6 +618,7 @@ public class ScriptArea extends StyleClassedTextArea {
         // Clear previous highlights
         clearBracketHighlights();
         clearQuoteHighlights();
+        clearFunctionHighlights();
         
         String text = getText();
         int caretPos = getCaretPosition();
@@ -646,6 +651,8 @@ public class ScriptArea extends StyleClassedTextArea {
         } else {
             // Caret is not on a bracket or quote - check if it's inside a bracket pair
             highlightEnclosingBrackets(text, caretPos);
+            // Also check if cursor is on a function name (identifier)
+            highlightFunctionName(text, caretPos);
         }
     }
     
@@ -983,6 +990,119 @@ public class ScriptArea extends StyleClassedTextArea {
             }
             
             lastHighlightedQuotes = null;
+        }
+    }
+    
+    /**
+     * Highlight all occurrences of a function name when cursor is on it.
+     * @param text The text to search in
+     * @param caretPos The current caret position
+     */
+    private void highlightFunctionName(String text, int caretPos) {
+        // Find the word boundaries at the caret position
+        int wordStart = caretPos;
+        int wordEnd = caretPos;
+        
+        // Expand left to find word start
+        while (wordStart > 0 && isIdentifierChar(text.charAt(wordStart - 1))) {
+            wordStart--;
+        }
+        
+        // Expand right to find word end
+        while (wordEnd < text.length() && isIdentifierChar(text.charAt(wordEnd))) {
+            wordEnd++;
+        }
+        
+        // Check if we actually have a word
+        if (wordStart >= wordEnd) {
+            return;
+        }
+        
+        // Extract the word
+        String word = text.substring(wordStart, wordEnd);
+        
+        // Only highlight if it looks like an identifier (not just numbers)
+        // and is not a keyword or built-in
+        if (!isValidIdentifier(word)) {
+            return;
+        }
+        
+        // Find all occurrences of this word
+        lastHighlightedFunctions = new java.util.ArrayList<>();
+        int searchPos = 0;
+        while (searchPos < text.length()) {
+            int foundPos = text.indexOf(word, searchPos);
+            if (foundPos == -1) {
+                break;
+            }
+            
+            // Check if this is a whole word match (not part of another identifier)
+            boolean isWholeWord = 
+                (foundPos == 0 || !isIdentifierChar(text.charAt(foundPos - 1))) &&
+                (foundPos + word.length() >= text.length() || !isIdentifierChar(text.charAt(foundPos + word.length())));
+            
+            if (isWholeWord) {
+                // Highlight this occurrence
+                addStyleToRange(foundPos, foundPos + word.length(), "function-highlight");
+                lastHighlightedFunctions.add(new int[]{foundPos, foundPos + word.length()});
+            }
+            
+            searchPos = foundPos + 1;
+        }
+    }
+    
+    /**
+     * Check if a character can be part of an identifier.
+     */
+    private boolean isIdentifierChar(char c) {
+        return Character.isLetterOrDigit(c) || c == '_';
+    }
+    
+    /**
+     * Check if a word is a valid identifier (not a keyword or builtin).
+     * We use a simple heuristic: must start with a letter or underscore,
+     * and should not be a common keyword.
+     */
+    private boolean isValidIdentifier(String word) {
+        if (word.isEmpty()) {
+            return false;
+        }
+        
+        // Must start with letter or underscore
+        char first = word.charAt(0);
+        if (!Character.isLetter(first) && first != '_') {
+            return false;
+        }
+        
+        // Don't highlight common keywords (basic list)
+        String lowerWord = word.toLowerCase();
+        return !isKeyword(lowerWord);
+    }
+    
+    /**
+     * Check if a word is a keyword.
+     */
+    private boolean isKeyword(String word) {
+        // Basic EBS keywords that shouldn't be highlighted as functions
+        return switch (word) {
+            case "if", "then", "else", "while", "for", "break", "continue", "return",
+                 "var", "int", "string", "float", "double", "bool", "json",
+                 "function", "call", "print", "screen", "show", "hide", "close",
+                 "import", "from", "as", "cursor", "open", "connection", "use",
+                 "true", "false", "null", "and", "or", "not", "in" -> true;
+            default -> false;
+        };
+    }
+    
+    /**
+     * Clear all function highlights.
+     */
+    private void clearFunctionHighlights() {
+        if (lastHighlightedFunctions != null) {
+            for (int[] range : lastHighlightedFunctions) {
+                removeStyleFromRange(range[0], range[1], "function-highlight");
+            }
+            lastHighlightedFunctions = null;
         }
     }
 }

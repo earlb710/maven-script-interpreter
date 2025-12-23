@@ -509,6 +509,16 @@
     -rtfx-background-color: #cc0000; /* darker red for unmatched brackets - improved contrast */
 }
 
+/* Function name highlight - underline with function color when cursor is on function name */
+.function-highlight,
+.text.function-highlight,
+.styled-text-area .text.function-highlight,
+.editor-ebs .text.function-highlight,
+.editor-text .text.function-highlight {
+    -rtfx-underline-color: #DCDCAA; /* yellow for functions - matches tok-function color */
+    -rtfx-underline-width: 1;
+}
+
 /* ===== Quote matching highlighting ===== */
 /* Matched quote highlight - darker blue background for better contrast */
 .quote-match,
