@@ -2823,8 +2823,8 @@ makeComputerMove() {
 
 screen chessScreen = {
     "title": "Chess Game",
-    "width": 1000,
-    "height": 800,
+    "width": 980,
+    "height": 850,
     "vars": [
         {"name": "whiteTimer", "type": "string", "default": "10:00"},
         {"name": "blackTimer", "type": "string", "default": "10:00"},
@@ -3062,7 +3062,7 @@ screen chessScreen = {
             "name": "mainArea",
             "type": "vbox",
             "spacing": "10",
-            "padding": "20",
+            "padding": "10",
             "style": "-fx-background-color: $COLOR_BG_MAIN;",
             "items": [
                 {"name": "titleLabel", "display": {"type": "label", "labelText": "\u265A Chess Game \u2654", "labelColor": "$COLOR_TEXT_WHITE", "itemFontSize": "28px", "labelBold": true}}
