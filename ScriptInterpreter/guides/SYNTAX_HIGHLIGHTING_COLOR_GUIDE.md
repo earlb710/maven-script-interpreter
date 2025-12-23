@@ -330,11 +330,15 @@ Current highlighting colors in the console:
 | **data** | pink | Type keywords (int, string, bool) |
 | **datatype** | #D070FF (purple) | Data types |
 | **builtin** | #99e0e0 (light cyan) | Built-in functions |
+| **function** | #DCDCAA (yellow) | Known custom/user-defined functions |
+| **function-error** | #DCDCAA with red underline | Unknown/undefined function calls |
 | **sql** | #00ee66 (green) | SQL keywords |
 | **custom** | #eeee90 (pale yellow) | Custom console commands |
 | **error** | #ee0000 (red) | Error messages |
 | **warn** | #eeee00 (yellow) | Warning messages |
 | **ok** | #00ee00 (green) | Success messages |
+
+**Note:** The `function` and `function-error` styles are applied dynamically by the editor's function validation system, which checks function calls against builtins, parsed functions, and imported functions in real-time.
 
 ---
 
@@ -519,6 +523,60 @@ EbsToken token = new EbsToken(
     endPos,                    // end
     "custom-identifier"        // custom style override
 );
+```
+
+**Example: Function Validation**
+
+The EBS editor uses custom token styles to validate function calls in real-time:
+
+```java
+// In EbsTab.java - markUnknownFunctions()
+
+// For known functions
+EbsToken funcToken = new EbsToken(
+    token.type,
+    token.literal,
+    token.line,
+    token.start,
+    token.end,
+    "tok-function"  // Custom style for known functions
+);
+
+// For unknown functions
+EbsToken errorToken = new EbsToken(
+    token.type,
+    token.literal,
+    token.line,
+    token.start,
+    token.end,
+    "tok-function-error"  // Custom style with red underline
+);
+```
+
+The function validation system:
+1. Identifies function calls (identifiers after `call` keyword or before `(`)
+2. Validates against builtins, parsed functions (RuntimeContext.blocks), and imports
+3. Applies `tok-function` style for known functions
+4. Applies `tok-function-error` style (red underline) for unknown functions
+
+CSS for function styles:
+```css
+/* Known functions */
+.tok-function,
+.text.tok-function,
+.styled-text-area .text.tok-function {
+    -fx-fill: #DCDCAA;  /* Yellow */
+}
+
+/* Unknown functions - red underline */
+.tok-function-error,
+.text.tok-function-error,
+.styled-text-area .text.tok-function-error {
+    -fx-fill: #DCDCAA;
+    -rtfx-underline-color: red;
+    -rtfx-underline-width: 2px;
+    -rtfx-underline-cap: butt;
+}
 ```
 
 ### Dynamic Style Application

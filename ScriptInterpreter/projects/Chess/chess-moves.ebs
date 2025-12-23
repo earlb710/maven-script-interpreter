@@ -841,7 +841,7 @@ function isCheckmate(playerColor: int) return bool {
 // Check if the game is in stalemate (draw)
 function isStalemate(playerColor: int) return bool {
     // Stalemate requires: king is NOT in check AND no legal moves
-    var inCheck: bool = call isKingInCheck(playerColor);
+    var inCheck: bool = #isKingInCheck(playerColor);
     if inCheck then {
         return false;
     }

@@ -1,0 +1,23 @@
+// Functions to be imported by test_import_highlighting.ebs
+// Testing all three function definition formats
+
+// Format 1: Basic function with parameters
+importedAdd(a: int, b: int) return int {
+    return a + b;
+}
+
+// Format 2: Function with return type only
+importedGetValue return int {
+    return 100;
+}
+
+// Format 3: Basic function without parameters
+importedHelper {
+    print("Helper function called");
+}
+
+// Format 4: Function with 'function' keyword
+function importedMultiply(x: int, y: int) return int {
+    return x * y;
+}
+

@@ -4,10 +4,12 @@ package com.eb.ui.ebs;
 import com.eb.ui.tabs.*;
 import com.eb.ui.util.ButtonShortcutHelper;
 import com.eb.script.RuntimeContext;
+import com.eb.script.interpreter.builtins.Builtins;
 import com.eb.script.interpreter.builtins.BuiltinsFile;
 import com.eb.script.file.FileData;
 import com.eb.script.token.ebs.EbsLexer;
 import com.eb.script.token.ebs.EbsToken;
+import com.eb.script.token.ebs.EbsTokenType;
 import com.eb.ui.cli.AutocompletePopup;
 import com.eb.ui.cli.AutocompleteSuggestions;
 import com.eb.ui.cli.Handler;
@@ -44,7 +46,9 @@ import org.fxmisc.flowless.VirtualizedScrollPane;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import javafx.geometry.Pos;
@@ -76,6 +80,11 @@ public class EbsTab extends Tab {
     private String baseTitle;        // the clean (no-star) title, usually file name
     private boolean dirty = false;
     private boolean suppressDirty = false; // avoid marking dirty during programmatic loads
+
+    // --- Syntax highlighting for custom functions ---
+    private final Set<String> customFunctionNames = new HashSet<>();
+    private final Set<String> builtinFunctionNames = new HashSet<>();
+    private final EbsLexer ebsLexer = new EbsLexer();
 
     private HBox findBar;
     private ComboBox<String> findField;
@@ -1264,9 +1273,11 @@ public class EbsTab extends Tab {
     }
 
 // ---------- Lexer-based highlighter ----------
-    private final EbsLexer ebsLexer = new EbsLexer();
 
     private void setupLexerHighlighting() {
+        // Update known functions before first highlighting
+        updateKnownFunctions();
+        
         // Initial pass
         applyLexerSpans(dispArea.getText());
 
@@ -1275,7 +1286,11 @@ public class EbsTab extends Tab {
         // multiple rapid keystrokes into a single highlighting pass
         dispArea.multiPlainChanges()
                 .successionEnds(java.time.Duration.ofMillis(100))
-                .subscribe(ignore -> applyLexerSpans(dispArea.getText()));
+                .subscribe(ignore -> {
+                    // Update known functions on each change (to catch new function definitions)
+                    updateKnownFunctions();
+                    applyLexerSpans(dispArea.getText());
+                });
     }
 
     private void applyLexerSpans(String src) {
@@ -1309,6 +1324,10 @@ public class EbsTab extends Tab {
         
         // Default: use EBS lexer for all other files
         List<EbsToken> tokens = ebsLexer.tokenize(src); // returns List<EbsToken> with start/end/style
+        
+        // Post-process tokens to identify unknown function calls
+        tokens = markUnknownFunctions(tokens, src);
+        
         // Build spans from token positions
         StyleSpansBuilder<Collection<String>> builder = new StyleSpansBuilder<>();
 
@@ -1350,6 +1369,268 @@ public class EbsTab extends Tab {
             // Reapply bracket highlighting after syntax highlighting to ensure it's visible
             dispArea.highlightMatchingBrackets();
         });
+    }
+
+    /**
+     * Extract function names from EBS source code.
+     * According to syntax_ebnf.txt, functions can be defined as:
+     * - namedBlock: identifier "{" ... "}" 
+     * - namedBlockWithReturn: identifier "return" typeName "{" ... "}"
+     * - namedBlockWithParams: identifier "(" ... ")" ["return" typeName] "{" ... "}"
+     * Optional "function" keyword is allowed before any of these.
+     * 
+     * IMPORTANT: Must distinguish function definitions from function calls!
+     * - Function definitions: appear at statement level (start of line or after})
+     * - Function calls: appear after keywords like "call", "var", "if", etc.
+     * 
+     * @param source The source code to parse
+     * @return Set of function names found
+     */
+    private Set<String> extractFunctionNames(String source) {
+        Set<String> functions = new HashSet<>();
+        
+        // Pattern 1: identifier followed by "(" - namedBlockWithParams
+        // Must NOT be preceded by keywords that indicate this is a call, not a definition
+        // Negative lookbehind ensures we don't match: call identifier(, var identifier(, etc.
+        Pattern withParamsPattern = Pattern.compile(
+            "(?:^|[;}])\\s*(?:function\\s+)?([a-zA-Z_][a-zA-Z0-9_]*)\\s*\\(",
+            Pattern.MULTILINE
+        );
+        
+        // Pattern 2: identifier followed by "return" - namedBlockWithReturn
+        // Matches: [function] identifier return
+        Pattern withReturnPattern = Pattern.compile(
+            "(?:^|[;}])\\s*(?:function\\s+)?([a-zA-Z_][a-zA-Z0-9_]*)\\s+return\\s+",
+            Pattern.MULTILINE
+        );
+        
+        // Pattern 3: identifier followed by "{" - namedBlock (basic function)
+        // Matches: [function] identifier {
+        Pattern basicPattern = Pattern.compile(
+            "(?:^|[;}])\\s*(?:function\\s+)?([a-zA-Z_][a-zA-Z0-9_]*)\\s*\\{",
+            Pattern.MULTILINE
+        );
+        
+        // Collect from all patterns
+        Matcher matcher1 = withParamsPattern.matcher(source);
+        while (matcher1.find()) {
+            String funcName = matcher1.group(1).toLowerCase();
+            if (!isKeyword(funcName) && !builtinFunctionNames.contains(funcName)) {
+                functions.add(funcName);
+            }
+        }
+        
+        Matcher matcher2 = withReturnPattern.matcher(source);
+        while (matcher2.find()) {
+            String funcName = matcher2.group(1).toLowerCase();
+            if (!isKeyword(funcName) && !builtinFunctionNames.contains(funcName)) {
+                functions.add(funcName);
+            }
+        }
+        
+        Matcher matcher3 = basicPattern.matcher(source);
+        while (matcher3.find()) {
+            String funcName = matcher3.group(1).toLowerCase();
+            // Check if this is already captured by other patterns
+            if (!isKeyword(funcName) && !builtinFunctionNames.contains(funcName)) {
+                // Verify it's not a screen, control structure, or other block
+                // by checking it's not preceded by keywords like "screen", "if", "while", etc.
+                int startPos = matcher3.start(1);
+                String before = source.substring(Math.max(0, startPos - 20), startPos).trim().toLowerCase();
+                if (!before.endsWith("screen") && !before.endsWith("subscreen") && 
+                    !before.endsWith("if") && !before.endsWith("else") && 
+                    !before.endsWith("while") && !before.endsWith("do") &&
+                    !before.endsWith("try")) {
+                    functions.add(funcName);
+                }
+            }
+        }
+        
+        return functions;
+    }
+    
+    /**
+     * Check if a string is a keyword
+     */
+    private boolean isKeyword(String name) {
+        String[] keywords = {"if", "then", "else", "while", "do", "for", "foreach", 
+            "in", "break", "continue", "return", "var", "const", "print", "call",
+            "import", "try", "exceptions", "when", "raise", "exception",
+            "connect", "use", "cursor", "open", "close", "connection",
+            "select", "from", "where", "order", "by", "group", "having",
+            "screen", "show", "hide", "submit", "callback", "typeof"};
+        for (String kw : keywords) {
+            if (kw.equals(name)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * Extract import statements from source code and collect function names
+     * from imported files.
+     * 
+     * @param source The source code to parse
+     * @return Set of function names from all imports
+     */
+    private Set<String> extractImportedFunctions(String source) {
+        Set<String> functions = new HashSet<>();
+        
+        // Pattern to match import statements: import "filename.ebs";
+        Pattern importPattern = Pattern.compile(
+            "import\\s+[\"']([^\"']+)[\"']\\s*;",
+            Pattern.CASE_INSENSITIVE
+        );
+        
+        Matcher matcher = importPattern.matcher(source);
+        while (matcher.find()) {
+            String importFile = matcher.group(1);
+            
+            // Resolve import path relative to current file
+            try {
+                Path currentDir = tabContext.path.getParent();
+                if (currentDir != null) {
+                    Path importPath = currentDir.resolve(importFile).normalize();
+                    
+                    if (Files.exists(importPath) && Files.isRegularFile(importPath)) {
+                        // Read the imported file and extract its functions
+                        String importedSource = Files.readString(importPath, StandardCharsets.UTF_8);
+                        functions.addAll(extractFunctionNames(importedSource));
+                        
+                        // Recursively process imports in the imported file
+                        functions.addAll(extractImportedFunctions(importedSource));
+                    }
+                }
+            } catch (IOException e) {
+                // Silently skip files that can't be read
+            }
+        }
+        
+        return functions;
+    }
+    
+    /**
+     * Update the set of known custom functions by parsing the current file
+     * and all its imports.
+     */
+    private void updateKnownFunctions() {
+        customFunctionNames.clear();
+        
+        // Get builtin function names
+        builtinFunctionNames.clear();
+        builtinFunctionNames.addAll(Builtins.getBuiltins());
+        
+        // Get functions from RuntimeContext blocks (parsed functions)
+        // This is the authoritative source for functions in the current file
+        if (context != null && context.blocks != null) {
+            customFunctionNames.addAll(context.blocks.keySet());
+        }
+        
+        String source = dispArea.getText();
+        
+        // Also extract functions using regex as a fallback for unparsed/editing state
+        // This helps provide highlighting even before the script is fully parsed
+        customFunctionNames.addAll(extractFunctionNames(source));
+        
+        // Extract functions from imports
+        customFunctionNames.addAll(extractImportedFunctions(source));
+    }
+    
+    /**
+     * Post-process tokens to identify and mark unknown function calls.
+     * Function calls (identifiers followed by '(') that are not builtins or custom functions
+     * will be marked with error styling.
+     * 
+     * In EBS, functions can be called in two ways:
+     * 1. call functionName(args)  - explicit call keyword
+     * 2. functionName(args)       - direct call (rare)
+     * 
+     * @param tokens The list of tokens from the lexer
+     * @param source The source code
+     * @return Modified list of tokens with unknown functions marked
+     */
+    private List<EbsToken> markUnknownFunctions(List<EbsToken> tokens, String source) {
+        List<EbsToken> result = new ArrayList<>();
+        
+        for (int i = 0; i < tokens.size(); i++) {
+            EbsToken token = tokens.get(i);
+            
+            // Check if this is an identifier that represents a function call
+            if (token.type == EbsTokenType.IDENTIFIER) {
+                boolean isFunction = false;
+                
+                // Case 1: Identifier after 'call' keyword
+                // When lexer sees 'call', it produces CALL token then IDENTIFIER token
+                // Check if previous non-EOF token is CALL
+                if (i > 0) {
+                    EbsToken prevToken = tokens.get(i - 1);
+                    if (prevToken.type == EbsTokenType.CALL) {
+                        isFunction = true;
+                    }
+                }
+                
+                // Case 2: Identifier directly followed by '(' (less common in EBS)
+                if (!isFunction && i + 1 < tokens.size()) {
+                    // Check if the identifier is followed by '(' in the actual source
+                    int endPos = token.end + 1;
+                    
+                    // Skip whitespace in source to check for '('
+                    while (endPos < source.length() && Character.isWhitespace(source.charAt(endPos))) {
+                        endPos++;
+                    }
+                    
+                    if (endPos < source.length() && source.charAt(endPos) == '(') {
+                        isFunction = true;
+                    }
+                }
+                
+                if (isFunction) {
+                    String funcName = token.literal != null ? token.literal.toString().toLowerCase() : "";
+                    
+                    // Check if function is known (builtin or custom)
+                    boolean isKnown = builtinFunctionNames.contains(funcName) || 
+                                     customFunctionNames.contains(funcName) ||
+                                     isKeyword(funcName);
+                    
+                    // Adjust start position to skip all leading whitespace
+                    int adjustedStart = token.start;
+                    while (adjustedStart < source.length() && Character.isWhitespace(source.charAt(adjustedStart))) {
+                        adjustedStart++;
+                    }
+                    
+                    if (!isKnown && !funcName.isEmpty()) {
+                        // Mark as unknown function with error style
+                        EbsToken errorToken = new EbsToken(
+                            token.type,
+                            token.literal,
+                            token.line,
+                            adjustedStart,
+                            token.end,
+                            "tok-function-error"
+                        );
+                        result.add(errorToken);
+                        continue;
+                    } else if (!funcName.isEmpty()) {
+                        // Mark as known function
+                        EbsToken funcToken = new EbsToken(
+                            token.type,
+                            token.literal,
+                            token.line,
+                            adjustedStart,
+                            token.end,
+                            "tok-function"
+                        );
+                        result.add(funcToken);
+                        continue;
+                    }
+                }
+            }
+            
+            result.add(token);
+        }
+        
+        return result;
     }
 
     public String getEditorText() {
