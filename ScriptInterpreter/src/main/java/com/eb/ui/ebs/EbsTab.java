@@ -1595,7 +1595,7 @@ public class EbsTab extends Tab {
                     
                     // Adjust start position if it points to whitespace
                     int adjustedStart = token.start;
-                    if (adjustedStart < sourceText.length() && Character.isWhitespace(sourceText.charAt(adjustedStart))) {
+                    if (adjustedStart < source.length() && Character.isWhitespace(source.charAt(adjustedStart))) {
                         adjustedStart++;
                     }
                     
