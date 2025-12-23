@@ -1271,7 +1271,6 @@ formatMove(fromX: int, fromY: int, toX: int, toY: int, pieceType: int, pieceColo
 
 // Select a piece (change to yellow)
 selectPiece(x: int, y: int) {
-    print "Selecting piece at (" + x + ", " + y + ")";
     var cellValue: int = call getPieceAt(x, y);
     if cellValue != -1 then {
         var cell = ChessCell(cellValue);
@@ -1279,7 +1278,6 @@ selectPiece(x: int, y: int) {
             var yellowPiece: imagedata = call getYellowPiece(cell.pieceType, cell.pieceColor);
             if yellowPiece != null then {
                 call setPieceImage(x, y, yellowPiece);
-                print "Piece turned yellow at (" + x + ", " + y + ")";
             }
         }
     }
@@ -2229,9 +2227,6 @@ handleStartGame() {
     // Close the startup dialog
     close screen startupDialog;
     
-    print "Chess screen is now displayed!";
-    print "Use the New Game button to reset the board.";
-    
     call initializeBoard();
     call printBoard();
     
@@ -2335,8 +2330,6 @@ handleStartGame() {
     call thread.timerStart("chessScreen.chessTimer", 100, "timerCallback");
     
     print "";
-    print "Chess screen is now displayed!";
-    print "Use the New Game button to reset the board.";
     
     // In 1-player mode, if computer plays white (currentPlayer=WHITE and humanPlayerColor=BLACK), 
     // trigger computer move immediately
