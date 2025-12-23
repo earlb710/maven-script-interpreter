@@ -1403,6 +1403,10 @@ public class EbsTab extends Tab {
      * - namedBlockWithParams: identifier "(" ... ")" ["return" typeName] "{" ... "}"
      * Optional "function" keyword is allowed before any of these.
      * 
+     * IMPORTANT: Must distinguish function definitions from function calls!
+     * - Function definitions: appear at statement level (start of line or after})
+     * - Function calls: appear after keywords like "call", "var", "if", etc.
+     * 
      * @param source The source code to parse
      * @return Set of function names found
      */
@@ -1410,24 +1414,24 @@ public class EbsTab extends Tab {
         Set<String> functions = new HashSet<>();
         
         // Pattern 1: identifier followed by "(" - namedBlockWithParams
-        // Matches: [function] identifier(
+        // Must NOT be preceded by keywords that indicate this is a call, not a definition
+        // Negative lookbehind ensures we don't match: call identifier(, var identifier(, etc.
         Pattern withParamsPattern = Pattern.compile(
-            "(?:^|\\s)(?:function\\s+)?([a-zA-Z_][a-zA-Z0-9_]*)\\s*\\(",
+            "(?:^|[;}])\\s*(?:function\\s+)?([a-zA-Z_][a-zA-Z0-9_]*)\\s*\\(",
             Pattern.MULTILINE
         );
         
         // Pattern 2: identifier followed by "return" - namedBlockWithReturn
         // Matches: [function] identifier return
         Pattern withReturnPattern = Pattern.compile(
-            "(?:^|\\s)(?:function\\s+)?([a-zA-Z_][a-zA-Z0-9_]*)\\s+return\\s+",
+            "(?:^|[;}])\\s*(?:function\\s+)?([a-zA-Z_][a-zA-Z0-9_]*)\\s+return\\s+",
             Pattern.MULTILINE
         );
         
         // Pattern 3: identifier followed by "{" - namedBlock (basic function)
         // Matches: [function] identifier {
-        // Must not be followed by return or ( to avoid duplicates
         Pattern basicPattern = Pattern.compile(
-            "(?:^|\\s)(?:function\\s+)?([a-zA-Z_][a-zA-Z0-9_]*)\\s*\\{",
+            "(?:^|[;}])\\s*(?:function\\s+)?([a-zA-Z_][a-zA-Z0-9_]*)\\s*\\{",
             Pattern.MULTILINE
         );
         
