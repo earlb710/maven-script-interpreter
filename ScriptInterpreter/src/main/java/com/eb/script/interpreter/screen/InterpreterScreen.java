@@ -2529,6 +2529,32 @@ public class InterpreterScreen {
             area.padding = String.valueOf(areaDef.get("padding"));
         }
         
+        // Extract size constraint properties (case-insensitive)
+        Object minWidthObj = getCaseInsensitive(areaDef, "minWidth");
+        if (minWidthObj != null) {
+            area.minWidth = String.valueOf(minWidthObj);
+        }
+        Object prefWidthObj = getCaseInsensitive(areaDef, "prefWidth");
+        if (prefWidthObj != null) {
+            area.prefWidth = String.valueOf(prefWidthObj);
+        }
+        Object maxWidthObj = getCaseInsensitive(areaDef, "maxWidth");
+        if (maxWidthObj != null) {
+            area.maxWidth = String.valueOf(maxWidthObj);
+        }
+        Object minHeightObj = getCaseInsensitive(areaDef, "minHeight");
+        if (minHeightObj != null) {
+            area.minHeight = String.valueOf(minHeightObj);
+        }
+        Object prefHeightObj = getCaseInsensitive(areaDef, "prefHeight");
+        if (prefHeightObj != null) {
+            area.prefHeight = String.valueOf(prefHeightObj);
+        }
+        Object maxHeightObj = getCaseInsensitive(areaDef, "maxHeight");
+        if (maxHeightObj != null) {
+            area.maxHeight = String.valueOf(maxHeightObj);
+        }
+        
         // Extract gainFocus and lostFocus inline code if present
         if (areaDef.containsKey("gainfocus")) {
             area.gainFocus = String.valueOf(areaDef.get("gainfocus"));

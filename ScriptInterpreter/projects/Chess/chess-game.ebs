@@ -142,6 +142,14 @@ var whiteQueensideRookMoved: bool = false; // Rook at a1 (x=0, y=7)
 var blackKingsideRookMoved: bool = false;  // Rook at h8 (x=7, y=0)
 var blackQueensideRookMoved: bool = false; // Rook at a8 (x=0, y=0)
 
+// Captured pieces tracking - stores piece type for each captured piece
+// White pieces captured by black (shown on left side)
+var capturedWhitePieces: int[16];  // Max 16 pieces per color
+var capturedWhiteCount: int = 0;
+// Black pieces captured by white (shown on right side)
+var capturedBlackPieces: int[16];  // Max 16 pieces per color
+var capturedBlackCount: int = 0;
+
 // Board layer images (bottom layer - checkerboard)
 var lightSquare: imagedata;     // Light square for board
 var darkSquare: imagedata;      // Dark square for board
@@ -227,7 +235,8 @@ function getNormalPiece(pieceType: int, pieceColor: int) return imagedata {
         if pieceType == QUEEN then { return normalBlackQueen; }
         if pieceType == KING then { return normalBlackKing; }
     }
-    return null;
+    // If piece type doesn't match, return transparent clear instead of null
+    return transparentClear;
 }
 
 // Get the yellow version of a piece image based on piece type and color
@@ -248,6 +257,82 @@ function getYellowPiece(pieceType: int, pieceColor: int) return imagedata {
         if pieceType == KING then { return yellowBlackKing; }
     }
     return null;
+}
+
+// Add a captured piece to the tracking arrays
+function addCapturedPiece(pieceType: int, pieceColor: int) {
+    if pieceColor == WHITE then {
+        // White piece captured by black - add to left side
+        if capturedWhiteCount < 16 then {
+            capturedWhitePieces[capturedWhiteCount] = pieceType;
+            capturedWhiteCount = capturedWhiteCount + 1;
+        }
+    } else {
+        // Black piece captured by white - add to right side
+        if capturedBlackCount < 16 then {
+            capturedBlackPieces[capturedBlackCount] = pieceType;
+            capturedBlackCount = capturedBlackCount + 1;
+        }
+    }
+    call updateCapturedPiecesDisplay();
+}
+
+// Update the captured pieces display on screen
+function updateCapturedPiecesDisplay() {
+    // Safety check - only update if transparentClear is initialized
+    if transparentClear == null then {
+        print "Warning: transparentClear is null, skipping captured pieces update";
+        return;
+    }
+    
+    // Update left side (captured white pieces) - use explicit slot assignments
+    // capturedWhitePieces stores WHITE pieces that were captured, so display them as WHITE pieces
+    if capturedWhiteCount > 0 then { 
+        chessScreen.capturedWhite0 = call getNormalPiece(capturedWhitePieces[0], WHITE); 
+    } else { chessScreen.capturedWhite0 = transparentClear; }
+    if capturedWhiteCount > 1 then { chessScreen.capturedWhite1 = call getNormalPiece(capturedWhitePieces[1], WHITE); } else { chessScreen.capturedWhite1 = transparentClear; }
+    if capturedWhiteCount > 2 then { chessScreen.capturedWhite2 = call getNormalPiece(capturedWhitePieces[2], WHITE); } else { chessScreen.capturedWhite2 = transparentClear; }
+    if capturedWhiteCount > 3 then { chessScreen.capturedWhite3 = call getNormalPiece(capturedWhitePieces[3], WHITE); } else { chessScreen.capturedWhite3 = transparentClear; }
+    if capturedWhiteCount > 4 then { chessScreen.capturedWhite4 = call getNormalPiece(capturedWhitePieces[4], WHITE); } else { chessScreen.capturedWhite4 = transparentClear; }
+    if capturedWhiteCount > 5 then { chessScreen.capturedWhite5 = call getNormalPiece(capturedWhitePieces[5], WHITE); } else { chessScreen.capturedWhite5 = transparentClear; }
+    if capturedWhiteCount > 6 then { chessScreen.capturedWhite6 = call getNormalPiece(capturedWhitePieces[6], WHITE); } else { chessScreen.capturedWhite6 = transparentClear; }
+    if capturedWhiteCount > 7 then { chessScreen.capturedWhite7 = call getNormalPiece(capturedWhitePieces[7], WHITE); } else { chessScreen.capturedWhite7 = transparentClear; }
+    if capturedWhiteCount > 8 then { chessScreen.capturedWhite8 = call getNormalPiece(capturedWhitePieces[8], WHITE); } else { chessScreen.capturedWhite8 = transparentClear; }
+    if capturedWhiteCount > 9 then { chessScreen.capturedWhite9 = call getNormalPiece(capturedWhitePieces[9], WHITE); } else { chessScreen.capturedWhite9 = transparentClear; }
+    if capturedWhiteCount > 10 then { chessScreen.capturedWhite10 = call getNormalPiece(capturedWhitePieces[10], WHITE); } else { chessScreen.capturedWhite10 = transparentClear; }
+    if capturedWhiteCount > 11 then { chessScreen.capturedWhite11 = call getNormalPiece(capturedWhitePieces[11], WHITE); } else { chessScreen.capturedWhite11 = transparentClear; }
+    if capturedWhiteCount > 12 then { chessScreen.capturedWhite12 = call getNormalPiece(capturedWhitePieces[12], WHITE); } else { chessScreen.capturedWhite12 = transparentClear; }
+    if capturedWhiteCount > 13 then { chessScreen.capturedWhite13 = call getNormalPiece(capturedWhitePieces[13], WHITE); } else { chessScreen.capturedWhite13 = transparentClear; }
+    if capturedWhiteCount > 14 then { chessScreen.capturedWhite14 = call getNormalPiece(capturedWhitePieces[14], WHITE); } else { chessScreen.capturedWhite14 = transparentClear; }
+    if capturedWhiteCount > 15 then { chessScreen.capturedWhite15 = call getNormalPiece(capturedWhitePieces[15], WHITE); } else { chessScreen.capturedWhite15 = transparentClear; }
+    
+    // Update right side (captured black pieces) - use explicit slot assignments
+    // capturedBlackPieces stores BLACK pieces that were captured, so display them as BLACK pieces
+    if capturedBlackCount > 0 then { 
+        chessScreen.capturedBlack0 = call getNormalPiece(capturedBlackPieces[0], BLACK); 
+    } else { chessScreen.capturedBlack0 = transparentClear; }
+    if capturedBlackCount > 1 then { chessScreen.capturedBlack1 = call getNormalPiece(capturedBlackPieces[1], BLACK); } else { chessScreen.capturedBlack1 = transparentClear; }
+    if capturedBlackCount > 2 then { chessScreen.capturedBlack2 = call getNormalPiece(capturedBlackPieces[2], BLACK); } else { chessScreen.capturedBlack2 = transparentClear; }
+    if capturedBlackCount > 3 then { chessScreen.capturedBlack3 = call getNormalPiece(capturedBlackPieces[3], BLACK); } else { chessScreen.capturedBlack3 = transparentClear; }
+    if capturedBlackCount > 4 then { chessScreen.capturedBlack4 = call getNormalPiece(capturedBlackPieces[4], BLACK); } else { chessScreen.capturedBlack4 = transparentClear; }
+    if capturedBlackCount > 5 then { chessScreen.capturedBlack5 = call getNormalPiece(capturedBlackPieces[5], BLACK); } else { chessScreen.capturedBlack5 = transparentClear; }
+    if capturedBlackCount > 6 then { chessScreen.capturedBlack6 = call getNormalPiece(capturedBlackPieces[6], BLACK); } else { chessScreen.capturedBlack6 = transparentClear; }
+    if capturedBlackCount > 7 then { chessScreen.capturedBlack7 = call getNormalPiece(capturedBlackPieces[7], BLACK); } else { chessScreen.capturedBlack7 = transparentClear; }
+    if capturedBlackCount > 8 then { chessScreen.capturedBlack8 = call getNormalPiece(capturedBlackPieces[8], BLACK); } else { chessScreen.capturedBlack8 = transparentClear; }
+    if capturedBlackCount > 9 then { chessScreen.capturedBlack9 = call getNormalPiece(capturedBlackPieces[9], BLACK); } else { chessScreen.capturedBlack9 = transparentClear; }
+    if capturedBlackCount > 10 then { chessScreen.capturedBlack10 = call getNormalPiece(capturedBlackPieces[10], BLACK); } else { chessScreen.capturedBlack10 = transparentClear; }
+    if capturedBlackCount > 11 then { chessScreen.capturedBlack11 = call getNormalPiece(capturedBlackPieces[11], BLACK); } else { chessScreen.capturedBlack11 = transparentClear; }
+    if capturedBlackCount > 12 then { chessScreen.capturedBlack12 = call getNormalPiece(capturedBlackPieces[12], BLACK); } else { chessScreen.capturedBlack12 = transparentClear; }
+    if capturedBlackCount > 13 then { chessScreen.capturedBlack13 = call getNormalPiece(capturedBlackPieces[13], BLACK); } else { chessScreen.capturedBlack13 = transparentClear; }
+    if capturedBlackCount > 14 then { chessScreen.capturedBlack14 = call getNormalPiece(capturedBlackPieces[14], BLACK); } else { chessScreen.capturedBlack14 = transparentClear; }
+    if capturedBlackCount > 15 then { chessScreen.capturedBlack15 = call getNormalPiece(capturedBlackPieces[15], BLACK); } else { chessScreen.capturedBlack15 = transparentClear; }
+}
+
+// Clear captured pieces (for new game)
+function clearCapturedPieces() {
+    capturedWhiteCount = 0;
+    capturedBlackCount = 0;
+    call updateCapturedPiecesDisplay();
 }
 
 // Create board layer images (bottom layer - checkerboard)
@@ -1068,8 +1153,6 @@ deselectPiece(x: int, y: int) {
 
 // Move a piece from source to destination
 movePiece(fromX: int, fromY: int, toX: int, toY: int) {
-    print "Moving piece from (" + fromX + ", " + fromY + ") to (" + toX + ", " + toY + ")";
-    
     // Get the piece being moved
     var fromIdx: int = call boardIndex(fromY, fromX);
     var fromCellValue: int = board[fromIdx];
@@ -1182,8 +1265,6 @@ movePiece(fromX: int, fromY: int, toX: int, toY: int) {
             }
         }
     }
-    
-    print "Piece moved successfully";
 }
 
 // Handle cell click - select piece and show valid moves, or move piece if valid destination
@@ -1243,6 +1324,8 @@ handleCellClick(x: int, y: int) {
                     isCapture = true;
                     capturedPieceType = destCell.pieceType;
                     capturedPieceColor = destCell.pieceColor;
+                    // Track the captured piece for display
+                    call addCapturedPiece(capturedPieceType, capturedPieceColor);
                 }
             }
             
@@ -1272,7 +1355,6 @@ handleCellClick(x: int, y: int) {
             }
             var moveEntry: string = playerName + ": " + moveNotation + "\n";
             chessScreen.moveHistory = chessScreen.moveHistory + moveEntry;
-            print "Move added to history: " + moveEntry;
             
             // Clear indicators and selection (valid move indicators)
             call clearIndicators();
@@ -1542,33 +1624,32 @@ formatElapsedTime() return string {
 // Note: This callback is already executed on JavaFX Platform.runLater by thread.timerStart
 timerCallback(timerName: string) {
     // Only update if game has started - exit early if not
-    if !gameStarted then {
-        return;
-    }
-    
-    // If unlimited time is selected, don't decrement the timer
-    if initialTimerValue >= UNLIMITED_TIME * 10 then {
-        return;
-    }
-    
-    // Decrement the active player's timer by 1 decisecond (0.1 seconds)
-    if currentPlayer == 0 then {
-        // White's turn
-        if timerWhite > 0 then {
-            timerWhite = timerWhite - 1;
-            var timerText: string = call formatTimerDecimal(timerWhite);
-            
-            // Update screen variable which is bound to the label via varRef
-            chessScreen.whiteTimer = timerText;
-        }
-    } else {
-        // Black's turn
-        if timerBlack > 0 then {
-            timerBlack = timerBlack - 1;
-            var timerText: string = call formatTimerDecimal(timerBlack);
-            
-            // Update screen variable which is bound to the label via varRef
-            chessScreen.blackTimer = timerText;
+    if gameStarted then {
+        // Safety check for null values
+        if initialTimerValue != null then {
+            // Only process timer updates if not unlimited time
+            if initialTimerValue < UNLIMITED_TIME * 10 then {
+                // Decrement the active player's timer by 1 decisecond (0.1 seconds)
+                if currentPlayer == 0 then {
+                    // White's turn
+                    if timerWhite > 0 then {
+                        timerWhite = timerWhite - 1;
+                        var timerText: string = call formatTimerDecimal(timerWhite);
+                        
+                        // Update screen variable which is bound to the label via varRef
+                        chessScreen.whiteTimer = timerText;
+                    }
+                } else {
+                    // Black's turn
+                    if timerBlack > 0 then {
+                        timerBlack = timerBlack - 1;
+                        var timerText: string = call formatTimerDecimal(timerBlack);
+                        
+                        // Update screen variable which is bound to the label via varRef
+                        chessScreen.blackTimer = timerText;
+                    }
+                }
+            }
         }
     }
 }
@@ -1937,8 +2018,47 @@ handleStartGame() {
     chessScreen.statusMessage = "White to move";
     call updateTimerColors();
     
+    // Initialize captured pieces display variables BEFORE showing screen
+    // This ensures ImageViews are created with valid initial values
+    chessScreen.capturedWhite0 = transparentClear;
+    chessScreen.capturedWhite1 = transparentClear;
+    chessScreen.capturedWhite2 = transparentClear;
+    chessScreen.capturedWhite3 = transparentClear;
+    chessScreen.capturedWhite4 = transparentClear;
+    chessScreen.capturedWhite5 = transparentClear;
+    chessScreen.capturedWhite6 = transparentClear;
+    chessScreen.capturedWhite7 = transparentClear;
+    chessScreen.capturedWhite8 = transparentClear;
+    chessScreen.capturedWhite9 = transparentClear;
+    chessScreen.capturedWhite10 = transparentClear;
+    chessScreen.capturedWhite11 = transparentClear;
+    chessScreen.capturedWhite12 = transparentClear;
+    chessScreen.capturedWhite13 = transparentClear;
+    chessScreen.capturedWhite14 = transparentClear;
+    chessScreen.capturedWhite15 = transparentClear;
+    chessScreen.capturedBlack0 = transparentClear;
+    chessScreen.capturedBlack1 = transparentClear;
+    chessScreen.capturedBlack2 = transparentClear;
+    chessScreen.capturedBlack3 = transparentClear;
+    chessScreen.capturedBlack4 = transparentClear;
+    chessScreen.capturedBlack5 = transparentClear;
+    chessScreen.capturedBlack6 = transparentClear;
+    chessScreen.capturedBlack7 = transparentClear;
+    chessScreen.capturedBlack8 = transparentClear;
+    chessScreen.capturedBlack9 = transparentClear;
+    chessScreen.capturedBlack10 = transparentClear;
+    chessScreen.capturedBlack11 = transparentClear;
+    chessScreen.capturedBlack12 = transparentClear;
+    chessScreen.capturedBlack13 = transparentClear;
+    chessScreen.capturedBlack14 = transparentClear;
+    chessScreen.capturedBlack15 = transparentClear;
+    
     // Show the chess screen
     show screen chessScreen;
+    
+    // Reset captured pieces counters (variables already initialized above)
+    capturedWhiteCount = 0;
+    capturedBlackCount = 0;
     
     // Timer display is automatically updated via varRef binding to whiteTimer and blackTimer variables
     
@@ -2335,6 +2455,8 @@ makeComputerMove() {
             isCapture = true;
             capturedPieceType = destCell.pieceType;
             capturedPieceColor = destCell.pieceColor;
+            // Track the captured piece for display
+            call addCapturedPiece(capturedPieceType, capturedPieceColor);
         }
     }
     
@@ -2453,8 +2575,8 @@ makeComputerMove() {
 
 screen chessScreen = {
     "title": "Chess Game",
-    "width": 980,
-    "height": 780,
+    "width": 1300,
+    "height": 800,
     "vars": [
         {"name": "whiteTimer", "type": "string", "default": "10:00"},
         {"name": "blackTimer", "type": "string", "default": "10:00"},
@@ -2653,7 +2775,39 @@ screen chessScreen = {
         {"name": "i74", "type": "imagedata"},
         {"name": "i75", "type": "imagedata"},
         {"name": "i76", "type": "imagedata"},
-        {"name": "i77", "type": "imagedata"}
+        {"name": "i77", "type": "imagedata"},
+        {"name": "capturedWhite0", "type": "imagedata"},
+        {"name": "capturedWhite1", "type": "imagedata"},
+        {"name": "capturedWhite2", "type": "imagedata"},
+        {"name": "capturedWhite3", "type": "imagedata"},
+        {"name": "capturedWhite4", "type": "imagedata"},
+        {"name": "capturedWhite5", "type": "imagedata"},
+        {"name": "capturedWhite6", "type": "imagedata"},
+        {"name": "capturedWhite7", "type": "imagedata"},
+        {"name": "capturedWhite8", "type": "imagedata"},
+        {"name": "capturedWhite9", "type": "imagedata"},
+        {"name": "capturedWhite10", "type": "imagedata"},
+        {"name": "capturedWhite11", "type": "imagedata"},
+        {"name": "capturedWhite12", "type": "imagedata"},
+        {"name": "capturedWhite13", "type": "imagedata"},
+        {"name": "capturedWhite14", "type": "imagedata"},
+        {"name": "capturedWhite15", "type": "imagedata"},
+        {"name": "capturedBlack0", "type": "imagedata"},
+        {"name": "capturedBlack1", "type": "imagedata"},
+        {"name": "capturedBlack2", "type": "imagedata"},
+        {"name": "capturedBlack3", "type": "imagedata"},
+        {"name": "capturedBlack4", "type": "imagedata"},
+        {"name": "capturedBlack5", "type": "imagedata"},
+        {"name": "capturedBlack6", "type": "imagedata"},
+        {"name": "capturedBlack7", "type": "imagedata"},
+        {"name": "capturedBlack8", "type": "imagedata"},
+        {"name": "capturedBlack9", "type": "imagedata"},
+        {"name": "capturedBlack10", "type": "imagedata"},
+        {"name": "capturedBlack11", "type": "imagedata"},
+        {"name": "capturedBlack12", "type": "imagedata"},
+        {"name": "capturedBlack13", "type": "imagedata"},
+        {"name": "capturedBlack14", "type": "imagedata"},
+        {"name": "capturedBlack15", "type": "imagedata"}
     ],
     "area": [
         {
@@ -2685,17 +2839,48 @@ screen chessScreen = {
                     "type": "hbox",
                     "spacing": "0",
                     "padding": "0",
-                    "style": "-fx-background-color: $COLOR_BG_MAIN;",
+                    "style": "-fx-background-color: $COLOR_BG_MAIN; -fx-fill-height: false;",
                     "areas": [
+                        {
+                            "name": "capturedWhiteContainer",
+                            "type": "vbox",
+                            "spacing": "1",
+                            "padding": "5",
+                            "minWidth": "40",
+                            "maxWidth": "40",
+                            "minHeight": "100",
+                            "prefHeight": "530",
+                            "maxHeight": "530",
+                            "disableLabelAlignment": true,
+                            "style": "-fx-background-color: #3c3c3c; -fx-background-radius: 5; -fx-alignment: top-center;",
+                            "items": [
+                                {"name": "captPieceW0", "varRef": "capturedWhite0", "display": {"type": "image", "fitWidth": 30, "fitHeight": 30, "preserveRatio": true}},
+                                {"name": "captPieceW1", "varRef": "capturedWhite1", "display": {"type": "image", "fitWidth": 30, "fitHeight": 30, "preserveRatio": true}},
+                                {"name": "captPieceW2", "varRef": "capturedWhite2", "display": {"type": "image", "fitWidth": 30, "fitHeight": 30, "preserveRatio": true}},
+                                {"name": "captPieceW3", "varRef": "capturedWhite3", "display": {"type": "image", "fitWidth": 30, "fitHeight": 30, "preserveRatio": true}},
+                                {"name": "captPieceW4", "varRef": "capturedWhite4", "display": {"type": "image", "fitWidth": 30, "fitHeight": 30, "preserveRatio": true}},
+                                {"name": "captPieceW5", "varRef": "capturedWhite5", "display": {"type": "image", "fitWidth": 30, "fitHeight": 30, "preserveRatio": true}},
+                                {"name": "captPieceW6", "varRef": "capturedWhite6", "display": {"type": "image", "fitWidth": 30, "fitHeight": 30, "preserveRatio": true}},
+                                {"name": "captPieceW7", "varRef": "capturedWhite7", "display": {"type": "image", "fitWidth": 30, "fitHeight": 30, "preserveRatio": true}},
+                                {"name": "captPieceW8", "varRef": "capturedWhite8", "display": {"type": "image", "fitWidth": 30, "fitHeight": 30, "preserveRatio": true}},
+                                {"name": "captPieceW9", "varRef": "capturedWhite9", "display": {"type": "image", "fitWidth": 30, "fitHeight": 30, "preserveRatio": true}},
+                                {"name": "captPieceW10", "varRef": "capturedWhite10", "display": {"type": "image", "fitWidth": 30, "fitHeight": 30, "preserveRatio": true}},
+                                {"name": "captPieceW11", "varRef": "capturedWhite11", "display": {"type": "image", "fitWidth": 30, "fitHeight": 30, "preserveRatio": true}},
+                                {"name": "captPieceW12", "varRef": "capturedWhite12", "display": {"type": "image", "fitWidth": 30, "fitHeight": 30, "preserveRatio": true}},
+                                {"name": "captPieceW13", "varRef": "capturedWhite13", "display": {"type": "image", "fitWidth": 30, "fitHeight": 30, "preserveRatio": true}},
+                                {"name": "captPieceW14", "varRef": "capturedWhite14", "display": {"type": "image", "fitWidth": 30, "fitHeight": 30, "preserveRatio": true}},
+                                {"name": "captPieceW15", "varRef": "capturedWhite15", "display": {"type": "image", "fitWidth": 30, "fitHeight": 30, "preserveRatio": true}}
+                            ]
+                        },
                         {
                             "name": "boardContainer",
                             "type": "vbox",
                             "spacing": "0",
                             "padding": "10",
-                            "minWidth": "624",
-                            "maxWidth": "624",
-                            "minHeight": "624",
-                            "maxHeight": "624",
+                            "minWidth": "550",
+                            "maxWidth": "550",
+                            "minHeight": "550",
+                            "maxHeight": "550",
                             "style": "-fx-background-color: $COLOR_BG_BOARD; -fx-background-radius: 5;",
                             "areas": [
                                 {
@@ -2947,14 +3132,45 @@ screen chessScreen = {
                     ]
                 },
                 {
+                    "name": "capturedBlackContainer",
+                    "type": "vbox",
+                    "spacing": "1",
+                    "padding": "5",
+                    "minWidth": "40",
+                    "maxWidth": "40",
+                    "minHeight": "100",
+                    "prefHeight": "530",
+                    "maxHeight": "530",
+                    "disableLabelAlignment": true,
+                    "style": "-fx-background-color: #3c3c3c; -fx-background-radius: 5; -fx-alignment: top-center;",
+                    "items": [
+                        {"name": "captPieceB0", "varRef": "capturedBlack0", "display": {"type": "image", "fitWidth": 30, "fitHeight": 30, "preserveRatio": true}},
+                        {"name": "captPieceB1", "varRef": "capturedBlack1", "display": {"type": "image", "fitWidth": 30, "fitHeight": 30, "preserveRatio": true}},
+                        {"name": "captPieceB2", "varRef": "capturedBlack2", "display": {"type": "image", "fitWidth": 30, "fitHeight": 30, "preserveRatio": true}},
+                        {"name": "captPieceB3", "varRef": "capturedBlack3", "display": {"type": "image", "fitWidth": 30, "fitHeight": 30, "preserveRatio": true}},
+                        {"name": "captPieceB4", "varRef": "capturedBlack4", "display": {"type": "image", "fitWidth": 30, "fitHeight": 30, "preserveRatio": true}},
+                        {"name": "captPieceB5", "varRef": "capturedBlack5", "display": {"type": "image", "fitWidth": 30, "fitHeight": 30, "preserveRatio": true}},
+                        {"name": "captPieceB6", "varRef": "capturedBlack6", "display": {"type": "image", "fitWidth": 30, "fitHeight": 30, "preserveRatio": true}},
+                        {"name": "captPieceB7", "varRef": "capturedBlack7", "display": {"type": "image", "fitWidth": 30, "fitHeight": 30, "preserveRatio": true}},
+                        {"name": "captPieceB8", "varRef": "capturedBlack8", "display": {"type": "image", "fitWidth": 30, "fitHeight": 30, "preserveRatio": true}},
+                        {"name": "captPieceB9", "varRef": "capturedBlack9", "display": {"type": "image", "fitWidth": 30, "fitHeight": 30, "preserveRatio": true}},
+                        {"name": "captPieceB10", "varRef": "capturedBlack10", "display": {"type": "image", "fitWidth": 30, "fitHeight": 30, "preserveRatio": true}},
+                        {"name": "captPieceB11", "varRef": "capturedBlack11", "display": {"type": "image", "fitWidth": 30, "fitHeight": 30, "preserveRatio": true}},
+                        {"name": "captPieceB12", "varRef": "capturedBlack12", "display": {"type": "image", "fitWidth": 30, "fitHeight": 30, "preserveRatio": true}},
+                        {"name": "captPieceB13", "varRef": "capturedBlack13", "display": {"type": "image", "fitWidth": 30, "fitHeight": 30, "preserveRatio": true}},
+                        {"name": "captPieceB14", "varRef": "capturedBlack14", "display": {"type": "image", "fitWidth": 30, "fitHeight": 30, "preserveRatio": true}},
+                        {"name": "captPieceB15", "varRef": "capturedBlack15", "display": {"type": "image", "fitWidth": 30, "fitHeight": 30, "preserveRatio": true}}
+                    ]
+                },
+                {
                     "name": "moveHistoryContainer",
                     "type": "vbox",
                     "spacing": "5",
                     "padding": "10",
                     "minWidth": "300",
                     "maxWidth": "300",
-                    "minHeight": "624",
-                    "maxHeight": "624",
+                    "minHeight": "550",
+                    "maxHeight": "550",
                     "style": "-fx-background-color: $COLOR_MOVE_HISTORY_BG; -fx-background-radius: 5;",
                     "items": [
                         {"name": "moveHistoryTitle", "display": {"type": "label", "labelText": "Move History", "labelColor": "$COLOR_MOVE_HISTORY_TEXT", "labelFontSize": "16px", "labelBold": true}, "labelPos": "top"}
@@ -3096,6 +3312,9 @@ resetGame() {
     whiteQueensideRookMoved = false;
     blackKingsideRookMoved = false;
     blackQueensideRookMoved = false;
+    
+    // Clear captured pieces display
+    call clearCapturedPieces();
     
     // Reset timers
     var timeInDeciseconds: int = call getTimeLimitInDeciseconds(selectedTimeLimit);

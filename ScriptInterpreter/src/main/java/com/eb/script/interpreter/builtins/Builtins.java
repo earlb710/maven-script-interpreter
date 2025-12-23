@@ -1026,6 +1026,10 @@ public final class Builtins {
                 newParam("screenName", DataType.STRING, false) // optional; screen name (if null, uses current screen)
         ));
         addBuiltin(info(
+                "scr.refreshScreen", DataType.BOOL,
+                newParam("screenName", DataType.STRING, false) // optional; screen name (if null, uses current screen)
+        ));
+        addBuiltin(info(
                 "scr.showMenu", DataType.BOOL,
                 newParam("screenName", DataType.STRING, false) // optional; screen name (if null, uses current screen)
         ));
@@ -2264,6 +2268,7 @@ public final class Builtins {
             case "scr.showscreen" -> BuiltinsScreen.screenShow(context, args);
             case "scr.hidescreen" -> BuiltinsScreen.screenHide(context, args);
             case "scr.closescreen" -> BuiltinsScreen.screenClose(context, args);
+            case "scr.refreshscreen" -> BuiltinsScreen.screenRefresh(context, args);
             case "scr.showmenu" -> BuiltinsScreen.screenShowMenu(context, args);
             case "scr.hidemenu" -> BuiltinsScreen.screenHideMenu(context, args);
             case "scr.addmenu" -> BuiltinsScreen.screenAddMenu(context, args);

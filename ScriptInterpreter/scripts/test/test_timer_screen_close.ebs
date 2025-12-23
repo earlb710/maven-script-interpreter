@@ -1,0 +1,44 @@
+// Test script to verify that thread timers are stopped when a screen is closed
+// This tests both close methods: 1) window close button, 2) "close screen" statement
+
+var timerCount: int = 0;
+
+// Callback function for timer
+timerCallback(name: string) {
+    timerCount = timerCount + 1;
+    print "Timer fired " + call str.toString(timerCount) + " times";
+}
+
+// Define a screen with a timer
+screen testScreen = {
+    "title": "Test Screen - Timer Cleanup",
+    "width": 400,
+    "height": 300,
+    "startup": "
+        print \"Starting timer in screen...\";
+        call thread.timerStart(\"screenTimer\", 1000, \"timerCallback\");
+        var count: long = call thread.getCount();
+        print \"Active timers: \" + call str.toString(count);
+    ",
+    "cleanup": "
+        print \"Screen cleanup called\";
+    ",
+    "vars": [
+        {
+            "name": "message",
+            "type": "string",
+            "default": "Close this window to test timer cleanup",
+            "display": {
+                "type": "label",
+                "labelText": "Instructions"
+            }
+        }
+    ]
+};
+
+// Show the screen
+show screen testScreen;
+
+print "Screen shown. Timer should be running.";
+print "Close the window to verify timers are stopped.";
+print "You should see a message: 'Stopped 1 timer(s) associated with screen'";

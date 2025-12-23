@@ -1,0 +1,99 @@
+// Test script for new thread builtin functions
+
+print "=== Testing New Thread Timer Functions ===";
+print "";
+
+// Test 1: Get initial count (should be 0)
+var count: long = call thread.getCount();
+print "Initial timer count: " + call str.toString(count);
+
+// Test 2: Start a timer
+testCallback(timerName: string) {
+    print "Timer fired: " + timerName;
+}
+
+print "";
+print "Starting test timer...";
+call thread.timerStart("test1", 2000, "testCallback");
+
+// Test 3: Check if running
+var running: bool = call thread.timerIsRunning("test1");
+print "Timer is running: " + call str.toString(running);
+
+// Test 4: Check if paused (should be false)
+var paused: bool = call thread.timerIsPaused("test1");
+print "Timer is paused: " + call str.toString(paused);
+
+// Test 5: Get period
+var period: long = call thread.timerGetPeriod("test1");
+print "Timer period: " + call str.toString(period) + "ms";
+
+// Test 6: Get fire count (should be 0 initially)
+var fireCount: long = call thread.timerGetFireCount("test1");
+print "Fire count: " + call str.toString(fireCount);
+
+// Test 7: Get timer count (should be 1)
+count = call thread.getCount();
+print "Timer count: " + call str.toString(count);
+
+// Test 8: Get timer info
+print "";
+print "Timer info:";
+var info: string = call thread.timerGetInfo("test1");
+print info;
+
+// Test 9: List all timers
+print "";
+print "All timers:";
+var list: string = call thread.timerList();
+print list;
+
+// Test 10: Pause timer
+print "";
+print "Pausing timer...";
+paused = call thread.timerPause("test1");
+print "Paused: " + call str.toString(paused);
+
+// Test 11: Check if paused (should be true now)
+paused = call thread.timerIsPaused("test1");
+print "Timer is paused: " + call str.toString(paused);
+
+// Test 12: Check if running (should be false)
+running = call thread.timerIsRunning("test1");
+print "Timer is running: " + call str.toString(running);
+
+// Test 13: Resume timer
+print "";
+print "Resuming timer...";
+var resumed: bool = call thread.timerResume("test1");
+print "Resumed: " + call str.toString(resumed);
+
+// Test 14: Check if running (should be true)
+running = call thread.timerIsRunning("test1");
+print "Timer is running: " + call str.toString(running);
+
+// Wait a bit
+print "";
+print "Waiting 3 seconds for timer to fire...";
+call thread.sleep(3000);
+
+// Test 15: Check fire count (should be at least 1)
+fireCount = call thread.timerGetFireCount("test1");
+print "Fire count after wait: " + call str.toString(fireCount);
+
+// Test 16: Stop timer
+print "";
+print "Stopping timer...";
+var stopped: bool = call thread.timerStop("test1");
+print "Stopped: " + call str.toString(stopped);
+
+// Test 17: Verify timer stopped
+running = call thread.timerIsRunning("test1");
+print "Timer is running: " + call str.toString(running);
+
+// Test 18: Final count (should be 0)
+count = call thread.getCount();
+print "Final timer count: " + call str.toString(count);
+
+print "";
+print "=== All Tests Complete ===";

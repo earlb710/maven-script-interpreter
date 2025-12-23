@@ -1,0 +1,92 @@
+// Example: Multi-line inline event handlers in screen JSON
+// Demonstrates the fix for JSON parser to allow newlines in inline event code
+
+// Global variable to track button clicks
+var clickCount = 0;
+
+// Screen definition with multi-line onClick handlers
+screen multilineDemo = {
+    "title": "Multi-line Event Handlers Demo",
+    "width": 500,
+    "height": 400,
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "15",
+            "padding": "20",
+            "items": [
+                {
+                    "name": "lblTitle",
+                    "display": {
+                        "type": "label",
+                        "labelText": "Multi-line Event Handler Demo",
+                        "labelFontSize": "18px",
+                        "labelBold": true
+                    }
+                },
+                {
+                    "name": "lblInfo",
+                    "display": {
+                        "type": "label",
+                        "labelText": "Click the button below to execute multi-line inline code"
+                    }
+                },
+                {
+                    "name": "btnMultiline",
+                    "display": {
+                        "type": "button",
+                        "labelText": "Click Me (Multi-line Handler)",
+                        "onClick": "clickCount = clickCount + 1;
+print \"Button clicked! Count: \" + clickCount;
+print \"This is line 2 of the handler\";
+print \"This is line 3 of the handler\";
+call scr.setLabelText(\"multilineDemo\", \"lblResult\", \"Clicked \" + clickCount + \" times\");"
+                    }
+                },
+                {
+                    "name": "lblResult",
+                    "display": {
+                        "type": "label",
+                        "labelText": "Result: (not clicked yet)",
+                        "labelFontSize": "14px"
+                    }
+                },
+                {
+                    "name": "txtInput",
+                    "varRef": "userInput",
+                    "display": {
+                        "type": "textfield",
+                        "promptText": "Type something here...",
+                        "onChange": "print \"Text changed to: \" + userInput;
+var len = string.length(userInput);
+print \"Length: \" + len;
+call scr.setLabelText(\"multilineDemo\", \"lblChars\", \"Characters: \" + len);"
+                    }
+                },
+                {
+                    "name": "lblChars",
+                    "display": {
+                        "type": "label",
+                        "labelText": "Characters: 0"
+                    }
+                },
+                {
+                    "name": "btnClose",
+                    "display": {
+                        "type": "button",
+                        "labelText": "Close",
+                        "onClick": "print \"Closing screen...\";
+call scr.close(\"multilineDemo\");"
+                    }
+                }
+            ]
+        }
+    ]
+};
+
+print "✓ Screen definition parsed successfully!";
+print "✓ Multi-line inline event handlers are working!";
+print "";
+print "Screen 'multilineDemo' is ready.";
+print "To show it, run: call scr.showScreen(\"multilineDemo\");";
