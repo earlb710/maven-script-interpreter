@@ -1,0 +1,45 @@
+// Test script for util.runlater builtin
+
+print "Testing util.runlater with callback...";
+print "";
+
+// Test 1: Simple callback with no parameters
+testCallback() {
+    print "Callback executed successfully!";
+}
+
+print "Calling util.runlater with callback 'testCallback'...";
+call util.runlater("testCallback");
+print "util.runlater called (callback will execute asynchronously)";
+print "";
+
+// Give the callback time to execute
+call thread.sleep(500);
+
+print "";
+print "Test 2: util.runlater without callback (should return immediately)";
+call util.runlater("");
+print "util.runlater without callback completed";
+print "";
+
+// Test 3: Multiple callbacks
+counter: int = 0;
+
+incrementCounter() {
+    counter = counter + 1;
+    print "Counter incremented to: " + string.fromInt(counter);
+}
+
+print "Test 3: Multiple runlater calls";
+call util.runlater("incrementCounter");
+call util.runlater("incrementCounter");
+call util.runlater("incrementCounter");
+print "Three util.runlater calls made";
+
+// Wait for all callbacks to complete
+call thread.sleep(500);
+
+print "";
+print "Final counter value: " + string.fromInt(counter);
+print "";
+print "All tests completed!";
