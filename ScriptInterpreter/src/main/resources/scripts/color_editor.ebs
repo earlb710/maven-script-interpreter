@@ -1982,7 +1982,8 @@ screen colorEditorScreen = {
                                                             {"name": "literal_item", "varref": "literal"},
                                                             {"name": "identifier_item", "varref": "identifier"},
                                                             {"name": "sql_item", "varref": "sql"},
-                                                            {"name": "custom_item", "varref": "custom"}
+                                                            {"name": "functionClr_item", "varref": "functionClr"},
+                                                            {"name": "errorClr_item", "varref": "errorClr"}
                                                         ]
                                                     }
                                                 ]
