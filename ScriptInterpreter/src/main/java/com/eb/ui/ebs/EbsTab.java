@@ -1325,13 +1325,21 @@ public class EbsTab extends Tab {
         // Default: use EBS lexer for all other files
         List<EbsToken> tokens = ebsLexer.tokenize(src); // returns List<EbsToken> with start/end/style
         
+        System.out.println("=== DEBUG applyLexerSpans() ===");
+        System.out.println("Initial token count: " + tokens.size());
+        
         // Post-process tokens to identify unknown function calls
         tokens = markUnknownFunctions(tokens, src);
+        
+        System.out.println("After markUnknownFunctions token count: " + tokens.size());
         
         // Build spans from token positions
         StyleSpansBuilder<Collection<String>> builder = new StyleSpansBuilder<>();
 
         int pos = 0;
+        int errorTokensApplied = 0;
+        int functionTokensApplied = 0;
+        
         for (EbsToken t : tokens) {
             if (t.start <= t.end) {//test empty string
                 int start = Math.max(0, t.start);
@@ -1346,11 +1354,27 @@ public class EbsTab extends Tab {
 
                 // token style (from EbsToken.style → EbsTokenType.getStyle() → LexerType.getStyle() → PrintStyle.styleClass())
                 //Collection<String> styles = (t.style != null) ? t.styleList : defaultStyle;
+                
+                // DEBUG: Log when applying error or function styles
+                if (t.styleList != null && !t.styleList.isEmpty()) {
+                    String firstStyle = t.styleList.get(0);
+                    if ("tok-function-error".equals(firstStyle)) {
+                        errorTokensApplied++;
+                        System.out.println("DEBUG: Applying tok-function-error to '" + t.literal + "' at pos " + start + "-" + endInclusive);
+                    } else if ("tok-function".equals(firstStyle)) {
+                        functionTokensApplied++;
+                        System.out.println("DEBUG: Applying tok-function to '" + t.literal + "' at pos " + start + "-" + endInclusive);
+                    }
+                }
+                
                 builder.add(t.styleList, Math.max(0, tokenLen));
                 pos = endInclusive + 1;
             }
         }
 
+        System.out.println("DEBUG: Applied " + errorTokensApplied + " tok-function-error styles, " + functionTokensApplied + " tok-function styles");
+        System.out.println("================================");
+        
         // tail gap
         if (pos < src.length()) {
             builder.add(Collections.emptyList(), src.length() - pos);
@@ -1531,6 +1555,12 @@ public class EbsTab extends Tab {
         
         // Extract functions from imports
         customFunctionNames.addAll(extractImportedFunctions(source));
+        
+        // DEBUG: Log function registry state
+        System.out.println("=== DEBUG updateKnownFunctions() ===");
+        System.out.println("Builtin functions count: " + builtinFunctionNames.size());
+        System.out.println("Custom functions: " + customFunctionNames);
+        System.out.println("=====================================");
     }
     
     /**
@@ -1549,6 +1579,13 @@ public class EbsTab extends Tab {
     private List<EbsToken> markUnknownFunctions(List<EbsToken> tokens, String source) {
         List<EbsToken> result = new ArrayList<>();
         
+        System.out.println("=== DEBUG markUnknownFunctions() called ===");
+        System.out.println("Total tokens: " + tokens.size());
+        
+        int functionCallsFound = 0;
+        int unknownFound = 0;
+        int knownFound = 0;
+        
         for (int i = 0; i < tokens.size(); i++) {
             EbsToken token = tokens.get(i);
             
@@ -1563,6 +1600,7 @@ public class EbsTab extends Tab {
                     EbsToken prevToken = tokens.get(i - 1);
                     if (prevToken.type == EbsTokenType.CALL) {
                         isFunction = true;
+                        System.out.println("DEBUG: Found identifier after CALL token: " + token.literal);
                     }
                 }
                 
@@ -1578,10 +1616,12 @@ public class EbsTab extends Tab {
                     
                     if (endPos < source.length() && source.charAt(endPos) == '(') {
                         isFunction = true;
+                        System.out.println("DEBUG: Found identifier followed by '(': " + token.literal);
                     }
                 }
                 
                 if (isFunction) {
+                    functionCallsFound++;
                     String funcName = token.literal != null ? token.literal.toString().toLowerCase() : "";
                     
                     // Check if function is known (builtin or custom)
@@ -1589,8 +1629,17 @@ public class EbsTab extends Tab {
                                      customFunctionNames.contains(funcName) ||
                                      isKeyword(funcName);
                     
+                    System.out.println("DEBUG: Validating function '" + funcName + "' - isKnown=" + isKnown);
+                    if (!isKnown) {
+                        System.out.println("  - Not in builtins: " + !builtinFunctionNames.contains(funcName));
+                        System.out.println("  - Not in custom: " + !customFunctionNames.contains(funcName));
+                        System.out.println("  - Not a keyword: " + !isKeyword(funcName));
+                    }
+                    
                     if (!isKnown && !funcName.isEmpty()) {
+                        unknownFound++;
                         // Mark as unknown function with error style
+                        System.out.println("DEBUG: *** MARKING AS UNKNOWN (tok-function-error): " + funcName + " ***");
                         EbsToken errorToken = new EbsToken(
                             token.type,
                             token.literal,
@@ -1599,10 +1648,13 @@ public class EbsTab extends Tab {
                             token.end,
                             "tok-function-error"
                         );
+                        System.out.println("DEBUG: Created token with style: " + errorToken.style + ", styleList: " + errorToken.styleList);
                         result.add(errorToken);
                         continue;
                     } else if (!funcName.isEmpty()) {
+                        knownFound++;
                         // Mark as known function
+                        System.out.println("DEBUG: Marking as known (tok-function): " + funcName);
                         EbsToken funcToken = new EbsToken(
                             token.type,
                             token.literal,
@@ -1619,6 +1671,9 @@ public class EbsTab extends Tab {
             
             result.add(token);
         }
+        
+        System.out.println("DEBUG: Summary - Function calls: " + functionCallsFound + ", Known: " + knownFound + ", Unknown: " + unknownFound);
+        System.out.println("===========================================");
         
         return result;
     }
