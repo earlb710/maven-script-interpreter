@@ -238,8 +238,11 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
         // script, no import can declare a function with the same name, and vice versa.
         // This is stricter than traditional import semantics but is the desired behavior per requirements.
         if (runtime.blocks != null) {
-            for (String functionName : runtime.blocks.keySet()) {
-                context.getDeclaredFunctions().put(functionName, runtime.name);
+            for (Map.Entry<String, BlockStatement> entry : runtime.blocks.entrySet()) {
+                String functionName = entry.getKey();
+                BlockStatement block = entry.getValue();
+                FunctionMetadata metadata = new FunctionMetadata(runtime.name, block.getLine());
+                context.getDeclaredFunctions().put(functionName, metadata);
             }
         }
 
@@ -1989,19 +1992,21 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             if (importContext.blocks != null && rootRuntime != null) {
                 for (Map.Entry<String, BlockStatement> entry : importContext.blocks.entrySet()) {
                     String functionName = entry.getKey();
+                    BlockStatement block = entry.getValue();
                     
                     // Check if this function name was already declared (in current script or previous import)
                     // This enforces the requirement that no function name can be reused across the current
                     // script and any imports, preventing all forms of overwriting
                     if (context.getDeclaredFunctions().containsKey(functionName)) {
-                        String existingSource = context.getDeclaredFunctions().get(functionName);
+                        FunctionMetadata existingMetadata = context.getDeclaredFunctions().get(functionName);
                         throw error(stmt.getLine(), 
-                            "Function '" + functionName + "' is already declared in " + existingSource + 
+                            "Function '" + functionName + "' is already declared in " + existingMetadata.toString() + 
                             " and cannot be overwritten by import from " + stmt.filename);
                     }
                     
                     // Register this function as declared from the imported file
-                    context.getDeclaredFunctions().put(functionName, stmt.filename);
+                    FunctionMetadata metadata = new FunctionMetadata(stmt.filename, block.getLine());
+                    context.getDeclaredFunctions().put(functionName, metadata);
                     
                     // Store blocks in the root runtime (not currentRuntime) to ensure all imported
                     // functions are accessible from the main script context, regardless of import nesting level

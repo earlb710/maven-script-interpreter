@@ -70,8 +70,8 @@ public class InterpreterContext {
     // Screen configurations stored before Stage creation (lazy initialization)
     private final Map<String, ScreenConfig> screenConfigs = new ConcurrentHashMap<>(); // screenName -> ScreenConfig
 
-    // Track declared function names to prevent overwrites (functionName -> source file/script name)
-    private final Map<String, String> declaredFunctions = new ConcurrentHashMap<>();
+    // Track declared function names to prevent overwrites (functionName -> metadata including source, screen, and line number)
+    private final Map<String, FunctionMetadata> declaredFunctions = new ConcurrentHashMap<>();
     
     // Track declared screen names to prevent overwrites (screenName -> source file/script name)
     private final Map<String, String> declaredScreens = new ConcurrentHashMap<>();
@@ -904,13 +904,34 @@ public class InterpreterContext {
     }
 
     /**
-     * Get the map of declared functions (functionName -> source file/script name).
+     * Get the map of declared functions (functionName -> metadata).
      * Used to track and prevent function name conflicts across imports.
+     * Metadata includes script name, screen name (if applicable), and line number.
      * 
      * @return the declared functions map
      */
-    public Map<String, String> getDeclaredFunctions() {
+    public Map<String, FunctionMetadata> getDeclaredFunctions() {
         return declaredFunctions;
+    }
+
+    /**
+     * Update the screen association for a function.
+     * This is called when a function is used as a callback for a screen.
+     * 
+     * @param functionName The function name
+     * @param screenName The screen name to associate with the function
+     */
+    public void updateFunctionScreenAssociation(String functionName, String screenName) {
+        FunctionMetadata existingMetadata = declaredFunctions.get(functionName);
+        if (existingMetadata != null) {
+            // Create new metadata with the screen name
+            FunctionMetadata updatedMetadata = new FunctionMetadata(
+                existingMetadata.getScriptName(),
+                screenName,
+                existingMetadata.getLineNumber()
+            );
+            declaredFunctions.put(functionName, updatedMetadata);
+        }
     }
 
     /**

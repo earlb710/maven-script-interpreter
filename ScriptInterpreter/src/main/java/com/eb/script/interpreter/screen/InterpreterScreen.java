@@ -987,6 +987,8 @@ public class InterpreterScreen {
             // Store the callback if specified (will be invoked on screen close)
             if (stmt.callbackName != null) {
                 context.setScreenCallback(finalScreenKey, stmt.callbackName);
+                // Update function metadata to track screen association
+                context.updateFunctionScreenAssociation(stmt.callbackName.toLowerCase(), finalScreenKey);
             }
 
             // Get startup code from config if not already stored (check both qualified and base names)
