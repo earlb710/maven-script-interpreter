@@ -824,9 +824,10 @@ function setIndicator(x: int, y: int, indicatorImage: imagedata) {
 // Clear all move indicators on the board
 clearIndicators() {
     // Clear all 64 indicator positions using nested loops
+    // Use transparentClear instead of null to properly clear ImageView components
     for (var y: int = 0; y < 8; y++) {
         for (var x: int = 0; x < 8; x++) {
-            call setIndicator(x, y, null);
+            call setIndicator(x, y, transparentClear);
         }
     }
 }
