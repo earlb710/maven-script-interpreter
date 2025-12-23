@@ -65,6 +65,32 @@ public class Debugger {
     }
 
     public boolean setDebugOff() {
+        if (DEBUG_ENABLED) {
+            // Write final message with line count before turning off
+            long count = linesWritten;
+            String message = "debug off: " + count + " lines written";
+            
+            // Temporarily keep debug enabled to write the final message
+            String line = "[" + nowIso() + "]\t[INFO]\t" + message + System.lineSeparator();
+            try {
+                if (DEBUG_WRITER == null) {
+                    if (outputArea != null) {
+                        outputArea.print(line);
+                    } else {
+                        System.out.print(line);
+                    }
+                } else {
+                    ensureDebugWriter();
+                    DEBUG_WRITER.write(line);
+                    DEBUG_WRITER.flush();
+                }
+            } catch (Exception ex) {
+                // Ignore errors when writing final message
+            }
+            
+            // Reset counter after writing the message
+            linesWritten = 0;
+        }
         DEBUG_ENABLED = false;
         return DEBUG_ENABLED;
     }

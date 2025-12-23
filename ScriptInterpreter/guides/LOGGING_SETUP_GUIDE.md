@@ -34,9 +34,11 @@ debug.log("INFO", "Application started");
 // Log another message
 debug.log("DEBUG", "Processing complete");
 
-// Disable debug mode when done
+// Disable debug mode when done (writes final line count and resets counter)
 debug.off();
 ```
+
+**Note:** When you call `debug.off()`, it automatically writes a final message showing the total number of lines logged (e.g., "debug off: 3 lines written") and resets the line counter.
 
 ## Logging Functions
 
@@ -56,11 +58,23 @@ debug.on();
 
 Disables debug logging. Messages logged via `debug.log()` will be ignored.
 
+When debug is turned off, a final message is automatically written to the log file (if logging to a file) showing the total number of lines written, then the line counter is reset to zero.
+
 ```ebs
 debug.off();
 ```
 
 **Returns:** `BOOL` - false (debug is now disabled)
+
+**Behavior:**
+- Writes a final log entry: `"debug off: X lines written"` where X is the total line count
+- Resets the line counter to zero
+- Subsequent calls to `debug.log()` are ignored until `debug.on()` is called again
+
+**Example output in log file:**
+```
+[2025-12-23T06:03:34.363283723]	[INFO]	debug off: 5 lines written
+```
 
 ### debug.file(fileName)
 
@@ -149,6 +163,7 @@ var count: long = call debug.linesWritten();  // Will be 0
 **Notes:**
 - Useful for measuring log output for specific sections of code
 - Does not affect the actual log file content, only the internal counter
+- Note: `debug.off()` also automatically resets the counter after writing the final line count
 
 ### echo.on() / echo.off()
 
