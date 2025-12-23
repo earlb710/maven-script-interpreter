@@ -142,6 +142,11 @@ var whiteQueensideRookMoved: bool = false; // Rook at a1 (x=0, y=7)
 var blackKingsideRookMoved: bool = false;  // Rook at h8 (x=7, y=0)
 var blackQueensideRookMoved: bool = false; // Rook at a8 (x=0, y=0)
 
+// En passant tracking variables
+// Stores the position of a pawn that just moved two squares (can be captured en passant)
+var enPassantTargetX: int = -1;  // X coordinate of pawn that can be captured en passant (-1 = no en passant available)
+var enPassantTargetY: int = -1;  // Y coordinate of pawn that can be captured en passant
+
 // Captured pieces tracking - stores piece type for each captured piece
 // White pieces captured by black (shown on left side)
 var capturedWhitePieces: int[16];  // Max 16 pieces per color
@@ -1235,6 +1240,54 @@ movePiece(fromX: int, fromY: int, toX: int, toY: int) {
     
     // Clear the source cell image on screen with transparent rectangle
     call setPieceImage(fromX, fromY, transparentClear);
+    
+    // Check for en passant capture before resetting en passant state
+    var isEnPassantCapture: bool = false;
+    if fromCell.pieceType == PAWN && toX != fromX then {
+        // Pawn moved diagonally
+        var targetCellValue: int = call getPieceAt(toX, toY);
+        if targetCellValue != -1 then {
+            var targetCell = ChessCell(targetCellValue);
+            if targetCell.pieceType == EMPTY then {
+                // Diagonal move to empty square - this is en passant
+                isEnPassantCapture = true;
+                print "En passant capture detected!";
+                
+                // Remove the captured pawn (it's at toX, fromY not toX, toY)
+                var capturedPawnY: int = fromY;
+                var capturedPawnIdx: int = call boardIndex(capturedPawnY, toX);
+                var capturedPawnCell = ChessCell(board[capturedPawnIdx]);
+                
+                // Clear the captured pawn from the board
+                board[capturedPawnIdx] = call encodeCellValue(capturedPawnCell.cellColor, EMPTY, capturedPawnCell.pieceColor);
+                
+                // Clear the captured pawn's image on screen
+                call setPieceImage(toX, capturedPawnY, transparentClear);
+                
+                // Track the captured pawn for display
+                call addCapturedPiece(PAWN, capturedPawnCell.pieceColor);
+                
+                print "Captured pawn at (" + toX + ", " + capturedPawnY + ") via en passant";
+            }
+        }
+    }
+    
+    // Reset en passant state before checking for new double pawn move
+    // En passant is only valid for one turn
+    enPassantTargetX = -1;
+    enPassantTargetY = -1;
+    
+    // Check if this is a pawn double move (moving 2 squares forward)
+    // If so, set en passant target for next turn
+    if fromCell.pieceType == PAWN then {
+        var yDiff: int = toY - fromY;
+        if yDiff == 2 || yDiff == -2 then {
+            // Pawn moved two squares - set en passant target
+            enPassantTargetX = toX;
+            enPassantTargetY = toY;
+            print "Pawn double move detected - en passant available at (" + enPassantTargetX + ", " + enPassantTargetY + ")";
+        }
+    }
     
     // Track piece movements for castling rules
     if fromCell.pieceType == KING then {
@@ -3312,6 +3365,10 @@ resetGame() {
     whiteQueensideRookMoved = false;
     blackKingsideRookMoved = false;
     blackQueensideRookMoved = false;
+    
+    // Reset en passant tracking
+    enPassantTargetX = -1;
+    enPassantTargetY = -1;
     
     // Clear captured pieces display
     call clearCapturedPieces();

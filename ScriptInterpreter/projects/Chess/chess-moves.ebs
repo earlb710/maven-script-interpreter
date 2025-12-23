@@ -90,6 +90,32 @@ function getPawnMoves(x: int, y: int, color: int) return array {
         }
     }
     
+    // En passant captures
+    // Check if pawn is on the correct rank for en passant (5th rank for white, 4th rank for black)
+    var enPassantRank: int;
+    if color == WHITE then {
+        enPassantRank = 3;  // White's 5th rank (y=3, since y=0 is top)
+    } else {
+        enPassantRank = 4;  // Black's 4th rank (y=4)
+    }
+    
+    if y == enPassantRank && enPassantTargetX != -1 && enPassantTargetY != -1 then {
+        // There's an en passant opportunity available
+        // Check if the target pawn is adjacent to our pawn
+        if enPassantTargetY == y then {
+            // Target pawn is on the same rank (horizontally adjacent)
+            if enPassantTargetX == x - 1 || enPassantTargetX == x + 1 then {
+                // Target pawn is adjacent - we can capture it en passant
+                // The capture move is diagonal, one square forward
+                var enPassantCaptureX: int = enPassantTargetX;
+                var enPassantCaptureY: int = y + direction;
+                var enPassantCapture: posType = call createPos(enPassantCaptureX, enPassantCaptureY);
+                call array.add(moves, enPassantCapture);
+                print "En passant move available from (" + x + ", " + y + ") to (" + enPassantCaptureX + ", " + enPassantCaptureY + ")";
+            }
+        }
+    }
+    
     return moves;
 }
 
