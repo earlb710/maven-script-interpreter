@@ -2655,10 +2655,10 @@ selectBestMoveEasy(playerColor: int) return json {
         return null;  // No legal moves (shouldn't happen in normal play)
     }
     
-    // Find moves that capture pieces and track the highest value capture
+    // Find moves that capture pieces and evaluate them considering defenders
     var bestCaptureMove: json = null;
     var bestCaptureValue: int = 0;
-    var captureMovesFound: bool = false;
+    var safeCaptureMovesFound: bool = false;
     
     var i: int = 0;
     for (i = 0; i < moveCount; i = i + 1) {
@@ -2668,24 +2668,49 @@ selectBestMoveEasy(playerColor: int) return json {
         if destCellValue != -1 then {
             var destCell = ChessCell(destCellValue);
             if destCell.pieceType != EMPTY then {
-                // This is a capture move
-                captureMovesFound = true;
+                // This is a capture move - get the value of the piece being captured
                 var captureValue: int = call getPieceValue(destCell.pieceType);
                 
-                if captureValue > bestCaptureValue then {
-                    bestCaptureValue = captureValue;
-                    bestCaptureMove = move;
+                // Get the value of the attacking piece
+                var attackerPieceType: int = move.pieceType;
+                var attackerValue: int = call getPieceValue(attackerPieceType);
+                
+                // Check if the target square has defenders
+                var defenders = call getDefenders(move.toX, move.toY);
+                var defenderCount: int = defenders.length;
+                
+                // Decide if this capture is safe
+                var isSafeCapture: bool = false;
+                
+                if defenderCount == 0 then {
+                    // No defenders - safe to capture
+                    isSafeCapture = true;
+                } else {
+                    // Has defenders - only capture if target value >= attacker value
+                    // (i.e., we gain equal or more value than we might lose)
+                    if captureValue >= attackerValue then {
+                        isSafeCapture = true;
+                    }
+                }
+                
+                // If this is a safe capture, consider it
+                if isSafeCapture then {
+                    safeCaptureMovesFound = true;
+                    if captureValue > bestCaptureValue then {
+                        bestCaptureValue = captureValue;
+                        bestCaptureMove = move;
+                    }
                 }
             }
         }
     }
     
-    // If we found a capture move, return the best one
-    if captureMovesFound then {
+    // If we found a safe capture move, return the best one
+    if safeCaptureMovesFound then {
         return bestCaptureMove;
     }
     
-    // No captures available - select a random move
+    // No safe captures available - select a random move
     // Defensive check (should already be handled by moveCount check above)
     if moveCount == 0 then {
         return null;
