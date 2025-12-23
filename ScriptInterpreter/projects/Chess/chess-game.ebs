@@ -3538,71 +3538,21 @@ handleExitFromGameOver() {
 
 // Reset the game to initial state
 resetGame() {
-    print "Resetting game...";
+    print "Returning to startup screen...";
     
-    // Reset game state
-    gameOver = false;
-    selectedX = -1;
-    selectedY = -1;
-    currentPlayer = WHITE;
+    // Stop the game
+    gameStarted = false;
     
-    // Reset arrow path tracking
-    lastMoveFromX = -1;
-    lastMoveFromY = -1;
-    lastMoveToX = -1;
-    lastMoveToY = -1;
-    arrowPathCount = 0;
+    // Stop the timer if it's running
+    call thread.timerStop("chessScreen.chessTimer");
     
-    // Reset castling tracking
-    whiteKingMoved = false;
-    blackKingMoved = false;
-    whiteKingsideRookMoved = false;
-    whiteQueensideRookMoved = false;
-    blackKingsideRookMoved = false;
-    blackQueensideRookMoved = false;
+    // Close the chess screen
+    close screen chessScreen;
     
-    // Reset en passant tracking
-    enPassantTargetX = -1;
-    enPassantTargetY = -1;
+    // Show the startup dialog to start a new game
+    show screen startupDialog;
     
-    // Reset opponent piece selection tracking
-    lastOpponentX = -1;
-    lastOpponentY = -1;
-    
-    // Clear captured pieces display
-    call clearCapturedPieces();
-    
-    // Reset timers
-    var timeInDeciseconds: int = call getTimeLimitInDeciseconds(selectedTimeLimit);
-    timerWhite = timeInDeciseconds;
-    timerBlack = timeInDeciseconds;
-    initialTimerValue = timeInDeciseconds;  // Reset initial value for new game
-    
-    // Clear all indicators
-    call clearIndicators();
-    
-    // Reinitialize the board
-    call initializeBoard();
-    
-    // Update piece images on screen
-    call initializeBoardPieces();
-    
-    // Reset screen display variables
-    chessScreen.whiteTimer = call formatTimerDecimal(timerWhite);
-    chessScreen.blackTimer = call formatTimerDecimal(timerBlack);
-    chessScreen.statusMessage = "White to move";
-    chessScreen.moveHistory = "Game restarted.\nWhite's turn.\n";
-    call updateTimerColors();
-    
-    // Restart the timer
-    call thread.timerStart("chessScreen.chessTimer", 100, "timerCallback");
-    
-    print "Game reset complete!";
-    
-    // In 1-player mode, if computer plays white, trigger computer move
-    if selectedGameMode == "1 player" && humanPlayerColor == BLACK then {
-        call makeComputerMove();
-    }
+    print "Startup screen displayed.";
 }
 
 // Close chess screen handler
