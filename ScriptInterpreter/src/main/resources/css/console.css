@@ -624,7 +624,8 @@
 .editor-text .text.tok-function-error {
     -fx-fill: #DCDCAA; /* same yellow as functions */
     -rtfx-underline-color: red;
-    -rtfx-underline-width: 2;
+    -rtfx-underline-width: 2px;
     -rtfx-underline-dash-array: none; /* solid line */
+    -rtfx-underline-cap: butt;
 }
 
