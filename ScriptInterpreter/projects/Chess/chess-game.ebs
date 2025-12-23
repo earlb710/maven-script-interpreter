@@ -1440,6 +1440,29 @@ handleCellClick(x: int, y: int) {
         }
         
         if isValidMove then {
+            // Safety check: Verify the selected piece belongs to the current player
+            var selectedPieceCellValue: int = call getPieceAt(selectedX, selectedY);
+            if selectedPieceCellValue != -1 then {
+                var selectedPieceCell = ChessCell(selectedPieceCellValue);
+                if selectedPieceCell.pieceColor != currentPlayer then {
+                    print "Error: Cannot move opponent's piece!";
+                    chessScreen.statusMessage = "It's not your turn to move that piece!";
+                    call clearIndicators();
+                    
+                    // Redraw last move blue arrows and circles if they exist
+                    if lastMoveFromX >= 0 && lastMoveFromY >= 0 && lastMoveToX >= 0 && lastMoveToY >= 0 then {
+                        call showLastMove(lastMoveFromX, lastMoveFromY, lastMoveToX, lastMoveToY);
+                    }
+                    
+                    // Show check indicators if king is in check
+                    call showCheckIndicators();
+                    
+                    selectedX = -1;
+                    selectedY = -1;
+                    return;
+                }
+            }
+            
             // Check if this move would expose the player's own king
             var exposesKing: bool = call wouldMoveExposeKing(selectedX, selectedY, x, y, currentPlayer);
             
@@ -1670,9 +1693,8 @@ handleCellClick(x: int, y: int) {
         }
         chessScreen.statusMessage = "Opponent piece: " + defenderText;
         
-        // Store the selected opponent piece position so it can be deselected on next click
-        selectedX = x;
-        selectedY = y;
+        // DO NOT set selectedX and selectedY for opponent pieces - they should not be selectable
+        // selectedX and selectedY remain -1 to prevent moving opponent pieces
         return;
     }
     
