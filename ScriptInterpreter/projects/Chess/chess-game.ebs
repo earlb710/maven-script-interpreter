@@ -1642,9 +1642,6 @@ handleCellClick(x: int, y: int) {
         print debugMsg;
         print "===== END DEFENDER INFO =====";
         
-        // Show dialog with defender information
-        call dialog.info("Defender Information", debugMsg);
-        
         // Update status message to show defender count
         var defenderText: string;
         if defenderCount == 0 then {
