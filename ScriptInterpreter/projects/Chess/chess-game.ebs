@@ -1236,6 +1236,26 @@ movePiece(fromX: int, fromY: int, toX: int, toY: int) {
         }
     }
     
+    // Check for en passant capture BEFORE moving the piece
+    var isEnPassantCapture: bool = false;
+    var capturedPawnX: int = -1;
+    var capturedPawnY: int = -1;
+    
+    if fromCell.pieceType == PAWN && toX != fromX then {
+        // Pawn is moving diagonally - check if destination is empty (en passant)
+        var targetCellValue: int = call getPieceAt(toX, toY);
+        if targetCellValue != -1 then {
+            var targetCell = ChessCell(targetCellValue);
+            if targetCell.pieceType == EMPTY then {
+                // Diagonal move to empty square - this is en passant
+                isEnPassantCapture = true;
+                capturedPawnX = toX;
+                capturedPawnY = fromY;
+                print "En passant capture detected! Will remove pawn at (" + capturedPawnX + ", " + capturedPawnY + ")";
+            }
+        }
+    }
+    
     // Update the board array - move the king (or regular piece)
     // Set destination to the moved piece (preserve cell color from destination)
     board[toIdx] = call encodeCellValue(toCell.cellColor, fromCell.pieceType, fromCell.pieceColor);
@@ -1254,35 +1274,22 @@ movePiece(fromX: int, fromY: int, toX: int, toY: int) {
     // Clear the source cell image on screen with transparent rectangle
     call setPieceImage(fromX, fromY, transparentClear);
     
-    // Check for en passant capture before resetting en passant state
-    var isEnPassantCapture: bool = false;
-    if fromCell.pieceType == PAWN && toX != fromX then {
-        // Pawn moved diagonally
-        var targetCellValue: int = call getPieceAt(toX, toY);
-        if targetCellValue != -1 then {
-            var targetCell = ChessCell(targetCellValue);
-            if targetCell.pieceType == EMPTY then {
-                // Diagonal move to empty square - this is en passant
-                isEnPassantCapture = true;
-                print "En passant capture detected!";
-                
-                // Remove the captured pawn (it's at toX, fromY not toX, toY)
-                var capturedPawnY: int = fromY;
-                var capturedPawnIdx: int = call boardIndex(capturedPawnY, toX);
-                var capturedPawnCell = ChessCell(board[capturedPawnIdx]);
-                
-                // Clear the captured pawn from the board
-                board[capturedPawnIdx] = call encodeCellValue(capturedPawnCell.cellColor, EMPTY, capturedPawnCell.pieceColor);
-                
-                // Clear the captured pawn's image on screen
-                call setPieceImage(toX, capturedPawnY, transparentClear);
-                
-                // Track the captured pawn for display
-                call addCapturedPiece(PAWN, capturedPawnCell.pieceColor);
-                
-                print "Captured pawn at (" + toX + ", " + capturedPawnY + ") via en passant";
-            }
-        }
+    // Handle en passant capture if detected
+    if isEnPassantCapture then {
+        // Remove the captured pawn (it's at capturedPawnX, capturedPawnY)
+        var capturedPawnIdx: int = call boardIndex(capturedPawnY, capturedPawnX);
+        var capturedPawnCell = ChessCell(board[capturedPawnIdx]);
+        
+        // Clear the captured pawn from the board
+        board[capturedPawnIdx] = call encodeCellValue(capturedPawnCell.cellColor, EMPTY, capturedPawnCell.pieceColor);
+        
+        // Clear the captured pawn's image on screen
+        call setPieceImage(capturedPawnX, capturedPawnY, transparentClear);
+        
+        // Track the captured pawn for display
+        call addCapturedPiece(PAWN, capturedPawnCell.pieceColor);
+        
+        print "Captured pawn at (" + capturedPawnX + ", " + capturedPawnY + ") via en passant";
     }
     
     // Reset en passant state before checking for new double pawn move
@@ -1613,6 +1620,22 @@ handleCellClick(x: int, y: int) {
                 if targetCell.pieceType != EMPTY then {
                     isCapture = true;
                     print "    (capture move)";
+                }
+            }
+            
+            // Check for en passant capture - pawn moving diagonally to empty square
+            if !isCapture && cell.pieceType == PAWN && move.x != x then {
+                // Pawn moving diagonally
+                if targetCellValue != -1 then {
+                    var targetCell2 = ChessCell(targetCellValue);
+                    if targetCell2.pieceType == EMPTY then {
+                        // Diagonal move to empty square - check if it's en passant
+                        if enPassantTargetX == move.x && enPassantTargetY == y then {
+                            // This is an en passant capture
+                            isCapture = true;
+                            print "    (en passant capture move)";
+                        }
+                    }
                 }
             }
             
