@@ -771,6 +771,62 @@ function getDefenders(targetX: int, targetY: int) return array {
     return defenders;
 }
 
+// Get all pieces that are attacking a target square
+// Returns an array of posType positions
+function getAttackers(targetX: int, targetY: int, attackerColor: int) return array {
+    var attackers: posType[] = [];
+    
+    var x: int = 0;
+    var y: int = 0;
+    
+    // Check all squares for attacking pieces
+    for (y = 0; y < 8; y = y + 1) {
+        for (x = 0; x < 8; x = x + 1) {
+            var cellValue: int = call getPieceAt(x, y);
+            if cellValue != -1 then {
+                var cell = ChessCell(cellValue);
+                
+                // Only check pieces of the attacker's color
+                if cell.pieceType != EMPTY && cell.pieceColor == attackerColor then {
+                    // Get ALL possible moves for this piece (not filtered by friendly pieces)
+                    var moves = [];
+                    var pieceType: int = cell.pieceType;
+                    
+                    if pieceType == PAWN then {
+                        moves = call getPawnMoves(x, y, cell.pieceColor);
+                    } else if pieceType == ROOK then {
+                        moves = call getRookMoves(x, y);
+                    } else if pieceType == KNIGHT then {
+                        moves = call getKnightMoves(x, y);
+                    } else if pieceType == BISHOP then {
+                        moves = call getBishopMoves(x, y);
+                    } else if pieceType == QUEEN then {
+                        moves = call getQueenMoves(x, y);
+                    } else if pieceType == KING then {
+                        moves = call getKingMoves(x, y);
+                    }
+                    
+                    // Check if any move targets the square in question
+                    var i: int = 0;
+                    var len: int = moves.length;
+                    for (i = 0; i < len; i = i + 1) {
+                        var move: posType = moves[i];
+                        if move.x == targetX && move.y == targetY then {
+                            // This piece can attack the target square
+                            var attackerPos: posType = call createPos(x, y);
+                            call array.add(attackers, attackerPos);
+                            // Break out of the move checking loop for this piece
+                            i = len;  // Exit the loop
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    return attackers;
+}
+
 // Check if the given player is in checkmate
 function isCheckmate(playerColor: int) return bool {
     // Checkmate requires: king is in check AND no legal moves
