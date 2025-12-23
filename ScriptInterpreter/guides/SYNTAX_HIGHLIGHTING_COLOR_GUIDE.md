@@ -2,12 +2,13 @@
 
 ## Overview
 
-This guide explains how to add colors to the EBS Script Interpreter in two different contexts:
+This guide explains how to add colors to the EBS Script Interpreter in three different contexts:
 
 1. **Syntax Highlighting Colors** - For code tokens in the editor/console (keywords, operators, strings, etc.)
 2. **Screen JSON Color Properties** - For runtime UI control styling in screen definitions (labels, text fields, buttons, etc.)
+3. **Color Editor Screen** - For console configuration colors managed through the color_editor.ebs script
 
-These are two independent color systems with different purposes and implementations.
+These are three independent color systems with different purposes and implementations.
 
 **Related Documentation:**
 - [ARCHITECTURE.md](../../docs/ARCHITECTURE.md) - System architecture
@@ -31,6 +32,13 @@ These are two independent color systems with different purposes and implementati
 9. [Complete Screen Color Example](#complete-screen-color-example)
 10. [Screen Color Best Practices](#screen-color-best-practices)
 11. [Screen Color Troubleshooting](#screen-color-troubleshooting)
+
+### Part 3: Color Editor Screen
+12. [Color Editor System Architecture](#part-3-color-editor-screen)
+13. [Adding a New Color to the Editor](#adding-a-new-color-to-the-editor)
+14. [Complete Color Editor Example](#complete-color-editor-example)
+15. [Color Editor Best Practices](#color-editor-best-practices)
+16. [Color Editor Troubleshooting](#color-editor-troubleshooting)
 
 ---
 
@@ -1055,9 +1063,560 @@ if (DEBUG) {
 
 ---
 
+# Part 3: Color Editor Screen
+
+## Overview
+
+The Color Editor Screen is an EBS script (`color_editor.ebs`) that provides a graphical interface for managing console configuration colors. It reads colors from `console.cfg` and allows users to edit them through a JavaFX screen with color pickers.
+
+**Scope Note:** This system is for **console configuration colors** that control the appearance of the editor interface. Colors are stored in `console.cfg` and loaded at startup. This is different from syntax highlighting (Part 1) and screen JSON properties (Part 2).
+
+---
+
+## Color Editor System Architecture
+
+### Component Overview
+
+The color editor system consists of:
+
+```
+console.cfg (JSON config file)
+      ↓
+color_editor.ebs (EBS script)
+      ↓
+EBS Screen with ColorPickers
+      ↓
+User Edits Colors
+      ↓
+Save to console.cfg
+      ↓
+ConsoleConfig.java reloads config
+      ↓
+Colors applied to console UI
+```
+
+### Key Components
+
+| Component | Location | Purpose |
+|-----------|----------|---------|
+| **console.cfg** | Repository root | JSON config file storing color profiles |
+| **color_editor.ebs** | `src/main/resources/scripts/color_editor.ebs` | EBS script that creates the color editor screen |
+| **ConsoleConfig.java** | `src/main/java/com/eb/ui/ebs/ConsoleConfig.java` | Java class that loads and applies colors from config |
+| **console.css** | `src/main/resources/css/console.css` | CSS file with default color values |
+
+### Console Configuration Colors
+
+The `console.cfg` file contains color profiles with these properties:
+
+**Syntax Highlighting Colors:**
+- `info`, `comment`, `error`, `warn`, `ok`
+- `code`, `datatype`, `data`, `keyword`, `builtin`, `literal`, `identifier`, `sql`, `custom`
+
+**Editor Colors:**
+- `background`, `text`, `caret`, `line-cursor`, `line-numbers`
+- `console-background`
+
+**Tab Colors:**
+- `tab-background`, `tab-label-color`, `tab-label-changed-color`
+- `tab-label-background`, `tab-select`, `tab-content`
+
+**Find Colors:**
+- `find-highlight-color`, `find-highlight-background`, `current-find-highlight-bg`
+
+---
+
+## Adding a New Color to the Editor
+
+Follow these seven steps to add a new color to the color editor screen:
+
+### Step 1: Add Default Value in color_editor.ebs
+
+**File:** `src/main/resources/scripts/color_editor.ebs`
+
+Add a default color constant (around line 370-400):
+
+```javascript
+// Existing defaults
+var defaultInfoColor: string = "#e6e6e6";
+var defaultCommentColor: string = "#ffffcc";
+
+// NEW: Add your default color
+var defaultMyNewColor: string = "#ff00ff";
+```
+
+### Step 2: Add Variable Declaration
+
+Add a variable to hold the color value (around line 340-370):
+
+```javascript
+// Existing color variables
+var infoColor: string = call json.getstring(colors, "info", "");
+var commentColor: string = call json.getstring(colors, "comment", "");
+
+// NEW: Add your color variable
+var myNewColor: string = call json.getstring(colors, "myNewColor", "");
+```
+
+### Step 3: Add Default Fallback
+
+Add fallback logic to use default if not present (around line 402-431):
+
+```javascript
+// Existing fallbacks
+if infoColor == "" then { infoColor = defaultInfoColor; }
+if commentColor == "" then { commentColor = defaultCommentColor; }
+
+// NEW: Add fallback for your color
+if myNewColor == "" then { myNewColor = defaultMyNewColor; }
+```
+
+### Step 4: Add to setColorsToDefaults Function
+
+Update the function that resets colors (around line 438-468):
+
+```javascript
+function setColorsToDefaults {
+    colorEditorScreen.info = defaultInfoColor;
+    colorEditorScreen.comment = defaultCommentColor;
+    // ... existing colors ...
+    
+    // NEW: Add your color
+    colorEditorScreen.myNewColor = defaultMyNewColor;
+}
+```
+
+### Step 5: Add to setColorsToOriginal Function
+
+Update the function that restores loaded colors (around line 470-501):
+
+```javascript
+function setColorsToOriginal {
+    colorEditorScreen.info = infoColor;
+    colorEditorScreen.comment = commentColor;
+    // ... existing colors ...
+    
+    // NEW: Add your color
+    colorEditorScreen.myNewColor = myNewColor;
+}
+```
+
+### Step 6: Add to buildProfileColorsJson Function
+
+Update JSON building functions (around line 504-573):
+
+```javascript
+function buildProfileColorsJson(pName: string) return string {
+    var colorsJson: string = "\"" + pName + "\": {\n";
+    colorsJson = colorsJson + "      \"info\": \"" + colorEditorScreen.info + "\",\n";
+    // ... existing colors ...
+    
+    // NEW: Add your color (note the comma on the previous line)
+    colorsJson = colorsJson + "      \"myNewColor\": \"" + colorEditorScreen.myNewColor + "\"\n";
+    colorsJson = colorsJson + "    }";
+    return colorsJson;
+}
+```
+
+**Important:** Remove the comma from what was the last line and add it to your new line if adding at the end.
+
+### Step 7: Add ColorPicker to Screen Definition
+
+Add a variable and UI control to the screen (around line 1568-1846):
+
+```javascript
+screen colorEditorScreen = {
+    "title": "Console Configuration Color Editor",
+    "vars": [
+        {
+            "name": "info",
+            "type": "string",
+            "default": $infoColor,
+            "display": { "type": "colorpicker", "labelText": "Info Color:" }
+        },
+        // ... existing color variables ...
+        
+        // NEW: Add your color variable
+        {
+            "name": "myNewColor",
+            "type": "string",
+            "default": $myNewColor,
+            "display": {
+                "type": "colorpicker",
+                "labelText": "My New Color:"
+            }
+        }
+    ],
+    "area": [{
+        // ... screen layout ...
+        "items": [
+            {"name": "info_item", "varref": "info"},
+            // ... existing items ...
+            
+            // NEW: Add your color item to appropriate group
+            {"name": "myNewColor_item", "varref": "myNewColor"}
+        ]
+    }]
+};
+```
+
+**Note:** Add the item to the appropriate group area (consoleColorsArea, syntaxColorsArea, tabColorsArea, or editorColorsArea) based on what the color controls.
+
+---
+
+## Complete Color Editor Example
+
+Let's add a new `selection-background` color for text selection highlighting.
+
+### Example: Adding Selection Background Color
+
+#### 1. Add Default Value (line ~400)
+
+```javascript
+var defaultSelectionBackground: string = "#3366cc";
+```
+
+#### 2. Add Variable Declaration (line ~368)
+
+```javascript
+var selectionBackground: string = call json.getstring(colors, "selection-background", "");
+```
+
+#### 3. Add Default Fallback (line ~431)
+
+```javascript
+if selectionBackground == "" then { selectionBackground = defaultSelectionBackground; }
+```
+
+#### 4. Add to setColorsToDefaults (line ~468)
+
+```javascript
+function setColorsToDefaults {
+    // ... existing assignments ...
+    colorEditorScreen.selectionBackground = defaultSelectionBackground;
+}
+```
+
+#### 5. Add to setColorsToOriginal (line ~501)
+
+```javascript
+function setColorsToOriginal {
+    // ... existing assignments ...
+    colorEditorScreen.selectionBackground = selectionBackground;
+}
+```
+
+#### 6. Add to buildProfileColorsJson (line ~534)
+
+```javascript
+function buildProfileColorsJson(pName: string) return string {
+    // ... existing JSON building ...
+    colorsJson = colorsJson + "      \"tab-content\": \"" + colorEditorScreen.tabContent + "\",\n";
+    colorsJson = colorsJson + "      \"selection-background\": \"" + colorEditorScreen.selectionBackground + "\"\n";  // NEW (last item, no comma)
+    colorsJson = colorsJson + "    }";
+    return colorsJson;
+}
+```
+
+#### 7. Add to buildDefaultProfileColorsJson (line ~570)
+
+```javascript
+function buildDefaultProfileColorsJson(pName: string) return string {
+    // ... existing JSON building ...
+    colorsJson = colorsJson + "      \"tab-content\": \"" + defaultTabContentColor + "\",\n";
+    colorsJson = colorsJson + "      \"selection-background\": \"" + defaultSelectionBackground + "\"\n";  // NEW
+    colorsJson = colorsJson + "    }";
+    return colorsJson;
+}
+```
+
+#### 8. Add to saveConfigWithCurrentProfile (line ~794)
+
+Find the section where colors are assigned from screen values (around line 764-794) and from config (around line 796-826):
+
+```javascript
+// When saving current profile (line ~794)
+pSelectionBg = colorEditorScreen.selectionBackground;
+
+// When reading from config (line ~826)
+pSelectionBg = call json.getstring(pColors, "selection-background", "");
+```
+
+And in the JSON building section (around line ~857):
+
+```javascript
+profilesStr = profilesStr + "      \"tab-content\": \"" + pTabContent + "\",\n";
+profilesStr = profilesStr + "      \"selection-background\": \"" + pSelectionBg + "\"\n";  // NEW
+profilesStr = profilesStr + "    }";
+```
+
+#### 9. Add ColorPicker to Screen (line ~1846)
+
+```javascript
+{
+    "name": "selectionBackground",
+    "type": "string",
+    "default": $selectionBackground,
+    "display": {
+        "type": "colorpicker",
+        "labelText": "Selection Background:"
+    }
+}
+```
+
+And add the item to the appropriate area (e.g., editorColorsArea around line ~1999):
+
+```javascript
+"items": [
+    {"name": "background_item", "varref": "background"},
+    {"name": "text_item", "varref": "text"},
+    {"name": "selectionBackground_item", "varref": "selectionBackground"}  // NEW
+]
+```
+
+#### 10. Update ConsoleConfig.java
+
+**File:** `src/main/java/com/eb/ui/ebs/ConsoleConfig.java`
+
+Add code to read and apply the new color:
+
+```java
+// In loadConfig() method
+String selectionBg = getColorValue(colors, "selection-background", "#3366cc");
+
+// In applyColors() method
+// Apply to relevant UI components
+textArea.setStyle("-fx-selection-bar: " + selectionBg + ";");
+```
+
+#### 11. Test
+
+```bash
+cd ScriptInterpreter
+mvn clean compile
+mvn javafx:run
+
+# In the console, run:
+/open color_editor.ebs
+
+# Verify your new color appears in the editor
+# Change the color and click "Save and Apply"
+# Verify the color is saved to console.cfg
+```
+
+---
+
+## Color Editor Best Practices
+
+### 1. Follow Naming Conventions
+
+Use kebab-case for color names in JSON:
+
+✅ **Good:**
+```
+"selection-background"
+"error-highlight"
+"tab-hover-color"
+```
+
+❌ **Bad:**
+```
+"SelectionBackground"
+"error_highlight"
+"tabHoverColor"
+```
+
+### 2. Provide Sensible Defaults
+
+Choose defaults that work well with the existing color scheme:
+
+```javascript
+// Consider contrast and readability
+var defaultSelectionBg: string = "#3366cc";  // Blue, visible on dark backgrounds
+var defaultErrorHighlight: string = "#ff4444";  // Red, but not too bright
+```
+
+### 3. Add Colors to Appropriate Groups
+
+Place your color picker in the logical group:
+- **Console Colors** - Message types (info, error, warn, ok)
+- **Syntax Colors** - Code element types
+- **Tab Colors** - Tab bar and label colors
+- **Editor Colors** - Text area and cursor colors
+- **Find Colors** - Search highlighting colors
+
+### 4. Update All Profile Functions
+
+Colors must be added to:
+- `setColorsToDefaults()`
+- `setColorsToOriginal()`
+- `buildProfileColorsJson()`
+- `buildDefaultProfileColorsJson()`
+- `saveConfigWithCurrentProfile()` (multiple places)
+- `onProfileChange()` (if you want profile-specific loading)
+
+Missing any of these will cause issues when switching profiles or saving.
+
+### 5. Handle Comma Placement in JSON
+
+When building JSON strings, the last property should NOT have a trailing comma:
+
+```javascript
+// Correct
+colorsJson = colorsJson + "      \"tab-content\": \"" + color1 + "\",\n";
+colorsJson = colorsJson + "      \"new-color\": \"" + color2 + "\"\n";  // No comma
+
+// Incorrect
+colorsJson = colorsJson + "      \"new-color\": \"" + color2 + "\",\n";  // Trailing comma!
+```
+
+### 6. Test Profile Switching
+
+After adding a color:
+1. Open the editor and verify the color appears
+2. Change the color and save
+3. Switch to a different profile
+4. Switch back and verify the color persisted
+5. Create a new profile and verify default value is used
+
+### 7. Document the Color
+
+Add comments explaining what the color controls:
+
+```javascript
+// Selection background - color for selected text in the editor
+var defaultSelectionBackground: string = "#3366cc";
+```
+
+---
+
+## Color Editor Troubleshooting
+
+### Problem: Color Not Appearing in Editor
+
+**Symptoms:** New color doesn't show up in the color editor screen
+
+**Solutions:**
+
+1. **Check variable is in screen vars array:**
+   ```javascript
+   "vars": [
+       {"name": "myNewColor", "type": "string", "default": $myNewColor, ...}
+   ]
+   ```
+
+2. **Check item is in screen areas:**
+   ```javascript
+   "items": [
+       {"name": "myNewColor_item", "varref": "myNewColor"}
+   ]
+   ```
+
+3. **Verify $variable syntax:**
+   - Use `$myNewColor` (with $) for default values
+   - Variable name must match between var declaration and screen definition
+
+### Problem: Color Not Saving
+
+**Symptoms:** Color changes in editor but doesn't persist after closing
+
+**Solutions:**
+
+1. **Check buildProfileColorsJson includes your color:**
+   ```javascript
+   colorsJson = colorsJson + "      \"myNewColor\": \"" + colorEditorScreen.myNewColor + "\"\n";
+   ```
+
+2. **Check saveConfigWithCurrentProfile handles your color:**
+   - Must be in the section that reads from screen (line ~764-794)
+   - Must be in the JSON building section (line ~828-857)
+
+3. **Verify JSON comma placement:**
+   - Last property should not have a trailing comma
+   - Check generated JSON is valid
+
+### Problem: Profile Switching Loses Color
+
+**Symptoms:** Color resets when switching between profiles
+
+**Solutions:**
+
+1. **Add to onProfileChange function:**
+   ```javascript
+   var pMyNewColor: string = call json.getstring(profileColors, "myNewColor", "");
+   if pMyNewColor != "" then { colorEditorScreen.myNewColor = pMyNewColor; }
+   else { colorEditorScreen.myNewColor = defaultMyNewColor; }
+   ```
+
+2. **Add to saveConfigWithCurrentProfile:**
+   - Read from screen values for current profile
+   - Read from config for other profiles
+
+3. **Check addProfileToConfig function:**
+   - Ensure new profiles get the default value
+
+### Problem: Default Not Applied
+
+**Symptoms:** New color shows as empty or black instead of default
+
+**Solutions:**
+
+1. **Check fallback logic:**
+   ```javascript
+   if myNewColor == "" then { myNewColor = defaultMyNewColor; }
+   ```
+
+2. **Check setColorsToDefaults:**
+   ```javascript
+   colorEditorScreen.myNewColor = defaultMyNewColor;
+   ```
+
+3. **Verify default constant is defined:**
+   ```javascript
+   var defaultMyNewColor: string = "#ff00ff";
+   ```
+
+### Problem: Color Not Applied to UI
+
+**Symptoms:** Color saves correctly but doesn't affect the console appearance
+
+**Solutions:**
+
+1. **Add to ConsoleConfig.java:**
+   ```java
+   String myColor = getColorValue(colors, "myNewColor", "#ff00ff");
+   ```
+
+2. **Apply to relevant UI components:**
+   ```java
+   component.setStyle("-fx-property: " + myColor + ";");
+   ```
+
+3. **Reload config after saving:**
+   - The `system.reloadConfig()` call should trigger a reload
+   - If not, restart the application
+
+### Debug Tips
+
+1. **Add print statements:**
+   ```javascript
+   print "myNewColor loaded: " + myNewColor;
+   print "myNewColor from screen: " + colorEditorScreen.myNewColor;
+   ```
+
+2. **Check console.cfg manually:**
+   - Open `console.cfg` in a text editor
+   - Verify your color property appears in the profiles object
+   - Check JSON syntax is valid
+
+3. **Test with default profile first:**
+   - Always test with the "default" profile before testing other profiles
+   - The default profile has special handling in many places
+
+---
+
 ## Summary
 
-This guide covers two independent color systems in the EBS Script Interpreter:
+This guide covers three independent color systems in the EBS Script Interpreter:
 
 ### Part 1: Syntax Highlighting Colors
 - **Purpose:** Color code tokens in the editor/console
@@ -1070,6 +1629,12 @@ This guide covers two independent color systems in the EBS Script Interpreter:
 - **Components:** JSON Schema → Parse → Data Structure → Apply to JavaFX
 - **Files:** display-metadata.json, InterpreterScreen.java, DisplayItem.java, AreaItemFactory.java
 - **Scope:** Interpreter screen parsing and UI rendering
+
+### Part 3: Color Editor Screen
+- **Purpose:** Manage console configuration colors through GUI
+- **Components:** console.cfg → color_editor.ebs → ColorPickers → Save → ConsoleConfig.java
+- **Files:** console.cfg, color_editor.ebs, ConsoleConfig.java, console.css
+- **Scope:** Console configuration and theme management
 
 For more information, see:
 - [ARCHITECTURE.md](../../docs/ARCHITECTURE.md) - Overall system design
@@ -1109,6 +1674,22 @@ ScriptInterpreter/
 │   └── AreaItemFactory.java          # Step 4: Apply styling
 └── src/main/resources/json/
     └── display-metadata.json          # Step 1: Add to schema
+```
+
+### Part 3: Color Editor Screen Files
+
+```
+Repository Root/
+├── console.cfg                        # Console color configuration
+
+ScriptInterpreter/
+├── src/main/java/com/eb/ui/ebs/
+│   └── ConsoleConfig.java            # Loads and applies console colors
+├── src/main/resources/
+│   ├── css/
+│   │   └── console.css               # Default color values
+│   └── scripts/
+│       └── color_editor.ebs          # Color editor screen script
 ```
 
 ---
