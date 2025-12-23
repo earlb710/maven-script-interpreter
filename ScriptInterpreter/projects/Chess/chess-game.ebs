@@ -2696,7 +2696,7 @@ makeComputerMove() {
 
 screen chessScreen = {
     "title": "Chess Game",
-    "width": 1300,
+    "width": 1000,
     "height": 800,
     "vars": [
         {"name": "whiteTimer", "type": "string", "default": "10:00"},
