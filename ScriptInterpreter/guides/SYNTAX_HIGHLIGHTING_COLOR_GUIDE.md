@@ -1464,7 +1464,7 @@ Colors from `console.cfg` map to syntax highlighting classes:
 
 ### Complete Flow Diagram
 
-```
+```text
 User edits color in Color Editor
         ↓
 Click "Save and Apply"
