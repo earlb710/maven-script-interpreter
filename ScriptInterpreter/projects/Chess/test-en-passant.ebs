@@ -1,0 +1,62 @@
+// Test script to verify en passant functionality
+// This script tests the en passant capture move for pawns
+
+print "==============================================";
+print "       En Passant Test Script";
+print "==============================================";
+print "";
+print "Testing en passant tracking variables...";
+
+// Simulate the en passant scenario
+// White pawn at e2 moves to e4 (double move)
+// Black pawn at d4 should be able to capture en passant
+
+// Expected behavior:
+// 1. After white pawn double move (e2 to e4), enPassantTargetX should be 4, enPassantTargetY should be 3
+// 2. Black pawn at d4 should see en passant capture as a valid move
+// 3. After en passant capture, white pawn should be removed from board
+
+print "Test 1: Checking en passant variable initialization";
+print "Expected: enPassantTargetX = -1, enPassantTargetY = -1";
+print "This test requires the chess game to be running.";
+print "";
+
+print "Test 2: En passant should be available when:";
+print "  - Enemy pawn moves two squares forward";
+print "  - Capturing pawn is on 5th rank (white) or 4th rank (black)";
+print "  - Enemy pawn is horizontally adjacent";
+print "";
+
+print "Test 3: En passant capture should:";
+print "  - Remove the enemy pawn from its position";
+print "  - Move capturing pawn diagonally";
+print "  - Count as a capture in move history";
+print "";
+
+print "Test 4: En passant opportunity should expire after one turn";
+print "";
+
+print "==============================================";
+print "To manually test en passant:";
+print "1. Start the chess game";
+print "2. Move white pawn from e2 to e4 (double move)";
+print "3. Move black pawn from d7 to d5 (any move)";
+print "4. Move white pawn from e4 to e5";
+print "5. Move black pawn from d5 to d4 (single move)";
+print "6. Move white pawn from c2 to c4 (double move)";
+print "7. Now black pawn at d4 should show en passant capture";
+print "   as a valid move (diagonal to c3)";
+print "==============================================";
+print "";
+print "Alternatively, test with black capturing:";
+print "1. Move white pawn from e2 to e3";
+print "2. Move black pawn from d7 to d5 (double move)";
+print "3. Move white pawn from c2 to c4 (any move)";
+print "4. Move black pawn from d5 to d4";
+print "5. Move white pawn from e3 to e4 (any move)";
+print "6. Move black pawn from d4 to d3";
+print "7. Move white pawn from c4 to c5";
+print "8. Move black pawn from f7 to f5 (double move)";
+print "9. White pawn at c5 should be adjacent to black f5";
+print "10. Need to position correctly for en passant";
+print "==============================================";
