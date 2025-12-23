@@ -924,11 +924,13 @@ public class InterpreterContext {
     public void updateFunctionScreenAssociation(String functionName, String screenName) {
         FunctionMetadata existingMetadata = declaredFunctions.get(functionName);
         if (existingMetadata != null) {
-            // Create new metadata with the screen name
+            // Create new metadata with the screen name, preserving all other fields
             FunctionMetadata updatedMetadata = new FunctionMetadata(
                 existingMetadata.getScriptName(),
                 screenName,
-                existingMetadata.getLineNumber()
+                existingMetadata.getLineNumber(),
+                existingMetadata.getStartPosition(),
+                existingMetadata.getEndPosition()
             );
             declaredFunctions.put(functionName, updatedMetadata);
         }

@@ -44,6 +44,9 @@ public class ScriptArea extends StyleClassedTextArea {
     // Function highlighting state
     private List<int[]> lastHighlightedFunctions = null; // List of [start, end] positions for highlighted functions
     
+    // RuntimeContext for accessing function position information
+    private com.eb.script.RuntimeContext runtimeContext = null;
+    
     // Selection drag state - used to suppress bracket highlighting during selection
     // Volatile ensures visibility across potential concurrent access from different event handlers
     private volatile boolean isSelectionDragInProgress = false;
@@ -78,6 +81,16 @@ public class ScriptArea extends StyleClassedTextArea {
             // Now apply bracket highlighting at the final caret position
             highlightMatchingBrackets();
         });
+    }
+    
+    /**
+     * Set the RuntimeContext for accessing function position information.
+     * This enables position-based function highlighting.
+     * 
+     * @param context The RuntimeContext containing parsed function information
+     */
+    public void setRuntimeContext(com.eb.script.RuntimeContext context) {
+        this.runtimeContext = context;
     }
     
     /**
@@ -995,43 +1008,57 @@ public class ScriptArea extends StyleClassedTextArea {
     
     /**
      * Highlight all occurrences of a function name when cursor is on it.
+     * Uses stored function position information from RuntimeContext for accurate detection.
      * @param text The text to search in
      * @param caretPos The current caret position
      */
     private void highlightFunctionName(String text, int caretPos) {
-        // Find the word boundaries at the caret position
-        int wordStart = caretPos;
-        int wordEnd = caretPos;
-        
-        // Expand left to find word start
-        while (wordStart > 0 && isIdentifierChar(text.charAt(wordStart - 1))) {
-            wordStart--;
-        }
-        
-        // Expand right to find word end
-        while (wordEnd < text.length() && isIdentifierChar(text.charAt(wordEnd))) {
-            wordEnd++;
-        }
-        
-        // Check if we actually have a word
-        if (wordStart >= wordEnd) {
+        // Check if we have RuntimeContext with function position information
+        if (runtimeContext == null || runtimeContext.blocks == null) {
             return;
         }
         
-        // Extract the word
-        String word = text.substring(wordStart, wordEnd);
+        // Find which function (if any) the cursor is on by checking stored positions
+        String targetFunctionName = null;
+        for (java.util.Map.Entry<String, com.eb.script.interpreter.statement.BlockStatement> entry : runtimeContext.blocks.entrySet()) {
+            com.eb.script.interpreter.statement.BlockStatement block = entry.getValue();
+            int startPos = block.getNameStartPosition();
+            int endPos = block.getNameEndPosition();
+            
+            // Check if cursor is within this function name's character range
+            if (startPos >= 0 && endPos >= 0 && caretPos >= startPos && caretPos <= endPos) {
+                targetFunctionName = entry.getKey();
+                break;
+            }
+        }
         
-        // Only highlight if it looks like an identifier (not just numbers)
-        // and is not a keyword or built-in
-        if (!isValidIdentifier(word)) {
+        // If cursor is not on any function name, don't highlight
+        if (targetFunctionName == null) {
             return;
         }
         
-        // Find all occurrences of this word
+        // Highlight all occurrences of this function name
         lastHighlightedFunctions = new java.util.ArrayList<>();
+        
+        // First, highlight the declaration
+        for (java.util.Map.Entry<String, com.eb.script.interpreter.statement.BlockStatement> entry : runtimeContext.blocks.entrySet()) {
+            if (entry.getKey().equals(targetFunctionName)) {
+                com.eb.script.interpreter.statement.BlockStatement block = entry.getValue();
+                int startPos = block.getNameStartPosition();
+                int endPos = block.getNameEndPosition();
+                
+                if (startPos >= 0 && endPos >= 0) {
+                    addStyleToRange(startPos, endPos + 1, "function-highlight");
+                    lastHighlightedFunctions.add(new int[]{startPos, endPos + 1});
+                }
+                break;
+            }
+        }
+        
+        // Then find and highlight all call sites using whole-word matching
         int searchPos = 0;
         while (searchPos < text.length()) {
-            int foundPos = text.indexOf(word, searchPos);
+            int foundPos = text.indexOf(targetFunctionName, searchPos);
             if (foundPos == -1) {
                 break;
             }
@@ -1039,12 +1066,23 @@ public class ScriptArea extends StyleClassedTextArea {
             // Check if this is a whole word match (not part of another identifier)
             boolean isWholeWord = 
                 (foundPos == 0 || !isIdentifierChar(text.charAt(foundPos - 1))) &&
-                (foundPos + word.length() >= text.length() || !isIdentifierChar(text.charAt(foundPos + word.length())));
+                (foundPos + targetFunctionName.length() >= text.length() || 
+                 !isIdentifierChar(text.charAt(foundPos + targetFunctionName.length())));
             
             if (isWholeWord) {
-                // Highlight this occurrence
-                addStyleToRange(foundPos, foundPos + word.length(), "function-highlight");
-                lastHighlightedFunctions.add(new int[]{foundPos, foundPos + word.length()});
+                // Avoid re-highlighting the declaration if we already did it
+                boolean alreadyHighlighted = false;
+                for (int[] range : lastHighlightedFunctions) {
+                    if (foundPos >= range[0] && foundPos < range[1]) {
+                        alreadyHighlighted = true;
+                        break;
+                    }
+                }
+                
+                if (!alreadyHighlighted) {
+                    addStyleToRange(foundPos, foundPos + targetFunctionName.length(), "function-highlight");
+                    lastHighlightedFunctions.add(new int[]{foundPos, foundPos + targetFunctionName.length()});
+                }
             }
             
             searchPos = foundPos + 1;
@@ -1056,42 +1094,6 @@ public class ScriptArea extends StyleClassedTextArea {
      */
     private boolean isIdentifierChar(char c) {
         return Character.isLetterOrDigit(c) || c == '_';
-    }
-    
-    /**
-     * Check if a word is a valid identifier (not a keyword or builtin).
-     * We use a simple heuristic: must start with a letter or underscore,
-     * and should not be a common keyword.
-     */
-    private boolean isValidIdentifier(String word) {
-        if (word.isEmpty()) {
-            return false;
-        }
-        
-        // Must start with letter or underscore
-        char first = word.charAt(0);
-        if (!Character.isLetter(first) && first != '_') {
-            return false;
-        }
-        
-        // Don't highlight common keywords (basic list)
-        String lowerWord = word.toLowerCase();
-        return !isKeyword(lowerWord);
-    }
-    
-    /**
-     * Check if a word is a keyword.
-     */
-    private boolean isKeyword(String word) {
-        // Basic EBS keywords that shouldn't be highlighted as functions
-        return switch (word) {
-            case "if", "then", "else", "while", "for", "break", "continue", "return",
-                 "var", "int", "string", "float", "double", "bool", "json",
-                 "function", "call", "print", "screen", "show", "hide", "close",
-                 "import", "from", "as", "cursor", "open", "connection", "use",
-                 "true", "false", "null", "and", "or", "not", "in" -> true;
-            default -> false;
-        };
     }
     
     /**

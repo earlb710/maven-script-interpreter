@@ -564,13 +564,16 @@ public class Parser {
         } else if (matchAll(EbsTokenType.IDENTIFIER, EbsTokenType.LBRACE)) {
             EbsToken n = peek();
             advance(2);
-            return block((String) n.literal);
+            BlockStatement bs = block((String) n.literal);
+            bs.setNamePositions(n.start, n.end);
+            return bs;
         } else if (matchAll(EbsTokenType.IDENTIFIER, EbsTokenType.RETURN)) {
             EbsToken n = peek();
             advance();
             ReturnTypeInfo typeInfo = blockParameterReturn();
             consume(EbsTokenType.LBRACE, "Expected { after return type.");
             BlockStatement bs = block((String) n.literal);
+            bs.setNamePositions(n.start, n.end);
             if (typeInfo != null) {
                 bs.setReturnType(typeInfo.dataType, typeInfo.recordType, typeInfo.bitmapType, typeInfo.intmapType);
             }
@@ -578,7 +581,9 @@ public class Parser {
         } else if (matchAll(EbsTokenType.IDENTIFIER, EbsTokenType.LPAREN)) {
             EbsToken n = peek();
             advance(2);
-            return blockParameters((String) n.literal);
+            BlockStatement bs = (BlockStatement) blockParameters((String) n.literal);
+            bs.setNamePositions(n.start, n.end);
+            return bs;
         } else if (match(EbsTokenType.LBRACE)) {
             return block();
         } else if (match(EbsTokenType.CALL)) {
@@ -2332,22 +2337,29 @@ public class Parser {
         // Supports: function name { ... } or function name(...) return type { ... }
         EbsToken n = consume(EbsTokenType.IDENTIFIER, "Expected function name after 'function'.");
         String name = (String) n.literal;
+        int nameStart = n.start;
+        int nameEnd = n.end;
         
         if (match(EbsTokenType.LBRACE)) {
             // function name { ... }
-            return block(name);
+            BlockStatement bs = block(name);
+            bs.setNamePositions(nameStart, nameEnd);
+            return bs;
         } else if (match(EbsTokenType.RETURN)) {
             // function name return type { ... }
             ReturnTypeInfo typeInfo = blockParameterReturn();
             consume(EbsTokenType.LBRACE, "Expected { after return type.");
             BlockStatement bs = block(name);
+            bs.setNamePositions(nameStart, nameEnd);
             if (typeInfo != null) {
                 bs.setReturnType(typeInfo.dataType, typeInfo.recordType, typeInfo.bitmapType, typeInfo.intmapType);
             }
             return bs;
         } else if (match(EbsTokenType.LPAREN)) {
             // function name(...) [return type] { ... }
-            return blockParameters(name);
+            BlockStatement bs = (BlockStatement) blockParameters(name);
+            bs.setNamePositions(nameStart, nameEnd);
+            return bs;
         } else {
             throw error(peek(), "Expected '{', 'return', or '(' after function name.");
         }

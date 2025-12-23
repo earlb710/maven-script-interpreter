@@ -816,6 +816,27 @@ public class EbsTab extends Tab {
         StyleSpans<Collection<String>> spans = computeEbsHighlighting(text);
         // Apply to the area
         dispArea.setStyleSpans(0, spans);
+        
+        // Parse the text to update function positions for highlighting
+        updateFunctionPositions(text);
+    }
+    
+    /**
+     * Parse the current editor text to update function position information.
+     * This enables position-based function highlighting in the editor.
+     */
+    private void updateFunctionPositions(String text) {
+        try {
+            // Parse the current text to get function positions
+            com.eb.script.RuntimeContext parsedContext = com.eb.script.parser.Parser.parse(context.name, text);
+            if (parsedContext != null) {
+                // Update the display area's runtime context for function highlighting
+                dispArea.setRuntimeContext(parsedContext);
+            }
+        } catch (Exception e) {
+            // Parsing errors are expected while user is typing - ignore them
+            // The function highlighting just won't work until the code is syntactically correct
+        }
     }
 
     private StyleSpans<Collection<String>> computeEbsHighlighting(String text) {

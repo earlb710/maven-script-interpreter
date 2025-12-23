@@ -241,7 +241,8 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
             for (Map.Entry<String, BlockStatement> entry : runtime.blocks.entrySet()) {
                 String functionName = entry.getKey();
                 BlockStatement block = entry.getValue();
-                FunctionMetadata metadata = new FunctionMetadata(runtime.name, block.getLine());
+                FunctionMetadata metadata = new FunctionMetadata(runtime.name, block.getLine(), 
+                    block.getNameStartPosition(), block.getNameEndPosition());
                 context.getDeclaredFunctions().put(functionName, metadata);
             }
         }
@@ -2005,7 +2006,8 @@ public class Interpreter implements StatementVisitor, ExpressionVisitor {
                     }
                     
                     // Register this function as declared from the imported file
-                    FunctionMetadata metadata = new FunctionMetadata(stmt.filename, block.getLine());
+                    FunctionMetadata metadata = new FunctionMetadata(stmt.filename, block.getLine(),
+                        block.getNameStartPosition(), block.getNameEndPosition());
                     context.getDeclaredFunctions().put(functionName, metadata);
                     
                     // Store blocks in the root runtime (not currentRuntime) to ensure all imported

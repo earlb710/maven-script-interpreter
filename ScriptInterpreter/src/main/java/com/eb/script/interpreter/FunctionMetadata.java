@@ -1,7 +1,7 @@
 package com.eb.script.interpreter;
 
 /**
- * Metadata about a declared function including its source, screen association, and line number.
+ * Metadata about a declared function including its source, screen association, line number, and character positions.
  * Used to track functions across the interpreter context for validation and debugging.
  *
  * @author Earl Bosch
@@ -17,6 +17,12 @@ public class FunctionMetadata {
     /** The line number in the source file where this function is declared */
     private final int lineNumber;
     
+    /** The character position where the function name starts in the source file */
+    private final int startPosition;
+    
+    /** The character position where the function name ends in the source file */
+    private final int endPosition;
+    
     /**
      * Create function metadata with script name only (for regular functions).
      * 
@@ -24,7 +30,19 @@ public class FunctionMetadata {
      * @param lineNumber The line number where the function is declared
      */
     public FunctionMetadata(String scriptName, int lineNumber) {
-        this(scriptName, null, lineNumber);
+        this(scriptName, null, lineNumber, -1, -1);
+    }
+    
+    /**
+     * Create function metadata with script name and character positions.
+     * 
+     * @param scriptName The name of the script/file where the function is declared
+     * @param lineNumber The line number where the function is declared
+     * @param startPosition The character position where the function name starts
+     * @param endPosition The character position where the function name ends
+     */
+    public FunctionMetadata(String scriptName, int lineNumber, int startPosition, int endPosition) {
+        this(scriptName, null, lineNumber, startPosition, endPosition);
     }
     
     /**
@@ -33,11 +51,15 @@ public class FunctionMetadata {
      * @param scriptName The name of the script/file where the function is declared
      * @param screenName The screen name this function is associated with (or null)
      * @param lineNumber The line number where the function is declared
+     * @param startPosition The character position where the function name starts
+     * @param endPosition The character position where the function name ends
      */
-    public FunctionMetadata(String scriptName, String screenName, int lineNumber) {
+    public FunctionMetadata(String scriptName, String screenName, int lineNumber, int startPosition, int endPosition) {
         this.scriptName = scriptName;
         this.screenName = screenName;
         this.lineNumber = lineNumber;
+        this.startPosition = startPosition;
+        this.endPosition = endPosition;
     }
     
     /**
@@ -68,12 +90,39 @@ public class FunctionMetadata {
     }
     
     /**
+     * Get the character position where the function name starts.
+     * 
+     * @return the start position, or -1 if not available
+     */
+    public int getStartPosition() {
+        return startPosition;
+    }
+    
+    /**
+     * Get the character position where the function name ends.
+     * 
+     * @return the end position, or -1 if not available
+     */
+    public int getEndPosition() {
+        return endPosition;
+    }
+    
+    /**
      * Check if this function is associated with a screen.
      * 
      * @return true if screenName is not null
      */
     public boolean hasScreenName() {
         return screenName != null && !screenName.isEmpty();
+    }
+    
+    /**
+     * Check if this function has character position information.
+     * 
+     * @return true if both start and end positions are available
+     */
+    public boolean hasPositionInfo() {
+        return startPosition >= 0 && endPosition >= 0;
     }
     
     @Override

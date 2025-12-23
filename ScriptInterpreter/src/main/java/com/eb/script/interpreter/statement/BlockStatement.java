@@ -17,6 +17,12 @@ public class BlockStatement extends Statement {
     public BitmapType returnBitmapType; // Bitmap type definition for return type (if returnType is BITMAP)
     public IntmapType returnIntmapType; // Intmap type definition for return type (if returnType is INTMAP)
     
+    /** Character position where the function name starts in the source file */
+    private int nameStartPosition = -1;
+    
+    /** Character position where the function name ends in the source file */
+    private int nameEndPosition = -1;
+    
     /** Optional exception handlers for this block (functions can have exceptions without try) */
     public ExceptionHandler[] exceptionHandlers;
 
@@ -107,6 +113,35 @@ public class BlockStatement extends Statement {
             return list.toArray(Parameter[]::new);
         }
         return null;
+    }
+    
+    /**
+     * Set the character positions for the function name in the source file.
+     * 
+     * @param startPosition The start character position
+     * @param endPosition The end character position
+     */
+    public void setNamePositions(int startPosition, int endPosition) {
+        this.nameStartPosition = startPosition;
+        this.nameEndPosition = endPosition;
+    }
+    
+    /**
+     * Get the start character position of the function name.
+     * 
+     * @return The start position, or -1 if not set
+     */
+    public int getNameStartPosition() {
+        return nameStartPosition;
+    }
+    
+    /**
+     * Get the end character position of the function name.
+     * 
+     * @return The end position, or -1 if not set
+     */
+    public int getNameEndPosition() {
+        return nameEndPosition;
     }
 
     @Override
