@@ -107,6 +107,7 @@ var redCrossIndicator: imagedata;     // Red cross for invalid moves (expose own
 var redCrossBigIndicator: imagedata;  // Larger red cross for checkmate
 var transparentClear: imagedata; // Transparent rectangle for clearing piece positions
 var blueCircleIndicator: imagedata; // Blue circle for showing last move endpoints
+var purpleCircleIndicator: imagedata; // Purple circle for showing piece defenders
 var blueArrowRight: imagedata;  // Blue arrow pointing right
 var blueArrowLeft: imagedata;   // Blue arrow pointing left
 var blueArrowUp: imagedata;     // Blue arrow pointing up
@@ -426,6 +427,16 @@ createIndicators() {
     call style.setStroke(blueCircleCanvas, "#0060CC", 2.5);
     call draw.circle(blueCircleCanvas, 30, 30, 18, false);
     blueCircleIndicator = call canvas.toImage(blueCircleCanvas);
+    
+    // Create purple circle indicator for showing piece defenders
+    // Canvas size matches cell size (60x60) for proper centering
+    var purpleCircleCanvas: canvas = call canvas.create(60, 60, "purple_circle_indicator");
+    call canvas.clear(purpleCircleCanvas);  // Make canvas transparent
+    call style.setFill(purpleCircleCanvas, "#A020F080");  // Semi-transparent purple
+    call draw.circle(purpleCircleCanvas, 30, 30, 18, true);
+    call style.setStroke(purpleCircleCanvas, "#6A0DAD", 2.5);
+    call draw.circle(purpleCircleCanvas, 30, 30, 18, false);
+    purpleCircleIndicator = call canvas.toImage(purpleCircleCanvas);
     
     // Create blue arrow pointing right (horizontal)
     var arrowRightCanvas: canvas = call canvas.create(60, 60, "blue_arrow_right");
@@ -747,6 +758,8 @@ setIndicator(x: int, y: int, indicatorType: string) {
         indicator = redCrossIndicator;
     } else if indicatorType == "move" then {
         indicator = blueArrowIndicator;
+    } else if indicatorType == "defender" then {
+        indicator = purpleCircleIndicator;
     } else {
         indicator = greenIndicator;  // "normal" or default
     }
@@ -1533,9 +1546,34 @@ handleCellClick(x: int, y: int) {
         return;
     }
     
-    // Only show valid moves for the current player's pieces
+    // Check if clicking on opponent's piece - show defenders
     if cell.pieceColor != currentPlayer then {
-        print "Not current player's piece, ignoring";
+        print "Opponent's piece clicked - showing defenders";
+        
+        // Get all defenders of this piece
+        var defenders = call getDefenders(x, y);
+        var defenderCount: int = defenders.length;
+        print "Found " + defenderCount + " defenders";
+        
+        // Show purple circles on all defender positions
+        var i: int = 0;
+        for (i = 0; i < defenderCount; i = i + 1) {
+            var defender: posType = defenders[i];
+            call setIndicator(defender.x, defender.y, "defender");
+            print "  Defender at (" + defender.x + ", " + defender.y + ")";
+        }
+        
+        // Update status message to show defender count
+        var defenderText: string;
+        if defenderCount == 0 then {
+            defenderText = "No defenders";
+        } else if defenderCount == 1 then {
+            defenderText = "1 defender";
+        } else {
+            defenderText = defenderCount + " defenders";
+        }
+        chessScreen.statusMessage = "Opponent piece: " + defenderText;
+        
         selectedX = -1;
         selectedY = -1;
         return;

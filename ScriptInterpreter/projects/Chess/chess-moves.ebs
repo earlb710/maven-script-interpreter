@@ -696,6 +696,65 @@ function hasAnyLegalMoves(playerColor: int) return bool {
     return false;
 }
 
+// Get all defenders of a piece at the given position
+// Returns an array of posType positions where defenders are located
+function getDefenders(targetX: int, targetY: int) return array {
+    var defenders: posType[] = [];
+    
+    // Get the piece at the target position
+    var targetCellValue: int = call getPieceAt(targetX, targetY);
+    if targetCellValue == -1 then {
+        return defenders;  // Empty array for invalid position
+    }
+    
+    var targetCell = ChessCell(targetCellValue);
+    if targetCell.pieceType == EMPTY then {
+        return defenders;  // Empty square has no defenders
+    }
+    
+    var targetColor: int = targetCell.pieceColor;
+    
+    // Check all squares for pieces of the same color
+    var x: int = 0;
+    var y: int = 0;
+    
+    for (y = 0; y < 8; y = y + 1) {
+        for (x = 0; x < 8; x = x + 1) {
+            // Skip the target piece itself
+            if x == targetX && y == targetY then {
+                // Continue to next iteration
+            } else {
+                var cellValue: int = call getPieceAt(x, y);
+                if cellValue != -1 then {
+                    var cell = ChessCell(cellValue);
+                    
+                    // Only check pieces of the same color as the target
+                    if cell.pieceType != EMPTY && cell.pieceColor == targetColor then {
+                        // Get moves for this piece
+                        var moves = call validMoves(x, y);
+                        
+                        // Check if any move targets the square in question
+                        var i: int = 0;
+                        var len: int = moves.length;
+                        for (i = 0; i < len; i = i + 1) {
+                            var move: posType = moves[i];
+                            if move.x == targetX && move.y == targetY then {
+                                // This piece can move to the target square - it's a defender
+                                var defenderPos: posType = call createPos(x, y);
+                                call array.add(defenders, defenderPos);
+                                // Break out of the move checking loop for this piece
+                                i = len;  // Exit the loop
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    return defenders;
+}
+
 // Check if the given player is in checkmate
 function isCheckmate(playerColor: int) return bool {
     // Checkmate requires: king is in check AND no legal moves
