@@ -694,6 +694,8 @@ public final class Builtins {
         addBuiltin(info("debug.log", DataType.BOOL, newParam("level", DataType.STRING), newParam("message", DataType.STRING))); // log timestamped message
         addBuiltin(info("debug.assert", DataType.BOOL, newParam("condition", DataType.BOOL), newParam("message", DataType.STRING, false)));
         addBuiltin(info("debug.assertEquals", DataType.BOOL, newParam("expected", DataType.JSON), newParam("actual", DataType.JSON), newParam("message", DataType.STRING, false)));
+        addBuiltin(info("debug.linesWritten", DataType.LONG)); // get total lines written
+        addBuiltin(info("debug.resetLineCount", null)); // reset line counter
         // Echo mode
         addBuiltin(info("echo.on", null)); // Enable echo mode
         addBuiltin(info("echo.off", null)); // Disable echo mode

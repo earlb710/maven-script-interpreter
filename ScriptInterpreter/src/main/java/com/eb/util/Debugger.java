@@ -22,6 +22,7 @@ public class Debugger {
     private final java.util.Deque<Long> debugStack = new java.util.ArrayDeque<>();
     private ScriptArea outputArea;
     private int currStackLevel = 0;
+    private volatile long linesWritten = 0;
 
     public Debugger(String file, java.io.Writer debugWriter) {
         if (file != null) {
@@ -64,6 +65,32 @@ public class Debugger {
     }
 
     public boolean setDebugOff() {
+        if (DEBUG_ENABLED) {
+            // Write final message with line count before turning off
+            long count = linesWritten;
+            String message = "debug off: " + count + " lines written";
+            
+            // Temporarily keep debug enabled to write the final message
+            String line = "[" + nowIso() + "]\t[INFO]\t" + message + System.lineSeparator();
+            try {
+                if (DEBUG_WRITER == null) {
+                    if (outputArea != null) {
+                        outputArea.print(line);
+                    } else {
+                        System.out.print(line);
+                    }
+                } else {
+                    ensureDebugWriter();
+                    DEBUG_WRITER.write(line);
+                    DEBUG_WRITER.flush();
+                }
+            } catch (Exception ex) {
+                // Ignore errors when writing final message
+            }
+            
+            // Reset counter after writing the message
+            linesWritten = 0;
+        }
         DEBUG_ENABLED = false;
         return DEBUG_ENABLED;
     }
@@ -88,6 +115,14 @@ public class Debugger {
 
     public Path getDebugFilePath() {
         return DEBUG_FILE_PATH;
+    }
+
+    public long getLinesWritten() {
+        return linesWritten;
+    }
+
+    public void resetLinesWritten() {
+        linesWritten = 0;
     }
 
     private synchronized void closeDebugWriterQuietly() {
@@ -175,6 +210,7 @@ public class Debugger {
                     DEBUG_WRITER.write(line);
                     DEBUG_WRITER.flush();
                 }
+                linesWritten++;
             } catch (Exception ex) {
                 throw new RuntimeException("debug.log: " + ex.getMessage());
             }
@@ -197,6 +233,7 @@ public class Debugger {
                     DEBUG_WRITER.write(line.toString());
                     DEBUG_WRITER.flush();
                 }
+                linesWritten++;
                 debugStack.push(System.nanoTime());
             } catch (Exception ex) {
                 throw new RuntimeException("debug.log: " + ex.getMessage());
@@ -226,6 +263,7 @@ public class Debugger {
                     DEBUG_WRITER.write(line);
                     DEBUG_WRITER.flush();
                 }
+                linesWritten++;
             } catch (Exception ex) {
                 throw new RuntimeException("debug.log: " + ex.getMessage());
             }

@@ -44,6 +44,8 @@ public class BuiltinsDebug {
             case "debug.log" -> debugLog(debug, args);
             case "debug.assert" -> debugAssert(debug, args);
             case "debug.assertequals" -> debugAssertEquals(debug, args);
+            case "debug.lineswritten" -> getLinesWritten(debug);
+            case "debug.resetlinecount" -> resetLineCount(debug);
             case "debug.vars" -> debugVars();
             case "debug.stack" -> debugStack();
             case "debug.memusage" -> memUsage(env, debug, args);
@@ -169,6 +171,15 @@ public class BuiltinsDebug {
     private static Object debugStack() {
         Builtins.StackSupplier supplier = getStackSupplier();
         return (supplier != null) ? supplier.get() : java.util.List.of();
+    }
+
+    private static Object getLinesWritten(Debugger debug) {
+        return debug.getLinesWritten();
+    }
+
+    private static Object resetLineCount(Debugger debug) {
+        debug.resetLinesWritten();
+        return null;
     }
 
     private static Object memUsage(Environment env, Debugger debug, Object[] args) {

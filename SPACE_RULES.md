@@ -103,6 +103,15 @@ Testing and Scripts
   - **Always validate scripts before committing**: Use `java -cp target/classes com.eb.script.Run --parse <script.ebs>` to check syntax and imports
   - The parse-only mode validates the script and all imported files without execution, catching syntax errors early
 
+Debug Logging Best Practices
+- **Extensive Debug Logs**: When extensive debug logging is required for troubleshooting:
+  - Use a debug file named after the branch: `debug.file("logs/debug-<branch-name>.log")`
+  - Example: `debug.file("logs/debug-feature-screen-cleanup.log")`
+  - This makes it easy to identify and upload debug logs associated with specific features or fixes
+  - **Operator notification**: Always inform the operator when extensive debug logs are being captured and will need to be uploaded
+  - The debug file can then be uploaded as part of the PR or issue for review
+- See `ScriptInterpreter/guides/LOGGING_SETUP_GUIDE.md` for comprehensive logging documentation
+
 Documentation and Maintenance
 - **IMPORTANT**: If solving a problem requires creating a new keyword, data type, event, or builtin that was not explicitly asked for, first get feedback on how to proceed before implementing.
 - When changes affect architecture, screen parsing, built-ins, or keywords:
