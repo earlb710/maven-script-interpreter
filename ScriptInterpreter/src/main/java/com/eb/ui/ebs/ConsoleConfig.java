@@ -315,6 +315,15 @@ public class ConsoleConfig {
                 css.append(".tab-pane .tab-content-area BorderPane {\n");
                 css.append("    -fx-background-color: ").append(color).append(" !important;\n");
                 css.append("}\n\n");
+            } else if ("syntax-error".equals(className)) {
+                // Special handling for syntax error color - applies to underline of tok-function-error
+                css.append(".tok-function-error,\n");
+                css.append(".text.tok-function-error,\n");
+                css.append(".styled-text-area .text.tok-function-error,\n");
+                css.append(".editor-ebs .text.tok-function-error,\n");
+                css.append(".editor-text .text.tok-function-error {\n");
+                css.append("    -rtfx-underline-color: ").append(color).append(" !important;\n");
+                css.append("}\n\n");
             } else {
                 // Regular style class - need to target both regular and RichTextFX .text nodes
                 // Use multiple selectors to cover all possible contexts
