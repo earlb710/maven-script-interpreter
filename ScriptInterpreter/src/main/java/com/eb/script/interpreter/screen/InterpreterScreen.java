@@ -1525,6 +1525,16 @@ public class InterpreterScreen {
             }
         }
         
+        // Turn off debug if it was on (writes final line count and resets counter)
+        try {
+            com.eb.util.Debugger debugger = interpreter.environment().getDebugger();
+            if (debugger != null && debugger.isDebugOn()) {
+                debugger.setDebugOff();
+            }
+        } catch (Exception e) {
+            // Ignore errors during debug cleanup - don't let this prevent screen closing
+        }
+        
         // Collect output fields and invoke callback if set
         try {
             collectOutputFieldsAndInvokeCallback(screenName, 0);

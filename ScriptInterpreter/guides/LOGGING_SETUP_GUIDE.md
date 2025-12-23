@@ -70,11 +70,14 @@ debug.off();
 - Writes a final log entry: `"debug off: X lines written"` where X is the total line count
 - Resets the line counter to zero
 - Subsequent calls to `debug.log()` are ignored until `debug.on()` is called again
+- **Automatic trigger**: When a screen is closed, `debug.off()` is automatically called if debug was enabled
 
 **Example output in log file:**
 ```
 [2025-12-23T06:03:34.363283723]	[INFO]	debug off: 5 lines written
 ```
+
+**Note:** If you're using screens, you typically don't need to manually call `debug.off()` - it will be automatically called when the screen closes, ensuring your log file always has a final line count.
 
 ### debug.file(fileName)
 
@@ -404,15 +407,18 @@ print "Logged " + string.tostr(linesLogged) + " lines to file";
 ```ebs
 // In a screen event handler
 onClick = logButtonClick(event) return void {
-    debug.on();
-    debug.file("logs/screen-events.log");
+    call debug.on();
+    call debug.file("logs/screen-events.log");
     
-    debug.log("INFO", "Button clicked: " + event.source);
-    debug.log("DEBUG", "Screen: " + screenName);
-    debug.log("DEBUG", "Timestamp: " + date.now());
+    call debug.log("INFO", "Button clicked: " + event.source);
+    call debug.log("DEBUG", "Screen: " + screenName);
+    call debug.log("DEBUG", "Timestamp: " + date.now());
     
     // Handle the click
     call processClick(event);
+    
+    // Note: No need to call debug.off() - it will be automatically
+    // called when the screen is closed
 }
 ```
 
@@ -667,7 +673,12 @@ Log files must be written within configured safe directories. To view or configu
 
 ### Integration with Screen Applications
 
-When using screens, you can log screen events and variable changes:
+When using screens, the logging system has special integration features:
+
+**Automatic Debug Cleanup**: When a screen is closed, `debug.off()` is automatically called if debug logging was enabled. This ensures:
+- A final line count is written to the log file
+- The line counter is reset
+- No need to manually call `debug.off()` in screen cleanup code
 
 ```ebs
 // Screen definition with logging
@@ -679,20 +690,29 @@ screen myScreen {
     events {
         onShow = logScreenShow() return void {
             if myScreen.debugEnabled == "true" then {
-                debug.on();
-                debug.file("logs/screen-events.log");
-                debug.log("INFO", "Screen 'myScreen' shown");
+                call debug.on();
+                call debug.file("logs/screen-events.log");
+                call debug.log("INFO", "Screen 'myScreen' shown");
             }
         }
         
         onClick = logClick(event) return void {
             if myScreen.debugEnabled == "true" then {
-                debug.log("DEBUG", "Button clicked: " + event.source);
+                call debug.log("DEBUG", "Button clicked: " + event.source);
             }
         }
+        
+        // No need for onClose handler to call debug.off()
+        // It's automatically called during screen cleanup
     }
 }
 ```
+
+**Key Points**:
+- Enable debug in `onShow` event handler
+- Log events throughout the screen's lifecycle
+- When screen closes, debug.off() is automatically called
+- Final log entry shows total lines written for that screen session
 
 ### Logging in Functions
 
