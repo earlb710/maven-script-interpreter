@@ -1153,8 +1153,6 @@ deselectPiece(x: int, y: int) {
 
 // Move a piece from source to destination
 movePiece(fromX: int, fromY: int, toX: int, toY: int) {
-    print "Moving piece from (" + fromX + ", " + fromY + ") to (" + toX + ", " + toY + ")";
-    
     // Get the piece being moved
     var fromIdx: int = call boardIndex(fromY, fromX);
     var fromCellValue: int = board[fromIdx];
@@ -1267,8 +1265,6 @@ movePiece(fromX: int, fromY: int, toX: int, toY: int) {
             }
         }
     }
-    
-    print "Piece moved successfully";
 }
 
 // Handle cell click - select piece and show valid moves, or move piece if valid destination
@@ -1359,7 +1355,6 @@ handleCellClick(x: int, y: int) {
             }
             var moveEntry: string = playerName + ": " + moveNotation + "\n";
             chessScreen.moveHistory = chessScreen.moveHistory + moveEntry;
-            print "Move added to history: " + moveEntry;
             
             // Clear indicators and selection (valid move indicators)
             call clearIndicators();
