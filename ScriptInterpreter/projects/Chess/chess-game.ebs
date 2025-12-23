@@ -743,93 +743,25 @@ initializeBoardPieces() {
     }
 }
 
-// Helper function to set an indicator at a specific board position
-function setIndicator(x: int, y: int, indicatorImage: imagedata) {
-    // Set the appropriate screen variable based on x,y position
-    if y == 0 then {
-        if x == 0 then { chessScreen.i00 = indicatorImage; }
-        else if x == 1 then { chessScreen.i01 = indicatorImage; }
-        else if x == 2 then { chessScreen.i02 = indicatorImage; }
-        else if x == 3 then { chessScreen.i03 = indicatorImage; }
-        else if x == 4 then { chessScreen.i04 = indicatorImage; }
-        else if x == 5 then { chessScreen.i05 = indicatorImage; }
-        else if x == 6 then { chessScreen.i06 = indicatorImage; }
-        else if x == 7 then { chessScreen.i07 = indicatorImage; }
-    } else if y == 1 then {
-        if x == 0 then { chessScreen.i10 = indicatorImage; }
-        else if x == 1 then { chessScreen.i11 = indicatorImage; }
-        else if x == 2 then { chessScreen.i12 = indicatorImage; }
-        else if x == 3 then { chessScreen.i13 = indicatorImage; }
-        else if x == 4 then { chessScreen.i14 = indicatorImage; }
-        else if x == 5 then { chessScreen.i15 = indicatorImage; }
-        else if x == 6 then { chessScreen.i16 = indicatorImage; }
-        else if x == 7 then { chessScreen.i17 = indicatorImage; }
-    } else if y == 2 then {
-        if x == 0 then { chessScreen.i20 = indicatorImage; }
-        else if x == 1 then { chessScreen.i21 = indicatorImage; }
-        else if x == 2 then { chessScreen.i22 = indicatorImage; }
-        else if x == 3 then { chessScreen.i23 = indicatorImage; }
-        else if x == 4 then { chessScreen.i24 = indicatorImage; }
-        else if x == 5 then { chessScreen.i25 = indicatorImage; }
-        else if x == 6 then { chessScreen.i26 = indicatorImage; }
-        else if x == 7 then { chessScreen.i27 = indicatorImage; }
-    } else if y == 3 then {
-        if x == 0 then { chessScreen.i30 = indicatorImage; }
-        else if x == 1 then { chessScreen.i31 = indicatorImage; }
-        else if x == 2 then { chessScreen.i32 = indicatorImage; }
-        else if x == 3 then { chessScreen.i33 = indicatorImage; }
-        else if x == 4 then { chessScreen.i34 = indicatorImage; }
-        else if x == 5 then { chessScreen.i35 = indicatorImage; }
-        else if x == 6 then { chessScreen.i36 = indicatorImage; }
-        else if x == 7 then { chessScreen.i37 = indicatorImage; }
-    } else if y == 4 then {
-        if x == 0 then { chessScreen.i40 = indicatorImage; }
-        else if x == 1 then { chessScreen.i41 = indicatorImage; }
-        else if x == 2 then { chessScreen.i42 = indicatorImage; }
-        else if x == 3 then { chessScreen.i43 = indicatorImage; }
-        else if x == 4 then { chessScreen.i44 = indicatorImage; }
-        else if x == 5 then { chessScreen.i45 = indicatorImage; }
-        else if x == 6 then { chessScreen.i46 = indicatorImage; }
-        else if x == 7 then { chessScreen.i47 = indicatorImage; }
-    } else if y == 5 then {
-        if x == 0 then { chessScreen.i50 = indicatorImage; }
-        else if x == 1 then { chessScreen.i51 = indicatorImage; }
-        else if x == 2 then { chessScreen.i52 = indicatorImage; }
-        else if x == 3 then { chessScreen.i53 = indicatorImage; }
-        else if x == 4 then { chessScreen.i54 = indicatorImage; }
-        else if x == 5 then { chessScreen.i55 = indicatorImage; }
-        else if x == 6 then { chessScreen.i56 = indicatorImage; }
-        else if x == 7 then { chessScreen.i57 = indicatorImage; }
-    } else if y == 6 then {
-        if x == 0 then { chessScreen.i60 = indicatorImage; }
-        else if x == 1 then { chessScreen.i61 = indicatorImage; }
-        else if x == 2 then { chessScreen.i62 = indicatorImage; }
-        else if x == 3 then { chessScreen.i63 = indicatorImage; }
-        else if x == 4 then { chessScreen.i64 = indicatorImage; }
-        else if x == 5 then { chessScreen.i65 = indicatorImage; }
-        else if x == 6 then { chessScreen.i66 = indicatorImage; }
-        else if x == 7 then { chessScreen.i67 = indicatorImage; }
-    } else if y == 7 then {
-        if x == 0 then { chessScreen.i70 = indicatorImage; }
-        else if x == 1 then { chessScreen.i71 = indicatorImage; }
-        else if x == 2 then { chessScreen.i72 = indicatorImage; }
-        else if x == 3 then { chessScreen.i73 = indicatorImage; }
-        else if x == 4 then { chessScreen.i74 = indicatorImage; }
-        else if x == 5 then { chessScreen.i75 = indicatorImage; }
-        else if x == 6 then { chessScreen.i76 = indicatorImage; }
-        else if x == 7 then { chessScreen.i77 = indicatorImage; }
-    }
-}
-
 // Clear all move indicators on the board
 clearIndicators() {
-    // Clear all 64 indicator positions using nested loops
-    // Use transparentClear instead of null to properly clear ImageView components
-    for (var y: int = 0; y < 8; y++) {
-        for (var x: int = 0; x < 8; x++) {
-            call setIndicator(x, y, transparentClear);
-        }
-    }
+    // Clear all 64 indicator positions by setting them directly to transparentClear
+    chessScreen.i00 = transparentClear; chessScreen.i01 = transparentClear; chessScreen.i02 = transparentClear; chessScreen.i03 = transparentClear;
+    chessScreen.i04 = transparentClear; chessScreen.i05 = transparentClear; chessScreen.i06 = transparentClear; chessScreen.i07 = transparentClear;
+    chessScreen.i10 = transparentClear; chessScreen.i11 = transparentClear; chessScreen.i12 = transparentClear; chessScreen.i13 = transparentClear;
+    chessScreen.i14 = transparentClear; chessScreen.i15 = transparentClear; chessScreen.i16 = transparentClear; chessScreen.i17 = transparentClear;
+    chessScreen.i20 = transparentClear; chessScreen.i21 = transparentClear; chessScreen.i22 = transparentClear; chessScreen.i23 = transparentClear;
+    chessScreen.i24 = transparentClear; chessScreen.i25 = transparentClear; chessScreen.i26 = transparentClear; chessScreen.i27 = transparentClear;
+    chessScreen.i30 = transparentClear; chessScreen.i31 = transparentClear; chessScreen.i32 = transparentClear; chessScreen.i33 = transparentClear;
+    chessScreen.i34 = transparentClear; chessScreen.i35 = transparentClear; chessScreen.i36 = transparentClear; chessScreen.i37 = transparentClear;
+    chessScreen.i40 = transparentClear; chessScreen.i41 = transparentClear; chessScreen.i42 = transparentClear; chessScreen.i43 = transparentClear;
+    chessScreen.i44 = transparentClear; chessScreen.i45 = transparentClear; chessScreen.i46 = transparentClear; chessScreen.i47 = transparentClear;
+    chessScreen.i50 = transparentClear; chessScreen.i51 = transparentClear; chessScreen.i52 = transparentClear; chessScreen.i53 = transparentClear;
+    chessScreen.i54 = transparentClear; chessScreen.i55 = transparentClear; chessScreen.i56 = transparentClear; chessScreen.i57 = transparentClear;
+    chessScreen.i60 = transparentClear; chessScreen.i61 = transparentClear; chessScreen.i62 = transparentClear; chessScreen.i63 = transparentClear;
+    chessScreen.i64 = transparentClear; chessScreen.i65 = transparentClear; chessScreen.i66 = transparentClear; chessScreen.i67 = transparentClear;
+    chessScreen.i70 = transparentClear; chessScreen.i71 = transparentClear; chessScreen.i72 = transparentClear; chessScreen.i73 = transparentClear;
+    chessScreen.i74 = transparentClear; chessScreen.i75 = transparentClear; chessScreen.i76 = transparentClear; chessScreen.i77 = transparentClear;
 }
 
 // Helper function to set a board square (background layer) at a specific position
