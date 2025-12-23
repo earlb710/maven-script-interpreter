@@ -32,7 +32,9 @@ The EBS script editor now provides intelligent syntax highlighting for custom (u
    - Pattern 1: `identifier(` - Functions with parameters
    - Pattern 2: `identifier return` - Functions with return type only
    - Pattern 3: `identifier {` - Basic functions without parameters
-3. **Token Processing**: During syntax highlighting, identifies function calls (identifier followed by `(`)
+3. **Token Processing**: During syntax highlighting, identifies function calls:
+   - **Primary pattern**: Identifier after `call` keyword (`call functionName(args)`)
+   - **Secondary pattern**: Identifier directly followed by `(` (less common)
 4. **Validation**: Checks if each function call matches:
    - A builtin function (from `Builtins.java`)
    - A custom function (defined in current file or imports)

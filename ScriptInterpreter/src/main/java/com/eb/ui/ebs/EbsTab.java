@@ -1531,6 +1531,10 @@ public class EbsTab extends Tab {
      * Function calls (identifiers followed by '(') that are not builtins or custom functions
      * will be marked with error styling.
      * 
+     * In EBS, functions can be called in two ways:
+     * 1. call functionName(args)  - explicit call keyword
+     * 2. functionName(args)       - direct call (rare)
+     * 
      * @param tokens The list of tokens from the lexer
      * @param source The source code
      * @return Modified list of tokens with unknown functions marked
@@ -1541,23 +1545,33 @@ public class EbsTab extends Tab {
         for (int i = 0; i < tokens.size(); i++) {
             EbsToken token = tokens.get(i);
             
-            // Check if this is an identifier followed by '('
-            if (token.type == EbsTokenType.IDENTIFIER && i + 1 < tokens.size()) {
-                // Look ahead to see if next non-whitespace token is '('
-                int nextIdx = i + 1;
-                EbsToken nextToken = tokens.get(nextIdx);
-                
-                // Check if the identifier is followed by '(' (checking the actual source)
-                int endPos = token.end + 1;
+            // Check if this is an identifier that represents a function call
+            if (token.type == EbsTokenType.IDENTIFIER) {
                 boolean isFunction = false;
                 
-                // Skip whitespace in source to check for '('
-                while (endPos < source.length() && Character.isWhitespace(source.charAt(endPos))) {
-                    endPos++;
+                // Case 1: Identifier after 'call' keyword
+                // When lexer sees 'call', it produces CALL token then IDENTIFIER token
+                // Check if previous non-EOF token is CALL
+                if (i > 0) {
+                    EbsToken prevToken = tokens.get(i - 1);
+                    if (prevToken.type == EbsTokenType.CALL) {
+                        isFunction = true;
+                    }
                 }
                 
-                if (endPos < source.length() && source.charAt(endPos) == '(') {
-                    isFunction = true;
+                // Case 2: Identifier directly followed by '(' (less common in EBS)
+                if (!isFunction && i + 1 < tokens.size()) {
+                    // Check if the identifier is followed by '(' in the actual source
+                    int endPos = token.end + 1;
+                    
+                    // Skip whitespace in source to check for '('
+                    while (endPos < source.length() && Character.isWhitespace(source.charAt(endPos))) {
+                        endPos++;
+                    }
+                    
+                    if (endPos < source.length() && source.charAt(endPos) == '(') {
+                        isFunction = true;
+                    }
                 }
                 
                 if (isFunction) {
