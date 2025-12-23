@@ -1167,8 +1167,8 @@ selectOpponentPiece(x: int, y: int) {
                 var pieceCanvas: canvas = call canvas.create(60, 60, "opponent_piece_select");
                 call canvas.clear(pieceCanvas);
                 
-                // Draw the normal piece
-                call draw.image(pieceCanvas, normalPiece, 0, 0, 60, 60);
+                // Draw the normal piece at its actual size (no scaling)
+                call draw.image(pieceCanvas, normalPiece, 0, 0);
                 
                 // Add a semi-transparent gray overlay
                 call style.setFill(pieceCanvas, "#80808060");  // Gray with 37% opacity
