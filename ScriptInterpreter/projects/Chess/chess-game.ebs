@@ -2178,6 +2178,30 @@ handleGameModeChange() {
 handleStartGame() {
     print "Start button clicked!";
     
+    // Reset all game state variables to ensure clean start
+    // White always starts in chess
+    currentPlayer = WHITE;
+    gameOver = false;
+    selectedX = -1;
+    selectedY = -1;
+    lastMoveFromX = -1;
+    lastMoveFromY = -1;
+    lastMoveToX = -1;
+    lastMoveToY = -1;
+    arrowPathCount = 0;
+    whiteKingMoved = false;
+    blackKingMoved = false;
+    whiteKingsideRookMoved = false;
+    whiteQueensideRookMoved = false;
+    blackKingsideRookMoved = false;
+    blackQueensideRookMoved = false;
+    enPassantTargetX = -1;
+    enPassantTargetY = -1;
+    lastOpponentX = -1;
+    lastOpponentY = -1;
+    capturedWhiteCount = 0;
+    capturedBlackCount = 0;
+    
     // Determine game mode from radio button
     // The gameMode variable stores "1" or "2"
     if startupDialog.gameMode == "1" then {
@@ -2279,6 +2303,7 @@ handleStartGame() {
     chessScreen.whiteTimer = call formatTimerDecimal(timerWhite);
     chessScreen.blackTimer = call formatTimerDecimal(timerBlack);
     chessScreen.statusMessage = "White to move";
+    chessScreen.moveHistory = "Game started.\nWhite's turn.\n";
     call updateTimerColors();
     
     // Initialize captured pieces display variables BEFORE showing screen
@@ -2318,10 +2343,6 @@ handleStartGame() {
     
     // Show the chess screen
     show screen chessScreen;
-    
-    // Reset captured pieces counters (variables already initialized above)
-    capturedWhiteCount = 0;
-    capturedBlackCount = 0;
     
     // Timer display is automatically updated via varRef binding to whiteTimer and blackTimer variables
     
