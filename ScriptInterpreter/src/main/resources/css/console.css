@@ -515,7 +515,8 @@
 .styled-text-area .text.function-highlight,
 .editor-ebs .text.function-highlight,
 .editor-text .text.function-highlight {
-    -rtfx-underline-color: #DCDCAA; /* yellow for functions - matches tok-function color */
+    -fx-fill: #DCDCAA; /* yellow for functions - preserve normal function color */
+    -rtfx-underline-color: #DCDCAA; /* yellow underline to match function color */
     -rtfx-underline-width: 1;
 }
 
