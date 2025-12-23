@@ -1,0 +1,13 @@
+// Functions to be imported by test_import_highlighting.ebs
+
+importedAdd(a: int, b: int) return int {
+    return a + b;
+}
+
+importedMultiply(x: int, y: int) return int {
+    return x * y;
+}
+
+importedHelper() {
+    print("Helper function called");
+}

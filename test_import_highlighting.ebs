@@ -1,0 +1,17 @@
+// Test script for import function highlighting
+// This imports functions from imported_functions.ebs
+// Functions from the import should be recognized
+
+import "imported_functions.ebs";
+
+// Use imported function - should be highlighted as known
+var result: int = call importedAdd(10, 20);
+print("Imported add result: " + result);
+
+// Use another imported function - should be highlighted as known
+var mult: int = call importedMultiply(5, 6);
+print("Imported multiply result: " + mult);
+
+// Use unknown function - should have red underline
+var bad: int = call notDefinedAnywhere(1, 2);
+print("Bad result: " + bad);

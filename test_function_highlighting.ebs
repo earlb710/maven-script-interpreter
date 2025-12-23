@@ -1,0 +1,37 @@
+// Test script for function highlighting
+// This script should show:
+// - Custom functions defined here highlighted with tok-function
+// - Known builtins highlighted as builtins
+// - Unknown functions with red underline (tok-function-error)
+
+// Define a custom function
+myFunction(x: int, y: int) return int {
+    var result: int = x + y;
+    return result;
+}
+
+// Define another custom function
+calculateTotal(a: int, b: int) return int {
+    // This should be highlighted as known function
+    var sum: int = call myFunction(a, b);
+    return sum;
+}
+
+// Main code
+var x: int = 10;
+var y: int = 20;
+
+// This should be highlighted as known custom function
+var total: int = call calculateTotal(x, y);
+print("Total: " + total);
+
+// This should be highlighted as builtin
+var str: string = call string.toUpper("hello");
+print("Uppercase: " + str);
+
+// This should show red underline (unknown function)
+var unknown: int = call unknownFunction(x, y);
+print("Unknown result: " + unknown);
+
+// This should show red underline (another unknown function)
+call anotherUnknownFunc();
