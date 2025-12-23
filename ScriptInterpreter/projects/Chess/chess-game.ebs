@@ -1525,6 +1525,9 @@ handleCellClick(x: int, y: int) {
             print "Not a valid move destination - will handle as new selection";
             // Deselect the currently selected piece before processing new selection
             call deselectPiece(selectedX, selectedY);
+            // Reset selection variables so the click can be processed as a new selection
+            selectedX = -1;
+            selectedY = -1;
         }
     }
     
