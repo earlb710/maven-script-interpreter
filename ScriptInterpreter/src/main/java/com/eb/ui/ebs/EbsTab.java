@@ -1517,9 +1517,16 @@ public class EbsTab extends Tab {
         builtinFunctionNames.clear();
         builtinFunctionNames.addAll(Builtins.getBuiltins());
         
+        // Get functions from RuntimeContext blocks (parsed functions)
+        // This is the authoritative source for functions in the current file
+        if (context != null && context.blocks != null) {
+            customFunctionNames.addAll(context.blocks.keySet());
+        }
+        
         String source = dispArea.getText();
         
-        // Extract functions from current file
+        // Also extract functions using regex as a fallback for unparsed/editing state
+        // This helps provide highlighting even before the script is fully parsed
         customFunctionNames.addAll(extractFunctionNames(source));
         
         // Extract functions from imports

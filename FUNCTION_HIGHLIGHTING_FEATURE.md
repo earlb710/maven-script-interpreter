@@ -117,17 +117,35 @@ call notDefined();    // ⚠️ Red underline
 
 ### Key Classes Modified
 - **EbsTab.java**: Main editor tab component
-  - `extractFunctionNames()`: Parses all three function definition formats
-  - `extractImportedFunctions()`: Recursively processes imports
-  - `updateKnownFunctions()`: Maintains set of known functions
+  - `extractFunctionNames()`: Parses all three function definition formats using regex
+  - `extractImportedFunctions()`: Recursively processes imports to find functions
+  - `updateKnownFunctions()`: Maintains set of known functions from multiple sources:
+    - **Global builtins**: From `Builtins.getBuiltins()` registry
+    - **Parsed functions**: From `RuntimeContext.blocks` (parsed by Parser)
+    - **Current file functions**: Regex extraction from editor text (for real-time feedback)
+    - **Imported functions**: Regex extraction from imported files
   - `markUnknownFunctions()`: Post-processes tokens for validation
 
 - **console.css**: Styling
   - Added `tok-function-error` style class
 
+### Function Validation Strategy
+
+The validation checks against a comprehensive list:
+1. **Builtin functions**: All registered builtins from `Builtins.java`
+2. **Parsed functions**: Functions from `RuntimeContext.blocks` (authoritative for executed scripts)
+3. **Current file functions**: Regex-extracted from editor text (provides immediate feedback during typing)
+4. **Imported functions**: Recursively extracted from imported files using regex
+
+This multi-source approach ensures:
+- Accurate validation against the global function registry
+- Real-time feedback even before script is parsed/executed
+- Recognition of functions from imports before they're executed
+
 ### Performance
 - Function extraction runs on each editor change (debounced 100ms)
 - Three regex patterns for comprehensive function detection
+- RuntimeContext blocks checked for parsed functions
 - Import files are only read when changed
 - Set-based lookup for O(1) validation
 
