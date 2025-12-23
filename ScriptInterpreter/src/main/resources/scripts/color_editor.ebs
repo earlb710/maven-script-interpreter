@@ -86,6 +86,8 @@ if configIsValid == false then {
         defaultConfig = defaultConfig + "      \"identifier\": \"white\",\n";
         defaultConfig = defaultConfig + "      \"sql\": \"#00ee66\",\n";
         defaultConfig = defaultConfig + "      \"custom\": \"#eeee90\",\n";
+        defaultConfig = defaultConfig + "      \"function\": \"#DCDCAA\",\n";
+        defaultConfig = defaultConfig + "      \"function-error\": \"#DCDCAA\",\n";
         defaultConfig = defaultConfig + "      \"background\": \"#000000\",\n";
         defaultConfig = defaultConfig + "      \"text\": \"#e6e6e6\",\n";
         defaultConfig = defaultConfig + "      \"caret\": \"white\",\n";
@@ -147,6 +149,8 @@ if call json.isempty(config) then {
         defaultConfig2 = defaultConfig2 + "      \"identifier\": \"white\",\n";
         defaultConfig2 = defaultConfig2 + "      \"sql\": \"#00ee66\",\n";
         defaultConfig2 = defaultConfig2 + "      \"custom\": \"#eeee90\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"function\": \"#DCDCAA\",\n";
+        defaultConfig2 = defaultConfig2 + "      \"function-error\": \"#DCDCAA\",\n";
         defaultConfig2 = defaultConfig2 + "      \"background\": \"#000000\",\n";
         defaultConfig2 = defaultConfig2 + "      \"text\": \"#e6e6e6\",\n";
         defaultConfig2 = defaultConfig2 + "      \"caret\": \"white\",\n";
@@ -351,6 +355,8 @@ var literalColor: string = call json.getstring(colors, "literal", "");
 var identifierColor: string = call json.getstring(colors, "identifier", "");
 var sqlColor: string = call json.getstring(colors, "sql", "");
 var customColor: string = call json.getstring(colors, "custom", "");
+var functionColor: string = call json.getstring(colors, "function", "");
+var functionErrorColor: string = call json.getstring(colors, "function-error", "");
 var backgroundColor: string = call json.getstring(colors, "background", "");
 var textColor: string = call json.getstring(colors, "text", "");
 var caretColor: string = call json.getstring(colors, "caret", "");
@@ -383,6 +389,8 @@ var defaultLiteralColor: string = "blue";
 var defaultIdentifierColor: string = "white";
 var defaultSqlColor: string = "#00ee66";
 var defaultCustomColor: string = "#eeee90";
+var defaultFunctionColor: string = "#DCDCAA";
+var defaultFunctionErrorColor: string = "#DCDCAA";
 var defaultBackgroundColor: string = "#000000";
 var defaultTextColor: string = "#e6e6e6";
 var defaultCaretColor: string = "white";
@@ -414,6 +422,8 @@ if literalColor == "" then { literalColor = defaultLiteralColor; }
 if identifierColor == "" then { identifierColor = defaultIdentifierColor; }
 if sqlColor == "" then { sqlColor = defaultSqlColor; }
 if customColor == "" then { customColor = defaultCustomColor; }
+if functionColor == "" then { functionColor = defaultFunctionColor; }
+if functionErrorColor == "" then { functionErrorColor = defaultFunctionErrorColor; }
 if backgroundColor == "" then { backgroundColor = defaultBackgroundColor; }
 if textColor == "" then { textColor = defaultTextColor; }
 if caretColor == "" then { caretColor = defaultCaretColor; }
@@ -450,6 +460,8 @@ function setColorsToDefaults {
     colorEditorScreen.identifier = defaultIdentifierColor;
     colorEditorScreen.sql = defaultSqlColor;
     colorEditorScreen.custom = defaultCustomColor;
+    colorEditorScreen.function = defaultFunctionColor;
+    colorEditorScreen.functionError = defaultFunctionErrorColor;
     colorEditorScreen.background = defaultBackgroundColor;
     colorEditorScreen.text = defaultTextColor;
     colorEditorScreen.caret = defaultCaretColor;
@@ -483,6 +495,8 @@ function setColorsToOriginal {
     colorEditorScreen.identifier = identifierColor;
     colorEditorScreen.sql = sqlColor;
     colorEditorScreen.custom = customColor;
+    colorEditorScreen.function = functionColor;
+    colorEditorScreen.functionError = functionErrorColor;
     colorEditorScreen.background = backgroundColor;
     colorEditorScreen.text = textColor;
     colorEditorScreen.caret = caretColor;
@@ -517,6 +531,8 @@ function buildProfileColorsJson(pName: string) return string {
     colorsJson = colorsJson + "      \"identifier\": \"" + colorEditorScreen.identifier + "\",\n";
     colorsJson = colorsJson + "      \"sql\": \"" + colorEditorScreen.sql + "\",\n";
     colorsJson = colorsJson + "      \"custom\": \"" + colorEditorScreen.custom + "\",\n";
+    colorsJson = colorsJson + "      \"function\": \"" + colorEditorScreen.function + "\",\n";
+    colorsJson = colorsJson + "      \"function-error\": \"" + colorEditorScreen.functionError + "\",\n";
     colorsJson = colorsJson + "      \"background\": \"" + colorEditorScreen.background + "\",\n";
     colorsJson = colorsJson + "      \"text\": \"" + colorEditorScreen.text + "\",\n";
     colorsJson = colorsJson + "      \"caret\": \"" + colorEditorScreen.caret + "\",\n";
@@ -553,6 +569,8 @@ function buildDefaultProfileColorsJson(pName: string) return string {
     colorsJson = colorsJson + "      \"identifier\": \"" + defaultIdentifierColor + "\",\n";
     colorsJson = colorsJson + "      \"sql\": \"" + defaultSqlColor + "\",\n";
     colorsJson = colorsJson + "      \"custom\": \"" + defaultCustomColor + "\",\n";
+    colorsJson = colorsJson + "      \"function\": \"" + defaultFunctionColor + "\",\n";
+    colorsJson = colorsJson + "      \"function-error\": \"" + defaultFunctionErrorColor + "\",\n";
     colorsJson = colorsJson + "      \"background\": \"" + defaultBackgroundColor + "\",\n";
     colorsJson = colorsJson + "      \"text\": \"" + defaultTextColor + "\",\n";
     colorsJson = colorsJson + "      \"caret\": \"" + defaultCaretColor + "\",\n";
@@ -575,7 +593,7 @@ function buildDefaultProfileColorsJson(pName: string) return string {
 // Function: Update a profile in the in-memory profiles object with current screen values
 function updateProfileInMemory(targetProfile: string) {
     // Build the colors JSON for the current screen values
-    var colorsStr: string = "{\"info\": \"" + colorEditorScreen.info + "\", \"comment\": \"" + colorEditorScreen.comment + "\", \"error\": \"" + colorEditorScreen.error + "\", \"warn\": \"" + colorEditorScreen.warn + "\", \"ok\": \"" + colorEditorScreen.ok + "\", \"code\": \"" + colorEditorScreen.code + "\", \"datatype\": \"" + colorEditorScreen.datatype + "\", \"data\": \"" + colorEditorScreen.data + "\", \"keyword\": \"" + colorEditorScreen.keyword + "\", \"builtin\": \"" + colorEditorScreen.builtin + "\", \"literal\": \"" + colorEditorScreen.literal + "\", \"identifier\": \"" + colorEditorScreen.identifier + "\", \"sql\": \"" + colorEditorScreen.sql + "\", \"custom\": \"" + colorEditorScreen.custom + "\", \"background\": \"" + colorEditorScreen.background + "\", \"text\": \"" + colorEditorScreen.text + "\", \"caret\": \"" + colorEditorScreen.caret + "\", \"line-cursor\": \"" + colorEditorScreen.lineCursor + "\", \"line-numbers\": \"" + colorEditorScreen.lineNumbers + "\", \"console-background\": \"" + colorEditorScreen.consoleBackground + "\", \"tab-background\": \"" + colorEditorScreen.tabBackground + "\", \"tab-label-color\": \"" + colorEditorScreen.tabLabelColor + "\", \"tab-label-changed-color\": \"" + colorEditorScreen.tabLabelChangedColor + "\", \"tab-label-background\": \"" + colorEditorScreen.tabLabelBackground + "\", \"find-highlight-color\": \"" + colorEditorScreen.findHighlightColor + "\", \"find-highlight-background\": \"" + colorEditorScreen.findHighlightBackground + "\", \"current-find-highlight-bg\": \"" + colorEditorScreen.currentFindHighlightBg + "\", \"tab-select\": \"" + colorEditorScreen.tabSelect + "\", \"tab-content\": \"" + colorEditorScreen.tabContent + "\"}";
+    var colorsStr: string = "{\"info\": \"" + colorEditorScreen.info + "\", \"comment\": \"" + colorEditorScreen.comment + "\", \"error\": \"" + colorEditorScreen.error + "\", \"warn\": \"" + colorEditorScreen.warn + "\", \"ok\": \"" + colorEditorScreen.ok + "\", \"code\": \"" + colorEditorScreen.code + "\", \"datatype\": \"" + colorEditorScreen.datatype + "\", \"data\": \"" + colorEditorScreen.data + "\", \"keyword\": \"" + colorEditorScreen.keyword + "\", \"builtin\": \"" + colorEditorScreen.builtin + "\", \"literal\": \"" + colorEditorScreen.literal + "\", \"identifier\": \"" + colorEditorScreen.identifier + "\", \"sql\": \"" + colorEditorScreen.sql + "\", \"custom\": \"" + colorEditorScreen.custom + "\", \"function\": \"" + colorEditorScreen.function + "\", \"function-error\": \"" + colorEditorScreen.functionError + "\", \"background\": \"" + colorEditorScreen.background + "\", \"text\": \"" + colorEditorScreen.text + "\", \"caret\": \"" + colorEditorScreen.caret + "\", \"line-cursor\": \"" + colorEditorScreen.lineCursor + "\", \"line-numbers\": \"" + colorEditorScreen.lineNumbers + "\", \"console-background\": \"" + colorEditorScreen.consoleBackground + "\", \"tab-background\": \"" + colorEditorScreen.tabBackground + "\", \"tab-label-color\": \"" + colorEditorScreen.tabLabelColor + "\", \"tab-label-changed-color\": \"" + colorEditorScreen.tabLabelChangedColor + "\", \"tab-label-background\": \"" + colorEditorScreen.tabLabelBackground + "\", \"find-highlight-color\": \"" + colorEditorScreen.findHighlightColor + "\", \"find-highlight-background\": \"" + colorEditorScreen.findHighlightBackground + "\", \"current-find-highlight-bg\": \"" + colorEditorScreen.currentFindHighlightBg + "\", \"tab-select\": \"" + colorEditorScreen.tabSelect + "\", \"tab-content\": \"" + colorEditorScreen.tabContent + "\"}";
     
     // Parse to JSON and update the in-memory profiles object
     var colorsJson: json = call json.jsonFromString(colorsStr);
@@ -1707,6 +1725,24 @@ screen colorEditorScreen = {
             "display": {
                 "type": "colorpicker",
                 "labelText": "Custom Color:"
+            }
+        },
+        {
+            "name": "function",
+            "type": "string",
+            "default": $functionColor,
+            "display": {
+                "type": "colorpicker",
+                "labelText": "Function Color:"
+            }
+        },
+        {
+            "name": "functionError",
+            "type": "string",
+            "default": $functionErrorColor,
+            "display": {
+                "type": "colorpicker",
+                "labelText": "Function Error Color:"
             }
         },
         {
