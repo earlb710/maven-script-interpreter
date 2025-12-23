@@ -23,11 +23,11 @@ print "util.runlater without callback completed";
 print "";
 
 // Test 3: Multiple callbacks
-counter: int = 0;
+var counter: int = 0;
 
 incrementCounter() {
     counter = counter + 1;
-    print "Counter incremented to: " + string.fromInt(counter);
+    print "Counter incremented to: " + string(counter);
 }
 
 print "Test 3: Multiple runlater calls";
@@ -40,6 +40,6 @@ print "Three util.runlater calls made";
 call thread.sleep(500);
 
 print "";
-print "Final counter value: " + string.fromInt(counter);
+print "Final counter value: " + string(counter);
 print "";
 print "All tests completed!";
