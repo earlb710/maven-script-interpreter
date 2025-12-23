@@ -460,7 +460,7 @@ function setColorsToDefaults {
     colorEditorScreen.identifier = defaultIdentifierColor;
     colorEditorScreen.sql = defaultSqlColor;
     colorEditorScreen.custom = defaultCustomColor;
-    colorEditorScreen.function = defaultFunctionColor;
+    colorEditorScreen.functionClr = defaultFunctionColor;
     colorEditorScreen.functionError = defaultFunctionErrorColor;
     colorEditorScreen.background = defaultBackgroundColor;
     colorEditorScreen.text = defaultTextColor;
@@ -495,7 +495,7 @@ function setColorsToOriginal {
     colorEditorScreen.identifier = identifierColor;
     colorEditorScreen.sql = sqlColor;
     colorEditorScreen.custom = customColor;
-    colorEditorScreen.function = functionColor;
+    colorEditorScreen.functionClr = functionColor;
     colorEditorScreen.functionError = functionErrorColor;
     colorEditorScreen.background = backgroundColor;
     colorEditorScreen.text = textColor;
@@ -531,7 +531,7 @@ function buildProfileColorsJson(pName: string) return string {
     colorsJson = colorsJson + "      \"identifier\": \"" + colorEditorScreen.identifier + "\",\n";
     colorsJson = colorsJson + "      \"sql\": \"" + colorEditorScreen.sql + "\",\n";
     colorsJson = colorsJson + "      \"custom\": \"" + colorEditorScreen.custom + "\",\n";
-    colorsJson = colorsJson + "      \"function\": \"" + colorEditorScreen.function + "\",\n";
+    colorsJson = colorsJson + "      \"function\": \"" + colorEditorScreen.functionClr + "\",\n";
     colorsJson = colorsJson + "      \"function-error\": \"" + colorEditorScreen.functionError + "\",\n";
     colorsJson = colorsJson + "      \"background\": \"" + colorEditorScreen.background + "\",\n";
     colorsJson = colorsJson + "      \"text\": \"" + colorEditorScreen.text + "\",\n";
@@ -593,7 +593,7 @@ function buildDefaultProfileColorsJson(pName: string) return string {
 // Function: Update a profile in the in-memory profiles object with current screen values
 function updateProfileInMemory(targetProfile: string) {
     // Build the colors JSON for the current screen values
-    var colorsStr: string = "{\"info\": \"" + colorEditorScreen.info + "\", \"comment\": \"" + colorEditorScreen.comment + "\", \"error\": \"" + colorEditorScreen.error + "\", \"warn\": \"" + colorEditorScreen.warn + "\", \"ok\": \"" + colorEditorScreen.ok + "\", \"code\": \"" + colorEditorScreen.code + "\", \"datatype\": \"" + colorEditorScreen.datatype + "\", \"data\": \"" + colorEditorScreen.data + "\", \"keyword\": \"" + colorEditorScreen.keyword + "\", \"builtin\": \"" + colorEditorScreen.builtin + "\", \"literal\": \"" + colorEditorScreen.literal + "\", \"identifier\": \"" + colorEditorScreen.identifier + "\", \"sql\": \"" + colorEditorScreen.sql + "\", \"custom\": \"" + colorEditorScreen.custom + "\", \"function\": \"" + colorEditorScreen.function + "\", \"function-error\": \"" + colorEditorScreen.functionError + "\", \"background\": \"" + colorEditorScreen.background + "\", \"text\": \"" + colorEditorScreen.text + "\", \"caret\": \"" + colorEditorScreen.caret + "\", \"line-cursor\": \"" + colorEditorScreen.lineCursor + "\", \"line-numbers\": \"" + colorEditorScreen.lineNumbers + "\", \"console-background\": \"" + colorEditorScreen.consoleBackground + "\", \"tab-background\": \"" + colorEditorScreen.tabBackground + "\", \"tab-label-color\": \"" + colorEditorScreen.tabLabelColor + "\", \"tab-label-changed-color\": \"" + colorEditorScreen.tabLabelChangedColor + "\", \"tab-label-background\": \"" + colorEditorScreen.tabLabelBackground + "\", \"find-highlight-color\": \"" + colorEditorScreen.findHighlightColor + "\", \"find-highlight-background\": \"" + colorEditorScreen.findHighlightBackground + "\", \"current-find-highlight-bg\": \"" + colorEditorScreen.currentFindHighlightBg + "\", \"tab-select\": \"" + colorEditorScreen.tabSelect + "\", \"tab-content\": \"" + colorEditorScreen.tabContent + "\"}";
+    var colorsStr: string = "{\"info\": \"" + colorEditorScreen.info + "\", \"comment\": \"" + colorEditorScreen.comment + "\", \"error\": \"" + colorEditorScreen.error + "\", \"warn\": \"" + colorEditorScreen.warn + "\", \"ok\": \"" + colorEditorScreen.ok + "\", \"code\": \"" + colorEditorScreen.code + "\", \"datatype\": \"" + colorEditorScreen.datatype + "\", \"data\": \"" + colorEditorScreen.data + "\", \"keyword\": \"" + colorEditorScreen.keyword + "\", \"builtin\": \"" + colorEditorScreen.builtin + "\", \"literal\": \"" + colorEditorScreen.literal + "\", \"identifier\": \"" + colorEditorScreen.identifier + "\", \"sql\": \"" + colorEditorScreen.sql + "\", \"custom\": \"" + colorEditorScreen.custom + "\", \"function\": \"" + colorEditorScreen.functionClr + "\", \"function-error\": \"" + colorEditorScreen.functionError + "\", \"background\": \"" + colorEditorScreen.background + "\", \"text\": \"" + colorEditorScreen.text + "\", \"caret\": \"" + colorEditorScreen.caret + "\", \"line-cursor\": \"" + colorEditorScreen.lineCursor + "\", \"line-numbers\": \"" + colorEditorScreen.lineNumbers + "\", \"console-background\": \"" + colorEditorScreen.consoleBackground + "\", \"tab-background\": \"" + colorEditorScreen.tabBackground + "\", \"tab-label-color\": \"" + colorEditorScreen.tabLabelColor + "\", \"tab-label-changed-color\": \"" + colorEditorScreen.tabLabelChangedColor + "\", \"tab-label-background\": \"" + colorEditorScreen.tabLabelBackground + "\", \"find-highlight-color\": \"" + colorEditorScreen.findHighlightColor + "\", \"find-highlight-background\": \"" + colorEditorScreen.findHighlightBackground + "\", \"current-find-highlight-bg\": \"" + colorEditorScreen.currentFindHighlightBg + "\", \"tab-select\": \"" + colorEditorScreen.tabSelect + "\", \"tab-content\": \"" + colorEditorScreen.tabContent + "\"}";
     
     // Parse to JSON and update the in-memory profiles object
     var colorsJson: json = call json.jsonFromString(colorsStr);
@@ -1728,7 +1728,7 @@ screen colorEditorScreen = {
             }
         },
         {
-            "name": "function",
+            "name": "functionClr",
             "type": "string",
             "default": $functionColor,
             "display": {
