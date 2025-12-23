@@ -730,8 +730,24 @@ function getDefenders(targetX: int, targetY: int) return array {
                     
                     // Only check pieces of the same color as the target
                     if cell.pieceType != EMPTY && cell.pieceColor == targetColor then {
-                        // Get moves for this piece
-                        var moves = call validMoves(x, y);
+                        // Get ALL possible moves for this piece (not filtered by friendly pieces)
+                        // This is different from validMoves() which filters out friendly pieces
+                        var moves = [];
+                        var pieceType: int = cell.pieceType;
+                        
+                        if pieceType == PAWN then {
+                            moves = call getPawnMoves(x, y, cell.pieceColor);
+                        } else if pieceType == ROOK then {
+                            moves = call getRookMoves(x, y);
+                        } else if pieceType == KNIGHT then {
+                            moves = call getKnightMoves(x, y);
+                        } else if pieceType == BISHOP then {
+                            moves = call getBishopMoves(x, y);
+                        } else if pieceType == QUEEN then {
+                            moves = call getQueenMoves(x, y);
+                        } else if pieceType == KING then {
+                            moves = call getKingMoves(x, y);
+                        }
                         
                         // Check if any move targets the square in question
                         var i: int = 0;
