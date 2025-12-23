@@ -1593,13 +1593,21 @@ public class EbsTab extends Tab {
                                      customFunctionNames.contains(funcName) ||
                                      isKeyword(funcName);
                     
+                    // Adjust start position to skip leading whitespace
+                    // This ensures underlines start at the first letter, not at preceding spaces
+                    int adjustedStart = token.start;
+                    while (adjustedStart < token.end && adjustedStart < source.length() && 
+                           Character.isWhitespace(source.charAt(adjustedStart))) {
+                        adjustedStart++;
+                    }
+                    
                     if (!isKnown && !funcName.isEmpty()) {
                         // Mark as unknown function with error style
                         EbsToken errorToken = new EbsToken(
                             token.type,
                             token.literal,
                             token.line,
-                            token.start,
+                            adjustedStart,
                             token.end,
                             "tok-function-error"
                         );
@@ -1611,7 +1619,7 @@ public class EbsTab extends Tab {
                             token.type,
                             token.literal,
                             token.line,
-                            token.start,
+                            adjustedStart,
                             token.end,
                             "tok-function"
                         );
