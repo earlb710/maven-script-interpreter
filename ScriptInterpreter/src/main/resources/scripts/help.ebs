@@ -1449,7 +1449,6 @@ performSearch(query: string) {
     
     // Find the best match
     var bestMatch: string = "";
-    var exactMatch: bool = false;
     
     foreach topicPath in allTopics {
         var lowerPath: string = call str.toLower(topicPath);
@@ -1465,15 +1464,17 @@ performSearch(query: string) {
         }
         var lowerLeaf: string = call str.toLower(leafName);
         
+        // Check for exact match on leaf name (highest priority)
         if lowerLeaf == lowerQuery then {
             bestMatch = leafName;
-            exactMatch = true;
             break;
         } else if call str.contains(lowerLeaf, lowerQuery) then {
+            // Partial match on leaf name
             if bestMatch == "" then {
                 bestMatch = leafName;
             }
         } else if call str.contains(lowerPath, lowerQuery) then {
+            // Partial match on full path
             if bestMatch == "" then {
                 bestMatch = leafName;
             }
