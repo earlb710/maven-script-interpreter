@@ -48,14 +48,10 @@ public class ArrayFixed implements ArrayDef<Object, Object[]> {
         int idx = 0;
         for (Object value : values) {
             // Skip type conversion for nested arrays (ArrayDef objects)
-            if (value instanceof ArrayDef) {
-                elements[idx] = value;
-            } else if (!dataType.isDataType(value)) {
+            if (!(value instanceof ArrayDef) && !dataType.isDataType(value)) {
                 value = dataType.convertValue(value);
-                elements[idx] = value;
-            } else {
-                elements[idx] = value;
             }
+            elements[idx] = value;
             idx++;
         }
     }
@@ -64,40 +60,28 @@ public class ArrayFixed implements ArrayDef<Object, Object[]> {
     public void set(int index, Object value) {
         // Skip type conversion for nested arrays (ArrayDef objects)
         // These are stored as-is in multi-dimensional arrays
-        if (value instanceof ArrayDef) {
-            elements[index] = value;
-        } else if (!dataType.isDataType(value)) {
+        if (!(value instanceof ArrayDef) && !dataType.isDataType(value)) {
             value = dataType.convertValue(value);
-            elements[index] = value;
-        } else {
-            elements[index] = value;
         }
+        elements[index] = value;
     }
 
     @Override
     public void add(Object value) {
         // Skip type conversion for nested arrays (ArrayDef objects)
-        if (value instanceof ArrayDef) {
-            elements[addIdx++] = value;
-        } else if (!dataType.isDataType(value)) {
+        if (!(value instanceof ArrayDef) && !dataType.isDataType(value)) {
             value = dataType.convertValue(value);
-            elements[addIdx++] = value;
-        } else {
-            elements[addIdx++] = value;
         }
+        elements[addIdx++] = value;
     }
 
     @Override
     public void add(int idx, Object value) {
         // Skip type conversion for nested arrays (ArrayDef objects)
-        if (value instanceof ArrayDef) {
-            elements[idx] = value;
-        } else if (!dataType.isDataType(value)) {
+        if (!(value instanceof ArrayDef) && !dataType.isDataType(value)) {
             value = dataType.convertValue(value);
-            elements[idx] = value;
-        } else {
-            elements[idx] = value;
         }
+        elements[idx] = value;
     }
 
     @Override
