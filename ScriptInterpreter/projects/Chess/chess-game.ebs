@@ -4053,8 +4053,8 @@ screen chessScreen = {
                     "spacing": "20",
                     "padding": "10",
                     "items": [
-                        {"name": "undoBtn", "display": {"type": "button", "labelText": "Undo", "onClick": "call undoMove();", "disabled": true}},
-                        {"name": "redoBtn", "display": {"type": "button", "labelText": "Redo", "onClick": "call redoMove();", "disabled": true}},
+                        {"name": "undoBtn", "disabled": true, "display": {"type": "button", "labelText": "Undo", "onClick": "call undoMove();"}},
+                        {"name": "redoBtn", "disabled": true, "display": {"type": "button", "labelText": "Redo", "onClick": "call redoMove();"}},
                         {"name": "newGameBtn", "display": {"type": "button", "labelText": "New Game", "onClick": "call resetGame();"}},
                         {"name": "closeBtn", "display": {"type": "button", "labelText": "Close", "onClick": "call closeChessScreen();"}}
                     ]
