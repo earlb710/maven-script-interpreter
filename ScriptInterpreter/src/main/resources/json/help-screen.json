@@ -49,6 +49,7 @@
                   "name": "searchCombo",
                   "varRef": "searchQuery",
                   "sequence": 1,
+                  "editable": true,
                   "hgrow": "ALWAYS",
                   "vgrow": "NEVER",
                   "prefWidth": "180",
@@ -56,7 +57,6 @@
                     "type": "combobox",
                     "labelText": "",
                     "labelPosition": "TOP",
-                    "editable": true,
                     "promptHelp": "Search help topics...",
                     "options": []
                   }
@@ -116,8 +116,7 @@
             {
               "name": "helpContentView",
               "varRef": "helpContent",
-              "seq": 1,
-              "stateful": false,
+              "sequence": 1,
               "hgrow": "ALWAYS",
               "vgrow": "ALWAYS",
               "minWidth": "200",
