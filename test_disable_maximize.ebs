@@ -1,7 +1,8 @@
 // Test script for disableMaximize screen property
-// This script creates two screens:
+// This script creates three screens to test different scenarios:
 // 1. A regular screen that CAN be maximized
 // 2. A screen with disableMaximize=true that CANNOT be maximized
+// 3. A screen with both resizable=true and disableMaximize=true
 
 // Screen 1: Regular screen (can be maximized)
 screen normalScreen = {
@@ -13,7 +14,7 @@ screen normalScreen = {
         {
             "name": "message",
             "type": "string",
-            "default": "This window CAN be maximized using the maximize button.",
+            "default": "This window CAN be maximized using the maximize button or keyboard shortcuts.",
             "display": {
                 "type": "textarea",
                 "labelText": "Message",
@@ -34,7 +35,7 @@ screen noMaximizeScreen = {
         {
             "name": "info",
             "type": "string",
-            "default": "This window CANNOT be maximized. Try clicking the maximize button - it won't work!",
+            "default": "This window CANNOT be maximized. Try clicking the maximize button - it will not work! But you can still resize the window by dragging the edges.",
             "display": {
                 "type": "textarea",
                 "labelText": "Info",
@@ -44,12 +45,36 @@ screen noMaximizeScreen = {
     ]
 };
 
-// Show both screens
+// Screen 3: Fixed size dialog (cannot resize or maximize)
+screen fixedDialog = {
+    "title": "Fixed Dialog - No Resize or Maximize",
+    "width": 500,
+    "height": 300,
+    "resizable": false,
+    "disableMaximize": true,
+    "vars": [
+        {
+            "name": "note",
+            "type": "string",
+            "default": "This window is completely fixed in size. It cannot be resized OR maximized. This is useful for dialog windows.",
+            "display": {
+                "type": "textarea",
+                "labelText": "Note",
+                "height": 5
+            }
+        }
+    ]
+};
+
+// Show all screens
 show screen normalScreen;
 show screen noMaximizeScreen;
+show screen fixedDialog;
 
-println("Two screens have been opened:");
+println("Three screens have been opened:");
 println("1. Normal Screen - Can be maximized (standard behavior)");
 println("2. No Maximize Screen - Cannot be maximized (disableMaximize=true)");
+println("3. Fixed Dialog - Cannot be resized or maximized (both properties set)");
 println("");
 println("Try clicking the maximize button on each window to see the difference!");
+println("Also try resizing the windows by dragging the edges.");
