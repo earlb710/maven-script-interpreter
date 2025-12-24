@@ -1456,11 +1456,14 @@ performSearch(query: string) return null {
     foreach topicPath in allTopics {
         var lowerPath: string = call str.toLower(topicPath);
         
-        // Check for exact match on the last component (leaf node name)
-        var lastSepIdx: int = call str.lastIndexOf(topicPath, " > ", topicPath.length);
+        // Extract the leaf name (last component after " > ")
         var leafName: string = topicPath;
-        if lastSepIdx > 0 then {
-            leafName = call str.substring(topicPath, lastSepIdx + 3, topicPath.length);
+        if call str.contains(topicPath, " > ") then {
+            var parts: array = call str.split(topicPath, " > ", 0);
+            var lastIdx: int = parts.length - 1;
+            if lastIdx >= 0 then {
+                leafName = parts[lastIdx];
+            }
         }
         var lowerLeaf: string = call str.toLower(leafName);
         

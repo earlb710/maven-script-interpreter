@@ -46,7 +46,6 @@
               "padding": "0",
               "hgrow": "NEVER",
               "vgrow": "NEVER",
-              "areas": [],
               "items": [
                 {
                   "name": "searchCombo",
