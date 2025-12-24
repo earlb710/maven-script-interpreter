@@ -1,0 +1,55 @@
+// Test script for disableMaximize screen property
+// This script creates two screens:
+// 1. A regular screen that CAN be maximized
+// 2. A screen with disableMaximize=true that CANNOT be maximized
+
+// Screen 1: Regular screen (can be maximized)
+screen normalScreen = {
+    "title": "Normal Screen - Can Maximize",
+    "width": 600,
+    "height": 400,
+    "resizable": true,
+    "vars": [
+        {
+            "name": "message",
+            "type": "string",
+            "default": "This window CAN be maximized using the maximize button.",
+            "display": {
+                "type": "textarea",
+                "labelText": "Message",
+                "height": 5
+            }
+        }
+    ]
+};
+
+// Screen 2: Screen with disabled maximize (cannot be maximized)
+screen noMaximizeScreen = {
+    "title": "No Maximize Screen - Cannot Maximize",
+    "width": 600,
+    "height": 400,
+    "resizable": true,
+    "disableMaximize": true,
+    "vars": [
+        {
+            "name": "info",
+            "type": "string",
+            "default": "This window CANNOT be maximized. Try clicking the maximize button - it won't work!",
+            "display": {
+                "type": "textarea",
+                "labelText": "Info",
+                "height": 5
+            }
+        }
+    ]
+};
+
+// Show both screens
+show screen normalScreen;
+show screen noMaximizeScreen;
+
+println("Two screens have been opened:");
+println("1. Normal Screen - Can be maximized (standard behavior)");
+println("2. No Maximize Screen - Cannot be maximized (disableMaximize=true)");
+println("");
+println("Try clicking the maximize button on each window to see the difference!");

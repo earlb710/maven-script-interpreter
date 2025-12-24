@@ -267,6 +267,17 @@ public class InterpreterScreen {
                 }
             }
             
+            boolean disableMaximize = false; // default to false
+            // All keys are stored lowercase in the config map
+            if (config.containsKey("disablemaximize")) {
+                Object disableMaximizeValue = config.get("disablemaximize");
+                if (disableMaximizeValue instanceof Boolean) {
+                    disableMaximize = (Boolean) disableMaximizeValue;
+                } else if (disableMaximizeValue != null) {
+                    disableMaximize = Boolean.parseBoolean(disableMaximizeValue.toString());
+                }
+            }
+            
             // Extract startup and cleanup inline code if present
             String startupCode = config.containsKey("startup") ? String.valueOf(config.get("startup")) : null;
             String cleanupCode = config.containsKey("cleanup") ? String.valueOf(config.get("cleanup")) : null;
@@ -573,7 +584,7 @@ public class InterpreterScreen {
 
             // Store the screen configuration for lazy initialization
             ScreenConfig screenConfig = new ScreenConfig(
-                stmt.name, title, width, height, maximize, resizable, showMenu,
+                stmt.name, title, width, height, maximize, resizable, showMenu, disableMaximize,
                 screenVarMap, screenVarTypeMap,
                 varSetsMap, varItemsMap, areaItemsMap,
                 areas,
@@ -815,6 +826,17 @@ public class InterpreterScreen {
         
         // Apply resizable property from screen configuration
         stage.setResizable(config.isResizable());
+        
+        // Apply disableMaximize property to prevent window maximization
+        if (config.isDisableMaximize()) {
+            stage.setMaximized(false); // Ensure it's not maximized
+            stage.maximizedProperty().addListener((observable, oldValue, newValue) -> {
+                if (newValue) {
+                    // User tried to maximize - prevent it
+                    stage.setMaximized(false);
+                }
+            });
+        }
         
         // Set up screen-level focus listeners
         String screenGainFocusCode = config.getGainFocusCode();
