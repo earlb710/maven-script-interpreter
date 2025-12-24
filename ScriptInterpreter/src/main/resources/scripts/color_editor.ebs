@@ -1602,7 +1602,7 @@ function onCloseClick {
 // print "Creating color editor screen with colors from console.cfg...";
 screen colorEditorScreen = {
     "title": "Console Configuration Color Editor",
-    "width": 1100,
+    "width": 1000,
     "height": 720,
     "maximize": false,
     "vars": [
