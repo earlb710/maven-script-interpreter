@@ -224,7 +224,7 @@ Useful when content has optimal viewing dimensions and maximizing would degrade 
 
 1. **ScreenConfig.java** - Added property storage and accessor
 2. **InterpreterScreen.java** - Added parsing and application logic
-3. **test_disable_maximize.ebs** - Test script with 3 scenarios
+3. **ScriptInterpreter/scripts/test/test_screen_disable_maximize.ebs** - Test script with 3 scenarios
 4. **SCREEN_DISABLE_MAXIMIZE_PROPERTY.md** - Complete documentation
 
 ## Build Status

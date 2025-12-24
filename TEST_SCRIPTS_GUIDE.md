@@ -16,7 +16,7 @@ Three test scripts are provided to validate and demonstrate the `disableMaximize
 
 ## 1. Quick Validation Test (Recommended for Testing)
 
-**File:** `test_disable_maximize_quick.ebs`
+**File:** `ScriptInterpreter/scripts/test/test_screen_disable_maximize_quick.ebs`
 
 ### Purpose
 Quick side-by-side comparison of three window configurations for easy validation.
@@ -36,10 +36,11 @@ Quick side-by-side comparison of three window configurations for easy validation
 ### How to Use
 ```bash
 # From EBS console
-/load test_disable_maximize_quick.ebs
+/load ScriptInterpreter/scripts/test/test_screen_disable_maximize_quick.ebs
 
 # Or from command line
-java -cp ... com.eb.script.Run test_disable_maximize_quick.ebs
+cd ScriptInterpreter
+java -cp target/classes com.eb.script.Run scripts/test/test_screen_disable_maximize_quick.ebs
 ```
 
 ### Validation Steps
@@ -51,7 +52,7 @@ java -cp ... com.eb.script.Run test_disable_maximize_quick.ebs
 
 ## 2. Interactive Test Panel (Recommended for Development)
 
-**File:** `test_disable_maximize_interactive.ebs`
+**File:** `ScriptInterpreter/scripts/test/test_screen_disable_maximize_interactive.ebs`
 
 ### Purpose
 Provides a comprehensive control panel for testing various configurations dynamically.
@@ -78,7 +79,11 @@ Provides a comprehensive control panel for testing various configurations dynami
 ### How to Use
 ```bash
 # From EBS console
-/load test_disable_maximize_interactive.ebs
+/load ScriptInterpreter/scripts/test/test_screen_disable_maximize_interactive.ebs
+
+# Or from command line
+cd ScriptInterpreter
+java -cp target/classes com.eb.script.Run scripts/test/test_screen_disable_maximize_interactive.ebs
 
 # The control panel window will open
 # Use preset buttons or configure manually
@@ -96,7 +101,7 @@ Provides a comprehensive control panel for testing various configurations dynami
 
 ## 3. Basic Demo (Simplest)
 
-**File:** `test_disable_maximize.ebs`
+**File:** `ScriptInterpreter/scripts/test/test_screen_disable_maximize.ebs`
 
 ### Purpose
 Simple static demonstration with three pre-configured windows.
@@ -114,7 +119,11 @@ Simple static demonstration with three pre-configured windows.
 ### How to Use
 ```bash
 # From EBS console
-/load test_disable_maximize.ebs
+/load ScriptInterpreter/scripts/test/test_screen_disable_maximize.ebs
+
+# Or from command line
+cd ScriptInterpreter
+java -cp target/classes com.eb.script.Run scripts/test/test_screen_disable_maximize.ebs
 ```
 
 ---
@@ -122,19 +131,19 @@ Simple static demonstration with three pre-configured windows.
 ## Which Test Script Should I Use?
 
 ### For Quick Validation
-→ **Use test_disable_maximize_quick.ebs**
+→ **Use test_screen_disable_maximize_quick.ebs**
 - Fast execution
 - Clear pass/fail indicators
 - Side-by-side comparison
 
 ### For Development & Experimentation
-→ **Use test_disable_maximize_interactive.ebs**
+→ **Use test_screen_disable_maximize_interactive.ebs**
 - Test multiple configurations
 - No need to edit script or restart
 - Keyboard shortcuts for quick testing
 
 ### For Simple Demonstration
-→ **Use test_disable_maximize.ebs**
+→ **Use test_screen_disable_maximize.ebs**
 - Minimal code
 - Good for showing basic usage
 - Easy to understand
