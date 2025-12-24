@@ -12,6 +12,11 @@
       "name": "helpContent",
       "type": "string",
       "default": ""
+    },
+    {
+      "name": "searchQuery",
+      "type": "string",
+      "default": ""
     }
   ],
   "area": [
@@ -26,7 +31,8 @@
         {
           "name": "treeArea",
           "type": "vbox",
-          "spacing": "0",
+          "spacing": "5",
+          "padding": "5",
           "minWidth": "200",
           "prefWidth": "250",
           "hgrow": "NEVER",
@@ -34,9 +40,51 @@
           "style": "-fx-border-color: #cccccc; -fx-border-width: 0 1 0 0;",
           "items": [
             {
+              "name": "searchBox",
+              "type": "hbox",
+              "spacing": "5",
+              "padding": "0",
+              "hgrow": "NEVER",
+              "vgrow": "NEVER",
+              "areas": [],
+              "items": [
+                {
+                  "name": "searchCombo",
+                  "varRef": "searchQuery",
+                  "seq": 1,
+                  "stateful": false,
+                  "hgrow": "ALWAYS",
+                  "vgrow": "NEVER",
+                  "prefWidth": "180",
+                  "display": {
+                    "type": "combobox",
+                    "labelText": "",
+                    "labelPosition": "TOP",
+                    "editable": true,
+                    "promptHelp": "Search help topics...",
+                    "options": []
+                  }
+                },
+                {
+                  "name": "searchButton",
+                  "varRef": "",
+                  "seq": 2,
+                  "stateful": false,
+                  "hgrow": "NEVER",
+                  "vgrow": "NEVER",
+                  "prefWidth": "60",
+                  "display": {
+                    "type": "button",
+                    "labelText": "Search",
+                    "onClick": "call performSearch(helpScreen.searchQuery);"
+                  }
+                }
+              ]
+            },
+            {
               "name": "helpTree",
               "varRef": "selectedTopic",
-              "seq": 1,
+              "seq": 3,
               "stateful": false,
               "hgrow": "NEVER",
               "vgrow": "ALWAYS",

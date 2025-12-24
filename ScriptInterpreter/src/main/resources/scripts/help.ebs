@@ -621,8 +621,10 @@ if areaArray != null && areaArray.length > 0 then {
     if areas != null && areas.length > 0 then {
         var treeArea: json = areas[0];
         var items: json = call json.get(treeArea, "items");
-        if items != null && items.length > 0 then {
-            var helpTreeItem: json = items[0];
+        if items != null && items.length > 1 then {
+            // First item (index 0) is the searchBox HBox
+            // Second item (index 1) is the helpTree TreeView
+            var helpTreeItem: json = items[1];
             var display: json = call json.get(helpTreeItem, "display");
             if display != null then {
                 // Wrap tree structure in array and set it
@@ -630,13 +632,37 @@ if areaArray != null && areaArray.length > 0 then {
                 call array.add(treeItemsArray, treeStructure);
                 display = call json.set(display, "treeItems", treeItemsArray);
                 helpTreeItem = call json.set(helpTreeItem, "display", display);
-                items = call json.set(items, 0, helpTreeItem);
+                items = call json.set(items, 1, helpTreeItem);
+                
+                // Now populate the search combobox options
+                var searchBox: json = items[0];
+                var searchItems: json = call json.get(searchBox, "items");
+                if searchItems != null && searchItems.length > 0 then {
+                    var searchCombo: json = searchItems[0];
+                    var comboDisplay: json = call json.get(searchCombo, "display");
+                    if comboDisplay != null then {
+                        // Collect all searchable topics
+                        var searchOptions: array[*];
+                        call collectSearchableTopics(treeStructure, "", searchOptions);
+                        
+                        // Sort the options alphabetically
+                        call array.sort(searchOptions, true);
+                        
+                        // Set the options in the combobox display
+                        comboDisplay = call json.set(comboDisplay, "options", searchOptions);
+                        searchCombo = call json.set(searchCombo, "display", comboDisplay);
+                        searchItems = call json.set(searchItems, 0, searchCombo);
+                        searchBox = call json.set(searchBox, "items", searchItems);
+                        items = call json.set(items, 0, searchBox);
+                    }
+                }
+                
                 treeArea = call json.set(treeArea, "items", items);
                 areas = call json.set(areas, 0, treeArea);
                 mainLayout = call json.set(mainLayout, "areas", areas);
                 areaArray = call json.set(areaArray, 0, mainLayout);
                 screenJson = call json.set(screenJson, "area", areaArray);
-                print "Tree items injected into screen definition";
+                print "Tree items and search options injected into screen definition";
             } else {
             }
         }
@@ -1370,6 +1396,99 @@ getHelpContent(topic: string) return string {
     content = "=== EBS Help ===\n\n";
     content = content + "Select a topic from the tree to view help documentation.\n";
     return content;
+}
+
+// Function to collect all searchable topics from tree structure
+collectSearchableTopics(node: json, prefix: string, results: array) return null {
+    // Get node value
+    var nodeValue: string = call json.getString(node, "value", "");
+    
+    // Add this node to search results if it has a value
+    if nodeValue != "" then {
+        // Build full path for display
+        var fullPath: string = "";
+        if prefix != "" then {
+            fullPath = prefix + " > " + nodeValue;
+        } else {
+            fullPath = nodeValue;
+        }
+        call array.add(results, fullPath);
+    }
+    
+    // Recursively process children
+    var children: json = call json.get(node, "children");
+    if children != null && children.length > 0 then {
+        var newPrefix: string = "";
+        if prefix != "" then {
+            newPrefix = prefix + " > " + nodeValue;
+        } else {
+            newPrefix = nodeValue;
+        }
+        
+        var i: int = 0;
+        while i < children.length {
+            var child: json = children[i];
+            call collectSearchableTopics(child, newPrefix, results);
+            i = i + 1;
+        }
+    }
+    
+    return null;
+}
+
+// Function to perform search
+performSearch(query: string) return null {
+    if query == "" then {
+        return null;
+    }
+    
+    // Normalize query to lowercase for case-insensitive search
+    var lowerQuery: string = call str.toLower(query);
+    
+    // Search through all searchable topics to find a match
+    var allTopics: array[*];
+    call collectSearchableTopics(treeStructure, "", allTopics);
+    
+    // Find the best match
+    var bestMatch: string = "";
+    var exactMatch: bool = false;
+    
+    foreach topicPath in allTopics {
+        var lowerPath: string = call str.toLower(topicPath);
+        
+        // Check for exact match on the last component (leaf node name)
+        var lastSepIdx: int = call str.lastIndexOf(topicPath, " > ", topicPath.length);
+        var leafName: string = topicPath;
+        if lastSepIdx > 0 then {
+            leafName = call str.substring(topicPath, lastSepIdx + 3, topicPath.length);
+        }
+        var lowerLeaf: string = call str.toLower(leafName);
+        
+        if lowerLeaf == lowerQuery then {
+            bestMatch = leafName;
+            exactMatch = true;
+            break;
+        } else if call str.contains(lowerLeaf, lowerQuery) then {
+            if bestMatch == "" then {
+                bestMatch = leafName;
+            }
+        } else if call str.contains(lowerPath, lowerQuery) then {
+            if bestMatch == "" then {
+                bestMatch = leafName;
+            }
+        }
+    }
+    
+    // If we found a match, update the selected topic and expand tree
+    if bestMatch != "" then {
+        helpScreen.selectedTopic = bestMatch;
+        helpScreen.helpContent = call convertToHtml(call getHelpContent(bestMatch));
+    } else {
+        // Show message if no match found
+        helpScreen.helpContent = call convertToHtml("No help topic found matching: " + query);
+    }
+    
+    return null;
 }
 
 // Create the help screen from the modified JSON
