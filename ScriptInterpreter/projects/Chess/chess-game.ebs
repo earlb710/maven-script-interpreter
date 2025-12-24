@@ -875,10 +875,12 @@ showCheckIndicators() {
 }
 
 // Set indicator for a specific cell
-// indicatorType can be: "normal", "capture", "check", "capture_check", "invalid", "checkmate", "defender"
+// indicatorType can be: "normal", "capture", "check", "capture_check", "invalid", "checkmate", "defender", "attacker"
 setIndicator(x: int, y: int, indicatorType: string) {
     var indicator: imagedata;
     if indicatorType == "capture_check" then {
+        indicator = orangeCircleIndicator;
+    } else if indicatorType == "attacker" then {
         indicator = orangeCircleIndicator;
     } else if indicatorType == "capture" then {
         indicator = redIndicator;
@@ -1734,7 +1736,7 @@ handleCellClick(x: int, y: int) {
         return;
     }
     
-    // Check if clicking on opponent's piece - show defenders
+    // Check if clicking on opponent's piece - show defenders and attackers
     if cell.pieceColor != currentPlayer then {
         // Track this opponent piece so we can restore it later
         lastOpponentX = x;
@@ -1754,7 +1756,18 @@ handleCellClick(x: int, y: int) {
             call setIndicator(defender.x, defender.y, "defender");
         }
         
-        // Update status message to show defender count
+        // Get all attackers of this piece (pieces of the current player's color that can attack it)
+        var attackers = call getAttackers(x, y, currentPlayer);
+        var attackerCount: int = attackers.length;
+        
+        // Show orange circles on all attacker positions
+        var j: int = 0;
+        for (j = 0; j < attackerCount; j = j + 1) {
+            var attacker: posType = attackers[j];
+            call setIndicator(attacker.x, attacker.y, "attacker");
+        }
+        
+        // Update status message to show defender and attacker counts
         var defenderText: string;
         if defenderCount == 0 then {
             defenderText = "No defenders";
@@ -1763,7 +1776,17 @@ handleCellClick(x: int, y: int) {
         } else {
             defenderText = defenderCount + " defenders";
         }
-        chessScreen.statusMessage = "Opponent piece: " + defenderText;
+        
+        var attackerText: string;
+        if attackerCount == 0 then {
+            attackerText = "no attackers";
+        } else if attackerCount == 1 then {
+            attackerText = "1 attacker";
+        } else {
+            attackerText = attackerCount + " attackers";
+        }
+        
+        chessScreen.statusMessage = "Opponent piece: " + defenderText + ", " + attackerText;
         
         // DO NOT set selectedX and selectedY for opponent pieces - they should not be selectable
         // selectedX and selectedY remain -1 to prevent moving opponent pieces
@@ -2655,10 +2678,10 @@ selectBestMoveEasy(playerColor: int) return json {
         return null;  // No legal moves (shouldn't happen in normal play)
     }
     
-    // Find moves that capture pieces and track the highest value capture
+    // Find moves that capture pieces and evaluate them considering defenders
     var bestCaptureMove: json = null;
     var bestCaptureValue: int = 0;
-    var captureMovesFound: bool = false;
+    var safeCaptureMovesFound: bool = false;
     
     var i: int = 0;
     for (i = 0; i < moveCount; i = i + 1) {
@@ -2668,24 +2691,61 @@ selectBestMoveEasy(playerColor: int) return json {
         if destCellValue != -1 then {
             var destCell = ChessCell(destCellValue);
             if destCell.pieceType != EMPTY then {
-                // This is a capture move
-                captureMovesFound = true;
+                // This is a capture move - get the value of the piece being captured
                 var captureValue: int = call getPieceValue(destCell.pieceType);
                 
-                if captureValue > bestCaptureValue then {
-                    bestCaptureValue = captureValue;
-                    bestCaptureMove = move;
+                // Get the value of the attacking piece
+                var attackerPieceType: int = move.pieceType;
+                var attackerValue: int = call getPieceValue(attackerPieceType);
+                
+                // Check if opponent pieces can attack the destination square (potential recapture)
+                // Get the opponent's color
+                var opponentColor: int = WHITE;
+                if playerColor == WHITE then {
+                    opponentColor = BLACK;
+                }
+                
+                // Find all opponent pieces that could recapture at the destination
+                var recapturers = call getAttackers(move.toX, move.toY, opponentColor);
+                var recapturerCount: int = recapturers.length;
+                
+                // Decide if this capture is safe
+                var isSafeCapture: bool = false;
+                
+                if recapturerCount == 0 then {
+                    // No one can recapture - safe to capture
+                    isSafeCapture = true;
+                } else {
+                    // Opponent can recapture - calculate net material gain/loss
+                    // We gain: captureValue
+                    // We lose: attackerValue (if opponent recaptures)
+                    // Net gain = captureValue - attackerValue (if positive, we gain material)
+                    var netGain: int = captureValue - attackerValue;
+                    
+                    // Only capture if we gain material or break even
+                    if netGain >= 0 then {
+                        isSafeCapture = true;
+                    }
+                }
+                
+                // If this is a safe capture, consider it
+                if isSafeCapture then {
+                    safeCaptureMovesFound = true;
+                    if captureValue > bestCaptureValue then {
+                        bestCaptureValue = captureValue;
+                        bestCaptureMove = move;
+                    }
                 }
             }
         }
     }
     
-    // If we found a capture move, return the best one
-    if captureMovesFound then {
+    // If we found a safe capture move, return the best one
+    if safeCaptureMovesFound then {
         return bestCaptureMove;
     }
     
-    // No captures available - select a random move
+    // No safe captures available - select a random move
     // Defensive check (should already be handled by moveCount check above)
     if moveCount == 0 then {
         return null;
