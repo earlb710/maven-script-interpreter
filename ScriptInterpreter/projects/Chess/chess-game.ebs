@@ -161,10 +161,10 @@ var capturedBlackPieces: int[16];  // Max 16 pieces per color
 var capturedBlackCount: int = 0;
 
 // Undo/Redo functionality for 2-player games
-// Store board states as separate variables (workaround for array limitations)
-// Undo/redo board state storage using 2D arrays (10 moves x 64 cells)
-var undoBoards: array.bitmap[10, 64];
-var redoBoards: array.bitmap[10, 64];
+// Undo/redo board state storage using 1D arrays indexed as [slot * 64 + cell]
+// This stores 10 moves x 64 cells = 640 total elements
+var undoBoards: array.bitmap[640];
+var redoBoards: array.bitmap[640];
 
 // Other state arrays (max 10 moves for undo/redo)
 var undoStackCurrentPlayer: int[10];
@@ -185,9 +185,9 @@ var undoStackLastMoveFromX: int[10];
 var undoStackLastMoveFromY: int[10];
 var undoStackLastMoveToX: int[10];
 var undoStackLastMoveToY: int[10];
-// Captured pieces stored as 2D arrays (10 moves x 16 pieces max per color)
-var undoStackCapturedWhitePieces: int[10, 16];
-var undoStackCapturedBlackPieces: int[10, 16];
+// Captured pieces stored as 1D arrays indexed as [slot * 16 + piece] (10 moves x 16 pieces max per color = 160 elements)
+var undoStackCapturedWhitePieces: int[160];
+var undoStackCapturedBlackPieces: int[160];
 var undoStackCount: int = 0;
 
 // Redo stacks (same structure as undo)
@@ -209,8 +209,8 @@ var redoStackLastMoveFromX: int[10];
 var redoStackLastMoveFromY: int[10];
 var redoStackLastMoveToX: int[10];
 var redoStackLastMoveToY: int[10];
-var redoStackCapturedWhitePieces: int[10, 16];
-var redoStackCapturedBlackPieces: int[10, 16];
+var redoStackCapturedWhitePieces: int[160];
+var redoStackCapturedBlackPieces: int[160];
 var redoStackCount: int = 0;
 
 // Board layer images (bottom layer - checkerboard)
@@ -381,7 +381,7 @@ function clearCapturedPieces() {
 
 // Undo/Redo functionality
 
-// No helper functions needed - 2D arrays are accessed directly using undoBoards[slot, cell] syntax
+// No helper functions needed - arrays are accessed using calculated indices [slot * 64 + cell]
 
 // Save current game state to undo stack (before making a move)
 function saveGameState() {
@@ -396,9 +396,9 @@ function saveGameState() {
         return;
     }
     
-    // Save board state using 2D array (copy all 64 cells)
+    // Save board state using calculated index (copy all 64 cells)
     for (var i: int = 0; i < 64; i++) {
-        undoBoards[undoStackCount, i] = board[i];
+        undoBoards[undoStackCount * 64 + i] = board[i];
     }
     
     // Save game variables
@@ -418,14 +418,14 @@ function saveGameState() {
     undoStackEnPassantTargetX[undoStackCount] = enPassantTargetX;
     undoStackEnPassantTargetY[undoStackCount] = enPassantTargetY;
     
-    // Save captured pieces using 2D arrays
+    // Save captured pieces using calculated index
     undoStackCapturedWhiteCount[undoStackCount] = capturedWhiteCount;
     undoStackCapturedBlackCount[undoStackCount] = capturedBlackCount;
     for (var i: int = 0; i < capturedWhiteCount; i++) {
-        undoStackCapturedWhitePieces[undoStackCount, i] = capturedWhitePieces[i];
+        undoStackCapturedWhitePieces[undoStackCount * 16 + i] = capturedWhitePieces[i];
     }
     for (var i: int = 0; i < capturedBlackCount; i++) {
-        undoStackCapturedBlackPieces[undoStackCount, i] = capturedBlackPieces[i];
+        undoStackCapturedBlackPieces[undoStackCount * 16 + i] = capturedBlackPieces[i];
     }
     
     // Save move history
@@ -449,9 +449,9 @@ function saveGameState() {
 
 // Restore game state from undo stack at given index
 function restoreGameStateFromUndo(index: int) {
-    // Restore board state using 2D array
+    // Restore board state using calculated index
     for (var i: int = 0; i < 64; i++) {
-        board[i] = undoBoards[index, i];
+        board[i] = undoBoards[index * 64 + i];
     }
     
     // Restore game variables
@@ -471,14 +471,14 @@ function restoreGameStateFromUndo(index: int) {
     enPassantTargetX = undoStackEnPassantTargetX[index];
     enPassantTargetY = undoStackEnPassantTargetY[index];
     
-    // Restore captured pieces from 2D arrays
+    // Restore captured pieces from calculated index
     capturedWhiteCount = undoStackCapturedWhiteCount[index];
     capturedBlackCount = undoStackCapturedBlackCount[index];
     for (var i: int = 0; i < capturedWhiteCount; i++) {
-        capturedWhitePieces[i] = undoStackCapturedWhitePieces[index, i];
+        capturedWhitePieces[i] = undoStackCapturedWhitePieces[index * 16 + i];
     }
     for (var i: int = 0; i < capturedBlackCount; i++) {
-        capturedBlackPieces[i] = undoStackCapturedBlackPieces[index, i];
+        capturedBlackPieces[i] = undoStackCapturedBlackPieces[index * 16 + i];
     }
     
     // Restore move history
@@ -516,9 +516,9 @@ function restoreGameStateFromUndo(index: int) {
 
 // Restore game state from redo stack at given index
 function restoreGameStateFromRedo(index: int) {
-    // Restore board state using 2D array
+    // Restore board state using calculated index
     for (var i: int = 0; i < 64; i++) {
-        board[i] = redoBoards[index, i];
+        board[i] = redoBoards[index * 64 + i];
     }
     
     // Restore game variables
@@ -538,14 +538,14 @@ function restoreGameStateFromRedo(index: int) {
     enPassantTargetX = redoStackEnPassantTargetX[index];
     enPassantTargetY = redoStackEnPassantTargetY[index];
     
-    // Restore captured pieces from 2D arrays
+    // Restore captured pieces from calculated index
     capturedWhiteCount = redoStackCapturedWhiteCount[index];
     capturedBlackCount = redoStackCapturedBlackCount[index];
     for (var i: int = 0; i < capturedWhiteCount; i++) {
-        capturedWhitePieces[i] = redoStackCapturedWhitePieces[index, i];
+        capturedWhitePieces[i] = redoStackCapturedWhitePieces[index * 16 + i];
     }
     for (var i: int = 0; i < capturedBlackCount; i++) {
-        capturedBlackPieces[i] = redoStackCapturedBlackPieces[index, i];
+        capturedBlackPieces[i] = redoStackCapturedBlackPieces[index * 16 + i];
     }
     
     // Restore move history
@@ -613,9 +613,9 @@ function undoMove() {
         return;
     }
     
-    // Save current state to redo stack using 2D arrays
+    // Save current state to redo stack using calculated index
     for (var i: int = 0; i < 64; i++) {
-        redoBoards[redoStackCount, i] = board[i];
+        redoBoards[redoStackCount * 64 + i] = board[i];
     }
     redoStackCurrentPlayer[redoStackCount] = currentPlayer;
     redoStackTimerWhite[redoStackCount] = timerWhite;
@@ -631,10 +631,10 @@ function undoMove() {
     redoStackCapturedWhiteCount[redoStackCount] = capturedWhiteCount;
     redoStackCapturedBlackCount[redoStackCount] = capturedBlackCount;
     for (var i: int = 0; i < capturedWhiteCount; i++) {
-        redoStackCapturedWhitePieces[redoStackCount, i] = capturedWhitePieces[i];
+        redoStackCapturedWhitePieces[redoStackCount * 16 + i] = capturedWhitePieces[i];
     }
     for (var i: int = 0; i < capturedBlackCount; i++) {
-        redoStackCapturedBlackPieces[redoStackCount, i] = capturedBlackPieces[i];
+        redoStackCapturedBlackPieces[redoStackCount * 16 + i] = capturedBlackPieces[i];
     }
     redoStackMoveHistory[redoStackCount] = chessScreen.moveHistory;
     redoStackLastMoveFromX[redoStackCount] = lastMoveFromX;
@@ -662,9 +662,9 @@ function redoMove() {
         return;
     }
     
-    // Save current state to undo stack using 2D arrays
+    // Save current state to undo stack using calculated index
     for (var i: int = 0; i < 64; i++) {
-        undoBoards[undoStackCount, i] = board[i];
+        undoBoards[undoStackCount * 64 + i] = board[i];
     }
     undoStackCurrentPlayer[undoStackCount] = currentPlayer;
     undoStackTimerWhite[undoStackCount] = timerWhite;
@@ -680,10 +680,10 @@ function redoMove() {
     undoStackCapturedWhiteCount[undoStackCount] = capturedWhiteCount;
     undoStackCapturedBlackCount[undoStackCount] = capturedBlackCount;
     for (var i: int = 0; i < capturedWhiteCount; i++) {
-        undoStackCapturedWhitePieces[undoStackCount, i] = capturedWhitePieces[i];
+        undoStackCapturedWhitePieces[undoStackCount * 16 + i] = capturedWhitePieces[i];
     }
     for (var i: int = 0; i < capturedBlackCount; i++) {
-        undoStackCapturedBlackPieces[undoStackCount, i] = capturedBlackPieces[i];
+        undoStackCapturedBlackPieces[undoStackCount * 16 + i] = capturedBlackPieces[i];
     }
     undoStackMoveHistory[undoStackCount] = chessScreen.moveHistory;
     undoStackLastMoveFromX[undoStackCount] = lastMoveFromX;
