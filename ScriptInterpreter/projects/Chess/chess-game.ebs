@@ -409,7 +409,7 @@ function capturedPiecesToString(count: int) return string {
         if i > 0 then {
             result = result + ",";
         }
-        result = result + call string.fromInt(capturedWhitePieces[i]);
+        result = result + capturedWhitePieces[i];
     }
     return result;
 }
@@ -422,7 +422,7 @@ function stringToCapturedPieces(str: string) return int {
     var parts: string[] = call string.split(str, ",");
     var count: int = parts.length;
     for (var i: int = 0; i < count; i++) {
-        capturedWhitePieces[i] = call string.toInt(parts[i]);
+        capturedWhitePieces[i] = int(parts[i]);
     }
     return count;
 }
@@ -437,7 +437,7 @@ function capturedBlackPiecesToString(count: int) return string {
         if i > 0 then {
             result = result + ",";
         }
-        result = result + call string.fromInt(capturedBlackPieces[i]);
+        result = result + capturedBlackPieces[i];
     }
     return result;
 }
@@ -450,7 +450,7 @@ function stringToBlackCapturedPieces(str: string) return int {
     var parts: string[] = call string.split(str, ",");
     var count: int = parts.length;
     for (var i: int = 0; i < count; i++) {
-        capturedBlackPieces[i] = call string.toInt(parts[i]);
+        capturedBlackPieces[i] = int(parts[i]);
     }
     return count;
 }
