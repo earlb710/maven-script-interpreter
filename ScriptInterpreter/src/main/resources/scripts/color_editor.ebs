@@ -1911,14 +1911,6 @@ screen colorEditorScreen = {
         			"spacing":4, "padding":4,
                                 "areas": [
                                     {
-                                        "name": "infoArea",
-                                        "type": "hbox",
-                                        "style": "-fx-spacing: 5; -fx-padding: 5 5 10 5; -fx-alignment: CENTER_LEFT;",
-                                        "items": [
-                                            {"name": "infoLabel", "type": "label", "labelText": "Configure console colors and syntax highlighting. Changes are saved per profile. Click 'Save and Apply' to apply changes immediately.", "style": "-fx-text-fill: #555555; -fx-font-size: 11px;"}
-                                        ]
-                                    },
-                                    {
                                         "name": "profileArea",
                                         "type": "hbox",
                                         "style": "-fx-spacing: 5; -fx-padding: 1; -fx-alignment: CENTER_LEFT;",
@@ -1934,47 +1926,54 @@ screen colorEditorScreen = {
        					"spacing":4, "padding":4,
                                         "areas": [
                                             {
-                                                "name": "leftColumn",
+                                                "name": "leftSideArea",
                                                 "type": "vbox",
         					"spacing":4, "padding":4,
                                                 "areas": [
                                                     {
-                                                        "name": "consoleColorsArea",
-                                                        "type": "vbox",
-                                                        "groupBorder": "lowered",
-                                                        "groupBorderColor": "#ffffff",
-                                                        "groupBorderWidth": "2",
-                                                        "groupBorderRadius": "4",
-                                                        "groupLabelColor": "#444444",
-                                                        "groupLabelBackground": "#efefef",
-                                                        "groupLabelText": "Console Colors",
-                                                        "groupLabelAlignment": "left",
-                                                        "groupLabelOffset": "bottom",
+                                                        "name": "topLeftRow",
+                                                        "type": "hbox",
         						"spacing":4, "padding":4,
-                                                        "items": [
-                                                            {"name": "info_item", "varref": "info"},
-                                                            {"name": "comment_item", "varref": "comment"},
-                                                            {"name": "error_item", "varref": "error"},
-                                                            {"name": "warn_item", "varref": "warn"},
-                                                            {"name": "ok_item", "varref": "ok"}
-                                                        ]
-                                                    },
-                                                    {
-                                                        "name": "findColorsArea",
-                                                        "type": "vbox",
-                                                        "groupBorder": "lowered",
-                                                        "groupBorderColor": "#ffffff",
-                                                        "groupBorderWidth": "2",
-                                                        "groupLabelText": "Find Colors",
-                                                        "groupLabelColor": "#444444",
-                                                        "groupLabelBackground": "#efefef",
-                                                        "groupLabelAlignment": "left",
-                                                        "groupLabelOffset": "bottom",
-        						"spacing":4, "padding":4,
-                                                        "items": [
-                                                            {"name": "findHighlightColor_item", "varref": "findHighlightColor"},
-                                                            {"name": "findHighlightBackground_item", "varref": "findHighlightBackground"},
-                                                            {"name": "currentFindHighlightBg_item", "varref": "currentFindHighlightBg"}
+                                                        "areas": [
+                                                            {
+                                                                "name": "consoleColorsArea",
+                                                                "type": "vbox",
+                                                                "groupBorder": "lowered",
+                                                                "groupBorderColor": "#ffffff",
+                                                                "groupBorderWidth": "2",
+                                                                "groupBorderRadius": "4",
+                                                                "groupLabelColor": "#444444",
+                                                                "groupLabelBackground": "#efefef",
+                                                                "groupLabelText": "Console Colors",
+                                                                "groupLabelAlignment": "left",
+                                                                "groupLabelOffset": "bottom",
+        							"spacing":4, "padding":4,
+                                                                "items": [
+                                                                    {"name": "info_item", "varref": "info"},
+                                                                    {"name": "comment_item", "varref": "comment"},
+                                                                    {"name": "error_item", "varref": "error"},
+                                                                    {"name": "warn_item", "varref": "warn"},
+                                                                    {"name": "ok_item", "varref": "ok"}
+                                                                ]
+                                                            },
+                                                            {
+                                                                "name": "findColorsArea",
+                                                                "type": "vbox",
+                                                                "groupBorder": "lowered",
+                                                                "groupBorderColor": "#ffffff",
+                                                                "groupBorderWidth": "2",
+                                                                "groupLabelText": "Find Colors",
+                                                                "groupLabelColor": "#444444",
+                                                                "groupLabelBackground": "#efefef",
+                                                                "groupLabelAlignment": "left",
+                                                                "groupLabelOffset": "bottom",
+        							"spacing":4, "padding":4,
+                                                                "items": [
+                                                                    {"name": "findHighlightColor_item", "varref": "findHighlightColor"},
+                                                                    {"name": "findHighlightBackground_item", "varref": "findHighlightBackground"},
+                                                                    {"name": "currentFindHighlightBg_item", "varref": "currentFindHighlightBg"}
+                                                                ]
+                                                            }
                                                         ]
                                                     }
                                                 ]
@@ -2060,6 +2059,14 @@ screen colorEditorScreen = {
                                                     }
                                                 ]
                                             }
+                                        ]
+                                    },
+                                    {
+                                        "name": "infoArea",
+                                        "type": "hbox",
+                                        "style": "-fx-spacing: 5; -fx-padding: 5 5 10 5; -fx-alignment: CENTER_LEFT;",
+                                        "items": [
+                                            {"name": "infoLabel", "type": "label", "labelText": "Configure console colors and syntax highlighting. Changes are saved per profile. Click 'Save and Apply' to apply changes immediately.", "style": "-fx-text-fill: #555555; -fx-font-size: 11px;"}
                                         ]
                                     }
                                 ]
