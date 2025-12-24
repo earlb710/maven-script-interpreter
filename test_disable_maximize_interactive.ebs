@@ -1,0 +1,286 @@
+// Interactive test script for disableMaximize screen property
+// This script creates a control panel to dynamically test the disableMaximize feature
+
+screen disableMaximizeTest = {
+    "title": "Disable Maximize - Interactive Test",
+    "width": 700,
+    "height": 550,
+    "sets": [
+        {
+            "setname": "controls",
+            "vars": [
+                {"name": "testType", "type": "string", "default": "normal"},
+                {"name": "testWidth", "type": "int", "default": 600},
+                {"name": "testHeight", "type": "int", "default": 400},
+                {"name": "testResizable", "type": "bool", "default": true},
+                {"name": "testDisableMaximize", "type": "bool", "default": false},
+                {"name": "testTitle", "type": "string", "default": "Test Window"},
+                {"name": "status", "type": "string", "default": "Click 'Create Test Window' to start testing"},
+                {"name": "instructions", "type": "string", "default": "Instructions:\n1. Configure the window properties below\n2. Click 'Create Test Window'\n3. Try to maximize the test window\n4. Observe the behavior based on your settings"}
+            ]
+        }
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "spacing": "15",
+            "padding": "20",
+            "areaBackground": "#f5f5f5",
+            "items": [
+                {
+                    "name": "titleLabel",
+                    "varRef": "instructions",
+                    "sequence": 1,
+                    "display": {
+                        "type": "textarea",
+                        "labelText": "Test Instructions",
+                        "labelBold": true,
+                        "labelFontSize": "14px",
+                        "height": 4,
+                        "itemColor": "#333333"
+                    }
+                },
+                {
+                    "name": "separator1",
+                    "varRef": "instructions",
+                    "sequence": 2,
+                    "display": {
+                        "type": "separator"
+                    }
+                },
+                {
+                    "name": "testTypeLabel",
+                    "varRef": "testType",
+                    "sequence": 3,
+                    "display": {
+                        "type": "label",
+                        "labelText": "Quick Test Scenarios",
+                        "labelBold": true,
+                        "itemColor": "#0066cc"
+                    }
+                },
+                {
+                    "name": "scenarioButtons",
+                    "varRef": "testType",
+                    "sequence": 4,
+                    "hgrow": "ALWAYS",
+                    "display": {
+                        "type": "hbox",
+                        "spacing": "10"
+                    }
+                }
+            ],
+            "areas": [
+                {
+                    "name": "scenarioArea",
+                    "type": "hbox",
+                    "spacing": "10",
+                    "padding": "10",
+                    "areaBackground": "#e3f2fd",
+                    "style": "-fx-border-color: #1976d2; -fx-border-width: 1; -fx-border-radius: 5;",
+                    "items": [
+                        {
+                            "name": "normalBtn",
+                            "varRef": "testType",
+                            "sequence": 1,
+                            "display": {
+                                "type": "button",
+                                "labelText": "Normal Window",
+                                "shortcut": "Alt+1",
+                                "onClick": "testResizable = true; testDisableMaximize = false; testTitle = 'Normal Window'; status = 'Preset: Normal window (can resize and maximize)';"
+                            }
+                        },
+                        {
+                            "name": "noMaxBtn",
+                            "varRef": "testType",
+                            "sequence": 2,
+                            "display": {
+                                "type": "button",
+                                "labelText": "No Maximize",
+                                "shortcut": "Alt+2",
+                                "onClick": "testResizable = true; testDisableMaximize = true; testTitle = 'No Maximize Window'; status = 'Preset: Can resize but CANNOT maximize';"
+                            }
+                        },
+                        {
+                            "name": "fixedBtn",
+                            "varRef": "testType",
+                            "sequence": 3,
+                            "display": {
+                                "type": "button",
+                                "labelText": "Fixed Dialog",
+                                "shortcut": "Alt+3",
+                                "onClick": "testResizable = false; testDisableMaximize = true; testTitle = 'Fixed Dialog'; status = 'Preset: Fixed size dialog (no resize or maximize)';"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "configArea",
+                    "type": "vbox",
+                    "spacing": "10",
+                    "padding": "15",
+                    "areaBackground": "#fff3e0",
+                    "style": "-fx-border-color: #ff9800; -fx-border-width: 1; -fx-border-radius: 5;",
+                    "items": [
+                        {
+                            "name": "configTitle",
+                            "varRef": "testType",
+                            "sequence": 1,
+                            "display": {
+                                "type": "label",
+                                "labelText": "Window Configuration",
+                                "labelBold": true,
+                                "itemColor": "#e65100"
+                            }
+                        },
+                        {
+                            "name": "titleField",
+                            "varRef": "testTitle",
+                            "sequence": 2,
+                            "display": {
+                                "type": "textfield",
+                                "labelText": "Window Title:",
+                                "maxLength": 50
+                            }
+                        },
+                        {
+                            "name": "widthField",
+                            "varRef": "testWidth",
+                            "sequence": 3,
+                            "display": {
+                                "type": "textfield",
+                                "labelText": "Width:",
+                                "contentAlignment": "right"
+                            }
+                        },
+                        {
+                            "name": "heightField",
+                            "varRef": "testHeight",
+                            "sequence": 4,
+                            "display": {
+                                "type": "textfield",
+                                "labelText": "Height:",
+                                "contentAlignment": "right"
+                            }
+                        },
+                        {
+                            "name": "resizableCheck",
+                            "varRef": "testResizable",
+                            "sequence": 5,
+                            "display": {
+                                "type": "checkbox",
+                                "labelText": "Resizable",
+                                "itemColor": "#d84315"
+                            }
+                        },
+                        {
+                            "name": "disableMaxCheck",
+                            "varRef": "testDisableMaximize",
+                            "sequence": 6,
+                            "display": {
+                                "type": "checkbox",
+                                "labelText": "Disable Maximize (NEW FEATURE)",
+                                "itemColor": "#1b5e20",
+                                "itemBold": true
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "actionArea",
+                    "type": "vbox",
+                    "spacing": "10",
+                    "padding": "15",
+                    "areaBackground": "#e8f5e9",
+                    "style": "-fx-border-color: #4caf50; -fx-border-width: 1; -fx-border-radius: 5;",
+                    "items": [
+                        {
+                            "name": "createBtn",
+                            "varRef": "testType",
+                            "sequence": 1,
+                            "display": {
+                                "type": "button",
+                                "labelText": "Create Test Window",
+                                "shortcut": "Ctrl+T",
+                                "onClick": "call createTestWindow();"
+                            }
+                        },
+                        {
+                            "name": "statusField",
+                            "varRef": "status",
+                            "sequence": 2,
+                            "display": {
+                                "type": "textarea",
+                                "labelText": "Status:",
+                                "height": 3,
+                                "itemColor": "#1565c0",
+                                "labelBold": true
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+};
+
+// Function to create the test window dynamically
+createTestWindow() {
+    // Build the screen configuration dynamically
+    string:screenName = "testWindow_" + string.valueOf(system.currentTimeMillis());
+    
+    // Create screen definition using the configured values
+    json:screenDef = {
+        "title": testTitle,
+        "width": testWidth,
+        "height": testHeight,
+        "resizable": testResizable,
+        "disableMaximize": testDisableMaximize,
+        "vars": [
+            {
+                "name": "testInfo",
+                "type": "string",
+                "default": "Test Window Information:\n\nResizable: " + string.valueOf(testResizable) + "\nDisable Maximize: " + string.valueOf(testDisableMaximize) + "\n\nTry to maximize this window:\n- Click the maximize button in the title bar\n- Use keyboard shortcuts (varies by OS)\n- Double-click the title bar\n\nResult: " + if (testDisableMaximize) then "Window CANNOT be maximized" else "Window CAN be maximized",
+                "display": {
+                    "type": "textarea",
+                    "labelText": "Test Info",
+                    "height": 10
+                }
+            }
+        ]
+    };
+    
+    // Use screen.define to create the screen dynamically
+    screen.define(screenName, screenDef);
+    
+    // Show the test window
+    show screen screenName;
+    
+    // Update status
+    status = "Test window created: '" + testTitle + "'\nResizable=" + string.valueOf(testResizable) + ", DisableMaximize=" + string.valueOf(testDisableMaximize) + "\n\nNow try to maximize the test window and observe the behavior!";
+    
+    return null;
+}
+
+// Show the control panel
+show screen disableMaximizeTest;
+
+println("=".repeat(60));
+println("Disable Maximize - Interactive Test");
+println("=".repeat(60));
+println("");
+println("An interactive test panel has been opened.");
+println("Use it to create test windows with different configurations.");
+println("");
+println("Quick shortcuts:");
+println("  Alt+1 = Normal window (can maximize)");
+println("  Alt+2 = No maximize window");
+println("  Alt+3 = Fixed dialog");
+println("  Ctrl+T = Create test window");
+println("");
+println("Test the disableMaximize feature by:");
+println("1. Using preset scenarios OR configuring manually");
+println("2. Creating a test window");
+println("3. Trying to maximize it");
+println("=".repeat(60));
