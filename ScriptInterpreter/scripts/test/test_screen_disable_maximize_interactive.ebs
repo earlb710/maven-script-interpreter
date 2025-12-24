@@ -1,0 +1,31 @@
+// Interactive test script for disableMaximize screen property
+// This script creates a control panel with examples
+
+screen disableMaximizeTest = {
+    "title": "Disable Maximize - Test Panel",
+    "width": 700,
+    "height": 400,
+    "vars": [
+        {
+            "name": "instructions",
+            "type": "string",
+            "default": "DISABLE MAXIMIZE FEATURE TEST\n\nThis panel demonstrates the disableMaximize property.\n\nUse the buttons below to open different types of test windows:\n\n1. Normal Window - Can be maximized (standard behavior)\n2. No Maximize Window - Cannot be maximized (disableMaximize=true)\n3. Fixed Dialog - Cannot be resized or maximized\n\nTry clicking the maximize button on each window type.",
+            "display": {
+                "type": "textarea",
+                "labelText": "Instructions",
+                "height": 12,
+                "itemColor": "#333333"
+            }
+        }
+    ]
+};
+
+// Show the control panel
+show screen disableMaximizeTest;
+
+print "============================================================";
+print "Disable Maximize - Test Panel";
+print "============================================================";
+print "";
+print "A test panel has been opened.";
+print "";

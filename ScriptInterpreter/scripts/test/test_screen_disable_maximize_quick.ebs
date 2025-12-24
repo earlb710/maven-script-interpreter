@@ -1,0 +1,105 @@
+// Quick validation test for disableMaximize property
+// This script creates side-by-side windows for easy comparison
+
+print "======================================================================";
+print "Quick Test: disableMaximize Property";
+print "======================================================================";
+
+// Test 1: Control window (normal behavior)
+screen controlWindow = {
+    "title": "CONTROL: Can Maximize",
+    "width": 500,
+    "height": 350,
+    "resizable": true,
+    "vars": [
+        {
+            "name": "info1",
+            "type": "string",
+            "default": "CONTROL WINDOW\n\nThis is a normal window with default settings.\n\nExpected behavior:\n✓ CAN be resized\n✓ CAN be maximized\n\nTry clicking the maximize button →",
+            "display": {
+                "type": "textarea",
+                "height": 10,
+                "itemColor": "#006600",
+                "itemBold": true
+            }
+        }
+    ]
+};
+
+// Test 2: Test window (disableMaximize = true)
+screen testWindow = {
+    "title": "TEST: Cannot Maximize",
+    "width": 500,
+    "height": 350,
+    "resizable": true,
+    "disableMaximize": true,
+    "vars": [
+        {
+            "name": "info2",
+            "type": "string",
+            "default": "TEST WINDOW (disableMaximize: true)\n\nThis window has the new disableMaximize property enabled.\n\nExpected behavior:\n✓ CAN be resized\n✗ CANNOT be maximized\n\nTry clicking the maximize button →",
+            "display": {
+                "type": "textarea",
+                "height": 10,
+                "itemColor": "#cc0000",
+                "itemBold": true
+            }
+        }
+    ]
+};
+
+// Test 3: Fixed dialog
+screen fixedWindow = {
+    "title": "FIXED: No Resize or Maximize",
+    "width": 500,
+    "height": 350,
+    "resizable": false,
+    "disableMaximize": true,
+    "vars": [
+        {
+            "name": "info3",
+            "type": "string",
+            "default": "FIXED WINDOW\n\nThis window is completely fixed.\n\nExpected behavior:\n✗ CANNOT be resized\n✗ CANNOT be maximized\n\nTry resizing or maximizing →",
+            "display": {
+                "type": "textarea",
+                "height": 10,
+                "itemColor": "#0066cc",
+                "itemBold": true
+            }
+        }
+    ]
+};
+
+// Show all windows
+show screen controlWindow;
+show screen testWindow;
+show screen fixedWindow;
+
+print "";
+print "✓ Three test windows have been created:";
+print "";
+print "  1. CONTROL: Can Maximize (green text)";
+print "     - Standard window behavior";
+print "     - Maximize button WORKS";
+print "";
+print "  2. TEST: Cannot Maximize (red text)";
+print "     - New disableMaximize property enabled";
+print "     - Maximize button DISABLED";
+print "";
+print "  3. FIXED: No Resize or Maximize (blue text)";
+print "     - Both resizable=false and disableMaximize=true";
+print "     - Completely fixed window size";
+print "";
+print "VALIDATION STEPS:";
+print "  1. Click the maximize button on the CONTROL window";
+print "     → Should maximize successfully";
+print "";
+print "  2. Click the maximize button on the TEST window";
+print "     → Should NOT maximize (stays same size)";
+print "";
+print "  3. Try to resize the FIXED window by dragging edges";
+print "     → Should NOT resize";
+print "";
+print "======================================================================";
+print "Test complete! Compare the three windows to validate the feature.";
+print "======================================================================";

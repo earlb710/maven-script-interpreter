@@ -3310,6 +3310,118 @@ formScreen.isActive = false;
 - **Data Binding**: Variable changes immediately reflected in UI
 - **Reusable**: Closed screens can be shown again (configuration is preserved)
 
+### Screen Window Properties
+
+Screen windows support various configuration properties that control their appearance and behavior:
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `title` | string | `""` | Window title displayed in title bar |
+| `width` | int | `800` | Initial window width in pixels |
+| `height` | int | `600` | Initial window height in pixels |
+| `maximize` | boolean | `false` | Start window in maximized state |
+| `resizable` | boolean | `true` | Allow window to be resized by user |
+| `disableMaximize` | boolean | `false` | Prevent window from being maximized |
+| `showMenu` | boolean | `true` | Show the Edit menu bar at top of window |
+
+#### Window Size and State Properties
+
+```javascript
+// Basic window configuration
+screen basicWindow = {
+    "title": "My Application",
+    "width": 800,
+    "height": 600
+};
+
+// Start maximized
+screen maximizedWindow = {
+    "title": "Maximized Window",
+    "width": 1024,
+    "height": 768,
+    "maximize": true  // Window opens in maximized state
+};
+
+// Fixed size window (cannot resize)
+screen fixedWindow = {
+    "title": "Fixed Size Dialog",
+    "width": 400,
+    "height": 300,
+    "resizable": false  // User cannot resize window
+};
+```
+
+#### Disable Maximize Property
+
+The `disableMaximize` property prevents users from maximizing a window, useful for dialogs and utility windows that should maintain a specific size:
+
+```javascript
+// Window that can be resized but not maximized
+screen utilityWindow = {
+    "title": "Utility Panel",
+    "width": 600,
+    "height": 400,
+    "resizable": true,        // Can resize by dragging edges
+    "disableMaximize": true,  // Cannot maximize window
+    "vars": [ /* ... */ ]
+};
+
+// Completely fixed dialog (no resize, no maximize)
+screen fixedDialog = {
+    "title": "Settings Dialog",
+    "width": 500,
+    "height": 350,
+    "resizable": false,
+    "disableMaximize": true,  // Extra protection against maximization
+    "vars": [ /* ... */ ]
+};
+
+// Normal window (default behavior)
+screen normalWindow = {
+    "title": "Document Editor",
+    "width": 900,
+    "height": 700,
+    // resizable defaults to true
+    // disableMaximize defaults to false
+    // User can resize and maximize freely
+    "vars": [ /* ... */ ]
+};
+```
+
+**How `disableMaximize` works:**
+- When `true`, prevents all maximization attempts (button click, keyboard shortcuts, double-click title bar)
+- Works independently of `resizable` - window can be resizable but not maximizable
+- The maximize button remains visible but becomes non-functional (JavaFX limitation)
+- Useful for maintaining consistent window layout and preventing UI issues
+
+**Common Use Cases:**
+- **Dialog Windows**: Settings, preferences, about dialogs
+- **Utility Windows**: Calculators, color pickers, tool palettes
+- **Fixed-Layout Forms**: Forms that look best at specific dimensions
+- **Child Windows**: Secondary windows that shouldn't dominate screen
+
+**Property Combinations:**
+
+| `resizable` | `disableMaximize` | Result |
+|-------------|-------------------|--------|
+| `true` | `false` | Normal window - can resize and maximize (default) |
+| `true` | `true` | Can resize but cannot maximize |
+| `false` | `false` | Fixed size but can maximize (size doesn't change) |
+| `false` | `true` | Completely fixed - no resize or maximize |
+
+#### Menu Visibility Property
+
+```javascript
+// Hide the Edit menu for cleaner interface
+screen cleanWindow = {
+    "title": "Clean Interface",
+    "width": 800,
+    "height": 600,
+    "showMenu": false,  // No menu bar at top
+    "vars": [ /* ... */ ]
+};
+```
+
 ---
 
 ## Built-in Functions
