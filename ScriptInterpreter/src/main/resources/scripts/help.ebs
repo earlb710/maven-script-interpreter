@@ -1399,7 +1399,7 @@ getHelpContent(topic: string) return string {
 }
 
 // Function to collect all searchable topics from tree structure
-collectSearchableTopics(node: json, prefix: string, results: array) return null {
+collectSearchableTopics(node: json, prefix: string, results: json) {
     // Get node value
     var nodeValue: string = call json.getString(node, "value", "");
     
@@ -1432,14 +1432,12 @@ collectSearchableTopics(node: json, prefix: string, results: array) return null 
             i = i + 1;
         }
     }
-    
-    return null;
 }
 
 // Function to perform search
-performSearch(query: string) return null {
+performSearch(query: string) {
     if query == "" then {
-        return null;
+        return;
     }
     
     // Normalize query to lowercase for case-insensitive search
@@ -1490,8 +1488,6 @@ performSearch(query: string) return null {
         // Show message if no match found
         helpScreen.helpContent = call convertToHtml("No help topic found matching: " + query);
     }
-    
-    return null;
 }
 
 // Create the help screen from the modified JSON
