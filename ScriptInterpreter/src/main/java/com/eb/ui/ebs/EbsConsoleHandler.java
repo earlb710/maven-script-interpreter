@@ -957,10 +957,6 @@ public class EbsConsoleHandler extends EbsHandler {
             
             String script = new String(is.readAllBytes(), StandardCharsets.UTF_8);
             
-            // Clear parse cache to ensure script changes are picked up
-            // This is especially important for development/testing when the script file is being edited
-            Parser.clearParseCache();
-            
             // Update status bar
             if (statusBar != null) {
                 javafx.application.Platform.runLater(() -> {
