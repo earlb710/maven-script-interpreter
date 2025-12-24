@@ -455,60 +455,104 @@ function stringToBlackCapturedPieces(str: string) return int {
     return count;
 }
 
-// Helper to save board state to specific undo slot
+// Helper to save board state to specific undo slot (copies all 64 elements)
 function saveUndoBoardState(slot: int) {
-    if slot == 0 then { undoBoard0 = board; }
-    else if slot == 1 then { undoBoard1 = board; }
-    else if slot == 2 then { undoBoard2 = board; }
-    else if slot == 3 then { undoBoard3 = board; }
-    else if slot == 4 then { undoBoard4 = board; }
-    else if slot == 5 then { undoBoard5 = board; }
-    else if slot == 6 then { undoBoard6 = board; }
-    else if slot == 7 then { undoBoard7 = board; }
-    else if slot == 8 then { undoBoard8 = board; }
-    else if slot == 9 then { undoBoard9 = board; }
+    if slot == 0 then {
+        for (var i: int = 0; i < 64; i++) { undoBoard0[i] = board[i]; }
+    } else if slot == 1 then {
+        for (var i: int = 0; i < 64; i++) { undoBoard1[i] = board[i]; }
+    } else if slot == 2 then {
+        for (var i: int = 0; i < 64; i++) { undoBoard2[i] = board[i]; }
+    } else if slot == 3 then {
+        for (var i: int = 0; i < 64; i++) { undoBoard3[i] = board[i]; }
+    } else if slot == 4 then {
+        for (var i: int = 0; i < 64; i++) { undoBoard4[i] = board[i]; }
+    } else if slot == 5 then {
+        for (var i: int = 0; i < 64; i++) { undoBoard5[i] = board[i]; }
+    } else if slot == 6 then {
+        for (var i: int = 0; i < 64; i++) { undoBoard6[i] = board[i]; }
+    } else if slot == 7 then {
+        for (var i: int = 0; i < 64; i++) { undoBoard7[i] = board[i]; }
+    } else if slot == 8 then {
+        for (var i: int = 0; i < 64; i++) { undoBoard8[i] = board[i]; }
+    } else if slot == 9 then {
+        for (var i: int = 0; i < 64; i++) { undoBoard9[i] = board[i]; }
+    }
 }
 
-// Helper to restore board state from specific undo slot
+// Helper to restore board state from specific undo slot (copies all 64 elements)
 function restoreUndoBoardState(slot: int) {
-    if slot == 0 then { board = undoBoard0; }
-    else if slot == 1 then { board = undoBoard1; }
-    else if slot == 2 then { board = undoBoard2; }
-    else if slot == 3 then { board = undoBoard3; }
-    else if slot == 4 then { board = undoBoard4; }
-    else if slot == 5 then { board = undoBoard5; }
-    else if slot == 6 then { board = undoBoard6; }
-    else if slot == 7 then { board = undoBoard7; }
-    else if slot == 8 then { board = undoBoard8; }
-    else if slot == 9 then { board = undoBoard9; }
+    if slot == 0 then {
+        for (var i: int = 0; i < 64; i++) { board[i] = undoBoard0[i]; }
+    } else if slot == 1 then {
+        for (var i: int = 0; i < 64; i++) { board[i] = undoBoard1[i]; }
+    } else if slot == 2 then {
+        for (var i: int = 0; i < 64; i++) { board[i] = undoBoard2[i]; }
+    } else if slot == 3 then {
+        for (var i: int = 0; i < 64; i++) { board[i] = undoBoard3[i]; }
+    } else if slot == 4 then {
+        for (var i: int = 0; i < 64; i++) { board[i] = undoBoard4[i]; }
+    } else if slot == 5 then {
+        for (var i: int = 0; i < 64; i++) { board[i] = undoBoard5[i]; }
+    } else if slot == 6 then {
+        for (var i: int = 0; i < 64; i++) { board[i] = undoBoard6[i]; }
+    } else if slot == 7 then {
+        for (var i: int = 0; i < 64; i++) { board[i] = undoBoard7[i]; }
+    } else if slot == 8 then {
+        for (var i: int = 0; i < 64; i++) { board[i] = undoBoard8[i]; }
+    } else if slot == 9 then {
+        for (var i: int = 0; i < 64; i++) { board[i] = undoBoard9[i]; }
+    }
 }
 
-// Helper to save board state to specific redo slot
+// Helper to save board state to specific redo slot (copies all 64 elements)
 function saveRedoBoardState(slot: int) {
-    if slot == 0 then { redoBoard0 = board; }
-    else if slot == 1 then { redoBoard1 = board; }
-    else if slot == 2 then { redoBoard2 = board; }
-    else if slot == 3 then { redoBoard3 = board; }
-    else if slot == 4 then { redoBoard4 = board; }
-    else if slot == 5 then { redoBoard5 = board; }
-    else if slot == 6 then { redoBoard6 = board; }
-    else if slot == 7 then { redoBoard7 = board; }
-    else if slot == 8 then { redoBoard8 = board; }
-    else if slot == 9 then { redoBoard9 = board; }
+    if slot == 0 then {
+        for (var i: int = 0; i < 64; i++) { redoBoard0[i] = board[i]; }
+    } else if slot == 1 then {
+        for (var i: int = 0; i < 64; i++) { redoBoard1[i] = board[i]; }
+    } else if slot == 2 then {
+        for (var i: int = 0; i < 64; i++) { redoBoard2[i] = board[i]; }
+    } else if slot == 3 then {
+        for (var i: int = 0; i < 64; i++) { redoBoard3[i] = board[i]; }
+    } else if slot == 4 then {
+        for (var i: int = 0; i < 64; i++) { redoBoard4[i] = board[i]; }
+    } else if slot == 5 then {
+        for (var i: int = 0; i < 64; i++) { redoBoard5[i] = board[i]; }
+    } else if slot == 6 then {
+        for (var i: int = 0; i < 64; i++) { redoBoard6[i] = board[i]; }
+    } else if slot == 7 then {
+        for (var i: int = 0; i < 64; i++) { redoBoard7[i] = board[i]; }
+    } else if slot == 8 then {
+        for (var i: int = 0; i < 64; i++) { redoBoard8[i] = board[i]; }
+    } else if slot == 9 then {
+        for (var i: int = 0; i < 64; i++) { redoBoard9[i] = board[i]; }
+    }
 }
 
-// Helper to restore board state from specific redo slot
+// Helper to restore board state from specific redo slot (copies all 64 elements)
 function restoreRedoBoardState(slot: int) {
-    if slot == 0 then { board = redoBoard0; }
-    else if slot == 1 then { board = redoBoard1; }
-    else if slot == 2 then { board = redoBoard2; }
-    else if slot == 3 then { board = redoBoard3; }
-    else if slot == 4 then { board = redoBoard4; }
-    else if slot == 5 then { board = redoBoard5; }
-    else if slot == 6 then { board = redoBoard6; }
-    else if slot == 7 then { board = redoBoard7; }
-    else if slot == 8 then { board = redoBoard8; }
-    else if slot == 9 then { board = redoBoard9; }
+    if slot == 0 then {
+        for (var i: int = 0; i < 64; i++) { board[i] = redoBoard0[i]; }
+    } else if slot == 1 then {
+        for (var i: int = 0; i < 64; i++) { board[i] = redoBoard1[i]; }
+    } else if slot == 2 then {
+        for (var i: int = 0; i < 64; i++) { board[i] = redoBoard2[i]; }
+    } else if slot == 3 then {
+        for (var i: int = 0; i < 64; i++) { board[i] = redoBoard3[i]; }
+    } else if slot == 4 then {
+        for (var i: int = 0; i < 64; i++) { board[i] = redoBoard4[i]; }
+    } else if slot == 5 then {
+        for (var i: int = 0; i < 64; i++) { board[i] = redoBoard5[i]; }
+    } else if slot == 6 then {
+        for (var i: int = 0; i < 64; i++) { board[i] = redoBoard6[i]; }
+    } else if slot == 7 then {
+        for (var i: int = 0; i < 64; i++) { board[i] = redoBoard7[i]; }
+    } else if slot == 8 then {
+        for (var i: int = 0; i < 64; i++) { board[i] = redoBoard8[i]; }
+    } else if slot == 9 then {
+        for (var i: int = 0; i < 64; i++) { board[i] = redoBoard9[i]; }
+    }
 }
 
 // Save current game state to undo stack (before making a move)
