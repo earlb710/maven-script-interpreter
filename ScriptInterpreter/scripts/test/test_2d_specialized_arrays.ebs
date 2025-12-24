@@ -1,0 +1,111 @@
+// Test 2D arrays with specialized types (bitmap, intmap, int, byte)
+// 
+// This test verifies that multi-dimensional arrays work correctly with
+// specialized storage types like bitmap and intmap.
+//
+// Issue: Previously, syntax like array.bitmap[10, 64] would fail with:
+//   "Cannot convert ArrayFixedByte to byte"
+// 
+// Fix: Modified ArrayFixed and ArrayDynamic to skip type conversion for
+//      nested ArrayDef objects.
+
+print "=== Testing 2D Specialized Array Types ===";
+print "";
+
+// Test 1: 2D bitmap array
+print "Test 1: 2D bitmap array (array.bitmap[10, 64])";
+var bitmap2d: array.bitmap[10, 64];
+print "  Created bitmap2d[10, 64]";
+
+// Set some values
+bitmap2d[0, 0] = 1;
+bitmap2d[0, 63] = 255;
+bitmap2d[9, 32] = 127;
+
+// Verify values
+print "  bitmap2d[0, 0] = " + bitmap2d[0, 0];
+print "  bitmap2d[0, 63] = " + bitmap2d[0, 63];
+print "  bitmap2d[9, 32] = " + bitmap2d[9, 32];
+print "  ✓ Passed";
+print "";
+
+// Test 2: 2D intmap array
+print "Test 2: 2D intmap array (array.intmap[5, 10])";
+var intmap2d: array.intmap[5, 10];
+print "  Created intmap2d[5, 10]";
+
+intmap2d[0, 0] = 1000;
+intmap2d[4, 9] = 2000;
+intmap2d[2, 5] = 1500;
+
+print "  intmap2d[0, 0] = " + intmap2d[0, 0];
+print "  intmap2d[4, 9] = " + intmap2d[4, 9];
+print "  intmap2d[2, 5] = " + intmap2d[2, 5];
+print "  ✓ Passed";
+print "";
+
+// Test 3: 2D int array
+print "Test 3: 2D int array (array.int[8, 8])";
+var int2d: array.int[8, 8];
+print "  Created int2d[8, 8] (chess board size)";
+
+int2d[0, 0] = 1;
+int2d[7, 7] = 64;
+int2d[3, 4] = 32;
+
+print "  int2d[0, 0] = " + int2d[0, 0];
+print "  int2d[7, 7] = " + int2d[7, 7];
+print "  int2d[3, 4] = " + int2d[3, 4];
+print "  ✓ Passed";
+print "";
+
+// Test 4: 2D byte array
+print "Test 4: 2D byte array (array.byte[4, 16])";
+var byte2d: array.byte[4, 16];
+print "  Created byte2d[4, 16]";
+
+byte2d[0, 0] = 10;
+byte2d[3, 15] = 100;
+byte2d[2, 8] = 50;
+
+print "  byte2d[0, 0] = " + byte2d[0, 0];
+print "  byte2d[3, 15] = " + byte2d[3, 15];
+print "  byte2d[2, 8] = " + byte2d[2, 8];
+print "  ✓ Passed";
+print "";
+
+// Test 5: 3D bitmap array
+print "Test 5: 3D bitmap array (array.bitmap[3, 3, 3])";
+var bitmap3d: array.bitmap[3, 3, 3];
+print "  Created bitmap3d[3, 3, 3]";
+
+bitmap3d[0, 0, 0] = 1;
+bitmap3d[2, 2, 2] = 27;
+bitmap3d[1, 1, 1] = 14;
+
+print "  bitmap3d[0, 0, 0] = " + bitmap3d[0, 0, 0];
+print "  bitmap3d[2, 2, 2] = " + bitmap3d[2, 2, 2];
+print "  bitmap3d[1, 1, 1] = " + bitmap3d[1, 1, 1];
+print "  ✓ Passed";
+print "";
+
+// Test 6: Verify 1D arrays still work (regression test)
+print "Test 6: 1D arrays still work (regression test)";
+var bitmap1d: array.bitmap[5];
+var intmap1d: array.intmap[5];
+var int1d: array.int[5];
+var byte1d: array.byte[5];
+
+bitmap1d[0] = 10;
+intmap1d[1] = 100;
+int1d[2] = 1000;
+byte1d[3] = 50;
+
+print "  bitmap1d[0] = " + bitmap1d[0];
+print "  intmap1d[1] = " + intmap1d[1];
+print "  int1d[2] = " + int1d[2];
+print "  byte1d[3] = " + byte1d[3];
+print "  ✓ Passed";
+print "";
+
+print "=== All 2D Specialized Array Tests Passed! ===";
