@@ -698,8 +698,13 @@ function updateBoardDisplay() {
             var cellValue: int = call getPieceAt(x, y);
             if cellValue != -1 then {
                 var cell = ChessCell(cellValue);
-                var pieceImage: imagedata = call getNormalPiece(cell.pieceType, cell.pieceColor);
-                call setPieceCell(x, y, pieceImage);
+                // For empty cells, explicitly use transparentClear to remove pieces
+                if cell.pieceType == EMPTY then {
+                    call setPieceCell(x, y, transparentClear);
+                } else {
+                    var pieceImage: imagedata = call getNormalPiece(cell.pieceType, cell.pieceColor);
+                    call setPieceCell(x, y, pieceImage);
+                }
             }
         }
     }
