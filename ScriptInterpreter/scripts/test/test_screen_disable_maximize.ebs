@@ -71,10 +71,10 @@ show screen normalScreen;
 show screen noMaximizeScreen;
 show screen fixedDialog;
 
-println("Three screens have been opened:");
-println("1. Normal Screen - Can be maximized (standard behavior)");
-println("2. No Maximize Screen - Cannot be maximized (disableMaximize=true)");
-println("3. Fixed Dialog - Cannot be resized or maximized (both properties set)");
-println("");
-println("Try clicking the maximize button on each window to see the difference!");
-println("Also try resizing the windows by dragging the edges.");
+print "Three screens have been opened:";
+print "1. Normal Screen - Can be maximized (standard behavior)";
+print "2. No Maximize Screen - Cannot be maximized (disableMaximize=true)";
+print "3. Fixed Dialog - Cannot be resized or maximized (both properties set)";
+print "";
+print "Try clicking the maximize button on each window to see the difference!";
+print "Also try resizing the windows by dragging the edges.";
