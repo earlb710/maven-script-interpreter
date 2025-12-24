@@ -875,10 +875,12 @@ showCheckIndicators() {
 }
 
 // Set indicator for a specific cell
-// indicatorType can be: "normal", "capture", "check", "capture_check", "invalid", "checkmate", "defender"
+// indicatorType can be: "normal", "capture", "check", "capture_check", "invalid", "checkmate", "defender", "attacker"
 setIndicator(x: int, y: int, indicatorType: string) {
     var indicator: imagedata;
     if indicatorType == "capture_check" then {
+        indicator = orangeCircleIndicator;
+    } else if indicatorType == "attacker" then {
         indicator = orangeCircleIndicator;
     } else if indicatorType == "capture" then {
         indicator = redIndicator;
@@ -1734,7 +1736,7 @@ handleCellClick(x: int, y: int) {
         return;
     }
     
-    // Check if clicking on opponent's piece - show defenders
+    // Check if clicking on opponent's piece - show defenders and attackers
     if cell.pieceColor != currentPlayer then {
         // Track this opponent piece so we can restore it later
         lastOpponentX = x;
@@ -1754,7 +1756,18 @@ handleCellClick(x: int, y: int) {
             call setIndicator(defender.x, defender.y, "defender");
         }
         
-        // Update status message to show defender count
+        // Get all attackers of this piece (pieces of the current player's color that can attack it)
+        var attackers = call getAttackers(x, y, currentPlayer);
+        var attackerCount: int = attackers.length;
+        
+        // Show orange circles on all attacker positions
+        var j: int = 0;
+        for (j = 0; j < attackerCount; j = j + 1) {
+            var attacker: posType = attackers[j];
+            call setIndicator(attacker.x, attacker.y, "attacker");
+        }
+        
+        // Update status message to show defender and attacker counts
         var defenderText: string;
         if defenderCount == 0 then {
             defenderText = "No defenders";
@@ -1763,7 +1776,17 @@ handleCellClick(x: int, y: int) {
         } else {
             defenderText = defenderCount + " defenders";
         }
-        chessScreen.statusMessage = "Opponent piece: " + defenderText;
+        
+        var attackerText: string;
+        if attackerCount == 0 then {
+            attackerText = "no attackers";
+        } else if attackerCount == 1 then {
+            attackerText = "1 attacker";
+        } else {
+            attackerText = attackerCount + " attackers";
+        }
+        
+        chessScreen.statusMessage = "Opponent piece: " + defenderText + ", " + attackerText;
         
         // DO NOT set selectedX and selectedY for opponent pieces - they should not be selectable
         // selectedX and selectedY remain -1 to prevent moving opponent pieces
