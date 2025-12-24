@@ -419,7 +419,7 @@ function stringToCapturedPieces(str: string) return int {
     if str == "" then {
         return 0;
     }
-    var parts: string[] = call string.split(str, ",");
+    var parts: string[] = call str.split(str, ",");
     var count: int = parts.length;
     for (var i: int = 0; i < count; i++) {
         capturedWhitePieces[i] = int(parts[i]);
@@ -447,7 +447,7 @@ function stringToBlackCapturedPieces(str: string) return int {
     if str == "" then {
         return 0;
     }
-    var parts: string[] = call string.split(str, ",");
+    var parts: string[] = call str.split(str, ",");
     var count: int = parts.length;
     for (var i: int = 0; i < count; i++) {
         capturedBlackPieces[i] = int(parts[i]);
