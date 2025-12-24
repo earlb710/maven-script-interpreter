@@ -620,49 +620,56 @@ if areaArray != null && areaArray.length > 0 then {
     var areas: json = call json.get(mainLayout, "areas");
     if areas != null && areas.length > 0 then {
         var treeArea: json = areas[0];
-        var items: json = call json.get(treeArea, "items");
-        if items != null && items.length > 1 then {
-            // First item (index 0) is the searchBox HBox
-            // Second item (index 1) is the helpTree TreeView
-            var helpTreeItem: json = items[1];
-            var display: json = call json.get(helpTreeItem, "display");
-            if display != null then {
-                // Wrap tree structure in array and set it
-                var treeItemsArray: array[*];
-                call array.add(treeItemsArray, treeStructure);
-                display = call json.set(display, "treeItems", treeItemsArray);
-                helpTreeItem = call json.set(helpTreeItem, "display", display);
-                items = call json.set(items, 1, helpTreeItem);
-                
-                // Now populate the search combobox options
-                var searchBox: json = items[0];
-                var searchItems: json = call json.get(searchBox, "items");
-                if searchItems != null && searchItems.length > 0 then {
-                    var searchCombo: json = searchItems[0];
-                    var comboDisplay: json = call json.get(searchCombo, "display");
-                    if comboDisplay != null then {
-                        // Collect all searchable topics
-                        var searchOptions: array[*];
-                        call collectSearchableTopics(treeStructure, "", searchOptions);
-                        
-                        // Sort the options alphabetically
-                        call array.sort(searchOptions, true);
-                        
-                        // Set the options in the combobox display
-                        comboDisplay = call json.set(comboDisplay, "options", searchOptions);
-                        searchCombo = call json.set(searchCombo, "display", comboDisplay);
-                        searchItems = call json.set(searchItems, 0, searchCombo);
-                        searchBox = call json.set(searchBox, "items", searchItems);
-                        items = call json.set(items, 0, searchBox);
+        var nestedAreas: json = call json.get(treeArea, "areas");
+        if nestedAreas != null && nestedAreas.length > 1 then {
+            // First nested area (index 0) is the searchBox HBox
+            // Second nested area (index 1) is the helpTreeArea VBox containing the tree
+            var helpTreeArea: json = nestedAreas[1];
+            var treeItems: json = call json.get(helpTreeArea, "items");
+            if treeItems != null && treeItems.length > 0 then {
+                var helpTreeItem: json = treeItems[0];
+                var display: json = call json.get(helpTreeItem, "display");
+                if display != null then {
+                    // Wrap tree structure in array and set it
+                    var treeItemsArray: array[*];
+                    call array.add(treeItemsArray, treeStructure);
+                    display = call json.set(display, "treeItems", treeItemsArray);
+                    helpTreeItem = call json.set(helpTreeItem, "display", display);
+                    treeItems = call json.set(treeItems, 0, helpTreeItem);
+                    helpTreeArea = call json.set(helpTreeArea, "items", treeItems);
+                    nestedAreas = call json.set(nestedAreas, 1, helpTreeArea);
+                    
+                    // Now populate the search combobox options
+                    var searchBox: json = nestedAreas[0];
+                    var searchItems: json = call json.get(searchBox, "items");
+                    if searchItems != null && searchItems.length > 0 then {
+                        var searchCombo: json = searchItems[0];
+                        var comboDisplay: json = call json.get(searchCombo, "display");
+                        if comboDisplay != null then {
+                            // Collect all searchable topics
+                            var searchOptions: array[*];
+                            call collectSearchableTopics(treeStructure, "", searchOptions);
+                            
+                            // Sort the options alphabetically
+                            call array.sort(searchOptions, true);
+                            
+                            // Set the options in the combobox display
+                            comboDisplay = call json.set(comboDisplay, "options", searchOptions);
+                            searchCombo = call json.set(searchCombo, "display", comboDisplay);
+                            searchItems = call json.set(searchItems, 0, searchCombo);
+                            searchBox = call json.set(searchBox, "items", searchItems);
+                            nestedAreas = call json.set(nestedAreas, 0, searchBox);
+                        }
                     }
+                    
+                    treeArea = call json.set(treeArea, "areas", nestedAreas);
+                    areas = call json.set(areas, 0, treeArea);
+                    mainLayout = call json.set(mainLayout, "areas", areas);
+                    areaArray = call json.set(areaArray, 0, mainLayout);
+                    screenJson = call json.set(screenJson, "area", areaArray);
+                    print "Tree items and search options injected into screen definition";
+                } else {
                 }
-                
-                treeArea = call json.set(treeArea, "items", items);
-                areas = call json.set(areas, 0, treeArea);
-                mainLayout = call json.set(mainLayout, "areas", areas);
-                areaArray = call json.set(areaArray, 0, mainLayout);
-                screenJson = call json.set(screenJson, "area", areaArray);
-                print "Tree items and search options injected into screen definition";
             } else {
             }
         }

@@ -38,20 +38,17 @@
           "hgrow": "NEVER",
           "vgrow": "ALWAYS",
           "style": "-fx-border-color: #cccccc; -fx-border-width: 0 1 0 0;",
-          "items": [
+          "areas": [
             {
               "name": "searchBox",
               "type": "hbox",
               "spacing": "5",
               "padding": "0",
-              "hgrow": "NEVER",
-              "vgrow": "NEVER",
               "items": [
                 {
                   "name": "searchCombo",
                   "varRef": "searchQuery",
-                  "seq": 1,
-                  "stateful": false,
+                  "sequence": 1,
                   "hgrow": "ALWAYS",
                   "vgrow": "NEVER",
                   "prefWidth": "180",
@@ -67,8 +64,7 @@
                 {
                   "name": "searchButton",
                   "varRef": "",
-                  "seq": 2,
-                  "stateful": false,
+                  "sequence": 2,
                   "hgrow": "NEVER",
                   "vgrow": "NEVER",
                   "prefWidth": "60",
@@ -81,26 +77,31 @@
               ]
             },
             {
-              "name": "helpTree",
-              "varRef": "selectedTopic",
-              "seq": 3,
-              "stateful": false,
-              "hgrow": "NEVER",
-              "vgrow": "ALWAYS",
-              "minWidth": "200",
-              "prefWidth": "250",
-              "minHeight": "200",
-              "prefHeight": "200",
-              "maxHeight": "MAX",
-              "display": {
-                "type": "treeview",
-                "labelText": "Help Topic",
-                "labelPosition": "TOP",
-                "expandAll": false,
-                "showRoot": false,
-                "onChange": "helpScreen.helpContent = call convertToHtml(call getHelpContent(helpScreen.selectedTopic));",
-                "treeItems": []
-              }
+              "name": "helpTreeArea",
+              "type": "vbox",
+              "items": [
+                {
+                  "name": "helpTree",
+                  "varRef": "selectedTopic",
+                  "sequence": 1,
+                  "hgrow": "NEVER",
+                  "vgrow": "ALWAYS",
+                  "minWidth": "200",
+                  "prefWidth": "250",
+                  "minHeight": "200",
+                  "prefHeight": "200",
+                  "maxHeight": "MAX",
+                  "display": {
+                    "type": "treeview",
+                    "labelText": "Help Topic",
+                    "labelPosition": "TOP",
+                    "expandAll": false,
+                    "showRoot": false,
+                    "onChange": "helpScreen.helpContent = call convertToHtml(call getHelpContent(helpScreen.selectedTopic));",
+                    "treeItems": []
+                  }
+                }
+              ]
             }
           ]
         },
