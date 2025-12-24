@@ -47,7 +47,8 @@ public class ArrayFixed implements ArrayDef<Object, Object[]> {
     public void setElements(Object... values) {
         int idx = 0;
         for (Object value : values) {
-            if (!dataType.isDataType(value)) {
+            // Skip type conversion for nested arrays (ArrayDef objects)
+            if (!(value instanceof ArrayDef) && !dataType.isDataType(value)) {
                 value = dataType.convertValue(value);
             }
             elements[idx] = value;
@@ -57,7 +58,9 @@ public class ArrayFixed implements ArrayDef<Object, Object[]> {
 
     @Override
     public void set(int index, Object value) {
-        if (!dataType.isDataType(value)) {
+        // Skip type conversion for nested arrays (ArrayDef objects)
+        // These are stored as-is in multi-dimensional arrays
+        if (!(value instanceof ArrayDef) && !dataType.isDataType(value)) {
             value = dataType.convertValue(value);
         }
         elements[index] = value;
@@ -65,7 +68,8 @@ public class ArrayFixed implements ArrayDef<Object, Object[]> {
 
     @Override
     public void add(Object value) {
-        if (!dataType.isDataType(value)) {
+        // Skip type conversion for nested arrays (ArrayDef objects)
+        if (!(value instanceof ArrayDef) && !dataType.isDataType(value)) {
             value = dataType.convertValue(value);
         }
         elements[addIdx++] = value;
@@ -73,7 +77,8 @@ public class ArrayFixed implements ArrayDef<Object, Object[]> {
 
     @Override
     public void add(int idx, Object value) {
-        if (!dataType.isDataType(value)) {
+        // Skip type conversion for nested arrays (ArrayDef objects)
+        if (!(value instanceof ArrayDef) && !dataType.isDataType(value)) {
             value = dataType.convertValue(value);
         }
         elements[idx] = value;

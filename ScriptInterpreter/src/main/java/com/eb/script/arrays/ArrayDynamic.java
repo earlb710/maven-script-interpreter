@@ -47,7 +47,8 @@ public class ArrayDynamic implements ArrayDef<Object, List<Object>> {
 
     @Override
     public void set(int index, Object value) {
-        if (!dataType.isDataType(value)) {
+        // Skip type conversion for nested arrays (ArrayDef objects)
+        if (!(value instanceof ArrayDef) && !dataType.isDataType(value)) {
             value = dataType.convertValue(value);
         }
         if (index == elements.size()) {
@@ -61,7 +62,8 @@ public class ArrayDynamic implements ArrayDef<Object, List<Object>> {
     public void setElements(Object... values) {
         int idx = 0;
         for (Object value : values) {
-            if (!dataType.isDataType(value)) {
+            // Skip type conversion for nested arrays (ArrayDef objects)
+            if (!(value instanceof ArrayDef) && !dataType.isDataType(value)) {
                 value = dataType.convertValue(value);
             }
             if (idx == elements.size()) {
@@ -75,7 +77,8 @@ public class ArrayDynamic implements ArrayDef<Object, List<Object>> {
 
     @Override
     public void add(Object value) {
-        if (!dataType.isDataType(value)) {
+        // Skip type conversion for nested arrays (ArrayDef objects)
+        if (!(value instanceof ArrayDef) && !dataType.isDataType(value)) {
             value = dataType.convertValue(value);
         }
         elements.add(value);
@@ -83,7 +86,8 @@ public class ArrayDynamic implements ArrayDef<Object, List<Object>> {
 
     @Override
     public void add(int idx, Object value) {
-        if (!dataType.isDataType(value)) {
+        // Skip type conversion for nested arrays (ArrayDef objects)
+        if (!(value instanceof ArrayDef) && !dataType.isDataType(value)) {
             value = dataType.convertValue(value);
         }
         elements.add(idx, value);
