@@ -161,35 +161,74 @@ var capturedBlackPieces: int[16];  // Max 16 pieces per color
 var capturedBlackCount: int = 0;
 
 // Undo/Redo functionality for 2-player games
-// Game state snapshot for undo/redo
-GameState typeof record {
-    boardState: array.bitmap[64],
-    currentPlayerState: int,
-    timerWhiteState: int,
-    timerBlackState: int,
-    whiteKingMovedState: bool,
-    blackKingMovedState: bool,
-    whiteKingsideRookMovedState: bool,
-    whiteQueensideRookMovedState: bool,
-    blackKingsideRookMovedState: bool,
-    blackQueensideRookMovedState: bool,
-    enPassantTargetXState: int,
-    enPassantTargetYState: int,
-    capturedWhitePiecesState: int[16],
-    capturedWhiteCountState: int,
-    capturedBlackPiecesState: int[16],
-    capturedBlackCountState: int,
-    moveHistoryState: string,
-    lastMoveFromXState: int,
-    lastMoveFromYState: int,
-    lastMoveToXState: int,
-    lastMoveToYState: int
-};
+// Store board states as separate variables (workaround for array limitations)
+var undoBoard0: array.bitmap[64];
+var undoBoard1: array.bitmap[64];
+var undoBoard2: array.bitmap[64];
+var undoBoard3: array.bitmap[64];
+var undoBoard4: array.bitmap[64];
+var undoBoard5: array.bitmap[64];
+var undoBoard6: array.bitmap[64];
+var undoBoard7: array.bitmap[64];
+var undoBoard8: array.bitmap[64];
+var undoBoard9: array.bitmap[64];
 
-// Undo/redo history stacks (max 100 moves)
-var undoStack: GameState[100];
+var redoBoard0: array.bitmap[64];
+var redoBoard1: array.bitmap[64];
+var redoBoard2: array.bitmap[64];
+var redoBoard3: array.bitmap[64];
+var redoBoard4: array.bitmap[64];
+var redoBoard5: array.bitmap[64];
+var redoBoard6: array.bitmap[64];
+var redoBoard7: array.bitmap[64];
+var redoBoard8: array.bitmap[64];
+var redoBoard9: array.bitmap[64];
+
+// Other state arrays (max 10 moves for undo/redo)
+var undoStackCurrentPlayer: int[10];
+var undoStackTimerWhite: int[10];
+var undoStackTimerBlack: int[10];
+var undoStackWhiteKingMoved: bool[10];
+var undoStackBlackKingMoved: bool[10];
+var undoStackWhiteKingsideRookMoved: bool[10];
+var undoStackWhiteQueensideRookMoved: bool[10];
+var undoStackBlackKingsideRookMoved: bool[10];
+var undoStackBlackQueensideRookMoved: bool[10];
+var undoStackEnPassantTargetX: int[10];
+var undoStackEnPassantTargetY: int[10];
+var undoStackCapturedWhiteCount: int[10];
+var undoStackCapturedBlackCount: int[10];
+var undoStackMoveHistory: string[10];
+var undoStackLastMoveFromX: int[10];
+var undoStackLastMoveFromY: int[10];
+var undoStackLastMoveToX: int[10];
+var undoStackLastMoveToY: int[10];
+// Captured pieces stored as comma-separated strings (e.g., "1,2,3" for pawn, rook, knight)
+var undoStackCapturedWhitePieces: string[10];
+var undoStackCapturedBlackPieces: string[10];
 var undoStackCount: int = 0;
-var redoStack: GameState[100];
+
+// Redo stacks (same structure as undo)
+var redoStackCurrentPlayer: int[10];
+var redoStackTimerWhite: int[10];
+var redoStackTimerBlack: int[10];
+var redoStackWhiteKingMoved: bool[10];
+var redoStackBlackKingMoved: bool[10];
+var redoStackWhiteKingsideRookMoved: bool[10];
+var redoStackWhiteQueensideRookMoved: bool[10];
+var redoStackBlackKingsideRookMoved: bool[10];
+var redoStackBlackQueensideRookMoved: bool[10];
+var redoStackEnPassantTargetX: int[10];
+var redoStackEnPassantTargetY: int[10];
+var redoStackCapturedWhiteCount: int[10];
+var redoStackCapturedBlackCount: int[10];
+var redoStackMoveHistory: string[10];
+var redoStackLastMoveFromX: int[10];
+var redoStackLastMoveFromY: int[10];
+var redoStackLastMoveToX: int[10];
+var redoStackLastMoveToY: int[10];
+var redoStackCapturedWhitePieces: string[10];
+var redoStackCapturedBlackPieces: string[10];
 var redoStackCount: int = 0;
 
 // Board layer images (bottom layer - checkerboard)
@@ -360,6 +399,118 @@ function clearCapturedPieces() {
 
 // Undo/Redo functionality
 
+// Helper function to convert captured pieces array to string
+function capturedPiecesToString(count: int) return string {
+    if count == 0 then {
+        return "";
+    }
+    var result: string = "";
+    for (var i: int = 0; i < count; i++) {
+        if i > 0 then {
+            result = result + ",";
+        }
+        result = result + call string.fromInt(capturedWhitePieces[i]);
+    }
+    return result;
+}
+
+// Helper function to restore captured pieces from string
+function stringToCapturedPieces(str: string) return int {
+    if str == "" then {
+        return 0;
+    }
+    var parts: string[] = call string.split(str, ",");
+    var count: int = parts.length;
+    for (var i: int = 0; i < count; i++) {
+        capturedWhitePieces[i] = call string.toInt(parts[i]);
+    }
+    return count;
+}
+
+// Helper function for black pieces
+function capturedBlackPiecesToString(count: int) return string {
+    if count == 0 then {
+        return "";
+    }
+    var result: string = "";
+    for (var i: int = 0; i < count; i++) {
+        if i > 0 then {
+            result = result + ",";
+        }
+        result = result + call string.fromInt(capturedBlackPieces[i]);
+    }
+    return result;
+}
+
+// Helper function to restore black captured pieces from string
+function stringToBlackCapturedPieces(str: string) return int {
+    if str == "" then {
+        return 0;
+    }
+    var parts: string[] = call string.split(str, ",");
+    var count: int = parts.length;
+    for (var i: int = 0; i < count; i++) {
+        capturedBlackPieces[i] = call string.toInt(parts[i]);
+    }
+    return count;
+}
+
+// Helper to save board state to specific undo slot
+function saveUndoBoardState(slot: int) {
+    if slot == 0 then { undoBoard0 = board; }
+    else if slot == 1 then { undoBoard1 = board; }
+    else if slot == 2 then { undoBoard2 = board; }
+    else if slot == 3 then { undoBoard3 = board; }
+    else if slot == 4 then { undoBoard4 = board; }
+    else if slot == 5 then { undoBoard5 = board; }
+    else if slot == 6 then { undoBoard6 = board; }
+    else if slot == 7 then { undoBoard7 = board; }
+    else if slot == 8 then { undoBoard8 = board; }
+    else if slot == 9 then { undoBoard9 = board; }
+}
+
+// Helper to restore board state from specific undo slot
+function restoreUndoBoardState(slot: int) {
+    if slot == 0 then { board = undoBoard0; }
+    else if slot == 1 then { board = undoBoard1; }
+    else if slot == 2 then { board = undoBoard2; }
+    else if slot == 3 then { board = undoBoard3; }
+    else if slot == 4 then { board = undoBoard4; }
+    else if slot == 5 then { board = undoBoard5; }
+    else if slot == 6 then { board = undoBoard6; }
+    else if slot == 7 then { board = undoBoard7; }
+    else if slot == 8 then { board = undoBoard8; }
+    else if slot == 9 then { board = undoBoard9; }
+}
+
+// Helper to save board state to specific redo slot
+function saveRedoBoardState(slot: int) {
+    if slot == 0 then { redoBoard0 = board; }
+    else if slot == 1 then { redoBoard1 = board; }
+    else if slot == 2 then { redoBoard2 = board; }
+    else if slot == 3 then { redoBoard3 = board; }
+    else if slot == 4 then { redoBoard4 = board; }
+    else if slot == 5 then { redoBoard5 = board; }
+    else if slot == 6 then { redoBoard6 = board; }
+    else if slot == 7 then { redoBoard7 = board; }
+    else if slot == 8 then { redoBoard8 = board; }
+    else if slot == 9 then { redoBoard9 = board; }
+}
+
+// Helper to restore board state from specific redo slot
+function restoreRedoBoardState(slot: int) {
+    if slot == 0 then { board = redoBoard0; }
+    else if slot == 1 then { board = redoBoard1; }
+    else if slot == 2 then { board = redoBoard2; }
+    else if slot == 3 then { board = redoBoard3; }
+    else if slot == 4 then { board = redoBoard4; }
+    else if slot == 5 then { board = redoBoard5; }
+    else if slot == 6 then { board = redoBoard6; }
+    else if slot == 7 then { board = redoBoard7; }
+    else if slot == 8 then { board = redoBoard8; }
+    else if slot == 9 then { board = redoBoard9; }
+}
+
 // Save current game state to undo stack (before making a move)
 function saveGameState() {
     // Only save for 2-player games
@@ -368,53 +519,47 @@ function saveGameState() {
     }
     
     // Check if we have space in undo stack
-    if undoStackCount >= 100 then {
-        print "Undo stack full, cannot save more states";
+    if undoStackCount >= 10 then {
+        print "Undo stack full (max 10 moves), cannot save more states";
         return;
     }
     
-    // Create a new game state snapshot
-    var state: GameState;
+    // Save board state using helper function
+    call saveUndoBoardState(undoStackCount);
     
-    // Copy board state
-    state.boardState = board;
+    // Save game variables
+    undoStackCurrentPlayer[undoStackCount] = currentPlayer;
+    undoStackTimerWhite[undoStackCount] = timerWhite;
+    undoStackTimerBlack[undoStackCount] = timerBlack;
     
-    // Copy game variables
-    state.currentPlayerState = currentPlayer;
-    state.timerWhiteState = timerWhite;
-    state.timerBlackState = timerBlack;
+    // Save castling rights
+    undoStackWhiteKingMoved[undoStackCount] = whiteKingMoved;
+    undoStackBlackKingMoved[undoStackCount] = blackKingMoved;
+    undoStackWhiteKingsideRookMoved[undoStackCount] = whiteKingsideRookMoved;
+    undoStackWhiteQueensideRookMoved[undoStackCount] = whiteQueensideRookMoved;
+    undoStackBlackKingsideRookMoved[undoStackCount] = blackKingsideRookMoved;
+    undoStackBlackQueensideRookMoved[undoStackCount] = blackQueensideRookMoved;
     
-    // Copy castling rights
-    state.whiteKingMovedState = whiteKingMoved;
-    state.blackKingMovedState = blackKingMoved;
-    state.whiteKingsideRookMovedState = whiteKingsideRookMoved;
-    state.whiteQueensideRookMovedState = whiteQueensideRookMoved;
-    state.blackKingsideRookMovedState = blackKingsideRookMoved;
-    state.blackQueensideRookMovedState = blackQueensideRookMoved;
+    // Save en passant state
+    undoStackEnPassantTargetX[undoStackCount] = enPassantTargetX;
+    undoStackEnPassantTargetY[undoStackCount] = enPassantTargetY;
     
-    // Copy en passant state
-    state.enPassantTargetXState = enPassantTargetX;
-    state.enPassantTargetYState = enPassantTargetY;
+    // Save captured pieces
+    undoStackCapturedWhiteCount[undoStackCount] = capturedWhiteCount;
+    undoStackCapturedBlackCount[undoStackCount] = capturedBlackCount;
+    undoStackCapturedWhitePieces[undoStackCount] = call capturedPiecesToString(capturedWhiteCount);
+    undoStackCapturedBlackPieces[undoStackCount] = call capturedBlackPiecesToString(capturedBlackCount);
     
-    // Copy captured pieces arrays
-    for (var i: int = 0; i < 16; i++) {
-        state.capturedWhitePiecesState[i] = capturedWhitePieces[i];
-        state.capturedBlackPiecesState[i] = capturedBlackPieces[i];
-    }
-    state.capturedWhiteCountState = capturedWhiteCount;
-    state.capturedBlackCountState = capturedBlackCount;
+    // Save move history
+    undoStackMoveHistory[undoStackCount] = chessScreen.moveHistory;
     
-    // Copy move history
-    state.moveHistoryState = chessScreen.moveHistory;
+    // Save last move tracking
+    undoStackLastMoveFromX[undoStackCount] = lastMoveFromX;
+    undoStackLastMoveFromY[undoStackCount] = lastMoveFromY;
+    undoStackLastMoveToX[undoStackCount] = lastMoveToX;
+    undoStackLastMoveToY[undoStackCount] = lastMoveToY;
     
-    // Copy last move tracking
-    state.lastMoveFromXState = lastMoveFromX;
-    state.lastMoveFromYState = lastMoveFromY;
-    state.lastMoveToXState = lastMoveToX;
-    state.lastMoveToYState = lastMoveToY;
-    
-    // Add to undo stack
-    undoStack[undoStackCount] = state;
+    // Increment stack count
     undoStackCount = undoStackCount + 1;
     
     // Clear redo stack when a new move is made
@@ -424,44 +569,103 @@ function saveGameState() {
     call updateUndoRedoButtons();
 }
 
-// Restore game state from a snapshot
-function restoreGameState(state: GameState) {
-    // Restore board state
-    board = state.boardState;
+// Restore game state from undo stack at given index
+function restoreGameStateFromUndo(index: int) {
+    // Restore board state using helper function
+    call restoreUndoBoardState(index);
     
     // Restore game variables
-    currentPlayer = state.currentPlayerState;
-    timerWhite = state.timerWhiteState;
-    timerBlack = state.timerBlackState;
+    currentPlayer = undoStackCurrentPlayer[index];
+    timerWhite = undoStackTimerWhite[index];
+    timerBlack = undoStackTimerBlack[index];
     
     // Restore castling rights
-    whiteKingMoved = state.whiteKingMovedState;
-    blackKingMoved = state.blackKingMovedState;
-    whiteKingsideRookMoved = state.whiteKingsideRookMovedState;
-    whiteQueensideRookMoved = state.whiteQueensideRookMovedState;
-    blackKingsideRookMoved = state.blackKingsideRookMovedState;
-    blackQueensideRookMoved = state.blackQueensideRookMovedState;
+    whiteKingMoved = undoStackWhiteKingMoved[index];
+    blackKingMoved = undoStackBlackKingMoved[index];
+    whiteKingsideRookMoved = undoStackWhiteKingsideRookMoved[index];
+    whiteQueensideRookMoved = undoStackWhiteQueensideRookMoved[index];
+    blackKingsideRookMoved = undoStackBlackKingsideRookMoved[index];
+    blackQueensideRookMoved = undoStackBlackQueensideRookMoved[index];
     
     // Restore en passant state
-    enPassantTargetX = state.enPassantTargetXState;
-    enPassantTargetY = state.enPassantTargetYState;
+    enPassantTargetX = undoStackEnPassantTargetX[index];
+    enPassantTargetY = undoStackEnPassantTargetY[index];
     
-    // Restore captured pieces arrays
-    for (var i: int = 0; i < 16; i++) {
-        capturedWhitePieces[i] = state.capturedWhitePiecesState[i];
-        capturedBlackPieces[i] = state.capturedBlackPiecesState[i];
-    }
-    capturedWhiteCount = state.capturedWhiteCountState;
-    capturedBlackCount = state.capturedBlackCountState;
+    // Restore captured pieces
+    capturedWhiteCount = undoStackCapturedWhiteCount[index];
+    capturedBlackCount = undoStackCapturedBlackCount[index];
+    capturedWhiteCount = call stringToCapturedPieces(undoStackCapturedWhitePieces[index]);
+    capturedBlackCount = call stringToBlackCapturedPieces(undoStackCapturedBlackPieces[index]);
     
     // Restore move history
-    chessScreen.moveHistory = state.moveHistoryState;
+    chessScreen.moveHistory = undoStackMoveHistory[index];
     
     // Restore last move tracking
-    lastMoveFromX = state.lastMoveFromXState;
-    lastMoveFromY = state.lastMoveFromYState;
-    lastMoveToX = state.lastMoveToXState;
-    lastMoveToY = state.lastMoveToYState;
+    lastMoveFromX = undoStackLastMoveFromX[index];
+    lastMoveFromY = undoStackLastMoveFromY[index];
+    lastMoveToX = undoStackLastMoveToX[index];
+    lastMoveToY = undoStackLastMoveToY[index];
+    
+    // Update all displays
+    call updateBoardDisplay();
+    call updateCapturedPiecesDisplay();
+    call updateTimerDisplay();
+    call updateTimerColors();
+    
+    // Clear selection and indicators
+    selectedX = -1;
+    selectedY = -1;
+    call clearIndicators();
+    
+    // Show last move if available
+    if lastMoveFromX >= 0 then {
+        call showLastMove(lastMoveFromX, lastMoveFromY, lastMoveToX, lastMoveToY);
+    }
+    
+    // Update status message
+    if currentPlayer == WHITE then {
+        chessScreen.statusMessage = "White to move";
+    } else {
+        chessScreen.statusMessage = "Black to move";
+    }
+}
+
+// Restore game state from redo stack at given index
+function restoreGameStateFromRedo(index: int) {
+    // Restore board state using helper function
+    call restoreRedoBoardState(index);
+    
+    // Restore game variables
+    currentPlayer = redoStackCurrentPlayer[index];
+    timerWhite = redoStackTimerWhite[index];
+    timerBlack = redoStackTimerBlack[index];
+    
+    // Restore castling rights
+    whiteKingMoved = redoStackWhiteKingMoved[index];
+    blackKingMoved = redoStackBlackKingMoved[index];
+    whiteKingsideRookMoved = redoStackWhiteKingsideRookMoved[index];
+    whiteQueensideRookMoved = redoStackWhiteQueensideRookMoved[index];
+    blackKingsideRookMoved = redoStackBlackKingsideRookMoved[index];
+    blackQueensideRookMoved = redoStackBlackQueensideRookMoved[index];
+    
+    // Restore en passant state
+    enPassantTargetX = redoStackEnPassantTargetX[index];
+    enPassantTargetY = redoStackEnPassantTargetY[index];
+    
+    // Restore captured pieces
+    capturedWhiteCount = redoStackCapturedWhiteCount[index];
+    capturedBlackCount = redoStackCapturedBlackCount[index];
+    capturedWhiteCount = call stringToCapturedPieces(redoStackCapturedWhitePieces[index]);
+    capturedBlackCount = call stringToBlackCapturedPieces(redoStackCapturedBlackPieces[index]);
+    
+    // Restore move history
+    chessScreen.moveHistory = redoStackMoveHistory[index];
+    
+    // Restore last move tracking
+    lastMoveFromX = redoStackLastMoveFromX[index];
+    lastMoveFromY = redoStackLastMoveFromY[index];
+    lastMoveToX = redoStackLastMoveToX[index];
+    lastMoveToY = redoStackLastMoveToY[index];
     
     // Update all displays
     call updateBoardDisplay();
@@ -514,44 +718,35 @@ function undoMove() {
         return;
     }
     
-    // Get the current state before undoing (for redo)
-    var currentState: GameState;
-    currentState.boardState = board;
-    currentState.currentPlayerState = currentPlayer;
-    currentState.timerWhiteState = timerWhite;
-    currentState.timerBlackState = timerBlack;
-    currentState.whiteKingMovedState = whiteKingMoved;
-    currentState.blackKingMovedState = blackKingMoved;
-    currentState.whiteKingsideRookMovedState = whiteKingsideRookMoved;
-    currentState.whiteQueensideRookMovedState = whiteQueensideRookMoved;
-    currentState.blackKingsideRookMovedState = blackKingsideRookMoved;
-    currentState.blackQueensideRookMovedState = blackQueensideRookMoved;
-    currentState.enPassantTargetXState = enPassantTargetX;
-    currentState.enPassantTargetYState = enPassantTargetY;
-    for (var i: int = 0; i < 16; i++) {
-        currentState.capturedWhitePiecesState[i] = capturedWhitePieces[i];
-        currentState.capturedBlackPiecesState[i] = capturedBlackPieces[i];
-    }
-    currentState.capturedWhiteCountState = capturedWhiteCount;
-    currentState.capturedBlackCountState = capturedBlackCount;
-    currentState.moveHistoryState = chessScreen.moveHistory;
-    currentState.lastMoveFromXState = lastMoveFromX;
-    currentState.lastMoveFromYState = lastMoveFromY;
-    currentState.lastMoveToXState = lastMoveToX;
-    currentState.lastMoveToYState = lastMoveToY;
-    
-    // Add current state to redo stack
-    if redoStackCount < 100 then {
-        redoStack[redoStackCount] = currentState;
-        redoStackCount = redoStackCount + 1;
-    }
+    // Save current state to redo stack
+    call saveRedoBoardState(redoStackCount);
+    redoStackCurrentPlayer[redoStackCount] = currentPlayer;
+    redoStackTimerWhite[redoStackCount] = timerWhite;
+    redoStackTimerBlack[redoStackCount] = timerBlack;
+    redoStackWhiteKingMoved[redoStackCount] = whiteKingMoved;
+    redoStackBlackKingMoved[redoStackCount] = blackKingMoved;
+    redoStackWhiteKingsideRookMoved[redoStackCount] = whiteKingsideRookMoved;
+    redoStackWhiteQueensideRookMoved[redoStackCount] = whiteQueensideRookMoved;
+    redoStackBlackKingsideRookMoved[redoStackCount] = blackKingsideRookMoved;
+    redoStackBlackQueensideRookMoved[redoStackCount] = blackQueensideRookMoved;
+    redoStackEnPassantTargetX[redoStackCount] = enPassantTargetX;
+    redoStackEnPassantTargetY[redoStackCount] = enPassantTargetY;
+    redoStackCapturedWhiteCount[redoStackCount] = capturedWhiteCount;
+    redoStackCapturedBlackCount[redoStackCount] = capturedBlackCount;
+    redoStackCapturedWhitePieces[redoStackCount] = call capturedPiecesToString(capturedWhiteCount);
+    redoStackCapturedBlackPieces[redoStackCount] = call capturedBlackPiecesToString(capturedBlackCount);
+    redoStackMoveHistory[redoStackCount] = chessScreen.moveHistory;
+    redoStackLastMoveFromX[redoStackCount] = lastMoveFromX;
+    redoStackLastMoveFromY[redoStackCount] = lastMoveFromY;
+    redoStackLastMoveToX[redoStackCount] = lastMoveToX;
+    redoStackLastMoveToY[redoStackCount] = lastMoveToY;
+    redoStackCount = redoStackCount + 1;
     
     // Pop state from undo stack
     undoStackCount = undoStackCount - 1;
-    var previousState: GameState = undoStack[undoStackCount];
     
     // Restore the previous state
-    call restoreGameState(previousState);
+    call restoreGameStateFromUndo(undoStackCount);
     
     // Update button states
     call updateUndoRedoButtons();
@@ -566,44 +761,35 @@ function redoMove() {
         return;
     }
     
-    // Get the current state before redoing (for undo)
-    var currentState: GameState;
-    currentState.boardState = board;
-    currentState.currentPlayerState = currentPlayer;
-    currentState.timerWhiteState = timerWhite;
-    currentState.timerBlackState = timerBlack;
-    currentState.whiteKingMovedState = whiteKingMoved;
-    currentState.blackKingMovedState = blackKingMoved;
-    currentState.whiteKingsideRookMovedState = whiteKingsideRookMoved;
-    currentState.whiteQueensideRookMovedState = whiteQueensideRookMoved;
-    currentState.blackKingsideRookMovedState = blackKingsideRookMoved;
-    currentState.blackQueensideRookMovedState = blackQueensideRookMoved;
-    currentState.enPassantTargetXState = enPassantTargetX;
-    currentState.enPassantTargetYState = enPassantTargetY;
-    for (var i: int = 0; i < 16; i++) {
-        currentState.capturedWhitePiecesState[i] = capturedWhitePieces[i];
-        currentState.capturedBlackPiecesState[i] = capturedBlackPieces[i];
-    }
-    currentState.capturedWhiteCountState = capturedWhiteCount;
-    currentState.capturedBlackCountState = capturedBlackCount;
-    currentState.moveHistoryState = chessScreen.moveHistory;
-    currentState.lastMoveFromXState = lastMoveFromX;
-    currentState.lastMoveFromYState = lastMoveFromY;
-    currentState.lastMoveToXState = lastMoveToX;
-    currentState.lastMoveToYState = lastMoveToY;
-    
-    // Add current state back to undo stack
-    if undoStackCount < 100 then {
-        undoStack[undoStackCount] = currentState;
-        undoStackCount = undoStackCount + 1;
-    }
+    // Save current state to undo stack
+    call saveUndoBoardState(undoStackCount);
+    undoStackCurrentPlayer[undoStackCount] = currentPlayer;
+    undoStackTimerWhite[undoStackCount] = timerWhite;
+    undoStackTimerBlack[undoStackCount] = timerBlack;
+    undoStackWhiteKingMoved[undoStackCount] = whiteKingMoved;
+    undoStackBlackKingMoved[undoStackCount] = blackKingMoved;
+    undoStackWhiteKingsideRookMoved[undoStackCount] = whiteKingsideRookMoved;
+    undoStackWhiteQueensideRookMoved[undoStackCount] = whiteQueensideRookMoved;
+    undoStackBlackKingsideRookMoved[undoStackCount] = blackKingsideRookMoved;
+    undoStackBlackQueensideRookMoved[undoStackCount] = blackQueensideRookMoved;
+    undoStackEnPassantTargetX[undoStackCount] = enPassantTargetX;
+    undoStackEnPassantTargetY[undoStackCount] = enPassantTargetY;
+    undoStackCapturedWhiteCount[undoStackCount] = capturedWhiteCount;
+    undoStackCapturedBlackCount[undoStackCount] = capturedBlackCount;
+    undoStackCapturedWhitePieces[undoStackCount] = call capturedPiecesToString(capturedWhiteCount);
+    undoStackCapturedBlackPieces[undoStackCount] = call capturedBlackPiecesToString(capturedBlackCount);
+    undoStackMoveHistory[undoStackCount] = chessScreen.moveHistory;
+    undoStackLastMoveFromX[undoStackCount] = lastMoveFromX;
+    undoStackLastMoveFromY[undoStackCount] = lastMoveFromY;
+    undoStackLastMoveToX[undoStackCount] = lastMoveToX;
+    undoStackLastMoveToY[undoStackCount] = lastMoveToY;
+    undoStackCount = undoStackCount + 1;
     
     // Pop state from redo stack
     redoStackCount = redoStackCount - 1;
-    var nextState: GameState = redoStack[redoStackCount];
     
     // Restore the next state
-    call restoreGameState(nextState);
+    call restoreGameStateFromRedo(redoStackCount);
     
     // Update button states
     call updateUndoRedoButtons();
