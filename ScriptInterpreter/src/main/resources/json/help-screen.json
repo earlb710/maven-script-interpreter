@@ -114,6 +114,7 @@
           "padding": "10",
           "hgrow": "ALWAYS",
           "vgrow": "ALWAYS",
+          "disableLabelAlignment": true,
           "items": [
             {
               "name": "helpContentView",
