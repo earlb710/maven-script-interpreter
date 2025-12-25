@@ -44,6 +44,8 @@
               "type": "hbox",
               "spacing": "5",
               "padding": "0",
+              "hgrow": "ALWAYS",
+              "vgrow": "NEVER",
               "items": [
                 {
                   "name": "searchCombo",
@@ -52,6 +54,7 @@
                   "editable": true,
                   "hgrow": "ALWAYS",
                   "vgrow": "NEVER",
+                  "minWidth": "150",
                   "prefWidth": "180",
                   "display": {
                     "type": "combobox",
@@ -79,6 +82,8 @@
             {
               "name": "helpTreeArea",
               "type": "vbox",
+              "hgrow": "NEVER",
+              "vgrow": "ALWAYS",
               "items": [
                 {
                   "name": "helpTree",
@@ -89,7 +94,6 @@
                   "minWidth": "200",
                   "prefWidth": "250",
                   "minHeight": "200",
-                  "prefHeight": "200",
                   "maxHeight": "MAX",
                   "display": {
                     "type": "treeview",
