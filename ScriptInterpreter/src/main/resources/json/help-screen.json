@@ -58,8 +58,6 @@
                   "prefWidth": "180",
                   "display": {
                     "type": "combobox",
-                    "labelText": "",
-                    "labelPosition": "TOP",
                     "promptHelp": "Search help topics...",
                     "options": []
                   }
@@ -97,8 +95,6 @@
                   "maxHeight": "MAX",
                   "display": {
                     "type": "treeview",
-                    "labelText": "Help Topic",
-                    "labelPosition": "TOP",
                     "expandAll": false,
                     "showRoot": false,
                     "onChange": "helpScreen.helpContent = call convertToHtml(call getHelpContent(helpScreen.selectedTopic));",
