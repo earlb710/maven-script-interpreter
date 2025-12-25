@@ -46,6 +46,7 @@
               "padding": "0",
               "hgrow": "ALWAYS",
               "vgrow": "NEVER",
+              "disableLabelAlignment": true,
               "items": [
                 {
                   "name": "searchCombo",
@@ -82,6 +83,7 @@
               "type": "vbox",
               "hgrow": "NEVER",
               "vgrow": "ALWAYS",
+              "disableLabelAlignment": true,
               "items": [
                 {
                   "name": "helpTree",
