@@ -5774,7 +5774,7 @@ public class ScreenFactory {
      */
     private static double calculateMaxLabelWidth(List<AreaItem> items, String screenName,
             InterpreterContext context) {
-        double maxWidth = 100; // Minimum width
+        double maxWidth = 0; // Default to 0 when no labels exist
         javafx.scene.text.Text measuringText = new javafx.scene.text.Text();
 
         for (AreaItem item : items) {
