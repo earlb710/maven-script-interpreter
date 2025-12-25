@@ -95,7 +95,6 @@
                   "vgrow": "ALWAYS",
                   "minWidth": "200",
                   "prefWidth": "250",
-                  "minHeight": "200",
                   "maxHeight": "MAX",
                   "display": {
                     "type": "treeview",
