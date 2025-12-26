@@ -201,15 +201,46 @@ public class ControlListenerFactory {
                 markScreenChanged(control);
             });
         } else if (control instanceof TreeView) {
-            @SuppressWarnings("unchecked")
-            TreeView<String> treeView = (TreeView<String>) control;
-            treeView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-                if (newVal != null) {
-                    VarRefResolver.setVarRefValue(varName, newVal.getValue(), screenVars);
-                    markScreenChanged(control);
-                }
-            });
+            setupTreeViewBinding(control, varName, screenVars);
         }
+    }
+    
+    /**
+     * Sets up bidirectional binding for TreeView controls.
+     * 
+     * @param control The TreeView control
+     * @param varName The variable name to bind to
+     * @param screenVars The screen variables map
+     */
+    private static void setupTreeViewBinding(Node control, String varName,
+            ConcurrentHashMap<String, Object> screenVars) {
+        @SuppressWarnings("unchecked")
+        TreeView<String> treeView = (TreeView<String>) control;
+        
+        // Flag to prevent infinite loops when updating from variable changes
+        final boolean[] updatingFromVariable = {false};
+        
+        // Forward binding: TreeView selection → variable
+        treeView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            // Skip if we're currently updating the tree from a variable change
+            if (updatingFromVariable[0]) {
+                return;
+            }
+            
+            if (newVal != null) {
+                VarRefResolver.setVarRefValue(varName, newVal.getValue(), screenVars);
+                markScreenChanged(control);
+            }
+        });
+        
+        // Reverse binding: variable → TreeView selection
+        // We need to monitor the screenVars map for changes to our variable
+        // Since ConcurrentHashMap doesn't have built-in listeners, we'll rely on
+        // the existing refreshBoundControls mechanism that's called after variable changes
+        // The updateControlFromValue method in ControlUpdater now handles TreeView updates
+        
+        // Store the flag in the control's properties for access by ControlUpdater
+        control.getProperties().put("updatingFromVariable", updatingFromVariable);
     }
     
     /**
