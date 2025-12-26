@@ -1456,6 +1456,7 @@ performSearch(query: string) {
     
     // Find the best match
     var bestMatch: string = "";
+    var bestMatchFullPath: string = "";
     
     foreach topicPath in allTopics {
         var lowerPath: string = call str.toLower(topicPath);
@@ -1474,24 +1475,28 @@ performSearch(query: string) {
         // Check for exact match on leaf name (highest priority)
         if lowerLeaf == lowerQuery then {
             bestMatch = leafName;
+            bestMatchFullPath = topicPath;
             break;
         } else if call str.contains(lowerLeaf, lowerQuery) then {
             // Partial match on leaf name
             if bestMatch == "" then {
                 bestMatch = leafName;
+                bestMatchFullPath = topicPath;
             }
         } else if call str.contains(lowerPath, lowerQuery) then {
             // Partial match on full path
             if bestMatch == "" then {
                 bestMatch = leafName;
+                bestMatchFullPath = topicPath;
             }
         }
     }
     
     // If we found a match, update the selected topic via screen variable
+    // Use the full path for tree selection (e.g., "Basic > Variables")
     // This will trigger tree selection and content update via the onChange event
     if bestMatch != "" then {
-        helpScreen.selectedTopic = bestMatch;
+        helpScreen.selectedTopic = bestMatchFullPath;
     } else {
         // Show message if no match found
         helpScreen.helpContent = call convertToHtml("No help topic found matching: " + query);
