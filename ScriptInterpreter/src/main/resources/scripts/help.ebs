@@ -1491,7 +1491,7 @@ performSearch(query: string) {
     // If we found a match, update the selected topic using scr.setProperty
     // This will properly trigger tree selection and content update
     if bestMatch != "" then {
-        call scr.setProperty("helpScreen", "helpTree", bestMatch);
+        call scr.setProperty("helpScreen.helpTree", "value", bestMatch);
     } else {
         // Show message if no match found
         helpScreen.helpContent = call convertToHtml("No help topic found matching: " + query);
