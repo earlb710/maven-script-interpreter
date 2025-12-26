@@ -240,6 +240,13 @@
       "onClick": "handleSubmit()"
     },
     {
+      "type": "button",
+      "labelText": "Save",
+      "icon": "icons/save.png",
+      "shortcut": "Ctrl+S",
+      "onClick": "call saveFile();"
+    },
+    {
       "type": "slider",
       "min": 0,
       "max": 100,
