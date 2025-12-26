@@ -5557,6 +5557,7 @@ public class ScreenFactory {
         merged.textColor = base.textColor;
         merged.itemBold = base.itemBold;
         merged.itemItalic = base.itemItalic;
+        merged.icon = base.icon;
         merged.onClick = base.onClick;
         merged.onValidate = base.onValidate;
         merged.onChange = base.onChange;
@@ -5598,6 +5599,7 @@ public class ScreenFactory {
         if (overlay.textColor != null) merged.textColor = overlay.textColor;
         if (overlay.itemBold != null) merged.itemBold = overlay.itemBold;
         if (overlay.itemItalic != null) merged.itemItalic = overlay.itemItalic;
+        if (overlay.icon != null) merged.icon = overlay.icon;
         if (overlay.onClick != null) merged.onClick = overlay.onClick;
         if (overlay.onValidate != null) merged.onValidate = overlay.onValidate;
         if (overlay.onChange != null) merged.onChange = overlay.onChange;
@@ -6604,6 +6606,7 @@ public class ScreenFactory {
         clone.textColor = source.textColor;
         clone.itemBold = source.itemBold;
         clone.itemItalic = source.itemItalic;
+        clone.icon = source.icon;
         clone.onClick = source.onClick;
         clone.onValidate = source.onValidate;
         clone.onChange = source.onChange;
