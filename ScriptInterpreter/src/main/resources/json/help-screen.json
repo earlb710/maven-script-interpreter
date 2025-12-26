@@ -85,6 +85,9 @@
               "padding": "0",
               "hgrow": "NEVER",
               "vgrow": "ALWAYS",
+              "minHeight": "0",
+              "prefHeight": "0",
+              "maxHeight": "MAX",
               "disableLabelAlignment": true,
               "items": [
                 {
@@ -95,6 +98,8 @@
                   "vgrow": "ALWAYS",
                   "minWidth": "200",
                   "prefWidth": "250",
+                  "minHeight": "0",
+                  "prefHeight": "0",
                   "maxHeight": "MAX",
                   "display": {
                     "type": "treeview",
