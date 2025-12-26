@@ -69,10 +69,10 @@
                   "sequence": 2,
                   "hgrow": "NEVER",
                   "vgrow": "NEVER",
-                  "prefWidth": "60",
+                  "prefWidth": "40",
                   "display": {
                     "type": "button",
-                    "labelText": "Search",
+                    "labelText": "🔍",
                     "onClick": "call performSearch(helpScreen.searchQuery);"
                   }
                 }
