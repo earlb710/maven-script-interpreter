@@ -1459,8 +1459,8 @@ performSearch(query: string) {
     var bestMatchFullPath: string = "";
     
     // Debug: Show search query
-    call console.print("=== Help Search Debug ===");
-    call console.print("Search query: " + query);
+    print "=== Help Search Debug ===";
+    print "Search query: " + query;
     
     foreach topicPath in allTopics {
         var lowerPath: string = call str.toLower(topicPath);
@@ -1497,22 +1497,22 @@ performSearch(query: string) {
     }
     
     // Debug: Show search results
-    call console.print("Best match found: " + bestMatch);
-    call console.print("Full path: " + bestMatchFullPath);
+    print "Best match found: " + bestMatch;
+    print "Full path: " + bestMatchFullPath;
     
     // If we found a match, update the selected topic via screen variable
     // Use the full path for tree selection (e.g., "Basic > Variables")
     // This will trigger tree selection and content update via the onChange event
     if bestMatch != "" then {
-        call console.print("Setting selectedTopic to: " + bestMatchFullPath);
+        print "Setting selectedTopic to: " + bestMatchFullPath;
         helpScreen.selectedTopic = bestMatchFullPath;
-        call console.print("selectedTopic set complete");
+        print "selectedTopic set complete";
     } else {
         // Show message if no match found
-        call console.print("No match found");
+        print "No match found";
         helpScreen.helpContent = call convertToHtml("No help topic found matching: " + query);
     }
-    call console.print("=== End Search Debug ===");
+    print "=== End Search Debug ===";
 }
 
 // Create the help screen from the modified JSON
