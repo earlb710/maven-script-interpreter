@@ -134,8 +134,6 @@ screen TreeBindingTest {
                                 labelText = "Clear Selection"
                                 onClick = "
                                     selectedFile = '';
-                                    call scr.setProperty('TreeBindingTest.selectionLabel', 'labelText', 
-                                        'Current selection: (none)');
                                     call print('Variable cleared');
                                 "
                             }

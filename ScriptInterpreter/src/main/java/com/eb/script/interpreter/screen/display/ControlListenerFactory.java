@@ -230,6 +230,10 @@ public class ControlListenerFactory {
             if (newVal != null) {
                 VarRefResolver.setVarRefValue(varName, newVal.getValue(), screenVars);
                 markScreenChanged(control);
+            } else {
+                // Selection cleared - set variable to empty string
+                VarRefResolver.setVarRefValue(varName, "", screenVars);
+                markScreenChanged(control);
             }
         });
         
