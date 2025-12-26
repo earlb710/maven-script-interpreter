@@ -79,7 +79,7 @@ Created comprehensive documentation:
    - Screen layout examples
    - Code structure explanation
 
-4. **test_button_icons.ebs** (7.2 KB)
+4. **ScriptInterpreter/scripts/test/test_button_icons.ebs** (7.2 KB)
    - Working demonstration script
    - File action buttons
    - Folder action buttons
@@ -152,7 +152,7 @@ screen fileManager = {
 ✅ No warnings introduced  
 
 ### Test Script
-`test_button_icons.ebs` demonstrates:
+`ScriptInterpreter/scripts/test/test_button_icons.ebs` demonstrates:
 - File type buttons (script, config, markdown, image icons)
 - Folder buttons (folder, open folder, project, favorite icons)
 - Icon + text + shortcut combinations
@@ -162,7 +162,7 @@ screen fileManager = {
 Due to JavaFX UI requirements, manual testing in graphical environment recommended:
 ```bash
 cd ScriptInterpreter
-mvn javafx:run -Djavafx.args="../test_button_icons.ebs"
+mvn javafx:run -Djavafx.args="scripts/test/test_button_icons.ebs"
 ```
 
 ## Code Quality
@@ -202,7 +202,7 @@ This implementation builds on existing features:
 | BUTTON_ICONS.md | Docs | 334 | Complete documentation |
 | BUTTON_ICONS_QUICKREF.md | Docs | 194 | Quick reference |
 | BUTTON_ICONS_VISUAL_GUIDE.md | Docs | 274 | Visual guide |
-| test_button_icons.ebs | Test | 209 | Demo script |
+| ScriptInterpreter/scripts/test/test_button_icons.ebs | Test | 209 | Demo script |
 
 **Total Changes**: ~90 lines of code + 1000+ lines of documentation
 
@@ -222,4 +222,4 @@ The feature is ready for use and follows all project conventions and patterns. I
 
 - Issue: "screen button items does not appear to support icons"
 - Branch: `copilot/fix-screen-button-item-icons`
-- Related: TreeView icon implementation (TREEVIEW_ICONS.md)
+- Related: TreeView icon implementation (../TREEVIEW_ICONS.md)

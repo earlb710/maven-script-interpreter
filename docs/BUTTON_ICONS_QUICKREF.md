@@ -204,6 +204,6 @@ var fileTypes = [
 ## See Also
 
 - [BUTTON_ICONS.md](BUTTON_ICONS.md) - Complete button icon documentation
-- [TREEVIEW_ICONS_QUICKREF.md](TREEVIEW_ICONS_QUICKREF.md) - TreeView icon quick reference
-- [BUTTON_SHORTCUTS.md](BUTTON_SHORTCUTS.md) - Button keyboard shortcuts
-- [test_button_icons.ebs](test_button_icons.ebs) - Working demo script
+- [TREEVIEW_ICONS_QUICKREF.md](../TREEVIEW_ICONS_QUICKREF.md) - TreeView icon quick reference
+- [BUTTON_SHORTCUTS.md](../BUTTON_SHORTCUTS.md) - Button keyboard shortcuts
+- [test_button_icons.ebs](../ScriptInterpreter/scripts/test/test_button_icons.ebs) - Working demo script

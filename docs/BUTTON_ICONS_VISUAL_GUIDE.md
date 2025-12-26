@@ -228,7 +228,7 @@ private static ImageView loadIcon(String iconPath, double width, double height) 
 Run the demo script:
 ```bash
 cd ScriptInterpreter
-mvn javafx:run -Djavafx.args="../test_button_icons.ebs"
+mvn javafx:run -Djavafx.args="scripts/test/test_button_icons.ebs"
 ```
 
 Demo includes:

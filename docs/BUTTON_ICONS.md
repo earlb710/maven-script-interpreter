@@ -129,7 +129,7 @@ The interpreter includes many pre-built icons in the `icons/` directory:
 | **Folders** | `folder.png`, `folder-open.png`, `folder_fav.png`, `folder_ref.png` |
 | **Projects** | `project.png` |
 
-See `TREEVIEW_ICONS_QUICKREF.md` for a complete list of available icons.
+See `../TREEVIEW_ICONS_QUICKREF.md` for a complete list of available icons.
 
 ## Icon Specifications
 
@@ -183,12 +183,12 @@ Button icons use the same underlying implementation as TreeView icons:
 
 ## Testing
 
-A comprehensive test script is provided in `test_button_icons.ebs`:
+A comprehensive test script is provided in `ScriptInterpreter/scripts/test/test_button_icons.ebs`:
 
 ```bash
 # Run the test script
 cd ScriptInterpreter
-mvn javafx:run -Djavafx.args="../test_button_icons.ebs"
+mvn javafx:run -Djavafx.args="scripts/test/test_button_icons.ebs"
 ```
 
 The test demonstrates:
@@ -268,9 +268,9 @@ Potential future improvements:
 
 ## Related Documentation
 
-- [TREEVIEW_ICONS.md](TREEVIEW_ICONS.md) - Complete TreeView icon documentation
-- [TREEVIEW_ICONS_QUICKREF.md](TREEVIEW_ICONS_QUICKREF.md) - Quick reference for available icons
-- [BUTTON_SHORTCUTS.md](BUTTON_SHORTCUTS.md) - Button keyboard shortcut documentation
+- [TREEVIEW_ICONS.md](../TREEVIEW_ICONS.md) - Complete TreeView icon documentation
+- [TREEVIEW_ICONS_QUICKREF.md](../TREEVIEW_ICONS_QUICKREF.md) - Quick reference for available icons
+- [BUTTON_SHORTCUTS.md](../BUTTON_SHORTCUTS.md) - Button keyboard shortcut documentation
 - [EBS_LANGUAGE_REFERENCE.md](docs/EBS_LANGUAGE_REFERENCE.md) - Full EBS syntax reference
 
 ## Version History
