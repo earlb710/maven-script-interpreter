@@ -1927,6 +1927,11 @@ public class InterpreterScreen {
             metadata.labelPosition = String.valueOf(displayDef.get("labelposition")).toLowerCase();
         }
 
+        // Extract icon path for buttons
+        if (displayDef.containsKey("icon")) {
+            metadata.icon = String.valueOf(displayDef.get("icon"));
+        }
+
         // Extract shortcut key combination for buttons - check both camelCase and lowercase
         if (displayDef.containsKey("shortcut")) {
             metadata.shortcut = String.valueOf(displayDef.get("shortcut"));
