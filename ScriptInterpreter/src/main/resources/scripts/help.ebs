@@ -1458,10 +1458,6 @@ performSearch(query: string) {
     var bestMatch: string = "";
     var bestMatchFullPath: string = "";
     
-    // Debug: Show search query
-    print "=== Help Search Debug ===";
-    print "Search query: " + query;
-    
     foreach topicPath in allTopics {
         var lowerPath: string = call str.toLower(topicPath);
         
@@ -1496,23 +1492,17 @@ performSearch(query: string) {
         }
     }
     
-    // Debug: Show search results
-    print "Best match found: " + bestMatch;
-    print "Full path: " + bestMatchFullPath;
-    
-    // If we found a match, update the selected topic via screen variable
-    // Use the full path for tree selection (e.g., "Basic > Variables")
-    // This will trigger tree selection and content update via the onChange event
+    // If we found a match, update content directly
+    // Note: Tree varRef binding is one-way only (tree->var), so setting the variable
+    // won't trigger tree selection. We bypass this by directly updating the content.
     if bestMatch != "" then {
-        print "Setting selectedTopic to: " + bestMatchFullPath;
         helpScreen.selectedTopic = bestMatchFullPath;
-        print "selectedTopic set complete";
+        // Directly update content (workaround for one-way tree binding)
+        helpScreen.helpContent = call convertToHtml(call getHelpContent(bestMatchFullPath));
     } else {
         // Show message if no match found
-        print "No match found";
         helpScreen.helpContent = call convertToHtml("No help topic found matching: " + query);
     }
-    print "=== End Search Debug ===";
 }
 
 // Create the help screen from the modified JSON
