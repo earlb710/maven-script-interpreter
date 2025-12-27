@@ -2557,6 +2557,7 @@ screen formScreen = {
     "labelBold": false,                    // Label bold
     "labelItalic": false,                  // Label italic
     "labelFontSize": "12px",               // Label font size
+    "icon": "icons/save.png",              // Icon path (for buttons) - classpath resources or file system paths
     "style": "-fx-background-color: #fff;", // Custom CSS style
     "cssClass": "custom-class"             // CSS class name
 }
@@ -2609,6 +2610,49 @@ The `height` property specifies the number of lines to display in a textarea con
 }
 ```
 
+#### Button with Icon
+Buttons can display icons alongside text. Icons are automatically scaled to 16x16 pixels.
+
+```javascript
+{
+    "name": "saveBtn",
+    "type": "string",
+    "area": "toolbarArea",
+    "display": {
+        "type": "button",
+        "labelText": "Save",
+        "icon": "icons/save.png",          // Icon from classpath resources
+        "onClick": "call saveFile();"
+    }
+}
+```
+
+#### Button with Icon and Keyboard Shortcut
+Combine icons, shortcuts, and event handlers for a complete button experience:
+
+```javascript
+{
+    "name": "openBtn",
+    "type": "string",
+    "area": "toolbarArea",
+    "display": {
+        "type": "button",
+        "labelText": "Open",
+        "icon": "icons/folder-open.png",   // Icon displayed alongside text
+        "shortcut": "Ctrl+O",              // Keyboard shortcut (shown in tooltip)
+        "onClick": "call openFile();"      // Click handler
+    }
+}
+```
+
+**Icon Path Resolution:**
+- **Classpath resources** (recommended): Place icons in `src/main/resources/icons/`
+  - Example: `"icon": "icons/save.png"`
+- **File system paths**: Use absolute or relative paths
+  - Example: `"icon": "/home/user/icons/save.png"`
+
+See [BUTTON_ICONS.md](BUTTON_ICONS.md) for complete documentation.
+
 #### Event Handlers
 
 Event handlers allow you to execute EBS code in response to user interactions with screen controls.
@@ -2632,6 +2676,18 @@ Defines a keyboard shortcut for the button. The shortcut key is automatically un
     "type": "button",
     "labelText": "Save",
     "shortcut": "Alt+S",  // Alt+S triggers the button
+    "onClick": "call saveData();"
+}
+```
+
+Shortcuts work seamlessly with button icons:
+
+```javascript
+"display": {
+    "type": "button",
+    "labelText": "Save",
+    "icon": "icons/save.png",    // Icon displayed alongside text
+    "shortcut": "Ctrl+S",         // Shortcut shown in tooltip
     "onClick": "call saveData();"
 }
 ```
