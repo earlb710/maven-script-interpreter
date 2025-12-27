@@ -12,6 +12,11 @@
       "name": "helpContent",
       "type": "string",
       "default": ""
+    },
+    {
+      "name": "searchQuery",
+      "type": "string",
+      "default": ""
     }
   ],
   "area": [
@@ -26,34 +31,81 @@
         {
           "name": "treeArea",
           "type": "vbox",
-          "spacing": "0",
+          "spacing": "5",
+          "padding": "5",
           "minWidth": "200",
           "prefWidth": "250",
           "hgrow": "NEVER",
           "vgrow": "ALWAYS",
           "style": "-fx-border-color: #cccccc; -fx-border-width: 0 1 0 0;",
-          "items": [
+          "areas": [
             {
-              "name": "helpTree",
-              "varRef": "selectedTopic",
-              "seq": 1,
-              "stateful": false,
+              "name": "searchBox",
+              "type": "hbox",
+              "spacing": "5",
+              "padding": "0",
+              "hgrow": "ALWAYS",
+              "vgrow": "NEVER",
+              "disableLabelAlignment": true,
+              "items": [
+                {
+                  "name": "searchCombo",
+                  "varRef": "searchQuery",
+                  "sequence": 1,
+                  "editable": true,
+                  "hgrow": "ALWAYS",
+                  "vgrow": "NEVER",
+                  "minWidth": "150",
+                  "prefWidth": "180",
+                  "display": {
+                    "type": "combobox",
+                    "promptHelp": "Search help topics...",
+                    "options": []
+                  }
+                },
+                {
+                  "name": "searchButton",
+                  "varRef": "",
+                  "sequence": 2,
+                  "hgrow": "NEVER",
+                  "vgrow": "NEVER",
+                  "prefWidth": "40",
+                  "display": {
+                    "type": "button",
+                    "labelText": "🔍",
+                    "onClick": "call performSearch(helpScreen.searchQuery);"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "helpTreeArea",
+              "type": "vbox",
+              "spacing": "0",
+              "padding": "0",
               "hgrow": "NEVER",
               "vgrow": "ALWAYS",
-              "minWidth": "200",
-              "prefWidth": "250",
-              "minHeight": "200",
-              "prefHeight": "200",
               "maxHeight": "MAX",
-              "display": {
-                "type": "treeview",
-                "labelText": "Help Topic",
-                "labelPosition": "TOP",
-                "expandAll": false,
-                "showRoot": false,
-                "onChange": "helpScreen.helpContent = call convertToHtml(call getHelpContent(helpScreen.selectedTopic));",
-                "treeItems": []
-              }
+              "disableLabelAlignment": true,
+              "items": [
+                {
+                  "name": "helpTree",
+                  "varRef": "selectedTopic",
+                  "sequence": 1,
+                  "hgrow": "NEVER",
+                  "vgrow": "ALWAYS",
+                  "minWidth": "200",
+                  "prefWidth": "250",
+                  "maxHeight": "MAX",
+                  "display": {
+                    "type": "treeview",
+                    "expandAll": false,
+                    "showRoot": false,
+                    "onChange": "helpScreen.helpContent = call convertToHtml(call getHelpContent(helpScreen.selectedTopic));",
+                    "treeItems": []
+                  }
+                }
+              ]
             }
           ]
         },
@@ -64,12 +116,12 @@
           "padding": "10",
           "hgrow": "ALWAYS",
           "vgrow": "ALWAYS",
+          "disableLabelAlignment": true,
           "items": [
             {
               "name": "helpContentView",
               "varRef": "helpContent",
-              "seq": 1,
-              "stateful": false,
+              "sequence": 1,
               "hgrow": "ALWAYS",
               "vgrow": "ALWAYS",
               "minWidth": "200",
@@ -80,9 +132,7 @@
               "maxHeight": "MAX",
               "style": "-fx-border-color: #b0b0b0; -fx-border-width: 1; -fx-border-style: solid; -fx-border-insets: -1;",
               "display": {
-                "type": "webview",
-                "labelText": "Help Content",
-                "labelPosition": "TOP"
+                "type": "webview"
               }
             }
           ]
