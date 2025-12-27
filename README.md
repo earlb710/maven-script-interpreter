@@ -22,6 +22,7 @@ A powerful script interpreter for the EBS (Earl Bosch Script) language, featurin
 - **JSON Support**: Native JSON parsing with support for both standard quoted keys and JavaScript-style unquoted keys, validation, and schema support
 - **File I/O**: Built-in file operations
 - **Script Packaging**: Package EBS applications into binary `.ebsp` files to protect source code from viewing
+- **UI Button Icons**: Display icons alongside button text using the `icon` property with support for classpath resources and file system paths
 - **Extensible**: Easy to add custom built-in functions
 
 ## Quick Start
@@ -557,6 +558,13 @@ show screen myWindow;
   - Supports Alt, Ctrl, and combined modifiers (e.g., "Alt+S", "Ctrl+R", "Alt+Ctrl+X")
   - Example: `"display": { "type": "button", "labelText": "Save", "shortcut": "Alt+S" }`
   - See [BUTTON_SHORTCUT_PROPERTY.md](BUTTON_SHORTCUT_PROPERTY.md) and `test_button_shortcut.ebs` for details
+- **Button Icons**: Display icons alongside button text using the `icon` property
+  - Icons loaded from classpath resources (e.g., `"icon": "icons/save.png"`) or file system paths
+  - Automatically scaled to 16x16 pixels to fit button size
+  - Supports PNG format with transparency via alpha channel
+  - Works seamlessly with shortcuts and onClick handlers
+  - Example: `"display": { "type": "button", "labelText": "Save", "icon": "icons/save.png", "shortcut": "Ctrl+S" }`
+  - See [BUTTON_ICONS.md](docs/BUTTON_ICONS.md) and `ScriptInterpreter/scripts/test/test_button_icons.ebs` for details
 - **Container Alignment**: Control positioning of child elements within areas using the `alignment` property
   - Supports 17 alignment values: `left`, `right`, `center`, `top-left`, `top-center`, etc.
   - Works with HBox, VBox, StackPane, FlowPane, and TilePane containers
