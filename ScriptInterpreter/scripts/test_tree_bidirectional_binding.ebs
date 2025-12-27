@@ -39,7 +39,7 @@ screen TreeBindingTest = {
                 "displayRecords": 12,
                 "showRoot": true,
                 "treeItems": $treeData,
-                "onChange": "call scr.setProperty('TreeBindingTest.selectionLabel', 'labelText', 'Current selection: ' + selectedFile); call print('Tree selection changed to: ' + selectedFile);"
+                "onChange": "call scr.setProperty('TreeBindingTest.selectionLabel', 'labelText', 'Current selection: ' + selectedFile);"
             }
         },
         {
@@ -75,7 +75,7 @@ screen TreeBindingTest = {
                     "display": {
                         "type": "button",
                         "labelText": "Select Root",
-                        "onClick": "selectedFile = 'Root'; call print('Variable set to: Root');"
+                        "onClick": "selectedFile = 'Root';"
                     }
                 },
                 {
@@ -83,7 +83,7 @@ screen TreeBindingTest = {
                     "display": {
                         "type": "button",
                         "labelText": "Select Documents",
-                        "onClick": "selectedFile = 'Documents'; call print('Variable set to: Documents');"
+                        "onClick": "selectedFile = 'Documents';"
                     }
                 },
                 {
@@ -91,7 +91,7 @@ screen TreeBindingTest = {
                     "display": {
                         "type": "button",
                         "labelText": "Select README.md",
-                        "onClick": "selectedFile = 'README.md'; call print('Variable set to: README.md');"
+                        "onClick": "selectedFile = 'README.md';"
                     }
                 },
                 {
@@ -99,7 +99,7 @@ screen TreeBindingTest = {
                     "display": {
                         "type": "button",
                         "labelText": "Select Project2",
-                        "onClick": "selectedFile = 'Project2'; call print('Variable set to: Project2');"
+                        "onClick": "selectedFile = 'Project2';"
                     }
                 },
                 {
@@ -107,7 +107,7 @@ screen TreeBindingTest = {
                     "display": {
                         "type": "button",
                         "labelText": "Clear Selection",
-                        "onClick": "selectedFile = ''; call print('Variable cleared');"
+                        "onClick": "selectedFile = '';"
                     }
                 },
                 {
