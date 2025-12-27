@@ -1,0 +1,230 @@
+// Test script to demonstrate button icon support
+// This script shows buttons with various icons from the resources
+
+screen buttonIconsDemo = {
+    "title": "Button Icons Demo",
+    "width": 600,
+    "height": 500,
+    "areas": [
+        {
+            "name": "headerArea",
+            "type": "vbox",
+            "spacing": "10",
+            "padding": "15",
+            "style": "-fx-background-color: #f5f5f5; -fx-border-color: #cccccc; -fx-border-width: 0 0 2 0;"
+        },
+        {
+            "name": "fileActionsArea",
+            "type": "hbox",
+            "spacing": "10",
+            "padding": "15"
+        },
+        {
+            "name": "folderActionsArea",
+            "type": "hbox",
+            "spacing": "10",
+            "padding": "15"
+        },
+        {
+            "name": "statusArea",
+            "type": "vbox",
+            "spacing": "5",
+            "padding": "15",
+            "style": "-fx-background-color: #e8f4f8; -fx-border-color: #4CAF50; -fx-border-width: 2; -fx-border-radius: 5; -fx-background-radius: 5;"
+        }
+    ],
+    "vars": [
+        // Header Section
+        {
+            "name": "titleLabel",
+            "type": "string",
+            "default": "Button Icons Demonstration",
+            "area": "headerArea",
+            "display": {
+                "type": "label",
+                "itemFontSize": "18",
+                "itemBold": true,
+                "itemColor": "#2196F3"
+            }
+        },
+        {
+            "name": "instructionsLabel",
+            "type": "string",
+            "default": "Buttons below show various icons loaded from the resources directory",
+            "area": "headerArea",
+            "display": {
+                "type": "label",
+                "itemFontSize": "12",
+                "itemColor": "#666666"
+            }
+        },
+        
+        // File Action Buttons with Icons
+        {
+            "name": "fileActionsLabel",
+            "type": "string",
+            "default": "File Actions:",
+            "area": "fileActionsArea",
+            "display": {
+                "type": "label",
+                "itemBold": true
+            }
+        },
+        {
+            "name": "scriptButton",
+            "type": "string",
+            "default": "",
+            "area": "fileActionsArea",
+            "display": {
+                "type": "button",
+                "labelText": "Script File",
+                "icon": "icons/script-file.png",
+                "onClick": "statusMessage = 'Script file button clicked!';"
+            }
+        },
+        {
+            "name": "configButton",
+            "type": "string",
+            "default": "",
+            "area": "fileActionsArea",
+            "display": {
+                "type": "button",
+                "labelText": "Config",
+                "icon": "icons/config-file.png",
+                "onClick": "statusMessage = 'Config button clicked!';"
+            }
+        },
+        {
+            "name": "markdownButton",
+            "type": "string",
+            "default": "",
+            "area": "fileActionsArea",
+            "display": {
+                "type": "button",
+                "labelText": "Markdown",
+                "icon": "icons/markdown-file.png",
+                "onClick": "statusMessage = 'Markdown button clicked!';"
+            }
+        },
+        {
+            "name": "imageButton",
+            "type": "string",
+            "default": "",
+            "area": "fileActionsArea",
+            "display": {
+                "type": "button",
+                "labelText": "Image",
+                "icon": "icons/image-file.png",
+                "onClick": "statusMessage = 'Image button clicked!';"
+            }
+        },
+        
+        // Folder Action Buttons with Icons
+        {
+            "name": "folderActionsLabel",
+            "type": "string",
+            "default": "Folder Actions:",
+            "area": "folderActionsArea",
+            "display": {
+                "type": "label",
+                "itemBold": true
+            }
+        },
+        {
+            "name": "folderButton",
+            "type": "string",
+            "default": "",
+            "area": "folderActionsArea",
+            "display": {
+                "type": "button",
+                "labelText": "Folder",
+                "icon": "icons/folder.png",
+                "onClick": "statusMessage = 'Folder button clicked!';"
+            }
+        },
+        {
+            "name": "openFolderButton",
+            "type": "string",
+            "default": "",
+            "area": "folderActionsArea",
+            "display": {
+                "type": "button",
+                "labelText": "Open Folder",
+                "icon": "icons/folder-open.png",
+                "onClick": "statusMessage = 'Open folder button clicked!';"
+            }
+        },
+        {
+            "name": "projectButton",
+            "type": "string",
+            "default": "",
+            "area": "folderActionsArea",
+            "display": {
+                "type": "button",
+                "labelText": "Project",
+                "icon": "icons/project.png",
+                "onClick": "statusMessage = 'Project button clicked!';"
+            }
+        },
+        {
+            "name": "favoriteButton",
+            "type": "string",
+            "default": "",
+            "area": "folderActionsArea",
+            "display": {
+                "type": "button",
+                "labelText": "Favorite",
+                "icon": "icons/folder_fav.png",
+                "onClick": "statusMessage = 'Favorite button clicked!';"
+            }
+        },
+        
+        // Status Section
+        {
+            "name": "statusLabel",
+            "type": "string",
+            "default": "Status:",
+            "area": "statusArea",
+            "display": {
+                "type": "label",
+                "itemBold": true,
+                "itemColor": "#2E7D32"
+            }
+        },
+        {
+            "name": "statusMessage",
+            "type": "string",
+            "default": "Ready - Click any button to see the action",
+            "area": "statusArea",
+            "display": {
+                "type": "label",
+                "itemFontSize": "14",
+                "itemColor": "#1976D2"
+            }
+        }
+    ]
+};
+
+// Display startup information
+print "═══════════════════════════════════════════════════════════════";
+print "BUTTON ICONS DEMONSTRATION";
+print "═══════════════════════════════════════════════════════════════";
+print "";
+print "This demonstration shows buttons with icons loaded from the";
+print "resources directory. Icons are automatically scaled to 16x16px";
+print "and displayed next to button text.";
+print "";
+print "FEATURES:";
+print "  • Icons loaded from classpath resources (icons/*.png)";
+print "  • Automatic icon scaling to fit button size";
+print "  • Support for both file system and classpath paths";
+print "  • Graceful handling of missing icon files";
+print "";
+print "CLICK BUTTONS:";
+print "  • Each button shows a different file/folder icon";
+print "  • Status message updates when buttons are clicked";
+print "";
+print "═══════════════════════════════════════════════════════════════";
+print "";
+
+show screen buttonIconsDemo;

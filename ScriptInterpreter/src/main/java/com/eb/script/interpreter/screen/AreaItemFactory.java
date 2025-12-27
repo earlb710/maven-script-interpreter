@@ -509,6 +509,14 @@ public class AreaItemFactory {
                 Button button = (Button) control;
                 button.setText(metadata.labelText);
                 
+                // Apply icon if specified
+                if (metadata.icon != null && !metadata.icon.isEmpty()) {
+                    ImageView iconView = loadIcon(metadata.icon, 16, 16);
+                    if (iconView != null) {
+                        button.setGraphic(iconView);
+                    }
+                }
+                
                 // Apply shortcut key if specified
                 if (metadata.shortcut != null && !metadata.shortcut.isEmpty()) {
                     applyButtonShortcut(button, metadata.shortcut);
@@ -1196,6 +1204,33 @@ public class AreaItemFactory {
      * @param iconPath The path to the icon image
      */
     private static void setTreeItemIcon(TreeItem<String> item, String iconPath) {
+        ImageView imageView = loadIcon(iconPath, 16, 16);
+        if (imageView != null) {
+            item.setGraphic(imageView);
+        }
+    }
+    
+    /**
+     * Loads an icon image from a path.
+     * Supports loading from classpath resources or file paths.
+     * 
+     * @param iconPath The path to the icon image
+     * @return An ImageView with the loaded icon, or null if loading failed
+     */
+    private static ImageView loadIcon(String iconPath) {
+        return loadIcon(iconPath, 16, 16);
+    }
+    
+    /**
+     * Loads an icon image from a path with custom dimensions.
+     * Supports loading from classpath resources or file paths.
+     * 
+     * @param iconPath The path to the icon image
+     * @param width The desired width in pixels
+     * @param height The desired height in pixels
+     * @return An ImageView with the loaded icon, or null if loading failed
+     */
+    private static ImageView loadIcon(String iconPath, double width, double height) {
         try {
             javafx.scene.image.Image image = null;
             
@@ -1224,14 +1259,15 @@ public class AreaItemFactory {
             
             if (image != null && !image.isError()) {
                 ImageView imageView = new ImageView(image);
-                imageView.setFitHeight(16);
-                imageView.setFitWidth(16);
+                imageView.setFitHeight(height);
+                imageView.setFitWidth(width);
                 imageView.setPreserveRatio(true);
-                item.setGraphic(imageView);
+                return imageView;
             }
         } catch (Exception e) {
             // Silently ignore icon loading errors - icons are optional
         }
+        return null;
     }
     
     /**

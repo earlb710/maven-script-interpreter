@@ -131,6 +131,10 @@
       "description": "Whether the control/item text should be italic",
       "default": false
     },
+    "icon": {
+      "type": "string",
+      "description": "Icon path for buttons and other controls (e.g., 'icons/save.png', 'icons/folder.png'). Supports classpath resources or file system paths. Icons are automatically scaled to fit the control."
+    },
     "onClick": {
       "type": "string",
       "description": "onClick event handler - EBS code to execute when button is clicked"
@@ -234,6 +238,13 @@
       "type": "button",
       "labelText": "Submit",
       "onClick": "handleSubmit()"
+    },
+    {
+      "type": "button",
+      "labelText": "Save",
+      "icon": "icons/save.png",
+      "shortcut": "Ctrl+S",
+      "onClick": "call saveFile();"
     },
     {
       "type": "slider",

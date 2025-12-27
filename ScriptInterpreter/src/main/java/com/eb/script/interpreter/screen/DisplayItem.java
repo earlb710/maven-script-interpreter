@@ -72,6 +72,8 @@ public class DisplayItem {
     Boolean itemBold;
     // Item/control text italic flag
     Boolean itemItalic;
+    // Icon path for buttons and other controls (e.g., "icons/save.png", "icons/open.png")
+    String icon;
     // Shortcut key combination for buttons (e.g., "Alt+S", "Ctrl+R")
     public String shortcut;
     // onClick event handler - EBS code to execute when button is clicked

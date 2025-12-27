@@ -466,8 +466,33 @@ public class InterpreterScreen {
                         // Set default alignment based on control type and variable type
                         if (varDisplayItem != null) {
                             // Add colon to labelText if specified and doesn't have one
-                            if (varDisplayItem.labelText != null && !varDisplayItem.labelText.isEmpty() 
-                                && !varDisplayItem.labelText.endsWith(":")) {
+                            // BUT: Skip for buttons, labels, and other controls where labelText IS the control text
+                            boolean shouldAddColon = varDisplayItem.labelText != null 
+                                && !varDisplayItem.labelText.isEmpty() 
+                                && !varDisplayItem.labelText.endsWith(":");
+                            
+                            // Don't add colon for buttons, labels, hyperlinks, togglebuttons, checkboxes, or radiobuttons
+                            // where labelText represents the button/control text itself, not a separate label
+                            if (shouldAddColon && varDisplayItem.itemType != null) {
+                                switch (varDisplayItem.itemType) {
+                                    case BUTTON:
+                                    case LABEL:
+                                    case LABELTEXT:
+                                    case TEXT:
+                                    case HYPERLINK:
+                                    case TOGGLEBUTTON:
+                                    case CHECKBOX:
+                                    case RADIOBUTTON:
+                                        // These controls use labelText as their display text, not as a separate label
+                                        shouldAddColon = false;
+                                        break;
+                                    default:
+                                        // For input controls, add colon
+                                        break;
+                                }
+                            }
+                            
+                            if (shouldAddColon) {
                                 varDisplayItem.labelText = varDisplayItem.labelText + ":";
                             }
                             
@@ -1925,6 +1950,11 @@ public class InterpreterScreen {
             metadata.labelPosition = String.valueOf(displayDef.get("labelPosition")).toLowerCase();
         } else if (displayDef.containsKey("labelposition")) {
             metadata.labelPosition = String.valueOf(displayDef.get("labelposition")).toLowerCase();
+        }
+
+        // Extract icon path for buttons
+        if (displayDef.containsKey("icon")) {
+            metadata.icon = String.valueOf(displayDef.get("icon"));
         }
 
         // Extract shortcut key combination for buttons - check both camelCase and lowercase
