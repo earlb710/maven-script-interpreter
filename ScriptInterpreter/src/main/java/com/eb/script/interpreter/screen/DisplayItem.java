@@ -225,6 +225,22 @@ public class DisplayItem {
     }
     
     /**
+     * Gets the type string for this display item.
+     * @return The item type string (e.g., "textfield", "button")
+     */
+    public String getType() {
+        return type;
+    }
+    
+    /**
+     * Gets the label text for this display item.
+     * @return The label text, or null if not set
+     */
+    public String getLabelText() {
+        return labelText;
+    }
+    
+    /**
      * Enum representing all supported JavaFX item types (input and display) with their CSS classes and default styles.
      */
     public enum ItemType {
