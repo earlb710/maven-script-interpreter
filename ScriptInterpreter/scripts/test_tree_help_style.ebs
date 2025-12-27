@@ -186,7 +186,7 @@ screen HelpStyleTreeTest = {
             "display": {
                 "type": "label",
                 "itemFontSize": "18px",
-                "itemFontWeight": "bold"
+                "itemBold": true
             }
         },
         {
@@ -227,7 +227,7 @@ screen HelpStyleTreeTest = {
                                 "type": "label",
                                 "labelText": "Quick Navigation (Tests Bidirectional Binding)",
                                 "itemFontSize": "14px",
-                                "itemFontWeight": "bold"
+                                "itemBold": true
                             }
                         },
                         {
@@ -324,7 +324,7 @@ screen HelpStyleTreeTest = {
                                 "type": "label",
                                 "labelText": "Instructions: Click tree items OR click buttons to test bidirectional binding",
                                 "itemFontSize": "11px",
-                                "itemFontStyle": "italic"
+                                "itemItalic": true
                             }
                         }
                     ]

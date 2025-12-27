@@ -49,7 +49,7 @@ screen TreeBindingTest = {
             "display": {
                 "type": "label",
                 "itemFontSize": "14px",
-                "itemFontWeight": "bold"
+                "itemBold": true
             }
         },
         {
@@ -116,7 +116,7 @@ screen TreeBindingTest = {
                         "type": "label",
                         "labelText": "Test: Click tree items, then click buttons to verify bidirectional binding",
                         "itemFontSize": "11px",
-                        "itemFontStyle": "italic"
+                        "itemItalic": true
                     }
                 }
             ]
