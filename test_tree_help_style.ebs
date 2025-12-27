@@ -12,347 +12,327 @@
 print "Tree Bidirectional Binding Test - Help Style";
 print "=============================================";
 
-screen HelpStyleTreeTest {
-    title = "Tree Bidirectional Binding - Help Style Demo"
-    width = 900
-    height = 650
-    
-    areas {
-        mainLayout {
-            type = hbox
-            
-            areas {
-                // Left panel - Tree navigation
-                leftPanel {
-                    type = vbox
-                    hgrow = "always"
-                    
-                    items {
-                        treeTitle {
-                            displayItem {
-                                type = label
-                                labelText = "Documentation Topics"
-                                itemFontSize = "16px"
-                                itemFontWeight = "bold"
-                            }
-                        }
-                        
-                        // Tree view with hierarchical structure
-                        helpTree {
-                            varRef = selectedTopic
-                            displayItem {
-                                type = treeview
-                                displayRecords = 20
-                                showRoot = true
-                                treeItems = [
-                                    {
-                                        value = "Documentation",
-                                        icon = "icons/tree-node.png",
-                                        expanded = true,
-                                        children = [
-                                            {
-                                                value = "Getting Started",
-                                                icon = "icons/tree-node.png",
-                                                expanded = true,
-                                                children = [
-                                                    { value = "Introduction", icon = "icons/help-page.png" },
-                                                    { value = "Installation", icon = "icons/help-page.png" },
-                                                    { value = "Quick Start", icon = "icons/help-page.png" },
-                                                    { value = "First Program", icon = "icons/help-page.png" }
-                                                ]
-                                            },
-                                            {
-                                                value = "Language Basics",
-                                                icon = "icons/tree-node.png",
-                                                expanded = false,
-                                                children = [
-                                                    {
-                                                        value = "Variables",
-                                                        icon = "icons/tree-node.png",
-                                                        expanded = false,
-                                                        children = [
-                                                            { value = "Declaration", icon = "icons/info-page.png" },
-                                                            { value = "Types", icon = "icons/info-page.png" },
-                                                            { value = "Scope", icon = "icons/info-page.png" }
-                                                        ]
-                                                    },
-                                                    { value = "Operators", icon = "icons/info-page.png" },
-                                                    { value = "Functions", icon = "icons/info-page.png" },
-                                                    { value = "Control Flow", icon = "icons/info-page.png" }
-                                                ]
-                                            },
-                                            {
-                                                value = "Data Structures",
-                                                icon = "icons/tree-node.png",
-                                                expanded = false,
-                                                children = [
-                                                    { value = "Arrays", icon = "icons/info-page.png" },
-                                                    { value = "JSON", icon = "icons/info-page.png" },
-                                                    { value = "Maps", icon = "icons/info-page.png" },
-                                                    { value = "Sets", icon = "icons/info-page.png" }
-                                                ]
-                                            },
-                                            {
-                                                value = "Screen Components",
-                                                icon = "icons/tree-node.png",
-                                                expanded = false,
-                                                children = [
-                                                    {
-                                                        value = "Input Controls",
-                                                        icon = "icons/tree-node.png",
-                                                        expanded = false,
-                                                        children = [
-                                                            { value = "TextField", icon = "icons/normal-page.png" },
-                                                            { value = "TextArea", icon = "icons/normal-page.png" },
-                                                            { value = "CheckBox", icon = "icons/normal-page.png" },
-                                                            { value = "ComboBox", icon = "icons/normal-page.png" }
-                                                        ]
-                                                    },
-                                                    {
-                                                        value = "Display Controls",
-                                                        icon = "icons/tree-node.png",
-                                                        expanded = false,
-                                                        children = [
-                                                            { value = "Label", icon = "icons/normal-page.png" },
-                                                            { value = "ImageView", icon = "icons/normal-page.png" },
-                                                            { value = "WebView", icon = "icons/normal-page.png" }
-                                                        ]
-                                                    },
-                                                    { value = "Button", icon = "icons/normal-page.png" },
-                                                    { value = "TreeView", icon = "icons/normal-page.png" }
-                                                ]
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        value = "Examples",
-                                        icon = "icons/tree-node.png",
-                                        expanded = false,
-                                        children = [
-                                            { value = "Hello World", icon = "icons/help-page.png" },
-                                            { value = "Calculator", icon = "icons/help-page.png" },
-                                            { value = "File Manager", icon = "icons/help-page.png" },
-                                            { value = "Database App", icon = "icons/help-page.png" }
-                                        ]
-                                    },
-                                    {
-                                        value = "API Reference",
-                                        icon = "icons/tree-node.png",
-                                        expanded = false,
-                                        children = [
-                                            {
-                                                value = "String Functions",
-                                                icon = "icons/tree-node.png",
-                                                expanded = false,
-                                                children = [
-                                                    { value = "str.trim", icon = "icons/help-page.png" },
-                                                    { value = "str.split", icon = "icons/help-page.png" },
-                                                    { value = "str.replace", icon = "icons/help-page.png" },
-                                                    { value = "str.substring", icon = "icons/help-page.png" }
-                                                ]
-                                            },
-                                            {
-                                                value = "Array Functions",
-                                                icon = "icons/tree-node.png",
-                                                expanded = false,
-                                                children = [
-                                                    { value = "array.add", icon = "icons/help-page.png" },
-                                                    { value = "array.remove", icon = "icons/help-page.png" },
-                                                    { value = "array.sort", icon = "icons/help-page.png" },
-                                                    { value = "array.length", icon = "icons/help-page.png" }
-                                                ]
-                                            },
-                                            { value = "File I/O", icon = "icons/tree-node.png" },
-                                            { value = "Database", icon = "icons/tree-node.png" }
-                                        ]
-                                    }
-                                ]
-                                
-                                // onChange event to update the content display
-                                onChange = "
-                                    if selectedTopic != '' then {
-                                        call scr.setProperty('HelpStyleTreeTest.topicTitle', 'labelText', 
-                                            'Topic: ' + selectedTopic);
-                                        call scr.setProperty('HelpStyleTreeTest.topicContent', 'labelText', 
-                                            'Showing content for: ' + selectedTopic + 
-                                            '\\n\\nThis demonstrates bidirectional binding where:\\n' +
-                                            '• Clicking tree items updates the variable\\n' +
-                                            '• Setting the variable updates the tree selection\\n' +
-                                            '• Parent nodes expand automatically\\n' +
-                                            '• Tree scrolls to show the selected item');
-                                        call print('Selected topic: ' + selectedTopic);
-                                    } else {
-                                        call scr.setProperty('HelpStyleTreeTest.topicTitle', 'labelText', 
-                                            'Topic: (none selected)');
-                                        call scr.setProperty('HelpStyleTreeTest.topicContent', 'labelText', 
-                                            'Select a topic from the tree or use the navigation buttons below.');
-                                    }
-                                "
-                            }
-                        }
-                    }
-                }
-                
-                // Right panel - Content area
-                rightPanel {
-                    type = vbox
-                    hgrow = "always"
-                    
-                    items {
-                        topicTitle {
-                            displayItem {
-                                type = label
-                                labelText = "Topic: (none selected)"
-                                itemFontSize = "18px"
-                                itemFontWeight = "bold"
-                            }
-                        }
-                        
-                        separator1 {
-                            displayItem {
-                                type = separator
-                            }
-                        }
-                        
-                        topicContent {
-                            displayItem {
-                                type = label
-                                labelText = "Select a topic from the tree or use the navigation buttons below."
-                                itemFontSize = "12px"
-                            }
-                        }
-                        
-                        separator2 {
-                            displayItem {
-                                type = separator
-                            }
-                        }
-                        
-                        navTitle {
-                            displayItem {
-                                type = label
-                                labelText = "Quick Navigation (Tests Bidirectional Binding)"
-                                itemFontSize = "14px"
-                                itemFontWeight = "bold"
-                            }
-                        }
-                        
-                        // Navigation buttons to test programmatic selection
-                        buttonRow1 {
-                            type = hbox
-                            items {
-                                btn1 {
-                                    displayItem {
-                                        type = button
-                                        labelText = "Introduction"
-                                        onClick = "selectedTopic = 'Introduction';"
-                                    }
-                                }
-                                btn2 {
-                                    displayItem {
-                                        type = button
-                                        labelText = "Quick Start"
-                                        onClick = "selectedTopic = 'Quick Start';"
-                                    }
-                                }
-                                btn3 {
-                                    displayItem {
-                                        type = button
-                                        labelText = "Variables"
-                                        onClick = "selectedTopic = 'Variables';"
-                                    }
-                                }
-                            }
-                        }
-                        
-                        buttonRow2 {
-                            type = hbox
-                            items {
-                                btn4 {
-                                    displayItem {
-                                        type = button
-                                        labelText = "Declaration"
-                                        onClick = "selectedTopic = 'Declaration';"
-                                    }
-                                }
-                                btn5 {
-                                    displayItem {
-                                        type = button
-                                        labelText = "TreeView"
-                                        onClick = "selectedTopic = 'TreeView';"
-                                    }
-                                }
-                                btn6 {
-                                    displayItem {
-                                        type = button
-                                        labelText = "TextField"
-                                        onClick = "selectedTopic = 'TextField';"
-                                    }
-                                }
-                            }
-                        }
-                        
-                        buttonRow3 {
-                            type = hbox
-                            items {
-                                btn7 {
-                                    displayItem {
-                                        type = button
-                                        labelText = "str.trim"
-                                        onClick = "selectedTopic = 'str.trim';"
-                                    }
-                                }
-                                btn8 {
-                                    displayItem {
-                                        type = button
-                                        labelText = "array.sort"
-                                        onClick = "selectedTopic = 'array.sort';"
-                                    }
-                                }
-                                btn9 {
-                                    displayItem {
-                                        type = button
-                                        labelText = "Calculator"
-                                        onClick = "selectedTopic = 'Calculator';"
-                                    }
-                                }
-                            }
-                        }
-                        
-                        buttonRow4 {
-                            type = hbox
-                            items {
-                                btnRoot {
-                                    displayItem {
-                                        type = button
-                                        labelText = "Documentation (Root)"
-                                        onClick = "selectedTopic = 'Documentation';"
-                                    }
-                                }
-                                btnClear {
-                                    displayItem {
-                                        type = button
-                                        labelText = "Clear Selection"
-                                        onClick = "selectedTopic = '';"
-                                    }
-                                }
-                            }
-                        }
-                        
-                        instructionsLabel {
-                            displayItem {
-                                type = label
-                                labelText = "Instructions: Click tree items OR click buttons above to test bidirectional binding"
-                                itemFontSize = "11px"
-                                itemFontStyle = "italic"
-                            }
-                        }
-                    }
-                }
+// Build tree structure dynamically
+var treeData: array[*] = [];
+
+// Build main documentation branch
+var docChildren: array[*] = [];
+
+// Getting Started section
+var gettingStartedChildren: array[*] = [];
+call array.add(gettingStartedChildren, {"value": "Introduction", "icon": "icons/help-page.png"});
+call array.add(gettingStartedChildren, {"value": "Installation", "icon": "icons/help-page.png"});
+call array.add(gettingStartedChildren, {"value": "Quick Start", "icon": "icons/help-page.png"});
+call array.add(gettingStartedChildren, {"value": "First Program", "icon": "icons/help-page.png"});
+
+var gettingStartedNode: json = {
+    "value": "Getting Started",
+    "icon": "icons/tree-node.png",
+    "expanded": true,
+    "children": $gettingStartedChildren
+};
+call array.add(docChildren, gettingStartedNode);
+
+// Language Basics section with nested Variables
+var variablesChildren: array[*] = [];
+call array.add(variablesChildren, {"value": "Declaration", "icon": "icons/info-page.png"});
+call array.add(variablesChildren, {"value": "Types", "icon": "icons/info-page.png"});
+call array.add(variablesChildren, {"value": "Scope", "icon": "icons/info-page.png"});
+
+var variablesNode: json = {
+    "value": "Variables",
+    "icon": "icons/tree-node.png",
+    "expanded": false,
+    "children": $variablesChildren
+};
+
+var langBasicsChildren: array[*] = [];
+call array.add(langBasicsChildren, variablesNode);
+call array.add(langBasicsChildren, {"value": "Operators", "icon": "icons/info-page.png"});
+call array.add(langBasicsChildren, {"value": "Functions", "icon": "icons/info-page.png"});
+call array.add(langBasicsChildren, {"value": "Control Flow", "icon": "icons/info-page.png"});
+
+var langBasicsNode: json = {
+    "value": "Language Basics",
+    "icon": "icons/tree-node.png",
+    "expanded": false,
+    "children": $langBasicsChildren
+};
+call array.add(docChildren, langBasicsNode);
+
+// Data Structures section
+var dataStructChildren: array[*] = [];
+call array.add(dataStructChildren, {"value": "Arrays", "icon": "icons/info-page.png"});
+call array.add(dataStructChildren, {"value": "JSON", "icon": "icons/info-page.png"});
+call array.add(dataStructChildren, {"value": "Maps", "icon": "icons/info-page.png"});
+
+var dataStructNode: json = {
+    "value": "Data Structures",
+    "icon": "icons/tree-node.png",
+    "expanded": false,
+    "children": $dataStructChildren
+};
+call array.add(docChildren, dataStructNode);
+
+// Screen Components section with nested controls
+var inputControlsChildren: array[*] = [];
+call array.add(inputControlsChildren, {"value": "TextField", "icon": "icons/normal-page.png"});
+call array.add(inputControlsChildren, {"value": "TextArea", "icon": "icons/normal-page.png"});
+call array.add(inputControlsChildren, {"value": "CheckBox", "icon": "icons/normal-page.png"});
+
+var inputControlsNode: json = {
+    "value": "Input Controls",
+    "icon": "icons/tree-node.png",
+    "expanded": false,
+    "children": $inputControlsChildren
+};
+
+var screenCompChildren: array[*] = [];
+call array.add(screenCompChildren, inputControlsNode);
+call array.add(screenCompChildren, {"value": "Button", "icon": "icons/normal-page.png"});
+call array.add(screenCompChildren, {"value": "TreeView", "icon": "icons/normal-page.png"});
+
+var screenCompNode: json = {
+    "value": "Screen Components",
+    "icon": "icons/tree-node.png",
+    "expanded": false,
+    "children": $screenCompChildren
+};
+call array.add(docChildren, screenCompNode);
+
+// Create Documentation root
+var documentationNode: json = {
+    "value": "Documentation",
+    "icon": "icons/tree-node.png",
+    "expanded": true,
+    "children": $docChildren
+};
+call array.add(treeData, documentationNode);
+
+// Build Examples branch
+var examplesChildren: array[*] = [];
+call array.add(examplesChildren, {"value": "Hello World", "icon": "icons/help-page.png"});
+call array.add(examplesChildren, {"value": "Calculator", "icon": "icons/help-page.png"});
+call array.add(examplesChildren, {"value": "File Manager", "icon": "icons/help-page.png"});
+
+var examplesNode: json = {
+    "value": "Examples",
+    "icon": "icons/tree-node.png",
+    "expanded": false,
+    "children": $examplesChildren
+};
+call array.add(treeData, examplesNode);
+
+// Build API Reference branch
+var strFuncChildren: array[*] = [];
+call array.add(strFuncChildren, {"value": "str.trim", "icon": "icons/help-page.png"});
+call array.add(strFuncChildren, {"value": "str.split", "icon": "icons/help-page.png"});
+call array.add(strFuncChildren, {"value": "str.replace", "icon": "icons/help-page.png"});
+
+var strFuncNode: json = {
+    "value": "String Functions",
+    "icon": "icons/tree-node.png",
+    "expanded": false,
+    "children": $strFuncChildren
+};
+
+var arrayFuncChildren: array[*] = [];
+call array.add(arrayFuncChildren, {"value": "array.add", "icon": "icons/help-page.png"});
+call array.add(arrayFuncChildren, {"value": "array.remove", "icon": "icons/help-page.png"});
+call array.add(arrayFuncChildren, {"value": "array.sort", "icon": "icons/help-page.png"});
+
+var arrayFuncNode: json = {
+    "value": "Array Functions",
+    "icon": "icons/tree-node.png",
+    "expanded": false,
+    "children": $arrayFuncChildren
+};
+
+var apiChildren: array[*] = [];
+call array.add(apiChildren, strFuncNode);
+call array.add(apiChildren, arrayFuncNode);
+
+var apiNode: json = {
+    "value": "API Reference",
+    "icon": "icons/tree-node.png",
+    "expanded": false,
+    "children": $apiChildren
+};
+call array.add(treeData, apiNode);
+
+// Define the screen with JSON syntax
+screen HelpStyleTreeTest = {
+    "title": "Tree Bidirectional Binding - Help Style Demo",
+    "width": 900,
+    "height": 650,
+    "vars": [
+        {
+            "name": "selectedTopic",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "treeview",
+                "labelText": "Documentation Topics",
+                "displayRecords": 20,
+                "showRoot": false,
+                "treeItems": $treeData,
+                "onChange": "if selectedTopic != '' then { call scr.setProperty('HelpStyleTreeTest.topicTitle', 'labelText', 'Topic: ' + selectedTopic); call scr.setProperty('HelpStyleTreeTest.topicContent', 'labelText', 'Showing content for: ' + selectedTopic + '\\n\\nBidirectional binding:\\n• Click tree items to update variable\\n• Set variable to update tree selection\\n• Parents expand automatically\\n• Tree scrolls to selection'); call print('Selected: ' + selectedTopic); } else { call scr.setProperty('HelpStyleTreeTest.topicTitle', 'labelText', 'Topic: (none)'); call scr.setProperty('HelpStyleTreeTest.topicContent', 'labelText', 'Select a topic from the tree or use navigation buttons.'); }"
+            }
+        },
+        {
+            "name": "topicTitle",
+            "type": "string",
+            "default": "Topic: (none selected)",
+            "display": {
+                "type": "label",
+                "itemFontSize": "18px",
+                "itemFontWeight": "bold"
+            }
+        },
+        {
+            "name": "topicContent",
+            "type": "string",
+            "default": "Select a topic from the tree or use the navigation buttons below.",
+            "display": {
+                "type": "label",
+                "itemFontSize": "12px"
             }
         }
-    }
-}
+    ],
+    "area": [
+        {
+            "name": "mainLayout",
+            "type": "hbox",
+            "areas": [
+                {
+                    "name": "leftPanel",
+                    "type": "vbox",
+                    "hgrow": "always",
+                    "items": [
+                        {"name": "selectedTopic"}
+                    ]
+                },
+                {
+                    "name": "rightPanel",
+                    "type": "vbox",
+                    "hgrow": "always",
+                    "items": [
+                        {"name": "topicTitle"},
+                        {"name": "separator1", "display": {"type": "separator"}},
+                        {"name": "topicContent"},
+                        {"name": "separator2", "display": {"type": "separator"}},
+                        {
+                            "name": "navTitle",
+                            "display": {
+                                "type": "label",
+                                "labelText": "Quick Navigation (Tests Bidirectional Binding)",
+                                "itemFontSize": "14px",
+                                "itemFontWeight": "bold"
+                            }
+                        },
+                        {
+                            "name": "btn1",
+                            "display": {
+                                "type": "button",
+                                "labelText": "Introduction",
+                                "onClick": "selectedTopic = 'Introduction';"
+                            }
+                        },
+                        {
+                            "name": "btn2",
+                            "display": {
+                                "type": "button",
+                                "labelText": "Quick Start",
+                                "onClick": "selectedTopic = 'Quick Start';"
+                            }
+                        },
+                        {
+                            "name": "btn3",
+                            "display": {
+                                "type": "button",
+                                "labelText": "Variables",
+                                "onClick": "selectedTopic = 'Variables';"
+                            }
+                        },
+                        {
+                            "name": "btn4",
+                            "display": {
+                                "type": "button",
+                                "labelText": "Declaration",
+                                "onClick": "selectedTopic = 'Declaration';"
+                            }
+                        },
+                        {
+                            "name": "btn5",
+                            "display": {
+                                "type": "button",
+                                "labelText": "TreeView",
+                                "onClick": "selectedTopic = 'TreeView';"
+                            }
+                        },
+                        {
+                            "name": "btn6",
+                            "display": {
+                                "type": "button",
+                                "labelText": "TextField",
+                                "onClick": "selectedTopic = 'TextField';"
+                            }
+                        },
+                        {
+                            "name": "btn7",
+                            "display": {
+                                "type": "button",
+                                "labelText": "str.trim",
+                                "onClick": "selectedTopic = 'str.trim';"
+                            }
+                        },
+                        {
+                            "name": "btn8",
+                            "display": {
+                                "type": "button",
+                                "labelText": "array.sort",
+                                "onClick": "selectedTopic = 'array.sort';"
+                            }
+                        },
+                        {
+                            "name": "btn9",
+                            "display": {
+                                "type": "button",
+                                "labelText": "Calculator",
+                                "onClick": "selectedTopic = 'Calculator';"
+                            }
+                        },
+                        {
+                            "name": "btnRoot",
+                            "display": {
+                                "type": "button",
+                                "labelText": "Documentation (Root)",
+                                "onClick": "selectedTopic = 'Documentation';"
+                            }
+                        },
+                        {
+                            "name": "btnClear",
+                            "display": {
+                                "type": "button",
+                                "labelText": "Clear Selection",
+                                "onClick": "selectedTopic = '';"
+                            }
+                        },
+                        {
+                            "name": "instructionsLabel",
+                            "display": {
+                                "type": "label",
+                                "labelText": "Instructions: Click tree items OR click buttons to test bidirectional binding",
+                                "itemFontSize": "11px",
+                                "itemFontStyle": "italic"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+};
 
 // Show the screen
 show screen HelpStyleTreeTest;
@@ -368,6 +348,6 @@ print "5. Test 'Clear Selection' button to clear the tree selection";
 print "";
 print "The tree structure mimics the help system with:";
 print "- Root node with icon";
-print "- Multiple levels of nesting";
+print "- Multiple levels of nesting (up to 4 levels)";
 print "- Different icon types for different node types";
 print "- Expanded and collapsed states";

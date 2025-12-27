@@ -1,161 +1,129 @@
 // Test script to demonstrate bidirectional tree binding
 // The tree selection updates the variable, and setting the variable updates the tree selection
 
-screen TreeBindingTest {
-    title = "Tree Bidirectional Binding Test"
-    width = 700
-    height = 500
-    
-    areas {
-        mainArea {
-            type = vbox
-            items {
-                // Instructions label
-                instructionsLabel {
-                    displayItem {
-                        type = label
-                        labelText = "Test bidirectional tree binding: Click tree items OR set the variable using buttons"
-                        itemFontSize = "14px"
-                        itemFontWeight = "bold"
-                    }
-                }
-                
-                // Display current selection
-                selectionLabel {
-                    displayItem {
-                        type = label
-                        labelText = "Current selection: (none)"
-                        itemFontSize = "12px"
-                    }
-                }
-                
-                // TreeView with varRef binding
-                fileTree {
-                    varRef = selectedFile
-                    displayItem {
-                        type = treeview
-                        displayRecords = 12
-                        showRoot = true
-                        treeItems = [
-                            {
-                                value = "Root",
-                                expanded = true,
-                                children = [
-                                    {
-                                        value = "Documents",
-                                        expanded = false,
-                                        children = [
-                                            { value = "README.md" },
-                                            { value = "TODO.txt" },
-                                            { value = "Notes.md" }
-                                        ]
-                                    },
-                                    {
-                                        value = "Projects",
-                                        expanded = false,
-                                        children = [
-                                            { value = "Project1" },
-                                            { value = "Project2" },
-                                            { value = "Project3" }
-                                        ]
-                                    },
-                                    {
-                                        value = "Images",
-                                        expanded = false,
-                                        children = [
-                                            { value = "photo1.jpg" },
-                                            { value = "photo2.png" }
-                                        ]
-                                    }
-                                ]
-                            }
-                        ]
-                        
-                        // onChange handler to update the label
-                        onChange = "
-                            call scr.setProperty('TreeBindingTest.selectionLabel', 'labelText', 
-                                'Current selection: ' + selectedFile);
-                            call print('Tree selection changed to: ' + selectedFile);
-                        "
-                    }
-                }
-                
-                // Button panel for testing programmatic selection
-                buttonArea {
-                    type = hbox
-                    items {
-                        selectRootBtn {
-                            displayItem {
-                                type = button
-                                labelText = "Select Root"
-                                onClick = "
-                                    selectedFile = 'Root';
-                                    call print('Variable set to: Root');
-                                "
-                            }
-                        }
-                        
-                        selectDocBtn {
-                            displayItem {
-                                type = button
-                                labelText = "Select Documents"
-                                onClick = "
-                                    selectedFile = 'Documents';
-                                    call print('Variable set to: Documents');
-                                "
-                            }
-                        }
-                        
-                        selectReadmeBtn {
-                            displayItem {
-                                type = button
-                                labelText = "Select README.md"
-                                onClick = "
-                                    selectedFile = 'README.md';
-                                    call print('Variable set to: README.md');
-                                "
-                            }
-                        }
-                        
-                        selectProject2Btn {
-                            displayItem {
-                                type = button
-                                labelText = "Select Project2"
-                                onClick = "
-                                    selectedFile = 'Project2';
-                                    call print('Variable set to: Project2');
-                                "
-                            }
-                        }
-                        
-                        clearBtn {
-                            displayItem {
-                                type = button
-                                labelText = "Clear Selection"
-                                onClick = "
-                                    selectedFile = '';
-                                    call print('Variable cleared');
-                                "
-                            }
-                        }
-                    }
-                }
-                
-                // Test results area
-                resultsLabel {
-                    displayItem {
-                        type = label
-                        labelText = "Test: Click tree items, then click buttons to verify bidirectional binding"
-                        itemFontSize = "11px"
-                        itemFontStyle = "italic"
-                    }
-                }
+// Build tree structure
+var treeData: array[*] = [];
+
+var docsChildren: array[*] = [];
+call array.add(docsChildren, {"value": "README.md"});
+call array.add(docsChildren, {"value": "TODO.txt"});
+call array.add(docsChildren, {"value": "Notes.md"});
+
+var projectsChildren: array[*] = [];
+call array.add(projectsChildren, {"value": "Project1"});
+call array.add(projectsChildren, {"value": "Project2"});
+call array.add(projectsChildren, {"value": "Project3"});
+
+var imagesChildren: array[*] = [];
+call array.add(imagesChildren, {"value": "photo1.jpg"});
+call array.add(imagesChildren, {"value": "photo2.png"});
+
+var rootChildren: array[*] = [];
+call array.add(rootChildren, {"value": "Documents", "expanded": false, "children": $docsChildren});
+call array.add(rootChildren, {"value": "Projects", "expanded": false, "children": $projectsChildren});
+call array.add(rootChildren, {"value": "Images", "expanded": false, "children": $imagesChildren});
+
+call array.add(treeData, {"value": "Root", "expanded": true, "children": $rootChildren});
+
+screen TreeBindingTest = {
+    "title": "Tree Bidirectional Binding Test",
+    "width": 700,
+    "height": 500,
+    "vars": [
+        {
+            "name": "selectedFile",
+            "type": "string",
+            "default": "",
+            "display": {
+                "type": "treeview",
+                "displayRecords": 12,
+                "showRoot": true,
+                "treeItems": $treeData,
+                "onChange": "call scr.setProperty('TreeBindingTest.selectionLabel', 'labelText', 'Current selection: ' + selectedFile); call print('Tree selection changed to: ' + selectedFile);"
+            }
+        },
+        {
+            "name": "instructionsLabel",
+            "type": "string",
+            "default": "Test bidirectional tree binding: Click tree items OR set the variable using buttons",
+            "display": {
+                "type": "label",
+                "itemFontSize": "14px",
+                "itemFontWeight": "bold"
+            }
+        },
+        {
+            "name": "selectionLabel",
+            "type": "string",
+            "default": "Current selection: (none)",
+            "display": {
+                "type": "label",
+                "itemFontSize": "12px"
             }
         }
-    }
-}
+    ],
+    "area": [
+        {
+            "name": "mainArea",
+            "type": "vbox",
+            "items": [
+                {"name": "instructionsLabel"},
+                {"name": "selectionLabel"},
+                {"name": "selectedFile"},
+                {
+                    "name": "selectRootBtn",
+                    "display": {
+                        "type": "button",
+                        "labelText": "Select Root",
+                        "onClick": "selectedFile = 'Root'; call print('Variable set to: Root');"
+                    }
+                },
+                {
+                    "name": "selectDocBtn",
+                    "display": {
+                        "type": "button",
+                        "labelText": "Select Documents",
+                        "onClick": "selectedFile = 'Documents'; call print('Variable set to: Documents');"
+                    }
+                },
+                {
+                    "name": "selectReadmeBtn",
+                    "display": {
+                        "type": "button",
+                        "labelText": "Select README.md",
+                        "onClick": "selectedFile = 'README.md'; call print('Variable set to: README.md');"
+                    }
+                },
+                {
+                    "name": "selectProject2Btn",
+                    "display": {
+                        "type": "button",
+                        "labelText": "Select Project2",
+                        "onClick": "selectedFile = 'Project2'; call print('Variable set to: Project2');"
+                    }
+                },
+                {
+                    "name": "clearBtn",
+                    "display": {
+                        "type": "button",
+                        "labelText": "Clear Selection",
+                        "onClick": "selectedFile = ''; call print('Variable cleared');"
+                    }
+                },
+                {
+                    "name": "resultsLabel",
+                    "display": {
+                        "type": "label",
+                        "labelText": "Test: Click tree items, then click buttons to verify bidirectional binding",
+                        "itemFontSize": "11px",
+                        "itemFontStyle": "italic"
+                    }
+                }
+            ]
+        }
+    ]
+};
 
-// Show the screen
 show screen TreeBindingTest;
 
 print "Tree Bidirectional Binding Test";
