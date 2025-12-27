@@ -5037,6 +5037,46 @@ call scr.setTreeItemIcons("fileExplorer", "src", "icons/folder.png",
 // TreeView styling example:
 call scr.setTreeItemBold("fileExplorer", "src", true);
 call scr.setTreeItemColor("fileExplorer", "main.ebs", "#0066cc");
+
+// Convert screen definition to HTML
+var html = call scr.toHtml("screenName");  // Full HTML with styles
+var htmlBody = call scr.toHtml("screenName", false);  // Body only, no styles
+
+// HTML conversion features:
+// - Converts screen JSON definitions to HTML pages
+// - Maps JavaFX controls to HTML5 elements
+// - Generates modern CSS with gradient theme
+// - Supports textfield, textarea, passwordfield, checkbox, combobox, 
+//   choicebox, button, label, datepicker
+// - Converts layout containers (vbox, hbox, gridpane, borderpane)
+// - Processes variable sets with scope filtering
+// - HTML-escapes special characters for security
+// - Returns complete HTML document (includeStyles=true) or body only (includeStyles=false)
+
+// Example: Export screen as HTML documentation
+screen contactForm = {
+    "title": "Contact Us",
+    "width": 500,
+    "height": 400,
+    "vars": [{
+        "name": "email",
+        "type": "string",
+        "display": {
+            "type": "textfield",
+            "labelText": "Email:",
+            "mandatory": true
+        }
+    }]
+};
+var html = call scr.toHtml("contactForm");
+call file.writeTextFile("contact_form.html", html);
+
+// Example: Generate HTML for embedding with custom CSS
+var htmlBody = call scr.toHtml("contactForm", false);
+var customPage = "<!DOCTYPE html><html><head>" +
+                 "<link rel='stylesheet' href='custom.css'></head><body>" +
+                 htmlBody + "</body></html>";
+call file.writeTextFile("custom_page.html", customPage);
 ```
 
 **Note:** The canonical prefix for screen functions is `scr.` (e.g., `scr.getProperty`, `scr.setStatus`). This is the recommended prefix for all new code.

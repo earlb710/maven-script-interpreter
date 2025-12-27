@@ -1,0 +1,110 @@
+// Test Script: Screen JSON to HTML Conversion
+// Description: Tests the scr.toHtml() builtin function
+// Author: EBS Test Suite
+// Date: 2025-12-27
+
+print "Test: Screen JSON to HTML Conversion";
+print "=====================================";
+print "";
+
+// Define a sample screen with various controls
+screen testScreen = {
+    "title": "Customer Registration Form",
+    "width": 600,
+    "height": 500,
+    "sets": [
+        {
+            "setname": "customerInfo",
+            "scope": "visible",
+            "vars": [
+                {
+                    "name": "firstName",
+                    "type": "string",
+                    "default": "",
+                    "display": {
+                        "type": "textfield",
+                        "labelText": "First Name:",
+                        "mandatory": true
+                    }
+                },
+                {
+                    "name": "lastName",
+                    "type": "string",
+                    "default": "",
+                    "display": {
+                        "type": "textfield",
+                        "labelText": "Last Name:",
+                        "mandatory": true
+                    }
+                },
+                {
+                    "name": "email",
+                    "type": "string",
+                    "default": "",
+                    "display": {
+                        "type": "textfield",
+                        "labelText": "Email Address:"
+                    }
+                },
+                {
+                    "name": "subscribe",
+                    "type": "bool",
+                    "default": false,
+                    "display": {
+                        "type": "checkbox",
+                        "labelText": "Subscribe to newsletter"
+                    }
+                },
+                {
+                    "name": "comments",
+                    "type": "string",
+                    "default": "",
+                    "display": {
+                        "type": "textarea",
+                        "labelText": "Comments:"
+                    }
+                }
+            ]
+        }
+    ]
+};
+
+print "Screen definition created successfully.";
+print "";
+
+// Test 1: Convert screen to HTML with styles
+print "Test 1: Converting screen to HTML with styles";
+print "----------------------------------------------";
+var html: string = call scr.toHtml("testScreen");
+print "HTML generated successfully!";
+print "HTML length: " + call string.length(html) + " characters";
+print "";
+
+// Test 2: Save HTML to file
+print "Test 2: Saving HTML to file";
+print "----------------------------";
+var outputFile: string = "/tmp/testScreen.html";
+call file.writeTextFile(outputFile, html);
+print "HTML saved to: " + outputFile;
+print "";
+
+// Test 3: Convert without styles (HTML body only)
+print "Test 3: Converting without styles";
+print "----------------------------------";
+var htmlBody: string = call scr.toHtml("testScreen", false);
+print "HTML body generated successfully!";
+print "HTML body length: " + call string.length(htmlBody) + " characters";
+print "";
+
+// Test 4: Display a portion of the HTML
+print "Test 4: Sample HTML output (first 500 characters)";
+print "--------------------------------------------------";
+var sample: string = call string.substring(html, 0, 500);
+print sample;
+print "...";
+print "";
+
+print "SUCCESS: All tests passed!";
+print "";
+print "You can view the generated HTML by opening: " + outputFile;
+print "in a web browser.";

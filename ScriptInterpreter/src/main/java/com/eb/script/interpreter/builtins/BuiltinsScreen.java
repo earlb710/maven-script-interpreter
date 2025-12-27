@@ -7,7 +7,9 @@ import com.eb.script.arrays.ArrayDynamic;
 import com.eb.script.interpreter.screen.AreaDefinition;
 import com.eb.script.interpreter.screen.AreaItem;
 import com.eb.script.interpreter.screen.DisplayItem;
+import com.eb.script.interpreter.screen.ScreenConfig;
 import com.eb.script.interpreter.screen.Var;
+import com.eb.script.interpreter.screen.VarSet;
 import com.eb.script.token.DataType;
 import java.util.List;
 import java.util.Map;
@@ -4213,5 +4215,534 @@ public class BuiltinsScreen {
         }
         
         return style.length() > 0 ? style.toString() : null;
+    }
+    
+    /**
+     * scr.toHtml(screenName, includeStyles?) -> STRING
+     * Converts a screen JSON definition to HTML.
+     * 
+     * This function takes a screen definition (JSON) and converts it to an HTML
+     * page that visually represents the screen's layout and controls.
+     * 
+     * @param context The interpreter context
+     * @param args Arguments: [0] = screenName (String), [1] = includeStyles (Boolean, optional, default true)
+     * @return HTML string representing the screen
+     * @throws InterpreterError if the screen doesn't exist or conversion fails
+     */
+    public static String screenToHtml(InterpreterContext context, Object[] args) throws InterpreterError {
+        if (args.length < 1 || args[0] == null) {
+            throw new InterpreterError("scr.toHtml requires at least 1 argument: screenName");
+        }
+        
+        String screenName = ((String) args[0]).toLowerCase();
+        boolean includeStyles = true;
+        
+        if (args.length > 1 && args[1] != null) {
+            includeStyles = (Boolean) args[1];
+        }
+        
+        // Get the screen configuration
+        ScreenConfig screenConfig = context.getScreenConfig(screenName);
+        if (screenConfig == null) {
+            throw new InterpreterError("scr.toHtml: Screen '" + screenName + "' does not exist");
+        }
+        
+        try {
+            StringBuilder html = new StringBuilder();
+            
+            // Start HTML document
+            if (includeStyles) {
+                html.append("<!DOCTYPE html>\n");
+                html.append("<html lang=\"en\">\n<head>\n");
+                html.append("<meta charset=\"UTF-8\">\n");
+                html.append("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n");
+                
+                // Add title
+                String title = screenConfig.getTitle();
+                if (title == null) title = "EBS Screen";
+                html.append("<title>").append(escapeHtml(title)).append("</title>\n");
+                
+                // Add styles
+                html.append(generateCss());
+                
+                html.append("</head>\n<body>\n");
+            }
+            
+            // Generate screen container
+            int width = screenConfig.getWidth();
+            int height = screenConfig.getHeight();
+            String screenTitle = screenConfig.getTitle();
+            if (screenTitle == null) screenTitle = "Screen";
+            
+            html.append("<div class=\"ebs-screen\" style=\"width: ").append(width).append("px; min-height: ")
+                .append(height).append("px;\">\n");
+            html.append("  <div class=\"ebs-screen-title\">").append(escapeHtml(screenTitle)).append("</div>\n");
+            html.append("  <div class=\"ebs-screen-content\">\n");
+            
+            // Process variables from sets
+            Map<String, VarSet> varSets = screenConfig.getVarSets();
+            if (varSets != null) {
+                for (VarSet varSet : varSets.values()) {
+                    String scope = varSet.getScope();
+                    if ("visible".equals(scope)) {
+                        Map<String, Var> vars = varSet.getVariables();
+                        if (vars != null) {
+                            for (Var var : vars.values()) {
+                                html.append(generateVariableHtml(var));
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Process standalone variable items
+            Map<String, Var> varItems = screenConfig.getVarItems();
+            if (varItems != null) {
+                for (Var var : varItems.values()) {
+                    html.append(generateVariableHtml(var));
+                }
+            }
+            
+            // Process areas
+            List<AreaDefinition> areas = screenConfig.getAreas();
+            if (areas != null) {
+                for (AreaDefinition area : areas) {
+                    html.append(generateAreaHtml(area, 2));
+                }
+            }
+            
+            html.append("  </div>\n");
+            html.append("</div>\n");
+            
+            // Add JavaScript placeholder for event handlers
+            if (includeStyles) {
+                html.append(generateJavaScript());
+                html.append("</body>\n</html>");
+            }
+            
+            return html.toString();
+            
+        } catch (Exception ex) {
+            throw new InterpreterError("scr.toHtml: " + ex.getMessage());
+        }
+    }
+    
+    /**
+     * Generates HTML for a variable definition
+     */
+    private static String generateVariableHtml(Var var) {
+        String varName = var.getName();
+        DataType varType = var.getType();
+        Object defaultValue = var.getDefaultValue();
+        
+        DisplayItem display = var.getDisplayItem();
+        if (display == null) {
+            return "";
+        }
+        
+        String displayType = display.getType() != null ? display.getType() : "textfield";
+        String labelText = display.getLabelText() != null ? display.getLabelText() : varName;
+        boolean mandatory = display.mandatory;
+        
+        StringBuilder html = new StringBuilder();
+        html.append("    <div class=\"ebs-var-container\">\n");
+        
+        // Generate label
+        if (labelText != null && !labelText.isEmpty()) {
+            html.append("      <label class=\"ebs-label\">");
+            html.append(escapeHtml(labelText));
+            if (mandatory) {
+                html.append(" <span class=\"ebs-mandatory\">*</span>");
+            }
+            html.append("</label>\n");
+        }
+        
+        // Generate control based on type
+        switch (displayType.toLowerCase()) {
+            case "textfield":
+                html.append("      <input type=\"text\" class=\"ebs-textfield\" ");
+                html.append("name=\"").append(escapeHtml(varName)).append("\" ");
+                if (defaultValue != null) {
+                    html.append("value=\"").append(escapeHtml(String.valueOf(defaultValue))).append("\" ");
+                }
+                html.append("/>\n");
+                break;
+                
+            case "textarea":
+                html.append("      <textarea class=\"ebs-textarea\" ");
+                html.append("name=\"").append(escapeHtml(varName)).append("\">");
+                if (defaultValue != null) {
+                    html.append(escapeHtml(String.valueOf(defaultValue)));
+                }
+                html.append("</textarea>\n");
+                break;
+                
+            case "passwordfield":
+                html.append("      <input type=\"password\" class=\"ebs-passwordfield\" ");
+                html.append("name=\"").append(escapeHtml(varName)).append("\" ");
+                html.append("/>\n");
+                break;
+                
+            case "checkbox":
+                html.append("      <input type=\"checkbox\" class=\"ebs-checkbox\" ");
+                html.append("name=\"").append(escapeHtml(varName)).append("\" ");
+                if (defaultValue != null && (Boolean) defaultValue) {
+                    html.append("checked ");
+                }
+                html.append("/>\n");
+                break;
+                
+            case "combobox":
+            case "choicebox":
+                html.append("      <select class=\"ebs-combobox\" ");
+                html.append("name=\"").append(escapeHtml(varName)).append("\">\n");
+                html.append("        <option value=\"\">-- Select --</option>\n");
+                if (display.getOptions() != null) {
+                    for (String option : display.getOptions()) {
+                        html.append("        <option value=\"").append(escapeHtml(option)).append("\">");
+                        html.append(escapeHtml(option)).append("</option>\n");
+                    }
+                }
+                html.append("      </select>\n");
+                break;
+                
+            case "button":
+                String buttonText = display.itemText != null ? display.itemText : labelText;
+                if (buttonText == null) buttonText = "Button";
+                html.append("      <button type=\"button\" class=\"ebs-button\" ");
+                html.append("name=\"").append(escapeHtml(varName)).append("\">");
+                html.append(escapeHtml(buttonText));
+                html.append("</button>\n");
+                break;
+                
+            case "label":
+                html.append("      <span class=\"ebs-label-value\">");
+                if (defaultValue != null) {
+                    html.append(escapeHtml(String.valueOf(defaultValue)));
+                } else if (display.itemText != null) {
+                    html.append(escapeHtml(display.itemText));
+                }
+                html.append("</span>\n");
+                break;
+                
+            case "datepicker":
+                html.append("      <input type=\"date\" class=\"ebs-datepicker\" ");
+                html.append("name=\"").append(escapeHtml(varName)).append("\" ");
+                html.append("/>\n");
+                break;
+                
+            default:
+                html.append("      <div class=\"ebs-unknown-control\">");
+                html.append("[").append(escapeHtml(displayType)).append("]");
+                html.append("</div>\n");
+        }
+        
+        html.append("    </div>\n");
+        return html.toString();
+    }
+    
+    /**
+     * Generates HTML for an area definition
+     */
+    private static String generateAreaHtml(AreaDefinition area, int indent) {
+        String areaType = area.type != null ? area.type : "vbox";
+        String areaName = area.name != null ? area.name : "area";
+        String spacing = area.spacing != null ? area.spacing : "10";
+        String padding = area.padding != null ? area.padding : "10";
+        String alignment = area.alignment != null ? area.alignment : "";
+        String background = area.areaBackground != null ? area.areaBackground : "";
+        String style = area.style != null ? area.style : "";
+        
+        StringBuilder html = new StringBuilder();
+        String indentStr = "  ".repeat(indent);
+        
+        html.append(indentStr).append("<div class=\"ebs-area ebs-area-").append(areaType).append("\" ");
+        html.append("data-area-name=\"").append(escapeHtml(areaName)).append("\" ");
+        
+        // Build inline styles
+        StringBuilder inlineStyle = new StringBuilder();
+        if (!spacing.isEmpty()) {
+            inlineStyle.append("gap: ").append(spacing).append("px; ");
+        }
+        if (!padding.isEmpty()) {
+            inlineStyle.append("padding: ").append(padding).append("px; ");
+        }
+        if (!background.isEmpty()) {
+            inlineStyle.append("background-color: ").append(background).append("; ");
+        }
+        if (!alignment.isEmpty()) {
+            switch (alignment.toLowerCase()) {
+                case "left":
+                case "center-left":
+                    inlineStyle.append("justify-content: flex-start; ");
+                    break;
+                case "center":
+                case "center-center":
+                    inlineStyle.append("justify-content: center; ");
+                    break;
+                case "right":
+                case "center-right":
+                    inlineStyle.append("justify-content: flex-end; ");
+                    break;
+            }
+        }
+        if (!style.isEmpty()) {
+            inlineStyle.append(style);
+        }
+        
+        if (inlineStyle.length() > 0) {
+            html.append("style=\"").append(inlineStyle.toString()).append("\" ");
+        }
+        
+        html.append(">\n");
+        
+        // Process items
+        List<AreaItem> items = area.items;
+        if (items != null) {
+            for (AreaItem item : items) {
+                String varRef = item.varRef;
+                if (varRef != null && !varRef.isEmpty()) {
+                    html.append(indentStr).append("  <div class=\"ebs-item-placeholder\">");
+                    html.append("[Variable: ").append(escapeHtml(varRef)).append("]");
+                    html.append("</div>\n");
+                } else {
+                    // Check if it's an inline item with display metadata
+                    DisplayItem displayItem = item.displayItem;
+                    if (displayItem != null && displayItem.getType() != null) {
+                        String itemType = displayItem.getType();
+                        if ("button".equals(itemType)) {
+                            String text = displayItem.itemText != null ? displayItem.itemText : "Button";
+                            html.append(indentStr).append("  <button type=\"button\" class=\"ebs-button\">");
+                            html.append(escapeHtml(text));
+                            html.append("</button>\n");
+                        } else if ("label".equals(itemType)) {
+                            String text = displayItem.itemText != null ? displayItem.itemText : "Label";
+                            html.append(indentStr).append("  <span class=\"ebs-label-value\">");
+                            html.append(escapeHtml(text));
+                            html.append("</span>\n");
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Process child areas
+        List<AreaDefinition> childAreas = area.childAreas;
+        if (childAreas != null) {
+            for (AreaDefinition childArea : childAreas) {
+                html.append(generateAreaHtml(childArea, indent + 1));
+            }
+        }
+        
+        html.append(indentStr).append("</div>\n");
+        return html.toString();
+    }
+    
+    /**
+     * Generates CSS styles for the HTML output
+     */
+    private static String generateCss() {
+        StringBuilder css = new StringBuilder();
+        css.append("<style>\n");
+        css.append("body {\n");
+        css.append("  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;\n");
+        css.append("  margin: 20px;\n");
+        css.append("  background-color: #f5f5f5;\n");
+        css.append("  color: #333;\n");
+        css.append("}\n");
+        css.append(".ebs-screen {\n");
+        css.append("  background-color: white;\n");
+        css.append("  border: 1px solid #ddd;\n");
+        css.append("  border-radius: 8px;\n");
+        css.append("  box-shadow: 0 2px 8px rgba(0,0,0,0.1);\n");
+        css.append("  margin: 20px auto;\n");
+        css.append("  overflow: hidden;\n");
+        css.append("}\n");
+        css.append(".ebs-screen-title {\n");
+        css.append("  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n");
+        css.append("  color: white;\n");
+        css.append("  padding: 15px 20px;\n");
+        css.append("  font-size: 18px;\n");
+        css.append("  font-weight: 600;\n");
+        css.append("  border-bottom: 1px solid #ddd;\n");
+        css.append("}\n");
+        css.append(".ebs-screen-content {\n");
+        css.append("  padding: 20px;\n");
+        css.append("}\n");
+        css.append(".ebs-var-container {\n");
+        css.append("  display: flex;\n");
+        css.append("  align-items: center;\n");
+        css.append("  margin-bottom: 15px;\n");
+        css.append("  gap: 10px;\n");
+        css.append("}\n");
+        css.append(".ebs-label {\n");
+        css.append("  font-weight: 500;\n");
+        css.append("  color: #555;\n");
+        css.append("  min-width: 120px;\n");
+        css.append("  flex-shrink: 0;\n");
+        css.append("}\n");
+        css.append(".ebs-mandatory {\n");
+        css.append("  color: #e74c3c;\n");
+        css.append("  font-weight: bold;\n");
+        css.append("}\n");
+        css.append(".ebs-textfield, .ebs-passwordfield, .ebs-datepicker {\n");
+        css.append("  padding: 8px 12px;\n");
+        css.append("  border: 1px solid #ccc;\n");
+        css.append("  border-radius: 4px;\n");
+        css.append("  flex: 1;\n");
+        css.append("  font-size: 14px;\n");
+        css.append("}\n");
+        css.append(".ebs-textfield:focus, .ebs-passwordfield:focus, .ebs-datepicker:focus {\n");
+        css.append("  outline: none;\n");
+        css.append("  border-color: #667eea;\n");
+        css.append("  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);\n");
+        css.append("}\n");
+        css.append(".ebs-textarea {\n");
+        css.append("  padding: 8px 12px;\n");
+        css.append("  border: 1px solid #ccc;\n");
+        css.append("  border-radius: 4px;\n");
+        css.append("  flex: 1;\n");
+        css.append("  font-size: 14px;\n");
+        css.append("  min-height: 80px;\n");
+        css.append("  resize: vertical;\n");
+        css.append("  font-family: inherit;\n");
+        css.append("}\n");
+        css.append(".ebs-textarea:focus {\n");
+        css.append("  outline: none;\n");
+        css.append("  border-color: #667eea;\n");
+        css.append("  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);\n");
+        css.append("}\n");
+        css.append(".ebs-checkbox {\n");
+        css.append("  width: 18px;\n");
+        css.append("  height: 18px;\n");
+        css.append("  cursor: pointer;\n");
+        css.append("}\n");
+        css.append(".ebs-combobox {\n");
+        css.append("  padding: 8px 12px;\n");
+        css.append("  border: 1px solid #ccc;\n");
+        css.append("  border-radius: 4px;\n");
+        css.append("  flex: 1;\n");
+        css.append("  font-size: 14px;\n");
+        css.append("  cursor: pointer;\n");
+        css.append("}\n");
+        css.append(".ebs-button {\n");
+        css.append("  padding: 8px 16px;\n");
+        css.append("  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n");
+        css.append("  color: white;\n");
+        css.append("  border: none;\n");
+        css.append("  border-radius: 4px;\n");
+        css.append("  font-size: 14px;\n");
+        css.append("  font-weight: 500;\n");
+        css.append("  cursor: pointer;\n");
+        css.append("  transition: transform 0.1s, box-shadow 0.2s;\n");
+        css.append("}\n");
+        css.append(".ebs-button:hover {\n");
+        css.append("  transform: translateY(-1px);\n");
+        css.append("  box-shadow: 0 4px 8px rgba(0,0,0,0.2);\n");
+        css.append("}\n");
+        css.append(".ebs-button:active {\n");
+        css.append("  transform: translateY(0);\n");
+        css.append("}\n");
+        css.append(".ebs-label-value {\n");
+        css.append("  padding: 8px 12px;\n");
+        css.append("  background-color: #f8f9fa;\n");
+        css.append("  border-radius: 4px;\n");
+        css.append("  flex: 1;\n");
+        css.append("}\n");
+        css.append(".ebs-area {\n");
+        css.append("  display: flex;\n");
+        css.append("  padding: 10px;\n");
+        css.append("  gap: 10px;\n");
+        css.append("  border-radius: 4px;\n");
+        css.append("}\n");
+        css.append(".ebs-area-vbox {\n");
+        css.append("  flex-direction: column;\n");
+        css.append("}\n");
+        css.append(".ebs-area-hbox {\n");
+        css.append("  flex-direction: row;\n");
+        css.append("}\n");
+        css.append(".ebs-area-gridpane {\n");
+        css.append("  display: grid;\n");
+        css.append("  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));\n");
+        css.append("}\n");
+        css.append(".ebs-area-borderpane {\n");
+        css.append("  display: grid;\n");
+        css.append("  grid-template-areas: 'top top top' 'left center right' 'bottom bottom bottom';\n");
+        css.append("}\n");
+        css.append(".ebs-item-placeholder {\n");
+        css.append("  padding: 8px;\n");
+        css.append("  background-color: #e9ecef;\n");
+        css.append("  border: 1px dashed #adb5bd;\n");
+        css.append("  border-radius: 4px;\n");
+        css.append("  color: #6c757d;\n");
+        css.append("  font-style: italic;\n");
+        css.append("}\n");
+        css.append(".ebs-unknown-control {\n");
+        css.append("  padding: 8px;\n");
+        css.append("  background-color: #fff3cd;\n");
+        css.append("  border: 1px solid #ffc107;\n");
+        css.append("  border-radius: 4px;\n");
+        css.append("  color: #856404;\n");
+        css.append("}\n");
+        css.append("</style>\n");
+        return css.toString();
+    }
+    
+    /**
+     * Generates JavaScript for event handlers
+     */
+    private static String generateJavaScript() {
+        StringBuilder js = new StringBuilder();
+        js.append("<script>\n");
+        js.append("// Event handlers placeholder\n");
+        js.append("document.querySelectorAll('.ebs-button').forEach(button => {\n");
+        js.append("  button.addEventListener('click', function() {\n");
+        js.append("    console.log('Button clicked:', this.textContent);\n");
+        js.append("    alert('Button \"' + this.textContent + '\" clicked!\\nNote: This is an HTML representation. Event handlers need to be implemented in JavaScript.');\n");
+        js.append("  });\n");
+        js.append("});\n");
+        js.append("</script>\n");
+        return js.toString();
+    }
+    
+    /**
+     * Helper method to get a string value from a map with a default
+     */
+    private static String getStringValue(Map<String, Object> map, String key, String defaultValue) {
+        Object value = map.get(key);
+        if (value == null) {
+            // Try lowercase key
+            value = map.get(key.toLowerCase());
+        }
+        return value != null ? String.valueOf(value) : defaultValue;
+    }
+    
+    /**
+     * Helper method to get a boolean value from a map with a default
+     */
+    private static boolean getBooleanValue(Map<String, Object> map, String key, boolean defaultValue) {
+        Object value = map.get(key);
+        if (value == null) {
+            // Try lowercase key
+            value = map.get(key.toLowerCase());
+        }
+        if (value instanceof Boolean) {
+            return (Boolean) value;
+        }
+        return defaultValue;
+    }
+    
+    /**
+     * Helper method to escape HTML special characters
+     */
+    private static String escapeHtml(String text) {
+        if (text == null) {
+            return "";
+        }
+        return text.replace("&", "&amp;")
+                   .replace("<", "&lt;")
+                   .replace(">", "&gt;")
+                   .replace("\"", "&quot;")
+                   .replace("'", "&#39;");
     }
 }

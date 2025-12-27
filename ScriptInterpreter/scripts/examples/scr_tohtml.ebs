@@ -1,0 +1,233 @@
+// ============================================================================
+// scr_tohtml.ebs - Screen to HTML Conversion Example
+// ============================================================================
+// Demonstrates the scr.toHtml builtin function that converts EBS screen
+// definitions (JavaFX UI) to HTML pages.
+// ============================================================================
+
+print "=== Screen to HTML Conversion Example ===";
+print "";
+
+// Example 1: Simple contact form
+// ============================================================================
+print "Example 1: Simple Contact Form";
+print "-------------------------------";
+
+screen contactForm = {
+    "title": "Contact Us",
+    "width": 500,
+    "height": 400,
+    "sets": [{
+        "setname": "contact",
+        "scope": "visible",
+        "vars": [
+            {
+                "name": "name",
+                "type": "string",
+                "display": {
+                    "type": "textfield",
+                    "labelText": "Your Name:",
+                    "mandatory": true
+                }
+            },
+            {
+                "name": "email",
+                "type": "string",
+                "display": {
+                    "type": "textfield",
+                    "labelText": "Email:",
+                    "mandatory": true
+                }
+            },
+            {
+                "name": "message",
+                "type": "string",
+                "display": {
+                    "type": "textarea",
+                    "labelText": "Message:"
+                }
+            }
+        ]
+    }]
+};
+
+// Convert to HTML with default styling
+var html1: string = call scr.toHtml("contactForm");
+print "Generated HTML with styles (" + call string.length(html1) + " chars)";
+
+// Save to file
+call file.writeTextFile("/tmp/contact_form.html", html1);
+print "Saved to: /tmp/contact_form.html";
+print "";
+
+
+// Example 2: Registration form with multiple control types
+// ============================================================================
+print "Example 2: Registration Form";
+print "-----------------------------";
+
+screen registrationForm = {
+    "title": "User Registration",
+    "width": 600,
+    "height": 500,
+    "sets": [
+        {
+            "setname": "personalInfo",
+            "scope": "visible",
+            "vars": [
+                {
+                    "name": "firstName",
+                    "type": "string",
+                    "display": {
+                        "type": "textfield",
+                        "labelText": "First Name:",
+                        "mandatory": true
+                    }
+                },
+                {
+                    "name": "lastName",
+                    "type": "string",
+                    "display": {
+                        "type": "textfield",
+                        "labelText": "Last Name:",
+                        "mandatory": true
+                    }
+                },
+                {
+                    "name": "birthDate",
+                    "type": "string",
+                    "display": {
+                        "type": "datepicker",
+                        "labelText": "Date of Birth:"
+                    }
+                }
+            ]
+        },
+        {
+            "setname": "accountInfo",
+            "scope": "visible",
+            "vars": [
+                {
+                    "name": "username",
+                    "type": "string",
+                    "display": {
+                        "type": "textfield",
+                        "labelText": "Username:",
+                        "mandatory": true
+                    }
+                },
+                {
+                    "name": "password",
+                    "type": "string",
+                    "display": {
+                        "type": "passwordfield",
+                        "labelText": "Password:",
+                        "mandatory": true
+                    }
+                },
+                {
+                    "name": "subscribe",
+                    "type": "bool",
+                    "default": false,
+                    "display": {
+                        "type": "checkbox",
+                        "labelText": "Subscribe to newsletter"
+                    }
+                }
+            ]
+        }
+    ]
+};
+
+// Convert to HTML
+var html2: string = call scr.toHtml("registrationForm");
+print "Generated HTML with styles (" + call string.length(html2) + " chars)";
+
+// Save to file
+call file.writeTextFile("/tmp/registration_form.html", html2);
+print "Saved to: /tmp/registration_form.html";
+print "";
+
+
+// Example 3: HTML body only (for custom CSS integration)
+// ============================================================================
+print "Example 3: HTML Body Only";
+print "--------------------------";
+
+screen feedbackForm = {
+    "title": "Feedback Form",
+    "width": 550,
+    "height": 450,
+    "vars": [
+        {
+            "name": "rating",
+            "type": "string",
+            "display": {
+                "type": "combobox",
+                "labelText": "How would you rate our service?"
+            }
+        },
+        {
+            "name": "comments",
+            "type": "string",
+            "display": {
+                "type": "textarea",
+                "labelText": "Additional Comments:"
+            }
+        }
+    ]
+};
+
+// Convert to HTML body only (no styles)
+var htmlBody: string = call scr.toHtml("feedbackForm", false);
+print "Generated HTML body only (" + call string.length(htmlBody) + " chars)";
+
+// Wrap in custom HTML structure
+var customPage: string = "<!DOCTYPE html><html><head>" +
+                        "<title>Custom Styled Form</title>" +
+                        "<link rel='stylesheet' href='custom.css'>" +
+                        "</head><body>" +
+                        htmlBody +
+                        "</body></html>";
+
+call file.writeTextFile("/tmp/feedback_form_custom.html", customPage);
+print "Saved to: /tmp/feedback_form_custom.html (with custom wrapper)";
+print "";
+
+
+// Example 4: Display HTML sample
+// ============================================================================
+print "Example 4: Sample HTML Output";
+print "------------------------------";
+print "First 500 characters of generated HTML:";
+print "";
+
+var sample: string = call string.substring(html1, 0, 500);
+print sample;
+print "...";
+print "";
+
+
+// Summary
+// ============================================================================
+print "Summary";
+print "-------";
+print "✓ scr.toHtml(screenName) - Full HTML with styles";
+print "✓ scr.toHtml(screenName, false) - Body only, no styles";
+print "";
+print "Use Cases:";
+print "• Export screen layouts as HTML documentation";
+print "• Generate web prototypes from JavaFX designs";
+print "• Create static HTML forms";
+print "• Generate email templates";
+print "";
+print "Supported Controls:";
+print "• textfield, textarea, passwordfield";
+print "• checkbox, combobox, choicebox";
+print "• button, label, datepicker";
+print "";
+print "Supported Layouts:";
+print "• vbox, hbox, gridpane, borderpane";
+print "";
+print "Files created in /tmp/";
+print "Open them in a web browser to see the results!";
