@@ -67,9 +67,9 @@ screen TreeBindingTest = {
             "name": "mainArea",
             "type": "vbox",
             "items": [
-                {"name": "instructionsLabel"},
-                {"name": "selectionLabel"},
-                {"name": "selectedFile"},
+                {"varRef": "instructionsLabel"},
+                {"varRef": "selectionLabel"},
+                {"varRef": "selectedFile"},
                 {
                     "name": "selectRootBtn",
                     "display": {

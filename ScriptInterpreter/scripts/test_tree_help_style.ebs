@@ -209,7 +209,7 @@ screen HelpStyleTreeTest = {
                     "type": "vbox",
                     "hgrow": "always",
                     "items": [
-                        {"name": "selectedTopic"}
+                        {"varRef": "selectedTopic"}
                     ]
                 },
                 {
@@ -217,9 +217,9 @@ screen HelpStyleTreeTest = {
                     "type": "vbox",
                     "hgrow": "always",
                     "items": [
-                        {"name": "topicTitle"},
+                        {"varRef": "topicTitle"},
                         {"name": "separator1", "display": {"type": "separator"}},
-                        {"name": "topicContent"},
+                        {"varRef": "topicContent"},
                         {"name": "separator2", "display": {"type": "separator"}},
                         {
                             "name": "navTitle",
