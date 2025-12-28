@@ -260,7 +260,7 @@ program HelloWorld
 
 main
     print "Hello World"
-end
+end main
 ```
 
 ### Complete Program Structure
@@ -274,7 +274,7 @@ settings
     version "1.0.0"
     author "Student Name"
     description "What this program does"
-end
+end settings
 
 // Optional: Global variables
 variables
@@ -283,7 +283,7 @@ variables
     variable isPlaying as yes/no = no    // 'variable' is same as 'var'
     const MAX_SCORE as number = 1000     // Constants cannot change
     constant APP_VERSION as text = "1.0" // 'constant' is same as 'const'
-end
+end variables
 
 // Optional: Function definitions
 functions
@@ -294,7 +294,7 @@ functions
     to calculate score
         return score * 10
     end function
-end
+end functions
 
 // Optional: Screen definitions
 screens
@@ -302,13 +302,13 @@ screens
         title "Main Screen"
         // screen content
     end screen
-end
+end screens
 
 // Required: Main entry point
 main
     // Program starts here
     print screen MainWindow
-end
+end main
 ```
 
 ### Section Rules
@@ -332,8 +332,10 @@ end
 
 EBS2 supports both compact single-line and explicit multi-line block syntax:
 
+**Key Rule:** `end` statements are **optional** for single-command blocks, **required** for multi-command blocks.
+
 ```javascript
-// SINGLE-LINE: No end keyword needed
+// SINGLE-LINE: No end keyword needed (optional)
 if x < 5 then print "Small"
 repeat 3 times print "Hello"
 for i from 1 to 5 print i
@@ -349,15 +351,15 @@ repeat 3 times
     print "World"
 end repeat
 
-// MULTIPLE COMMANDS ON ONE LINE: Use semicolon separator
+// MULTIPLE COMMANDS ON ONE LINE: Use semicolon separator, no end needed
 if x < 5 then print "Small"; log "Checked"; x = x + 1
 ```
 
 **When to use each:**
 
-- **Single-line**: Simple, one-command blocks - more compact
-- **Multi-line**: Multiple commands or complex logic - more readable
-- **Semicolon**: Multiple commands on same line - use sparingly
+- **Single-line (no end)**: Simple, one-command blocks - more compact
+- **Multi-line (with end)**: Multiple commands or complex logic - more readable
+- **Semicolon (no end)**: Multiple commands on same line - use sparingly
 
 **Control structures with explicit multi-line endings:**
 
@@ -396,7 +398,7 @@ end screen
 // Program sections use simple 'end'
 main
     // code
-end
+end main
 ```
 
 **Benefits:**
@@ -682,8 +684,10 @@ var numbers as array = {1, 2, 3, 4, 5}
 
 // Range syntax (no curly braces for ranges)
 var sequence = 1..100          // Creates array {1, 2, 3, ..., 100}
-var letters = 'a'..'z'         // Creates array {'a', 'b', ..., 'z'}
+var subset = 43..79            // Creates array {43, 44, 45, ..., 79}
+var negatives = -10..10        // Creates array {-10, -9, -8, ..., 0, 1, ..., 10}
 var countdown = 10..1          // Creates array {10, 9, 8, ..., 1}
+var letters = 'a'..'z'         // Creates array {'a', 'b', ..., 'z'}
 
 // Typed arrays with curly braces
 var names as array.text = {"Alice", "Bob", "Charlie"}
@@ -764,7 +768,7 @@ record type Person
     name as text
     age as number
     email as text
-end
+end function
 
 // Alternative with curly braces
 record type Student {
@@ -797,7 +801,7 @@ record type Address
     street as text
     city as text
     zipCode as text
-end
+end function
 
 record type Employee {
     name as text
@@ -825,7 +829,7 @@ record type Team
     name as text
     members as array.text
     scores as array.number
-end
+end label
 
 var team as Team = record {
     name: "Tigers",
@@ -848,7 +852,7 @@ record type Course
     instructor as text
     students as array.record(Student)
     grades as array.number
-end
+end record
 
 var course as Course = record {
     title: "Math 101",
@@ -996,7 +1000,7 @@ record type Student
     name as text
     age as number
     grade as number
-end
+end function
 
 var students as array.record(Student) = {
     record { name: "Alice", age: 10, grade: 95 },
@@ -1241,7 +1245,7 @@ program ScopeExample
 
 variables
     var globalVar as text = "Global"
-end
+end variables
 
 functions
     to testScope
@@ -1249,12 +1253,12 @@ functions
         print globalVar   -- Can access global
         print localVar    // Can access local
     end function
-end
+end functions
 
 main
     print globalVar      // Can access
     // print localVar   -- ERROR: Cannot access
-end
+end main
 ```
 
 ## Operators
@@ -1761,7 +1765,7 @@ to sum numbers...
         total = total + num
     end for
     return total
-end
+end function
 
 // Call with any number of arguments
 var result = call sum with 1, 2, 3, 4, 5
@@ -1774,7 +1778,7 @@ to factorial n
         return 1
     end function
     return n * call factorial with (n - 1)
-end
+end procedure
 ```
 
 #### Anonymous Functions (Advanced)
@@ -1799,16 +1803,16 @@ screen HelloScreen
     
     button OkButton
         text "OK"
-        when clicked
+        if clicked
             hide screen HelloScreen
-        end
-    end
-end
+        end when
+    end button
+end label
 
 // Show the screen
 main
     print screen HelloScreen
-end
+end main
 ```
 
 ### Screen with Layout (Intermediate)
@@ -1828,28 +1832,28 @@ screen UserForm
     textbox NameInput
         placeholder "Enter your name"
         max length 50
-    end
+    end textbox
     
     label AgeLabel
         text "How old are you?"
-    end
+    end label
     
     numberbox AgeInput
         minimum 1
         maximum 120
         default 10
-    end
+    end label
     
     button SubmitButton
         text "Submit"
         style primary
-        when clicked
+        if clicked
             var name = get text from NameInput
             var age = get value from AgeInput
             print "Hello " + name + ", you are " + age
-        end
-    end
-end
+        end when
+    end button
+end screen
 ```
 
 ### Screen with Multiple Areas (Advanced)
@@ -1869,15 +1873,15 @@ screen GameScreen
         
         label LivesLabel
             text "Lives: 3"
-        end
+        end label
         
         button PauseButton
             text "Pause"
-            when clicked
+            if clicked
                 pause game
-            end
-        end
-    end
+            end when
+        end button
+    end label
     
     area GameCanvas at center
         canvas MainCanvas
@@ -1885,16 +1889,16 @@ screen GameScreen
             height fill
             when draw
                 draw game graphics
-            end
-        end
-    end
+            end screen
+        end screen
+    end function
     
     area BottomBar at bottom height 40
         label StatusLabel
             text "Ready to play!"
-        end
-    end
-end
+        end label
+    end procedure
+end procedure
 ```
 
 ### UI Components
@@ -1907,7 +1911,7 @@ label MyLabel
     style normal | bold | italic
     color red | blue | green | black | "##FF0000"
     align left | center | right
-end
+end label
 ```
 
 #### Buttons
@@ -1917,10 +1921,10 @@ button MyButton
     icon "star.png"
     style primary | secondary | success | danger
     enabled yes | no
-    when clicked
+    if clicked
         // code to run
-    end
-end
+    end when
+end button
 ```
 
 #### Text Input
@@ -1929,11 +1933,11 @@ textbox MyInput
     placeholder "Enter text..."
     default "Initial value"
     max length 100
-    when changed
+    if changed
         var text = get text from MyInput
         // react to changes
-    end
-end
+    end textbox
+end function
 ```
 
 #### Number Input
@@ -1943,11 +1947,11 @@ numberbox MyNumber
     maximum 100
     default 50
     step 1
-    when changed
+    if changed
         var value = get value from MyNumber
         // react to changes
-    end
-end
+    end function
+end settings
 ```
 
 #### Checkboxes
@@ -1955,11 +1959,11 @@ end
 checkbox MyCheckbox
     text "I agree"
     checked no
-    when toggled
+    if toggled
         var isChecked = is checked MyCheckbox
         // react to toggle
-    end
-end
+    end if
+end checkbox
 ```
 
 #### Radio Buttons
@@ -1968,21 +1972,21 @@ radiogroup Difficulty
     radio Easy
         text "Easy"
         checked yes
-    end
+    end radio
     
     radio Medium
         text "Medium"
-    end
+    end radio
     
     radio Hard
         text "Hard"
-    end
+    end radio
     
-    when changed
+    if changed
         var selected = get selected from Difficulty
         // selected is "Easy", "Medium", or "Hard"
-    end
-end
+    end if
+end radiogroup
 ```
 
 #### Dropdowns
@@ -1992,11 +1996,11 @@ dropdown ColorChoice
     option "Green"
     option "Blue"
     selected "Red"
-    when changed
+    if changed
         var color = get selected from ColorChoice
         // react to selection
-    end
-end
+    end if
+end dropdown
 ```
 
 #### Lists
@@ -2004,11 +2008,11 @@ end
 listbox FruitList
     items list "Apple", "Banana", "Cherry"
     multiple selection no
-    when selected
+    if selected
         var fruit = get selected from FruitList
         // react to selection
-    end
-end
+    end if
+end listbox
 ```
 
 #### Canvas (for graphics)
@@ -2023,13 +2027,13 @@ canvas DrawingCanvas
         draw rectangle at x:10 y:10 width:50 height:50 color:red
         draw circle at x:100 y:100 radius:30 color:blue
         draw line from x1:0 y1:0 to x2:100 y2:100 color:black width:2
-    end
+    end if
     
-    when clicked at x and y
+    if clicked at x and y
         // React to clicks
         draw circle at x:x y:y radius:5 color:black
-    end
-end
+    end if
+end canvas
 ```
 
 ## Error Handling
@@ -2095,9 +2099,9 @@ parse_error             // Cannot parse data
 to withdraw amount from account
     if amount > account.balance then
         throw error "Insufficient funds"
-    end function
+    end if
     account.balance = account.balance - amount
-end
+end function
 ```
 
 ## Built-in Functions
@@ -2413,7 +2417,7 @@ call helpers.greet with "Alice"
 // Mark functions for export
 export function greet person
     print "Hello " + person
-end
+end function
 
 export function calculate sum of numbers
     var total = 0
@@ -2421,7 +2425,7 @@ export function calculate sum of numbers
         total = total + num
     end for
     return total
-end
+end function
 
 // Private function (not exported)
 to helperFunction

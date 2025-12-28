@@ -13,7 +13,7 @@ program MyApp
 variables
     var myVar as text = "hello"
     const MAX_SIZE as number = 100
-end
+end variables
 
 functions
     function calculate(x as number) as number {
@@ -23,19 +23,19 @@ functions
     procedure greet(name as text) {
         print "Hello " + name
     }
-end
+end procedure
 
 screens
     screen MyWindow
         title "My App"
         // screen content
-    end
-end
+    end screen
+end screens
 
 main
     // Program starts here
     print "Starting..."
-end
+end main
 ```
 
 ---
@@ -233,6 +233,8 @@ var fruits as array = "apple", "banana", "cherry"
 // Range syntax
 var oneToTen = 1..10          // Creates [1, 2, 3, ..., 10]
 var oneToHundred = 1..100     // Creates [1, 2, ..., 100]
+var subset = 43..79           // Creates [43, 44, ..., 79]
+var negatives = -10..10       // Creates [-10, -9, ..., 0, 1, ..., 10]
 
 // Access elements (0-based indexing)
 var first = numbers[0]        // 1 (first element)
@@ -256,7 +258,7 @@ record type Person
     name as text
     age as number
     email as text
-end
+end function
 
 var person as Person = {
     name: "Alice",
@@ -285,19 +287,19 @@ screen MyWindow
     
     label WelcomeLabel
         text "Welcome!"
-    end
+    end label
     
     button ClickButton
         text "Click Me"
-        when clicked
+        if clicked
             print "Button clicked!"
-        end
-    end
-end
+        end when
+    end button
+end screen
 
 main
     print screen MyWindow
-end
+end main
 ```
 
 ### Screen Components
@@ -305,7 +307,7 @@ end
 | Component | Purpose | Example |
 |-----------|---------|---------|
 | `label` | Display text | `text "Hello"` |
-| `button` | Clickable button | `when clicked` |
+| `button` | Clickable button | `if clicked` |
 | `textbox` | Text input | `placeholder "Enter name"` |
 | `numberbox` | Number input | `minimum 0, maximum 100` |
 | `checkbox` | Toggle option | `checked yes/no` |
