@@ -43,7 +43,7 @@ This document provides a summary of the EBS2 language specification and related 
 **Key Sections:**
 - Lexical Structure (keywords, identifiers, literals, operators; comments: single-line `//` only)
 - Program Structure (sections: settings, variables, functions, screens, main)
-- Data Types (basic: number, text, flag, date; collections: list, indicator, record, map)
+- Data Types (basic: number, text, flag, date; collections: array, array.text, array.number, indicator, record, map)
 - Variables and Constants (var/variable for mutable, const/constant for immutable)
 - Operators (arithmetic, comparison, logical, string)
 - Control Flow (if/then/else with optional natural language operators)
@@ -64,7 +64,9 @@ This document provides a summary of the EBS2 language specification and related 
 - **Symbolic alternatives for advanced users**: `if`, `while`, `&&`
 - **Single-line or multi-line blocks**: `if x < 5 then print "Small"` or multi-line with `end if`
 - **Semicolon separators**: Multiple commands on one line with `;`
-- **Range notation**: `list 1..100` creates arrays easily
+- **Range notation**: `array : 1..100` creates arrays easily with colon syntax
+- **Typed arrays**: `array.text`, `array.number`, `array.indicator` for type safety
+- **Colon initialization**: Required for literals: `var x as type : value`
 - **0-based array indexing**: Consistent with mainstream languages
 - **Curly brace blocks with scoping**: Variables in `{}` blocks are local to that block
 - **Child-friendly error messages**
@@ -255,8 +257,8 @@ end if
 More natural for children (who count starting from 1):
 
 ```javascript
-var fruits = list "apple", "banana", "cherry"
-show fruits at 1  -- "apple" (not fruits[0])
+var fruits as array : "apple", "banana", "cherry"
+print fruits[0]  // "apple" (0-based indexing)
 ```
 
 ### 4. Structured Programs

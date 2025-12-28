@@ -79,7 +79,7 @@ if          then        else        repeat      times
 for         each        in          to          call
 with        and         give        back        print
 log         hide        ask         screen      button
-label       textbox     list        text        number
+label       textbox     array       text        number
 flag        true        false       const       constant    indicator
 ```
 
@@ -611,28 +611,31 @@ var deadline as date = "2025-12-31 23:59:59"
 
 ### Collection Types (Intermediate)
 
-#### list
+#### array
 ```javascript
-// Simple list
-var numbers as list = list 1, 2, 3, 4, 5
+// Array with colon initialization (required for literals)
+var fruits as array : "apple", "banana", "cherry"
+var numbers as array : 1, 2, 3, 4, 5
 
-// With parentheses (explicit values)
-var fruits as list = list("apple", "banana", "cherry")
-var colors as list = list("red", "green", "blue")
+// Range syntax (no colon needed)
+var numbers as array : 1..100     // Creates array [1, 2, 3, ..., 100]
+var letters as array : 'a'..'z'   // Creates array ['a', 'b', ..., 'z']
+var countdown as array : 10..1    // Creates array [10, 9, 8, ..., 1]
 
-// Range syntax
-var numbers as list = list 1..100     // Creates list [1, 2, 3, ..., 100]
-var letters as list = list 'a'..'z'   // Creates list ['a', 'b', ..., 'z']
-var countdown as list = list 10..1    // Creates list [10, 9, 8, ..., 1]
+// Typed arrays with colon
+var names as array.text : "Alice", "Bob", "Charlie"
+var scores as array.number : 95, 87, 92, 88
+var flags as array.flag : true, false, true
 
-// Typed list
-var names as list of text = list("Alice", "Bob", "Charlie")
+// Typed indicator array (requires indicator definition)
+var statuses as array.indicator("new", "active", "done") : "new", "active", "done"
 
-// Empty list
-var items as list of number = list()
+// Empty array
+var empty as array : 
+var emptyNames as array.text : 
 
-// Multi-type list (advanced)
-var mixed as list = list(1, "two", true, 3.14)
+// Multi-type array (only with base array type)
+var mixed as array : 1, "two", true, 3.14
 
 // Arrays are 0-indexed (like most programming languages)
 var first = numbers[0]      // Gets first element
@@ -640,21 +643,28 @@ var second = numbers[1]     // Gets second element
 var last = numbers[99]      // Gets last element (for 100-item array)
 ```
 
-**Note:** Lists are arrays of multiple values that can be accessed by index.
+**Typed Arrays:**
+- `array.text` - Array of text values only
+- `array.number` - Array of number values only
+- `array.flag` - Array of boolean values only
+- `array.indicator` - Array of indicator values only
+- `array.date` - Array of date values only
+
+**Note:** Arrays are collections of multiple values that can be accessed by index. Use typed arrays for type safety.
 
 #### indicator
 ```javascript
-// Declare with allowed values (without parentheses)
-var status as indicator "pending", "active", "complete"
-var priority as indicator "low", "medium", "high"
+// Declare with colon initialization (REQUIRED)
+var status as indicator ("pending", "active", "complete") : "active"
+var priority as indicator ("low", "medium", "high") : "medium"
 
-// Declare with parentheses (alternative syntax)
-var color as indicator ("red", "yellow", "green")
-var state as indicator ("on", "off", "standby")
+// Without parentheses (alternative syntax)
+var color as indicator "red", "yellow", "green" : "red"
+var state as indicator "on", "off", "standby" : "off"
 
-// Assignment - must be one of the allowed values
-status = "active"       // OK
+// Assignment after declaration - must be one of the allowed values
 status = "pending"      // OK
+status = "active"       // OK
 status = "canceled"     // ERROR: Not in the allowed set
 
 // Usage in comparisons
@@ -662,20 +672,22 @@ if status = "active" then print "Processing"
 if color = "red" then print "Stop"
 if priority = "high" then print "Urgent!"
 
-// Common use cases
-var direction as indicator "north", "south", "east", "west"
-var mood as indicator "happy", "sad", "neutral"
-var grade as indicator "A", "B", "C", "D", "F"
+// Common use cases with colon initialization
+var direction as indicator ("north", "south", "east", "west") : "north"
+var mood as indicator ("happy", "sad", "neutral") : "neutral"
+var grade as indicator ("A", "B", "C", "D", "F") : "B"
 ```
 
 **Benefits:**
 - ✅ Type-safe enumeration - only allowed values accepted
 - ✅ Self-documenting - valid values visible in declaration
 - ✅ Prevents typos - compiler catches invalid values
+- ✅ Required initialization - prevents uninitialized indicators
+- ✅ Clear syntax - colon separates definition from initialization
 - ✅ Perfect for states, statuses, colors, priorities, modes
 
-**Difference from list:**
-- **`list`** - Array of multiple values accessed by index: `myList[0]`, `myList[1]`, etc.
+**Difference from array:**
+- **`array`** - Collection of multiple values accessed by index: `myArray[0]`, `myArray[1]`, etc.
 - **`indicator`** - Single value that must be one of a predefined set: `myStatus = "active"`
 
 #### record
@@ -736,13 +748,20 @@ calculator = to add
 ### Variable Declaration (Simple)
 
 ```javascript
-// Declare with initial value (both keywords work)
-var name as text = "Alice"
-variable userName as text = "Bob"    // Same as 'var'
+// Declare with colon for literal initialization
+var name as text : "Alice"
+variable userName as text : "Bob"    // Same as 'var'
 
-// Type inference (intermediate)
-var count = 42           -- Inferred as number
-var message = "Hello"    -- Inferred as text
+// Type inference with = (no colon)
+var count = 42           // Inferred as number
+var message = "Hello"    // Inferred as text
+
+// Arrays with colon
+var fruits as array : "apple", "banana", "cherry"
+var numbers as array.number : 1, 2, 3, 4, 5
+
+// Indicators with colon (required)
+var status as indicator ("new", "pending") : "new"
 ```
 
 ### Constant Declaration

@@ -79,7 +79,7 @@ Variables are like labeled boxes where you store information:
 program GreetFriend
 
 main
-    var name as text = "Sarah"
+    var name as text : "Sarah"
     print "Hello " + name
 end
 ```
@@ -92,8 +92,8 @@ end
 program CountApples
 
 main
-    var apples as number = 5
-    var oranges as number = 3
+    var apples as number : 5
+    var oranges as number : 3
     var total = apples + oranges
     
     print "Total fruit: " + total
@@ -253,7 +253,7 @@ end
 program FavoriteFruits
 
 main
-    var fruits = list "apple", "banana", "cherry"
+    var fruits as array : "apple", "banana", "cherry"
     
     for each fruit in fruits
         print "I like " + fruit
@@ -294,22 +294,22 @@ Lists let you store multiple values together:
 ### Creating Lists
 
 ```javascript
-program ListExample
+program ArrayExample
 
 main
-    // Simple list
-    var numbers = list 1, 2, 3, 4, 5
+    // Simple array with colon
+    var numbers as array : 1, 2, 3, 4, 5
     
-    // With parentheses (explicit values)
-    var fruits = list("apple", "banana", "cherry")
+    // Explicit values
+    var fruits as array : "apple", "banana", "cherry"
     
     // Range syntax (creates all numbers from 1 to 10)
-    var oneToTen = list 1..10
+    var oneToTen as array : 1..10
     
     // Large range (creates 1 to 100)
-    var oneToHundred = list 1..100
+    var oneToHundred as array : 1..100
     
-    // Get items from list (starts at 0!)
+    // Get items from array (starts at 0!)
     print numbers[0]  // Prints: 1 (first item)
     print numbers[1]  // Prints: 2 (second item)
     print fruits[0]   // Prints: apple (first fruit)
@@ -562,7 +562,7 @@ main
     }
     
     // For loop with braces
-    var fruits = list "apple", "banana", "cherry"
+    var fruits as array : "apple", "banana", "cherry"
     for each fruit in fruits {
         print fruit
     }
@@ -716,7 +716,7 @@ repeat 5 times
     -- do something
 end repeat
 
-for each item in list
+for each item in array
     -- do something with item
 end for
 ```
