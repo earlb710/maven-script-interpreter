@@ -62,16 +62,13 @@ EBS2 is designed with three core principles:
 // Single line comment (C-style)
 var x = 10  // Comment after code
 
--- Alternative comment style (Lua-style)
-var y = 20  -- Also works after code
-
 // Multi-line explanations use multiple single lines:
 // This is a longer explanation
 // that spans multiple lines
 // to describe complex logic
 ```
 
-**Note:** Block comments (`/* */`) are NOT supported. Use multiple `//` or `--` lines instead for clarity and simplicity. Both comment styles are equivalent; use whichever you prefer.
+**Note:** Block comments (`/* */`) are NOT supported. Use multiple `//` lines instead for clarity and simplicity.
 
 ### Keywords
 
@@ -156,19 +153,19 @@ print USERNAME            // "BOB"
 
 #### Number Literals
 ```javascript
-42          -- Integer
-3.14        -- Decimal
-1_000_000   -- Underscore separators for readability
-0xFF        -- Hexadecimal (advanced)
-0b1010      -- Binary (advanced)
+42          // Integer
+3.14        // Decimal
+1_000_000   // Underscore separators for readability
+0xFF        // Hexadecimal (advanced)
+0b1010      // Binary (advanced)
 ```
 
 #### Text Literals
 ```javascript
-"Hello World"           -- Double quotes
-'Single quotes work'    -- Single quotes (same as double)
-"Line 1\nLine 2"       -- Escape sequences
-"She said \"Hi\""      -- Escaped quotes
+"Hello World"           // Double quotes
+'Single quotes work'    // Single quotes (same as double)
+"Line 1\nLine 2"       // Escape sequences
+"She said \"Hi\""      // Escaped quotes
 ```
 
 #### Boolean Literals
@@ -195,52 +192,63 @@ record {name: "Alice", age: 10}
 
 #### Arithmetic (Simple)
 ```javascript
-+    -- Addition
--    -- Subtraction
-*    -- Multiplication
-/    -- Division
++    // Addition
+-    // Subtraction
+*    // Multiplication
+/    // Division
 ```
 
 #### Arithmetic (Advanced)
 ```javascript
-mod  -- Modulo (remainder) - can also use %
-^    -- Power
+mod  // Modulo (remainder) - can also use %
+^    // Power
+++   // Increment (add 1)
+--   // Decrement (subtract 1)
 ```
 
 **Note:** The modulo operator can be written as either `mod` (long form) or `%` (short form).
 
+**Increment/Decrement Usage:**
+```javascript
+var count = 5
+count++        // count is now 6 (post-increment)
+++count        // count is now 7 (pre-increment)
+count--        // count is now 6 (post-decrement)
+--count        // count is now 5 (pre-decrement)
+```
+
 #### Comparison (Natural Language)
 ```javascript
-is equal to              -- ==
-is not equal to          -- !=
-is greater than          -- >
-is less than             -- <
-is greater than or equal to  -- >=
-is less than or equal to     -- <=
+is equal to              // ==
+is not equal to          // !=
+is greater than          // >
+is less than             // <
+is greater than or equal to  // >=
+is less than or equal to     // <=
 ```
 
 #### Comparison (Symbolic - Advanced)
 ```javascript
-=    -- Equal
-<>   -- Not equal (also !=)
->    -- Greater than
-<    -- Less than
->=   -- Greater or equal
-<=   -- Less or equal
+=    // Equal
+<>   // Not equal (also !=)
+>    // Greater than
+<    // Less than
+>=   // Greater or equal
+<=   // Less or equal
 ```
 
 #### Logical (Natural Language)
 ```javascript
-and          -- Logical AND
-or           -- Logical OR
-not          -- Logical NOT
+and          // Logical AND
+or           // Logical OR
+not          // Logical NOT
 ```
 
 #### Logical (Symbolic - Advanced)
 ```javascript
-&&   -- AND
-||   -- OR
-!    -- NOT
+&&   // AND
+||   // OR
+!    // NOT
 ```
 
 ## Program Structure
@@ -292,13 +300,13 @@ end
 screens
     screen MainWindow
         title "Main Screen"
-        -- screen content
+        // screen content
     end screen
 end
 
 // Required: Main entry point
 main
-    -- Program starts here
+    // Program starts here
     print screen MainWindow
 end
 ```
@@ -1222,8 +1230,8 @@ CONSTANT MAX = 100       // Same as 'constant'
 userName = "Bob"
 
 // Compound assignment (advanced)
-count = count + 1        -- Long form
-count += 1               -- Short form (advanced)
+count = count + 1        // Long form
+count += 1               // Short form (advanced)
 ```
 
 ### Variable Scope
@@ -1239,13 +1247,13 @@ functions
     to testScope
         var localVar as text = "Local"
         print globalVar   -- Can access global
-        print localVar    -- Can access local
+        print localVar    // Can access local
     end function
 end
 
 main
-    print globalVar      -- Can access
-    -- print localVar   -- ERROR: Cannot access
+    print globalVar      // Can access
+    // print localVar   -- ERROR: Cannot access
 end
 ```
 
@@ -1255,22 +1263,22 @@ end
 
 #### Simple Form
 ```javascript
-var sum = 5 + 3          -- Addition: 8
-var diff = 5 - 3         -- Subtraction: 2
-var product = 5 * 3      -- Multiplication: 15
-var quotient = 15 / 3    -- Division: 5
+var sum = 5 + 3          // Addition: 8
+var diff = 5 - 3         // Subtraction: 2
+var product = 5 * 3      // Multiplication: 15
+var quotient = 15 / 3    // Division: 5
 ```
 
 #### Advanced Form
 ```javascript
 // Long form (natural language)
-var remainder = 17 mod 5     -- Modulo: 2
+var remainder = 17 mod 5     // Modulo: 2
 
 // Short form (symbolic)
-var remainder = 17 % 5       -- Modulo: 2 (same as mod)
+var remainder = 17 % 5       // Modulo: 2 (same as mod)
 
-var power = 2 ^ 8            -- Power: 256
-var negated = -value         -- Negation
+var power = 2 ^ 8            // Power: 256
+var negated = -value         // Negation
 ```
 
 **Note:** The modulo operator can be written as either `mod` (long form) or `%` (short form) - both are equivalent.
@@ -1415,7 +1423,7 @@ end if
 var fullName = firstName + " " + lastName
 
 // Repetition
-var stars = "*" * 5      -- "*****"
+var stars = "*" * 5      // "*****"
 
 // Interpolation (advanced)
 var greeting = "Hello {name}, you are {age} years old"
@@ -1430,7 +1438,7 @@ var greeting = "Hello {name}, you are {age} years old"
 ```javascript
 // Multi-line form (requires end if)
 if condition then
-    -- code to run if true
+    // code to run if true
 end if
 
 // Single-line form (no end if needed)
@@ -1469,11 +1477,11 @@ end if
 #### If Statement (Advanced)
 ```javascript
 if condition then
-    -- code
+    // code
 else if otherCondition then
-    -- code
+    // code
 else
-    -- code
+    // code
 end if
 ```
 
@@ -1536,7 +1544,7 @@ end for
 
 // Count with step
 for counter from 0 to 100 by 10
-    print counter     -- 0, 10, 20, ..., 100
+    print counter     // 0, 10, 20, ..., 100
 end for
 
 // Count backwards
@@ -1548,11 +1556,11 @@ end for
 #### While Loop (Advanced)
 ```javascript
 while condition
-    -- code
+    // code
 end while
 
 do
-    -- code
+    // code
 while condition
 ```
 
@@ -1714,7 +1722,7 @@ end function
 
 // Use it
 var result = call double with 5
-print result     -- Shows: 10
+print result     // Shows: 10
 ```
 
 #### Multiple Returns (Advanced)
@@ -1739,7 +1747,7 @@ to greet person and title: "Friend"
 end function
 
 // Call with default
-call greet with "Alice"           -- "Hello Friend Alice"
+call greet with "Alice"           // "Hello Friend Alice"
 
 // Call with custom title
 call greet with "Alice" and title: "Dr."  -- "Hello Dr. Alice"
@@ -1910,7 +1918,7 @@ button MyButton
     style primary | secondary | success | danger
     enabled yes | no
     when clicked
-        -- code to run
+        // code to run
     end
 end
 ```
@@ -1923,7 +1931,7 @@ textbox MyInput
     max length 100
     when changed
         var text = get text from MyInput
-        -- react to changes
+        // react to changes
     end
 end
 ```
@@ -1937,7 +1945,7 @@ numberbox MyNumber
     step 1
     when changed
         var value = get value from MyNumber
-        -- react to changes
+        // react to changes
     end
 end
 ```
@@ -1949,7 +1957,7 @@ checkbox MyCheckbox
     checked no
     when toggled
         var isChecked = is checked MyCheckbox
-        -- react to toggle
+        // react to toggle
     end
 end
 ```
@@ -1972,7 +1980,7 @@ radiogroup Difficulty
     
     when changed
         var selected = get selected from Difficulty
-        -- selected is "Easy", "Medium", or "Hard"
+        // selected is "Easy", "Medium", or "Hard"
     end
 end
 ```
@@ -1986,7 +1994,7 @@ dropdown ColorChoice
     selected "Red"
     when changed
         var color = get selected from ColorChoice
-        -- react to selection
+        // react to selection
     end
 end
 ```
@@ -1998,7 +2006,7 @@ listbox FruitList
     multiple selection no
     when selected
         var fruit = get selected from FruitList
-        -- react to selection
+        // react to selection
     end
 end
 ```
@@ -2011,14 +2019,14 @@ canvas DrawingCanvas
     background white
     
     when draw
-        -- Drawing commands
+        // Drawing commands
         draw rectangle at x:10 y:10 width:50 height:50 color:red
         draw circle at x:100 y:100 radius:30 color:blue
         draw line from x1:0 y1:0 to x2:100 y2:100 color:black width:2
     end
     
     when clicked at x and y
-        -- React to clicks
+        // React to clicks
         draw circle at x:x y:y radius:5 color:black
     end
 end
@@ -2071,14 +2079,14 @@ end try
 ### Error Types
 
 ```javascript
-file_not_found          -- File doesn't exist
-file_access_denied      -- No permission to read/write
-invalid_conversion      -- Cannot convert type
-division_by_zero        -- Math error
-index_out_of_range      -- Array access error
-null_value              -- Null reference
-network_error           -- Internet connection issue
-parse_error             -- Cannot parse data
+file_not_found          // File doesn't exist
+file_access_denied      // No permission to read/write
+invalid_conversion      // Cannot convert type
+division_by_zero        // Math error
+index_out_of_range      // Array access error
+null_value              // Null reference
+network_error           // Internet connection issue
+parse_error             // Cannot parse data
 ```
 
 ### Throwing Errors (Advanced)
@@ -2140,18 +2148,18 @@ var choice = ask to choose from "Red", "Green", "Blue"
 
 ```javascript
 // Length
-var len = length of "Hello"          -- 5
+var len = length of "Hello"          // 5
 
 // Uppercase/Lowercase
-var upper = uppercase "hello"         -- "HELLO"
-var lower = lowercase "HELLO"         -- "hello"
+var upper = uppercase "hello"         // "HELLO"
+var lower = lowercase "HELLO"         // "hello"
 
 // Find text
-var pos = find "lo" in "Hello"       -- 4
-var has = "Hello" contains "lo"      -- yes
+var pos = find "lo" in "Hello"       // 4
+var has = "Hello" contains "lo"      // yes
 
 // Get part of text
-var part = take 3 from "Hello"       -- "Hel"
+var part = take 3 from "Hello"       // "Hel"
 var part = take from 2 to 4 in "Hello"  -- "ell"
 
 // Replace text
@@ -2162,52 +2170,52 @@ var result = replace "World" with "Everyone" in "Hello World"
 
 ```javascript
 // Split text
-var parts = split "a,b,c" by ","     -- {"a", "b", "c"}
+var parts = split "a,b,c" by ","     // {"a", "b", "c"}
 
 // Join text
 var joined = join {"a", "b", "c"} with ","  -- "a,b,c"
 
 // Trim whitespace
-var trimmed = trim "  Hello  "       -- "Hello"
+var trimmed = trim "  Hello  "       // "Hello"
 
 // Format text
 var formatted = format "{name} is {age} years old"
     with name: "Alice" and age: 10
 
 // Repeat text
-var stars = repeat "*" times 5       -- "*****"
+var stars = repeat "*" times 5       // "*****"
 
 // Reverse text
-var reversed = reverse "Hello"       -- "olleH"
+var reversed = reverse "Hello"       // "olleH"
 ```
 
 ### Number Functions (Beginner)
 
 ```javascript
 // Round numbers
-var rounded = round 3.7              -- 4
-var down = round down 3.7            -- 3
-var up = round up 3.2                -- 4
+var rounded = round 3.7              // 4
+var down = round down 3.7            // 3
+var up = round up 3.2                // 4
 
 // Absolute value
-var abs = absolute value of -5      -- 5
+var abs = absolute value of -5      // 5
 
 // Min/Max
 var smallest = minimum of 5, 3, 8   -- 3
-var largest = maximum of 5, 3, 8    -- 8
+var largest = maximum of 5, 3, 8    // 8
 
 // Random number
 var dice = random from 1 to 6
-var chance = random                  -- 0.0 to 1.0
+var chance = random                  // 0.0 to 1.0
 ```
 
 ### Number Functions (Advanced)
 
 ```javascript
 // Power and roots
-var squared = 5 ^ 2                  -- 25
-var cubed = power 2 to 3             -- 8
-var root = square root of 16         -- 4
+var squared = 5 ^ 2                  // 25
+var cubed = power 2 to 3             // 8
+var root = square root of 16         // 4
 
 // Trigonometry
 var s = sin of 45 degrees
@@ -2226,16 +2234,16 @@ var degs = 3.14 radians to degrees
 var numbers = {1, 2, 3, 4, 5}
 
 // Count items
-var count = count of numbers         -- 5
+var count = count of numbers         // 5
 
 // Get item (0-based indexing like most programming languages)
-var first = numbers[0]               -- 1
-var second = numbers[1]              -- 2
-var last = numbers[4]                -- 5
+var first = numbers[0]               // 1
+var second = numbers[1]              // 2
+var last = numbers[4]                // 5
 
 // Alternative syntax (long form)
-var first = numbers at 0             -- 1
-var last = numbers at end            -- 5
+var first = numbers at 0             // 1
+var last = numbers at end            // 5
 
 // Add item
 add 6 to numbers
@@ -2247,7 +2255,7 @@ remove first from numbers
 remove last from numbers
 
 // Check if contains
-var has = numbers contains 3         -- yes/no
+var has = numbers contains 3         // yes/no
 ```
 
 ### List Functions (Advanced)
@@ -2417,7 +2425,7 @@ end
 
 // Private function (not exported)
 to helperFunction
-    -- only used internally
+    // only used internally
 end function
 ```
 
@@ -2425,12 +2433,12 @@ end function
 
 ```
 my_project/
-├── main.ebs           -- Main program file
-├── helpers.ebs        -- Helper functions
-├── ui.ebs            -- Screen definitions
-├── data.ebs          -- Data handling
+├── main.ebs           // Main program file
+├── helpers.ebs        // Helper functions
+├── ui.ebs            // Screen definitions
+├── data.ebs          // Data handling
 └── modules/
-    ├── math.ebs      -- Math utilities
+    ├── math.ebs      // Math utilities
     └── graphics.ebs  -- Graphics functions
 ```
 
@@ -2562,9 +2570,9 @@ end if
 
 // Conditional features
 if has feature "database" then
-    -- Use database features
+    // Use database features
 else
-    -- Use alternative approach
+    // Use alternative approach
 end if
 ```
 
@@ -2575,7 +2583,7 @@ end if
 1. **Use natural language keywords**
    ```javascript
    if age is greater than 12 then
-       -- instead of: if age > 12 then
+       // instead of: if age > 12 then
    ```
 
 2. **Use descriptive names**
@@ -2638,7 +2646,7 @@ end if
 | Functions | `greet(name: string)` | `greet(person as text)` or `to greet person` |
 | Arrays | 0-based indexing | 0-based indexing (consistent) |
 | Structure | Free-form | Organized sections |
-| Comments | `//` and `/* */` | `//` and `--` (single-line only) |
+| Comments | `//` and `/* */` | `//` only (single-line) |
 
 ### Migration Tool
 
@@ -2785,15 +2793,15 @@ See section [Built-in Functions](#built-in-functions) for detailed documentation
 
 ```
 ebs2/
-├── core/           -- Core language features (always loaded)
-├── text/           -- Extended text functions
-├── math/           -- Advanced math functions
-├── collections/    -- Advanced list, map operations
-├── files/          -- File I/O operations
-├── network/        -- HTTP, WebSocket functions
-├── graphics/       -- Drawing and animation
-├── ui/            -- UI components and helpers
-└── database/      -- Database connectivity (Java only)
+├── core/           // Core language features (always loaded)
+├── text/           // Extended text functions
+├── math/           // Advanced math functions
+├── collections/    // Advanced list, map operations
+├── files/          // File I/O operations
+├── network/        // HTTP, WebSocket functions
+├── graphics/       // Drawing and animation
+├── ui/            // UI components and helpers
+└── database/      // Database connectivity (Java only)
 ```
 
 ---

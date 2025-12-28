@@ -134,6 +134,16 @@ if score >= 90 {
 | `or` | `\|\|` or `\|` | Logical OR |
 | `not` | `!` | Logical NOT |
 
+### Increment/Decrement Operators
+
+```javascript
+var count = 5
+count++        // count is now 6 (post-increment)
+++count        // count is now 7 (pre-increment)
+count--        // count is now 6 (post-decrement)
+--count        // count is now 5 (pre-decrement)
+```
+
 ---
 
 ## Loops
@@ -307,9 +317,6 @@ end
 ```javascript
 // Single-line comment (C-style)
 var x = 10  // Comment after code
-
--- Alternative comment (Lua-style)
-var y = 20  -- Also works
 
 // Multi-line comments use multiple lines
 // This is line 1

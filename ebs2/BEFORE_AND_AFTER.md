@@ -55,24 +55,24 @@
 
 ---
 
-#### 2. Block Comment Support ❌ → ✅
+#### 2. Comment Syntax Clarification ❌ → ✅
 
 **Before:**
 ```
-❌ LANGUAGE_SPEC: "Block comments NOT supported"
-❌ COMPARISON: "Comments: // and /* */"
-🔴 CRITICAL CONFLICT - Parser would be inconsistent!
+❌ LANGUAGE_SPEC: "Comments: // and --"
+❌ COMPARISON: "Comments: // and -- (single-line)"
+🔴 CONFLICT - Should -- be comment or decrement operator?
 ```
 
 **After:**
 ```
-✅ Clarified: Only single-line comments (// and --) supported
-✅ Block comments explicitly NOT supported
+✅ Clarified: Only // for comments
+✅ Added ++ and -- as increment/decrement operators
 ✅ All comparison tables updated
-✅ Examples show both comment styles
+✅ All code examples updated to use //
 ```
 
-**Impact:** Clear parser requirements, no ambiguity
+**Impact:** Clear operator definition, `--` now available for decrement
 
 ---
 

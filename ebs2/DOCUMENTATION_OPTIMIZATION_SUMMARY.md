@@ -46,19 +46,20 @@ This document summarizes the comprehensive review and optimization of EBS2 speci
 
 ---
 
-### 2. ✅ Block Comment Support Clarification
+### 2. ✅ Comment Syntax Clarification
 
-**Problem:** Conflicting information about whether `/* */` block comments are supported.
+**Problem:** Conflicting information about comment syntax support.
 
-**Solution:** Clarified that **only single-line comments** (`//` and `--`) are supported. Block comments are explicitly not supported.
+**Solution:** Clarified that **only `//` comments** are supported. The `--` operator is now used for decrement, and `++` is used for increment.
 
 **Changes Made:**
-- Updated `EBS2_LANGUAGE_SPEC.md` comments section with examples for both styles
+- Updated `EBS2_LANGUAGE_SPEC.md` to remove `--` as comment syntax
+- Added `++` and `--` as increment/decrement operators
 - Fixed comparison tables in `EBS1_VS_EBS2_COMPARISON.md`
-- Updated `EBS2_LANGUAGE_SPEC.md` migration table
-- Clarified in `EBS2_QUICK_START_GUIDE.md` that both `//` and `--` work
+- Updated all code examples to use `//` instead of `--` for comments
+- Clarified in `EBS2_QUICK_START_GUIDE.md` that only `//` works
 
-**Rationale:** Simplifies parser implementation and improves clarity for beginners.
+**Rationale:** Frees up `--` for use as decrement operator, consistent with C-family languages.
 
 **Files Modified:** 3 files, 5 changes
 
@@ -156,7 +157,7 @@ end
 
 ### Clarifications Added
 
-1. **Comment Syntax:** Explicitly documented that both `//` and `--` are supported
+1. **Comment Syntax:** Only `//` supported for comments; `++` and `--` are increment/decrement operators
 2. **Type Inference:** Maintained clear examples showing explicit types (better for learning)
 3. **Natural Language Operators:** Clarified that both natural ("is greater than") and symbolic (">") forms work
 4. **Breaking Changes:** Updated to accurately reflect actual differences from EBS1

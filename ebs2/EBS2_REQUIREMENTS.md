@@ -621,8 +621,9 @@ print notification "Task Complete"
 1. **Syntax**: More natural language keywords available
 2. **Structure**: Recommended program organization (optional)
 3. **Types**: Simplified type names (text vs string, number vs int/float)
-4. **Comments**: Both `//` and `--` supported (block comments not supported)
-5. **Functions**: More natural definition syntax available
+4. **Comments**: Only `//` supported (single-line, block comments not supported)
+5. **Operators**: Added `++` and `--` for increment/decrement
+6. **Functions**: More natural definition syntax available
 
 ## Open Questions
 

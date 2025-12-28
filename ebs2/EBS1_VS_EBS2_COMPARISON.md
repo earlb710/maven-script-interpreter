@@ -43,7 +43,7 @@ EBS2 is a redesigned version of the language with focus on:
 | **Structure** | Free-form | Organized sections |
 | **Type Names** | `string`, `int`, `float` | `text`, `number` |
 | **Indexing** | 0-based arrays | 0-based arrays (consistent) |
-| **Comments** | `//` and `/* */` | `//` and `--` (single-line only) |
+| **Comments** | `//` and `/* */` | `//` only (single-line) |
 | **Block Syntax** | `{}` braces only | `end` keywords OR `{}` braces (choose one) |
 | **Single-Line Blocks** | Not supported | Supported: `if x < 5 then print "Small"` |
 | **Keyword Case** | Case-sensitive | Case-insensitive: `IF`/`if`/`If` all work |

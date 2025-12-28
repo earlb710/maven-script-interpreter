@@ -49,7 +49,7 @@ program MyProgram
 // The computer ignores comments
 
 main
-    -- Your code goes here
+    // Your code goes here
     print "This is where I write instructions"
 end
 ```
@@ -57,7 +57,7 @@ end
 **Parts of a program:**
 - **program** - Gives your program a name
 - **main** - The starting point (required)
-- **//** or **--** - Comments (notes that the computer skips - both styles work)
+- **//** - Comments (notes that the computer skips)
 - **end** - Closes a section
 
 **Bonus Tip:** Keywords like `program`, `main`, `print`, `if`, `end` can be written in ANY CASE:
@@ -739,27 +739,27 @@ var ready as yes/no = yes
 #### Decisions
 ```javascript
 if condition then
-    -- do something
+    // do something
 else
-    -- do something else
+    // do something else
 end if
 ```
 
 #### Loops
 ```javascript
 repeat 5 times
-    -- do something
+    // do something
 end repeat
 
 for each item in array
-    -- do something with item
+    // do something with item
 end for
 ```
 
 #### Functions
 ```javascript
 to functionName parameter
-    -- do something
+    // do something
     return result
 end function
 ```
@@ -772,7 +772,7 @@ screen MyScreen
     button MyButton
         text "Click"
         when clicked
-            -- do something
+            // do something
         end
     end
 end

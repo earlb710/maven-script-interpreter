@@ -33,17 +33,17 @@ This analysis reviews all EBS2 specification documents to identify inconsistenci
 
 **Recommendation:** Choose one approach consistently. Based on the majority of references and the stated goal of consistency with mainstream languages, **0-based indexing** appears to be the intended design. Update all conflicting references.
 
-### 2. Block Comment Support Ambiguity (HIGH)
+### 2. Comment Syntax and Decrement Operator (HIGH)
 
-**Issue:** Documentation conflicts on whether `/* */` block comments are supported.
+**Issue:** Need to clarify comment syntax and add increment/decrement operators.
 
-**Conflicting References:**
-- `EBS2_LANGUAGE_SPEC.md` line 71: "Block comments (`/* */`) are NOT supported"
-- `EBS1_VS_EBS2_COMPARISON.md` line 46: "Comments | `//` and `/* */` | `//` and `/* */`"
+**User Request:**
+- Remove `--` as a comment syntax option
+- Use `++` and `--` as increment and decrement operators
 
-**Impact:** Medium - Affects parser implementation and user expectations.
+**Impact:** Medium-High - Affects parser implementation and all code examples.
 
-**Recommendation:** Clarify and be consistent. The language spec explicitly says NO block comments, so update the comparison guide accordingly.
+**Recommendation:** Remove `--` comment syntax, document `++`/`--` as increment/decrement operators, update all examples to use `//` for comments.
 
 ### 3. Keyword Inconsistency: `else` vs `otherwise` (MEDIUM)
 
@@ -83,17 +83,7 @@ end
 
 ## Minor Issues and Optimizations
 
-### 5. Comment Syntax Inconsistency in Quick Start (LOW)
-
-**Issue:** Quick Start Guide line 60 mentions both `//` and `--` as comment syntax.
-
-**References:**
-- Line 60: "**//** or **--** - Comments (notes that the computer skips)"
-- But the language spec only mentions `//` comments
-
-**Recommendation:** Remove `--` reference if not supported, or clarify if both are valid.
-
-### 6. Function Parentheses Requirement Not Consistently Shown (MEDIUM)
+### 5. Function Parentheses Requirement Not Consistently Shown (MEDIUM)
 
 **Issue:** The language spec states parentheses are always required for functions/procedures, but some examples are inconsistent.
 
@@ -105,13 +95,13 @@ end
 
 **Recommendation:** Ensure all examples consistently show parentheses, even for zero-parameter functions.
 
-### 7. Variable Scope with Curly Braces Not Covered in Language Spec (LOW)
+### 6. Variable Scope with Curly Braces Not Covered in Language Spec (LOW)
 
 **Issue:** Quick Start Guide (lines 623-643) has excellent explanation of variable scope with curly braces, but this is not mentioned in the formal language specification.
 
 **Recommendation:** Add this important scoping rule to the language specification for completeness.
 
-### 8. Type Inference Not Fully Documented in Quick Start (LOW)
+### 7. Type Inference Not Fully Documented in Quick Start (LOW)
 
 **Issue:** Language spec mentions comprehensive type inference (line 66), but Quick Start always shows explicit type declarations.
 
@@ -121,7 +111,7 @@ end
 
 **Recommendation:** Add section in Quick Start explaining type inference is available but explicit types are clearer for learning.
 
-### 9. Missing Cross-References Between Documents (MEDIUM)
+### 8. Missing Cross-References Between Documents (MEDIUM)
 
 **Issue:** Documents would benefit from more explicit cross-references to related content.
 
@@ -132,7 +122,7 @@ end
 
 **Recommendation:** Add "See Also" sections at the end of major topics pointing to related documentation.
 
-### 10. Inconsistent Keyword Casing in Examples (LOW)
+### 9. Inconsistent Keyword Casing in Examples (LOW)
 
 **Issue:** While the spec says keywords are case-insensitive, examples inconsistently show mixed case.
 
