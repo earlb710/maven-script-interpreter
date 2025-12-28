@@ -585,6 +585,37 @@ var big as number = 1000000
 // Children don't need to understand the difference
 ```
 
+#### number with range constraint
+```javascript
+// Integer-backed range (whole numbers only)
+var percentage as number 0..100 = 50           // Backed by integer
+var age as number 0..120 = 25                  // Backed by integer
+var score as number 0..1000 = 875              // Backed by integer
+
+// Double-backed range (decimal numbers allowed)
+var temperature as number -273.15..1000.0 = 22.5   // Backed by double
+var ratio as number -1.0..1.0 = 0.75               // Backed by double
+var probability as number 0.0..1.0 = 0.85          // Backed by double
+
+// Compiler automatically selects backing type based on range notation:
+// - If range uses only integers (e.g., 0..100), backed by integer
+// - If range includes decimals (e.g., -1.0..1.0), backed by double
+
+// Values must be within the specified range
+percentage = 75        // OK - within range 0..100
+percentage = 150       // ERROR: Outside range 0..100
+
+ratio = 0.5            // OK - within range -1.0..1.0
+ratio = 1.5            // ERROR: Outside range -1.0..1.0
+```
+
+**Benefits:**
+- ✅ **Type safety** - Values must be within specified range
+- ✅ **Automatic backing** - Compiler selects int or double based on range notation
+- ✅ **Self-documenting** - Range constraints visible in declaration
+- ✅ **Performance** - Integer-backed ranges use less memory
+- ✅ **Validation** - Runtime checks enforce range constraints
+
 #### text
 ```javascript
 var name as text = "Alice"

@@ -102,6 +102,30 @@ end
 
 **Output:** `Total fruit: 8`
 
+### Numbers with Ranges (Advanced)
+
+You can limit numbers to a specific range:
+
+```javascript
+program GameScore
+
+main
+    // Score must be between 0 and 100
+    var score as number 0..100 = 85
+    
+    // Temperature can have decimals
+    var temperature as number -50.0..50.0 = 22.5
+    
+    print "Score: " + score
+    print "Temperature: " + temperature
+end
+```
+
+**Benefits:**
+- Computer checks that numbers stay in range
+- Whole number ranges (like `0..100`) use less memory
+- Decimal ranges (like `-1.0..1.0`) allow decimals
+
 ### Storing True/False (Flags)
 
 ```javascript
