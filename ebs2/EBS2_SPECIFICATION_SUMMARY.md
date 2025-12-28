@@ -58,7 +58,7 @@ This document provides a summary of the EBS2 language specification and related 
 - Grammar Summary (EBNF)
 
 **Key Features:**
-- **Function/Procedure Distinction**: Functions return values (`function name(params) as type`), procedures don't (`procedure name(params)`)
+- **Function/Procedure Distinction**: Functions return values (`function name(params) as type` or `function name() as type`), procedures don't (`procedure name(params)` or `procedure name()`). **Parentheses `()` are always required**, even with no parameters.
 - **Record Types**: Named structured data (`record type Person ... end`) and anonymous records (`var x as record = record {...}`)
 - **Array.Record**: Type-safe arrays of named records (`array.record(Person)`) or anonymous records (`array.record`)
 - **Case-Insensitive Names**: All user-defined names (variables, functions, types, fields) are case-insensitive

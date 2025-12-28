@@ -1352,13 +1352,20 @@ end for
 
 EBS2 distinguishes between **functions** (which return values) and **procedures** (which don't return values).
 
+**IMPORTANT:** All function and procedure definitions and calls **MUST include parentheses `()`**, even when there are no parameters.
+
 ### Function vs Procedure
 
 **Function** - Has parameters and returns a value:
 ```javascript
-// Short form - function with return type
+// Short form - function with return type (parentheses required)
 function calculateScore(points as number) as number {
     return points * 10
+}
+
+// Function with no parameters (parentheses still required)
+function getDefaultScore() as number {
+    return 100
 }
 
 // Long form - function with returns clause
@@ -1366,16 +1373,22 @@ to calculateScore points as number returns number
     return points * 10
 end function
 
-// Usage - returns a value
+// Usage - returns a value (parentheses required)
 var score = calculateScore(50)  // score = 500
+var default = getDefaultScore() // Parentheses required even with no params
 ```
 
 **Procedure** - Has parameters but does NOT return a value:
 ```javascript
-// Short form - procedure (no return type)
+// Short form - procedure (no return type, parentheses required)
 procedure displayMessage(message as text) {
     print message
     log "Message displayed"
+}
+
+// Procedure with no parameters (parentheses still required)
+procedure showWelcome() {
+    print "Welcome to EBS2!"
 }
 
 // Long form - procedure (no returns clause)
@@ -1384,47 +1397,64 @@ to displayMessage message as text
     log "Message displayed"
 end procedure
 
-// Usage - just executes, no return value
+// Usage - just executes, no return value (parentheses required)
 displayMessage("Hello World")
+showWelcome()  // Parentheses required even with no params
 ```
 
 **Key Differences:**
 
 | Feature | Function | Procedure |
 |---------|----------|-----------|
-| **Definition** | `function name(params) as returnType` | `procedure name(params)` |
+| **Definition** | `function name(params) as returnType` or `function name() as returnType` | `procedure name(params)` or `procedure name()` |
 | **Long Form** | `to name params returns type` | `to name params` (no returns) |
 | **Returns Value** | Yes (must use `return`) | No (no `return` statement) |
-| **Usage** | `var result = funcName(args)` | `procName(args)` |
+| **Usage** | `var result = funcName(args)` or `funcName()` | `procName(args)` or `procName()` |
 | **Purpose** | Calculate and return values | Perform actions/side effects |
+| **Parentheses** | **Always required**, even with no parameters | **Always required**, even with no parameters |
 
 **Benefits:**
 - ✅ **Clear intent** - Function returns value, procedure performs action
 - ✅ **Type safety** - Return type declared for functions
 - ✅ **Better errors** - Compiler catches missing returns in functions
 - ✅ **Self-documenting** - Code clearly shows what returns values
+- ✅ **Consistency** - Same syntax whether parameters exist or not
+- ✅ **Clarity** - Clear distinction between variable access and function calls
+- ✅ **Familiar** - Matches JavaScript, Java, C++, Python, C# conventions
 
 ### Definition Forms
 
 | Long Form (Natural) | Short Form (Traditional) |
 |---------------------|--------------------------|
 | `to functionName param returns type` | `function functionName(param) as type` |
+| `to functionName returns type` (no params) | `function functionName() as type` |
 | `to procedureName param` | `procedure procedureName(param)` |
+| `to procedureName` (no params) | `procedure procedureName()` |
 | `return value` | `return value` |
 | `call functionName with value` | `functionName(value)` |
+| `call functionName` (no params) | `functionName()` |
 
 **Both forms are equivalent and can be mixed.** Choose based on your audience and preference.
+
+**Note:** Parentheses `()` are **always required** in short form, even when there are no parameters.
 
 ### Simple Functions (Beginner)
 
 #### Function without Parameters
 ```javascript
+// Long form
 to sayHello
     print "Hello World"
 end function
 
-// Call it
-call sayHello
+// Short form (parentheses required)
+procedure sayHello() {
+    print "Hello World"
+}
+
+// Call it (parentheses required in short form)
+call sayHello           // Long form
+sayHello()              // Short form - parentheses required
 ```
 
 #### Function with One Parameter
