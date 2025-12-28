@@ -44,8 +44,11 @@ EBS2 is a redesigned version of the language with focus on:
 | **Type Names** | `string`, `int`, `float` | `text`, `number` |
 | **Indexing** | 0-based arrays | 0-based arrays (consistent) |
 | **Comments** | `//` and `/* */` | `//` and `/* */` |
-| **Block Syntax** | Multi-line only | Single-line or multi-line |
+| **Block Syntax** | `{}` braces only | `end` keywords OR `{}` braces (choose one) |
+| **Single-Line Blocks** | Not supported | Supported: `if x < 5 then print "Small"` |
+| **Keyword Case** | Case-sensitive | Case-insensitive: `IF`/`if`/`If` all work |
 | **JavaFX Output** | TextFlow/TextArea | WebView (HTML rendering) |
+| **Variable Scope** | Block scope with `{}` | Block scope with `end` or `{}` |
 
 ## Philosophy and Design Goals
 
@@ -146,6 +149,7 @@ end if
 
 **EBS2 (Symbolic - Advanced):**
 ```javascript
+// With end keyword
 if age > 12 then
     print "Teenager"
 else if age > 5 then
@@ -153,12 +157,26 @@ else if age > 5 then
 else
     print "Preschooler"
 end if
+
+// With curly braces (alternative)
+if age > 12 {
+    print "Teenager"
+} else if age > 5 {
+    print "Child"
+} else {
+    print "Preschooler"
+}
+
+// Single-line (compact)
+if age > 12 then print "Teenager"
 ```
 
 **Key Differences:**
-- EBS2 offers natural language version
-- EBS1 requires braces `{}`, EBS2 uses `end` keyword
-- EBS2 `otherwise` vs EBS1 `else`
+- EBS2 offers natural language version (`is greater than`)
+- EBS2 supports both `end if` keywords and `{}` braces
+- EBS2 single-line syntax doesn't need end keyword
+- **EBS2 keywords are case-insensitive**: `IF`, `if`, `If` all work
+- EBS2 supports semicolons for multiple commands: `if x < 5 then print "A"; print "B"`
 
 #### Loops
 

@@ -58,12 +58,18 @@ This document provides a summary of the EBS2 language specification and related 
 - Grammar Summary (EBNF)
 
 **Key Features:**
-- Natural language syntax: `if ... then`, `repeat ... times`, `for each ... in`
-- Symbolic alternatives for advanced users: `if`, `while`, `&&`
-- 1-based array indexing (more natural for beginners)
-- Child-friendly error messages
-- Progressive complexity throughout
-- Clear program organization with sections
+- **Flexible Syntax Options**: Choose between `end if` keywords or `{}` curly braces
+- **Case-Insensitive Keywords**: `if`, `IF`, `If` all work the same
+- **Natural language syntax**: `if ... then`, `repeat ... times`, `for each ... in`
+- **Symbolic alternatives for advanced users**: `if`, `while`, `&&`
+- **Single-line or multi-line blocks**: `if x < 5 then print "Small"` or multi-line with `end if`
+- **Semicolon separators**: Multiple commands on one line with `;`
+- **Range notation**: `list 1..100` creates arrays easily
+- **0-based array indexing**: Consistent with mainstream languages
+- **Curly brace blocks with scoping**: Variables in `{}` blocks are local to that block
+- **Child-friendly error messages**
+- **Progressive complexity throughout**
+- **Clear program organization with sections**
 
 ### 3. EBS2_IMPLEMENTATION_ROADMAP.md
 **Purpose:** Phased implementation plan with timeline and resources

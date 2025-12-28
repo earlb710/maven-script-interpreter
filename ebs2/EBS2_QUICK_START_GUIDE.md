@@ -57,8 +57,17 @@ end
 **Parts of a program:**
 - **program** - Gives your program a name
 - **main** - The starting point (required)
-- **--** - Comments (notes that the computer skips)
+- **//** or **--** - Comments (notes that the computer skips)
 - **end** - Closes a section
+
+**Bonus Tip:** Keywords like `program`, `main`, `print`, `if`, `end` can be written in ANY CASE:
+```javascript
+PROGRAM MyProgram    // Same as 'program MyProgram'
+Main                 // Same as 'main'
+    PRINT "Hello"    // Same as 'print "Hello"'
+End                  // Same as 'end'
+```
+All work the same! Write them however you prefer.
 
 ## Variables - Storing Information
 
@@ -457,6 +466,99 @@ log "Debug: count value is", count  // Only visible to you while debugging
 ```
 
 Use `log` to help find problems in your code without cluttering the user's screen!
+
+## Advanced Syntax: Curly Braces
+
+As you get more comfortable with EBS2, you might want to use **curly braces** `{}` instead of `end if`, `end repeat`, etc. This style is popular in many programming languages like JavaScript, Java, and C++.
+
+### Using Curly Braces for If Statements
+
+```javascript
+program CurlyBraceExample
+
+main
+    var age = 15
+    
+    // With curly braces (instead of end if)
+    if age > 12 {
+        print "You're a teenager!"
+        log "Age verified"
+    } else {
+        print "You're a child!"
+    }
+end
+```
+
+### Using Curly Braces for Loops
+
+```javascript
+program LoopWithBraces
+
+main
+    // Repeat with braces
+    repeat 5 times {
+        print "Hello"
+    }
+    
+    // For loop with braces
+    var fruits = list "apple", "banana", "cherry"
+    for each fruit in fruits {
+        print fruit
+    }
+end
+```
+
+### Using Curly Braces for Functions
+
+```javascript
+program FunctionWithBraces
+
+functions
+    function greet(name) {
+        print "Hello " + name
+        return "Greeting sent"
+    }
+end
+
+main
+    var result = greet("Alice")
+end
+```
+
+### Variable Scope with Curly Braces
+
+**Important:** When you use curly braces `{}`, variables created inside them **only exist inside those braces**:
+
+```javascript
+program ScopeExample
+
+main
+    var x = 10           // Exists everywhere in main
+    
+    if x > 5 {
+        var y = 20       // Only exists inside these braces
+        print x          // Works: prints 10
+        print y          // Works: prints 20
+    }
+    
+    print x              // Still works: prints 10
+    print y              // ERROR: y doesn't exist here!
+end
+```
+
+### Which Style Should You Use?
+
+**Use `end if`, `end repeat`, etc. when:**
+- You're just learning programming
+- You want code that's easy to read
+- You're teaching others
+
+**Use curly braces `{}` when:**
+- You know other programming languages (JavaScript, Java, C++)
+- You prefer compact code
+- You're working with experienced developers
+
+**Best practice:** Pick one style and stick with it in each project. Both work great!
 
 ## What's Next
 

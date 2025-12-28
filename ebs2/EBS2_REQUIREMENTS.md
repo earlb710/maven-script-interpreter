@@ -61,7 +61,9 @@ end if
 
 **Language Characteristics:**
 - **Forgiving Syntax**: Optional semicolons, flexible formatting
-- **Clear Keywords**: `show`, `hide`, `when`, `then` instead of `{`, `}`, `if`
+- **Case-Insensitive Keywords**: `if`, `IF`, `If` are all the same - reduces errors
+- **Flexible Block Syntax**: Choose between `end if` or `{}` - familiar to different backgrounds
+- **Clear Keywords**: Natural language like `print`, `repeat` alongside symbolic operators
 - **Visual Programming Support**: Block-based editor mode for beginners
 - **Helpful Errors**: "You forgot to close the quote" vs "Unexpected token at line 5"
 

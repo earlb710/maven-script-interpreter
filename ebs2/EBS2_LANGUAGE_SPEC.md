@@ -94,10 +94,36 @@ async       await       class       extends     new
 
 - Start with letter or underscore
 - Contain letters, digits, underscores
-- Case-insensitive (normalized to lowercase internally)
+- Case-sensitive for user-defined names
 - Cannot be reserved keywords
 
-**Valid:** `myVariable`, `user_name`, `count2`, `_private`  
+**Valid:** `myVariable`, `user_name`, `count2`, `_private`
+
+### Keyword Case Sensitivity
+
+**All language keywords are case-insensitive** for ease of learning:
+
+```javascript
+// All of these are valid and equivalent
+IF age > 12 THEN print "Teen"
+if age > 12 then print "Teen"
+If Age > 12 Then Print "Teen"
+iF aGe > 12 tHeN pRiNt "Teen"
+```
+
+**Examples:**
+- `if`, `IF`, `If` → all the same keyword
+- `repeat`, `REPEAT`, `Repeat` → all the same keyword
+- `function`, `FUNCTION`, `Function` → all the same keyword
+- `end`, `END`, `End` → all the same keyword
+
+**User-defined names remain case-sensitive:**
+```javascript
+var userName = "Alice"
+var USERNAME = "BOB"      // Different variable
+print userName            // "Alice"
+print USERNAME            // "BOB"
+```  
 **Invalid:** `2count`, `my-var`, `class` (keyword)
 
 ### Literals
@@ -340,6 +366,204 @@ end
 - Reduces debugging time
 - Makes code more readable
 - Helps catch mismatched blocks early
+
+### Curly Brace Block Syntax
+
+**Alternative syntax using curly braces `{}`** for developers familiar with C-style languages:
+
+EBS2 supports curly braces `{}` as an alternative to the explicit `end` keywords for defining blocks. **Blocks declared with curly braces create their own lexical scope** for variables.
+
+#### Syntax Forms Comparison
+
+| Feature | End Keyword Form | Curly Brace Form |
+|---------|------------------|------------------|
+| **If Statement** | `if x > 5 then ... end if` | `if x > 5 { ... }` |
+| **Repeat Loop** | `repeat 10 times ... end repeat` | `repeat 10 times { ... }` |
+| **For Loop** | `for each x in list ... end for` | `for each x in list { ... }` |
+| **While Loop** | `while condition ... end while` | `while condition { ... }` |
+| **Function** | `to func ... end function` | `function func() { ... }` |
+| **Try-Catch** | `try ... catch ... end try` | `try { ... } catch { ... }` |
+
+#### If Statements with Curly Braces
+
+```javascript
+// Simple if
+if age > 12 {
+    print "Teenager"
+    log "Age verified"
+}
+
+// If-else
+if age > 12 {
+    print "Teenager"
+} else {
+    print "Child"
+}
+
+// If-else if-else
+if score >= 90 {
+    print "Grade A"
+} else if score >= 80 {
+    print "Grade B"
+} else {
+    print "Grade C or lower"
+}
+```
+
+#### Loops with Curly Braces
+
+```javascript
+// Repeat times
+repeat 10 times {
+    print "Hello"
+}
+
+// Repeat with counter
+repeat 5 times with i {
+    print "Count: " + i
+}
+
+// For each
+for each item in items {
+    print item
+}
+
+// For range
+for i from 1 to 10 {
+    print i
+}
+
+// While loop
+while x < 100 {
+    x = x + 1
+}
+```
+
+#### Functions with Curly Braces
+
+```javascript
+// Function definition
+function greet(name) {
+    print "Hello " + name
+    return "Greeting sent"
+}
+
+// Function call
+var result = greet("Alice")
+```
+
+#### Try-Catch with Curly Braces
+
+```javascript
+try {
+    var data = read file "data.txt"
+    print data
+} catch {
+    print "Error reading file"
+}
+```
+
+#### Variable Scoping with Curly Braces
+
+**Important:** Curly brace blocks create their own lexical scope. Variables declared inside `{}` are local to that block.
+
+```javascript
+var x = 10               // Outer scope
+
+if x > 5 {
+    var y = 20          // Block scope - only exists inside this block
+    print x             // Can access outer x: prints 10
+    print y             // Can access y: prints 20
+}
+
+print x                 // Still accessible: prints 10
+print y                 // ERROR: y doesn't exist outside the block
+```
+
+**Scope rules:**
+- Variables declared inside `{}` blocks are local to that block
+- Inner blocks can access variables from outer blocks
+- Outer blocks cannot access variables from inner blocks
+- Variables declared with `end if/repeat/for/while/function` forms also create block scope
+
+```javascript
+// Nested scopes with curly braces
+var outer = 1
+
+if outer > 0 {
+    var middle = 2
+    
+    if middle > 1 {
+        var inner = 3
+        print outer   // OK: 1
+        print middle  // OK: 2
+        print inner   // OK: 3
+    }
+    
+    print outer       // OK: 1
+    print middle      // OK: 2
+    print inner       // ERROR: inner not in scope
+}
+
+print outer           // OK: 1
+print middle          // ERROR: middle not in scope
+```
+
+#### Mixing Syntax Styles
+
+You can mix both styles in the same program:
+
+```javascript
+// Using end keywords
+if age > 12 then
+    print "Teen"
+end if
+
+// Using curly braces
+if age < 5 {
+    print "Child"
+}
+
+// Single-line (no block needed)
+if age == 12 then print "Exactly 12"
+```
+
+**Equivalence:**
+When using `end if`, `end repeat`, `end for`, etc. in multi-line form, the content behaves **as if it had curly braces** - it creates a block scope:
+
+```javascript
+// These are equivalent in terms of scoping:
+
+// Form 1: end if
+if x > 5 then
+    var temp = 10
+end if
+
+// Form 2: curly braces
+if x > 5 {
+    var temp = 10
+}
+
+// In both cases, temp is not accessible here
+```
+
+#### Style Recommendations
+
+**Use `end` keywords when:**
+- Writing for beginners or children
+- Prioritizing readability over brevity
+- Creating educational content
+
+**Use curly braces when:**
+- Writing for experienced developers
+- Prefer C-style syntax (Java, JavaScript, C++, etc.)
+- Need explicit visual grouping
+- Working in teams familiar with brace syntax
+
+**Use single-line when:**
+- Block contains only one simple statement
+- Prefer compact code
+- Writing simple conditionals or loops
 
 ## Data Types
 
