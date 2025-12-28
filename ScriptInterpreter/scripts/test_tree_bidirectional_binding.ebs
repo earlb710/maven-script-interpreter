@@ -161,10 +161,29 @@ screen TreeBindingTest = {
     ]
 };
 
-// Inject tree items into the screen dynamically
-call scr.setProperty('TreeBindingTest.selectedFile', 'treeItems', treeData);
+// Convert screen to JSON, inject tree items, then show
+var screenJson: json = TreeBindingTest;
+var areaArray: json = call json.get(screenJson, "area");
+if areaArray != null && areaArray.length > 0 then {
+    var mainArea: json = areaArray[0];
+    var items: json = call json.get(mainArea, "items");
+    if items != null && items.length > 0 then {
+        // Find the selectedFile item (index 2 after instructionsLabel and selectionLabel)
+        var treeItem: json = items[2];
+        var display: json = call json.get(treeItem, "display");
+        if display != null then {
+            // Set treeItems in the display
+            display = call json.set(display, "treeItems", treeData);
+            treeItem = call json.set(treeItem, "display", display);
+            items = call json.set(items, 2, treeItem);
+            mainArea = call json.set(mainArea, "items", items);
+            areaArray = call json.set(areaArray, 0, mainArea);
+            screenJson = call json.set(screenJson, "area", areaArray);
+        }
+    }
+}
 
-show screen TreeBindingTest;
+show screen screenJson;
 
 print "Tree Bidirectional Binding Test";
 print "================================";

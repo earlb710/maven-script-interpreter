@@ -337,11 +337,37 @@ screen HelpStyleTreeTest = {
     ]
 };
 
-// Inject tree items into the screen dynamically
-call scr.setProperty('HelpStyleTreeTest.selectedTopic', 'treeItems', treeData);
+// Convert screen to JSON, inject tree items, then show
+var screenJson: json = HelpStyleTreeTest;
+var areaArray: json = call json.get(screenJson, "area");
+if areaArray != null && areaArray.length > 0 then {
+    var mainLayout: json = areaArray[0];
+    var areas: json = call json.get(mainLayout, "areas");
+    if areas != null && areas.length > 0 then {
+        // Get left panel (index 0)
+        var leftPanel: json = areas[0];
+        var items: json = call json.get(leftPanel, "items");
+        if items != null && items.length > 0 then {
+            // Get the selectedTopic tree item (index 0)
+            var treeItem: json = items[0];
+            var display: json = call json.get(treeItem, "display");
+            if display != null then {
+                // Set treeItems in the display
+                display = call json.set(display, "treeItems", treeData);
+                treeItem = call json.set(treeItem, "display", display);
+                items = call json.set(items, 0, treeItem);
+                leftPanel = call json.set(leftPanel, "items", items);
+                areas = call json.set(areas, 0, leftPanel);
+                mainLayout = call json.set(mainLayout, "areas", areas);
+                areaArray = call json.set(areaArray, 0, mainLayout);
+                screenJson = call json.set(screenJson, "area", areaArray);
+            }
+        }
+    }
+}
 
 // Show the screen
-show screen HelpStyleTreeTest;
+show screen screenJson;
 
 print "";
 print "Test Instructions:";
