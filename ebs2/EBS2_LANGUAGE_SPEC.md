@@ -806,6 +806,53 @@ var emp as Employee = record {
 
 // Access nested fields
 print emp.address.city  // "Springfield"
+
+// Records with arrays
+record type Team
+    name as text
+    members as array.text
+    scores as array.number
+end
+
+var team as Team = record {
+    name: "Tigers",
+    members: "Alice", "Bob", "Charlie",
+    scores: 95, 87, 92
+}
+
+// Access array fields in records
+print team.members[0]       // "Alice"
+print team.scores[1]        // 87
+
+// Loop through array in record
+for each member in team.members {
+    print member
+}
+
+// Complex nested structure with arrays and records
+record type Course
+    title as text
+    instructor as text
+    students as array.record(Student)
+    grades as array.number
+end
+
+var course as Course = record {
+    title: "Math 101",
+    instructor: "Dr. Smith",
+    students: 
+        record { name: "Alice", age: 10, grade: 95 },
+        record { name: "Bob", age: 11, grade: 87 },
+    grades: 95, 87, 90
+}
+
+// Access nested arrays and records
+print course.students[0].name       // "Alice"
+print course.grades[1]              // 87
+
+for each student in course.students {
+    print student.name + ": " + student.grade
+}
 ```
 
 **Anonymous Record Types** - Inline record definitions without named types:
@@ -861,6 +908,44 @@ var config as record = record {
 
 print config.server.host    // "localhost"
 print config.database.name  // "mydb"
+
+// Anonymous records with arrays
+var classroom as record = record {
+    roomNumber: "101",
+    students: "Alice", "Bob", "Charlie", "Diana",
+    grades: 95, 87, 92, 88,
+    equipment: "projector", "whiteboard", "computers"
+}
+
+// Access arrays within anonymous records
+print classroom.students[0]     // "Alice"
+print classroom.grades[2]       // 92
+
+for each item in classroom.equipment {
+    print "Equipment: " + item
+}
+
+// Complex anonymous record with nested records and arrays
+var school as record = record {
+    name: "Elementary School",
+    year: 2024,
+    classes: 
+        record { 
+            name: "Math 101", 
+            students: "Alice", "Bob",
+            scores: 95, 87
+        },
+        record { 
+            name: "Science 101", 
+            students: "Charlie", "Diana",
+            scores: 92, 88
+        }
+}
+
+// Access nested structures
+print school.classes[0].name            // "Math 101"
+print school.classes[0].students[0]     // "Alice"
+print school.classes[1].scores[1]       // 88
 ```
 
 **When to use each:**

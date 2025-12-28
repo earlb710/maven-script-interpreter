@@ -59,8 +59,10 @@ This document provides a summary of the EBS2 language specification and related 
 
 **Key Features:**
 - **Function/Procedure Distinction**: Functions return values (`function name(params) as type` or `function name() as type`), procedures don't (`procedure name(params)` or `procedure name()`). **Parentheses `()` are always required**, even with no parameters.
-- **Record Types**: Named structured data (`record type Person ... end`) and anonymous records (`var x as record = record {...}`)
+- **Record Types**: Named structured data (`record type Person ... end`) and anonymous records (`var x as record = record {...}`). **Records can contain arrays and nested records**.
 - **Array.Record**: Type-safe arrays of named records (`array.record(Person)`) or anonymous records (`array.record`)
+- **Arrays in Records**: Records can have array fields (`members as array.text`, `scores as array.number`) for storing collections within structured data
+- **Nested Structures**: Records can contain other records and arrays, enabling complex data modeling
 - **Case-Insensitive Names**: All user-defined names (variables, functions, types, fields) are case-insensitive
 - **Unique Naming**: Names must be unique within the same scope (case-insensitive check)
 - **Scope Shadowing**: Inner scope variables can shadow outer scope variables
