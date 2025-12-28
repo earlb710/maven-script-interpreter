@@ -102,14 +102,14 @@ end
 
 **Output:** `Total fruit: 8`
 
-### Storing Yes/No
+### Storing True/False (Flags)
 
 ```javascript
 program CheckWeather
 
 main
-    var isSunny as yes/no = yes
-    var isRaining as yes/no = no
+    var isSunny as flag = true
+    var isRaining as flag = false
     
     print "Is it sunny? " + isSunny
     print "Is it raining? " + isRaining
@@ -121,7 +121,7 @@ end
 - Use `const` or `constant` for values that never change
 - Use `as text` for words
 - Use `as number` for numbers
-- Use `as yes/no` for true/false
+- Use `as flag` for true/false
 
 ### Constants - Values That Never Change
 
@@ -300,6 +300,9 @@ main
     // Simple list
     var numbers = list 1, 2, 3, 4, 5
     
+    // With parentheses (explicit values)
+    var fruits = list("apple", "banana", "cherry")
+    
     // Range syntax (creates all numbers from 1 to 10)
     var oneToTen = list 1..10
     
@@ -309,7 +312,7 @@ main
     // Get items from list (starts at 0!)
     print numbers[0]  // Prints: 1 (first item)
     print numbers[1]  // Prints: 2 (second item)
-    print numbers[4]  // Prints: 5 (fifth item)
+    print fruits[0]   // Prints: apple (first fruit)
 end
 ```
 
@@ -317,6 +320,39 @@ end
 - `numbers[0]` = first item
 - `numbers[1]` = second item
 - `numbers[2]` = third item
+
+### Indicators - Choosing from a Set
+
+Sometimes you want a variable that can only be specific values (like traffic light colors). Use `indicator`:
+
+```javascript
+program TrafficLight
+
+main
+    // Indicator can only be "red", "yellow", or "green"
+    var lightColor as indicator "red", "yellow", "green"
+    
+    // Set the value
+    lightColor = "red"
+    print "Light is: " + lightColor
+    
+    // Change the value (must be one of the allowed values)
+    lightColor = "green"
+    print "Light is now: " + lightColor
+    
+    // This would be an ERROR:
+    // lightColor = "blue"  // ERROR! "blue" is not allowed
+end
+```
+
+**Indicator vs List:**
+- **List**: Array of many values accessed by index like `myList[0]`, `myList[1]`
+- **Indicator**: Single value that can only be one from a specific set
+
+**Common uses for indicators:**
+- Status: `var status as indicator "pending", "active", "complete"`
+- Direction: `var direction as indicator "north", "south", "east", "west"`
+- Grade: `var grade as indicator "A", "B", "C", "D", "F"`
 
 ## Creating Functions
 

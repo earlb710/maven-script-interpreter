@@ -56,17 +56,19 @@ EBS2 is designed with three core principles:
 
 ### Comments
 
+**Single-line comments only:**
+
 ```javascript
 // Single line comment
+var x = 10  // Comment after code
 
-/*
-  Multi-line comment
-  Can span multiple lines
-*/
-
-/// Documentation comment (three slashes)
-/// Used for generating help text
+// Multi-line explanations use multiple single lines:
+// This is a longer explanation
+// that spans multiple lines
+// to describe complex logic
 ```
+
+**Note:** Block comments (`/* */`) are NOT supported. Use multiple `//` lines instead for clarity and simplicity.
 
 ### Keywords
 
@@ -78,8 +80,10 @@ for         each        in          to          call
 with        and         give        back        print
 log         hide        ask         screen      button
 label       textbox     list        text        number
-yes         no          true        false       const       constant
+flag        true        false       const       constant    indicator
 ```
+
+**Note:** All keywords are case-insensitive (`IF`, `if`, `If` all work the same).
 
 #### Advanced Keywords
 ```
@@ -588,13 +592,14 @@ var message as text = "Hello World"
 var empty as text = ""
 ```
 
-#### yes/no
+#### flag
 ```javascript
-var isReady as yes/no = yes
-var gameOver as yes/no = no
+var isReady as flag = true
+var gameOver as flag = false
 
-// Can also use true/false
-var isActive as yes/no = true
+// Can use in conditions
+if isReady then print "Ready to start!"
+if not gameOver then print "Game continues"
 ```
 
 #### date
@@ -611,25 +616,67 @@ var deadline as date = "2025-12-31 23:59:59"
 // Simple list
 var numbers as list = list 1, 2, 3, 4, 5
 
+// With parentheses (explicit values)
+var fruits as list = list("apple", "banana", "cherry")
+var colors as list = list("red", "green", "blue")
+
 // Range syntax
 var numbers as list = list 1..100     // Creates list [1, 2, 3, ..., 100]
 var letters as list = list 'a'..'z'   // Creates list ['a', 'b', ..., 'z']
 var countdown as list = list 10..1    // Creates list [10, 9, 8, ..., 1]
 
 // Typed list
-var names as list of text = list "Alice", "Bob", "Charlie"
+var names as list of text = list("Alice", "Bob", "Charlie")
 
 // Empty list
-var items as list of number = empty list
+var items as list of number = list()
 
 // Multi-type list (advanced)
-var mixed as list = list 1, "two", yes, 3.14
+var mixed as list = list(1, "two", true, 3.14)
 
 // Arrays are 0-indexed (like most programming languages)
 var first = numbers[0]      // Gets first element
 var second = numbers[1]     // Gets second element
 var last = numbers[99]      // Gets last element (for 100-item array)
 ```
+
+**Note:** Lists are arrays of multiple values that can be accessed by index.
+
+#### indicator
+```javascript
+// Declare with allowed values (without parentheses)
+var status as indicator "pending", "active", "complete"
+var priority as indicator "low", "medium", "high"
+
+// Declare with parentheses (alternative syntax)
+var color as indicator ("red", "yellow", "green")
+var state as indicator ("on", "off", "standby")
+
+// Assignment - must be one of the allowed values
+status = "active"       // OK
+status = "pending"      // OK
+status = "canceled"     // ERROR: Not in the allowed set
+
+// Usage in comparisons
+if status = "active" then print "Processing"
+if color = "red" then print "Stop"
+if priority = "high" then print "Urgent!"
+
+// Common use cases
+var direction as indicator "north", "south", "east", "west"
+var mood as indicator "happy", "sad", "neutral"
+var grade as indicator "A", "B", "C", "D", "F"
+```
+
+**Benefits:**
+- ✅ Type-safe enumeration - only allowed values accepted
+- ✅ Self-documenting - valid values visible in declaration
+- ✅ Prevents typos - compiler catches invalid values
+- ✅ Perfect for states, statuses, colors, priorities, modes
+
+**Difference from list:**
+- **`list`** - Array of multiple values accessed by index: `myList[0]`, `myList[1]`, etc.
+- **`indicator`** - Single value that must be one of a predefined set: `myStatus = "active"`
 
 #### record
 ```javascript
