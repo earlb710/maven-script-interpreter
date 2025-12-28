@@ -33,14 +33,7 @@ screen TreeBindingTest = {
         {
             "name": "selectedFile",
             "type": "string",
-            "default": "",
-            "display": {
-                "type": "treeview",
-                "displayRecords": 12,
-                "showRoot": true,
-                "treeItems": $treeData,
-                "onChange": "call scr.setProperty('TreeBindingTest.selectionLabel', 'labelText', 'Current selection: ' + selectedFile);"
-            }
+            "default": ""
         },
         {
             "name": "instructionsLabel",
@@ -69,7 +62,17 @@ screen TreeBindingTest = {
             "items": [
                 {"name": "instructionsLabel", "varRef": "instructionsLabel"},
                 {"name": "selectionLabel", "varRef": "selectionLabel"},
-                {"name": "selectedFile", "varRef": "selectedFile"},
+                {
+                    "name": "selectedFile", 
+                    "varRef": "selectedFile",
+                    "display": {
+                        "type": "treeview",
+                        "displayRecords": 12,
+                        "showRoot": true,
+                        "treeItems": $treeData,
+                        "onChange": "call scr.setProperty('TreeBindingTest.selectionLabel', 'labelText', 'Current selection: ' + selectedFile);"
+                    }
+                },
                 {
                     "name": "selectRootBtn",
                     "display": {

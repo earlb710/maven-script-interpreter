@@ -169,15 +169,7 @@ screen HelpStyleTreeTest = {
         {
             "name": "selectedTopic",
             "type": "string",
-            "default": "",
-            "display": {
-                "type": "treeview",
-                "labelText": "Documentation Topics",
-                "displayRecords": 20,
-                "showRoot": false,
-                "treeItems": $treeData,
-                "onChange": "if selectedTopic != '' then { call scr.setProperty('HelpStyleTreeTest.topicTitle', 'labelText', 'Topic: ' + selectedTopic); call scr.setProperty('HelpStyleTreeTest.topicContent', 'labelText', 'Showing content for: ' + selectedTopic + '\\n\\nBidirectional binding:\\n• Click tree items to update variable\\n• Set variable to update tree selection\\n• Parents expand automatically\\n• Tree scrolls to selection'); } else { call scr.setProperty('HelpStyleTreeTest.topicTitle', 'labelText', 'Topic: (none)'); call scr.setProperty('HelpStyleTreeTest.topicContent', 'labelText', 'Select a topic from the tree or use navigation buttons.'); }"
-            }
+            "default": ""
         },
         {
             "name": "topicTitle",
@@ -209,7 +201,18 @@ screen HelpStyleTreeTest = {
                     "type": "vbox",
                     "hgrow": "always",
                     "items": [
-                        {"name": "selectedTopic", "varRef": "selectedTopic"}
+                        {
+                            "name": "selectedTopic", 
+                            "varRef": "selectedTopic",
+                            "display": {
+                                "type": "treeview",
+                                "labelText": "Documentation Topics",
+                                "displayRecords": 20,
+                                "showRoot": false,
+                                "treeItems": $treeData,
+                                "onChange": "if selectedTopic != '' then { call scr.setProperty('HelpStyleTreeTest.topicTitle', 'labelText', 'Topic: ' + selectedTopic); call scr.setProperty('HelpStyleTreeTest.topicContent', 'labelText', 'Showing content for: ' + selectedTopic + '\\n\\nBidirectional binding:\\n• Click tree items to update variable\\n• Set variable to update tree selection\\n• Parents expand automatically\\n• Tree scrolls to selection'); } else { call scr.setProperty('HelpStyleTreeTest.topicTitle', 'labelText', 'Topic: (none)'); call scr.setProperty('HelpStyleTreeTest.topicContent', 'labelText', 'Select a topic from the tree or use navigation buttons.'); }"
+                            }
+                        }
                     ]
                 },
                 {
