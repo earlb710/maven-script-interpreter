@@ -258,7 +258,7 @@ end if
 More natural for children (who count starting from 1):
 
 ```javascript
-var fruits as array : "apple", "banana", "cherry"
+var fruits as array = "apple", "banana", "cherry"
 print fruits[0]  // "apple" (0-based indexing)
 ```
 

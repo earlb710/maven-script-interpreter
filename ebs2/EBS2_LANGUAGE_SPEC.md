@@ -644,29 +644,29 @@ var deadline as date = "2025-12-31 23:59:59"
 
 #### array
 ```javascript
-// Array with colon initialization (required for literals)
-var fruits as array : "apple", "banana", "cherry"
-var numbers as array : 1, 2, 3, 4, 5
+// Array with equals initialization (consistent with assignment)
+var fruits as array = "apple", "banana", "cherry"
+var numbers as array = 1, 2, 3, 4, 5
 
-// Range syntax (no colon needed)
-var numbers as array : 1..100     // Creates array [1, 2, 3, ..., 100]
-var letters as array : 'a'..'z'   // Creates array ['a', 'b', ..., 'z']
-var countdown as array : 10..1    // Creates array [10, 9, 8, ..., 1]
+// Range syntax
+var numbers as array = 1..100     // Creates array [1, 2, 3, ..., 100]
+var letters as array = 'a'..'z'   // Creates array ['a', 'b', ..., 'z']
+var countdown as array = 10..1    // Creates array [10, 9, 8, ..., 1]
 
-// Typed arrays with colon
-var names as array.text : "Alice", "Bob", "Charlie"
-var scores as array.number : 95, 87, 92, 88
-var flags as array.flag : true, false, true
+// Typed arrays with equals
+var names as array.text = "Alice", "Bob", "Charlie"
+var scores as array.number = 95, 87, 92, 88
+var flags as array.flag = true, false, true
 
 // Typed indicator array (requires indicator definition)
-var statuses as array.indicator("new", "active", "done") : "new", "active", "done"
+var statuses as array.indicator("new", "active", "done") = "new", "active", "done"
 
 // Empty array
-var empty as array : 
-var emptyNames as array.text : 
+var empty as array = 
+var emptyNames as array.text = 
 
 // Multi-type array (only with base array type)
-var mixed as array : 1, "two", true, 3.14
+var mixed as array = 1, "two", true, 3.14
 
 // Arrays are 0-indexed (like most programming languages)
 var first = numbers[0]      // Gets first element
@@ -685,13 +685,13 @@ var last = numbers[99]      // Gets last element (for 100-item array)
 
 #### indicator
 ```javascript
-// Declare with colon initialization (REQUIRED)
-var status as indicator ("pending", "active", "complete") : "active"
-var priority as indicator ("low", "medium", "high") : "medium"
+// Declare with equals initialization (consistent with assignment)
+var status as indicator ("pending", "active", "complete") = "active"
+var priority as indicator ("low", "medium", "high") = "medium"
 
 // Without parentheses (alternative syntax)
-var color as indicator "red", "yellow", "green" : "red"
-var state as indicator "on", "off", "standby" : "off"
+var color as indicator "red", "yellow", "green" = "red"
+var state as indicator "on", "off", "standby" = "off"
 
 // Assignment after declaration - must be one of the allowed values
 status = "pending"      // OK
@@ -703,10 +703,10 @@ if status = "active" then print "Processing"
 if color = "red" then print "Stop"
 if priority = "high" then print "Urgent!"
 
-// Common use cases with colon initialization
-var direction as indicator ("north", "south", "east", "west") : "north"
-var mood as indicator ("happy", "sad", "neutral") : "neutral"
-var grade as indicator ("A", "B", "C", "D", "F") : "B"
+// Common use cases with equals initialization
+var direction as indicator ("north", "south", "east", "west") = "north"
+var mood as indicator ("happy", "sad", "neutral") = "neutral"
+var grade as indicator ("A", "B", "C", "D", "F") = "B"
 ```
 
 **Benefits:**
@@ -714,7 +714,7 @@ var grade as indicator ("A", "B", "C", "D", "F") : "B"
 - ✅ Self-documenting - valid values visible in declaration
 - ✅ Prevents typos - compiler catches invalid values
 - ✅ Required initialization - prevents uninitialized indicators
-- ✅ Clear syntax - colon separates definition from initialization
+- ✅ Consistent syntax - equals sign like standard assignments
 - ✅ Perfect for states, statuses, colors, priorities, modes
 
 **Difference from array:**
@@ -779,20 +779,20 @@ calculator = to add
 ### Variable Declaration (Simple)
 
 ```javascript
-// Declare with colon for literal initialization
-var name as text : "Alice"
-variable userName as text : "Bob"    // Same as 'var'
+// Declare with equals for literal initialization
+var name as text = "Alice"
+variable userName as text = "Bob"    // Same as 'var'
 
-// Type inference with = (no colon)
+// Type inference with = (no type annotation)
 var count = 42           // Inferred as number
 var message = "Hello"    // Inferred as text
 
-// Arrays with colon
-var fruits as array : "apple", "banana", "cherry"
-var numbers as array.number : 1, 2, 3, 4, 5
+// Arrays with equals
+var fruits as array = "apple", "banana", "cherry"
+var numbers as array.number = 1, 2, 3, 4, 5
 
-// Indicators with colon (required)
-var status as indicator ("new", "pending") : "new"
+// Indicators with equals (required initialization)
+var status as indicator ("new", "pending") = "new"
 ```
 
 ### Constant Declaration

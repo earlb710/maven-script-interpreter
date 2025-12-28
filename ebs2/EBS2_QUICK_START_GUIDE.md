@@ -79,7 +79,7 @@ Variables are like labeled boxes where you store information:
 program GreetFriend
 
 main
-    var name as text : "Sarah"
+    var name as text = "Sarah"
     print "Hello " + name
 end
 ```
@@ -92,8 +92,8 @@ end
 program CountApples
 
 main
-    var apples as number : 5
-    var oranges as number : 3
+    var apples as number = 5
+    var oranges as number = 3
     var total = apples + oranges
     
     print "Total fruit: " + total
@@ -277,7 +277,7 @@ end
 program FavoriteFruits
 
 main
-    var fruits as array : "apple", "banana", "cherry"
+    var fruits as array = "apple", "banana", "cherry"
     
     for each fruit in fruits
         print "I like " + fruit
@@ -322,16 +322,16 @@ program ArrayExample
 
 main
     // Simple array with colon
-    var numbers as array : 1, 2, 3, 4, 5
+    var numbers as array = 1, 2, 3, 4, 5
     
     // Explicit values
-    var fruits as array : "apple", "banana", "cherry"
+    var fruits as array = "apple", "banana", "cherry"
     
     // Range syntax (creates all numbers from 1 to 10)
-    var oneToTen as array : 1..10
+    var oneToTen as array = 1..10
     
     // Large range (creates 1 to 100)
-    var oneToHundred as array : 1..100
+    var oneToHundred as array = 1..100
     
     // Get items from array (starts at 0!)
     print numbers[0]  // Prints: 1 (first item)
@@ -586,7 +586,7 @@ main
     }
     
     // For loop with braces
-    var fruits as array : "apple", "banana", "cherry"
+    var fruits as array = "apple", "banana", "cherry"
     for each fruit in fruits {
         print fruit
     }
