@@ -46,7 +46,7 @@ This document provides a summary of the EBS2 language specification and related 
 - Data Types (basic: number, text, yes/no, date; collections: list, record, map)
 - Variables (declaration, assignment, scope)
 - Operators (arithmetic, comparison, logical, string)
-- Control Flow (when/then, repeat, for each, loops)
+- Control Flow (if/then/else with optional natural language operators)
 - Functions (simple to advanced, with parameters, return values)
 - Screens and UI (components, layouts, events)
 - Error Handling (automatic, try-catch, error types)
@@ -58,7 +58,7 @@ This document provides a summary of the EBS2 language specification and related 
 - Grammar Summary (EBNF)
 
 **Key Features:**
-- Natural language syntax: `when ... then`, `repeat ... times`, `for each ... in`
+- Natural language syntax: `if ... then`, `repeat ... times`, `for each ... in`
 - Symbolic alternatives for advanced users: `if`, `while`, `&&`
 - 1-based array indexing (more natural for beginners)
 - Child-friendly error messages
@@ -158,7 +158,7 @@ This document provides a summary of the EBS2 language specification and related 
 **"Make it so simple that an 8-year-old can understand it"**
 
 1. **Natural Language**
-   - `when age is greater than 12 then` instead of `if (age > 12) {`
+   - `if age is greater than 12 then` instead of `if (age > 12) {`
    - `repeat 10 times` instead of `for (i = 0; i < 10; i++)`
    - `give back result` instead of `return result`
 
@@ -219,10 +219,10 @@ This document provides a summary of the EBS2 language specification and related 
 Every complex function has both simple and advanced forms:
 
 ```javascript
--- SIMPLE: Read entire file
+// SIMPLE: Read entire file
 var content = read file "data.txt"
 
--- ADVANCED: Read with options
+// ADVANCED: Read with options
 var content = read file "data.txt" 
     with encoding "UTF-8" 
     and handle errors gracefully
@@ -233,12 +233,12 @@ var content = read file "data.txt"
 Support both for smooth learning curve:
 
 ```javascript
--- NATURAL (beginner)
-when age is greater than 12 then
+// NATURAL (beginner)
+if age is greater than 12 then
     show "Teenager"
 end
 
--- SYMBOLIC (advanced)
+// SYMBOLIC (advanced)
 if age > 12 then
     show "Teenager"
 end

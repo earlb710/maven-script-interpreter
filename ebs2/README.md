@@ -37,9 +37,9 @@ variables
 end
 
 main
-    when age is greater than 12 then
+    if age is greater than 12 then
         show "You're a teenager!"
-    otherwise
+    else
         show "You're a child!"
     end
 end

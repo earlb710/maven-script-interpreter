@@ -45,8 +45,8 @@ Every EBS2 program has the same basic structure:
 ```javascript
 program MyProgram
 
--- This is a comment (notes for yourself)
--- The computer ignores comments
+// This is a comment (notes for yourself)
+// The computer ignores comments
 
 main
     -- Your code goes here
@@ -125,7 +125,7 @@ program CheckAge
 main
     var age as number = 12
     
-    when age is greater than 12 then
+    if age is greater than 12 then
         show "You're a teenager!"
     end
 end
@@ -139,7 +139,7 @@ program CheckAge2
 main
     var age as number = 10
     
-    when age is greater than 12 then
+    if age is greater than 12 then
         show "You're a teenager!"
     otherwise
         show "You're a child!"
@@ -155,11 +155,11 @@ program GradingSystem
 main
     var score as number = 85
     
-    when score >= 90 then
+    if score >= 90 then
         show "Grade: A"
-    otherwise when score >= 80 then
+    otherwise if score >= 80 then
         show "Grade: B"
-    otherwise when score >= 70 then
+    otherwise if score >= 70 then
         show "Grade: C"
     otherwise
         show "Grade: D"
@@ -433,31 +433,31 @@ end
 
 **Forgot `end` keyword:**
 ```javascript
--- Wrong
-when age > 12 then
+// Wrong
+if age > 12 then
     show "Teenager"
 
--- Right
-when age > 12 then
+// Right
+if age > 12 then
     show "Teenager"
 end
 ```
 
 **Forgot quotes around text:**
 ```javascript
--- Wrong
+// Wrong
 show Hello World
 
--- Right
+// Right
 show "Hello World"
 ```
 
 **Wrong variable type:**
 ```javascript
--- Wrong
+// Wrong
 var age as text = 12
 
--- Right
+// Right
 var age as number = 12
 ```
 
@@ -472,9 +472,9 @@ var ready as yes/no = yes
 
 #### Decisions
 ```javascript
-when condition then
+if condition then
     -- do something
-otherwise
+else
     -- do something else
 end
 ```

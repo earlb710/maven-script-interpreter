@@ -29,6 +29,22 @@ EBS2 is designed with three core principles:
 2. **Simplicity with depth**: Simple things stay simple; complex things become possible
 3. **Universal access**: Runs identically in browsers (HTML5) and desktop (Java)
 
+### Language Efficiency: Long and Short Forms
+
+**EBS2 supports dual syntax** - both natural language (long form) and symbolic (short form) - allowing users to choose based on their needs:
+
+**Long Form (Natural Language):**
+- Best for beginners and children
+- Self-documenting and readable
+- Example: `if age is greater than 12 then`
+
+**Short Form (Symbolic):**
+- Best for experienced developers
+- Compact and efficient
+- Example: `if age > 12 then`
+
+**Both forms are equivalent and can be mixed in the same program.** Users can start with long form and transition to short form as they gain experience.
+
 ### Language Goals
 
 - **For Children**: Natural syntax that reads like English stories
@@ -41,15 +57,15 @@ EBS2 is designed with three core principles:
 ### Comments
 
 ```javascript
--- Single line comment (two dashes)
+// Single line comment
 
---[[
+/*
   Multi-line comment
   Can span multiple lines
---]]
+*/
 
---- Documentation comment (three dashes)
---- Used for generating help text
+/// Documentation comment (three slashes)
+/// Used for generating help text
 ```
 
 ### Keywords
@@ -57,7 +73,7 @@ EBS2 is designed with three core principles:
 #### Basic Keywords (Beginner Level)
 ```
 program     end         var         as          is
-when        then        otherwise   repeat      times
+if          then        else        repeat      times
 for         each        in          to          call
 with        and         give        back        show
 hide        ask         screen      button      label
@@ -105,17 +121,17 @@ async       await       class       extends     new
 
 #### Boolean Literals
 ```javascript
-yes         -- Boolean true (beginner-friendly)
-no          -- Boolean false
-true        -- Also supported
-false       -- Also supported
+yes         // Boolean true (beginner-friendly)
+no          // Boolean false
+true        // Also supported
+false       // Also supported
 ```
 
 #### List Literals
 ```javascript
-list 1, 2, 3, 4, 5                    -- Simple list
-list of numbers 1, 2, 3               -- Typed list
-list "apple", "banana", "cherry"      -- Text list
+list 1, 2, 3, 4, 5                    // Simple list
+list of numbers 1, 2, 3               // Typed list
+list "apple", "banana", "cherry"      // Text list
 ```
 
 #### Record Literals
@@ -190,7 +206,7 @@ end
 ```javascript
 program ProgramName
 
--- Optional: Program metadata
+// Optional: Program metadata
 settings
     title "My Application"
     version "1.0.0"
@@ -198,14 +214,14 @@ settings
     description "What this program does"
 end
 
--- Optional: Global variables
+// Optional: Global variables
 variables
     var userName as text = "Guest"
     var score as number = 0
     var isPlaying as yes/no = no
 end
 
--- Optional: Function definitions
+// Optional: Function definitions
 functions
     to greet person
         show "Hello " + person
@@ -216,7 +232,7 @@ functions
     end
 end
 
--- Optional: Screen definitions
+// Optional: Screen definitions
 screens
     screen MainWindow
         title "Main Screen"
@@ -224,7 +240,7 @@ screens
     end
 end
 
--- Required: Main entry point
+// Required: Main entry point
 main
     -- Program starts here
     show screen MainWindow
@@ -256,8 +272,8 @@ var count as number = 42
 var price as number = 19.99
 var big as number = 1000000
 
--- Automatic type selection (int, float, double)
--- Children don't need to understand the difference
+// Automatic type selection (int, float, double)
+// Children don't need to understand the difference
 ```
 
 #### text
@@ -272,7 +288,7 @@ var empty as text = ""
 var isReady as yes/no = yes
 var gameOver as yes/no = no
 
--- Can also use true/false
+// Can also use true/false
 var isActive as yes/no = true
 ```
 
@@ -287,54 +303,54 @@ var deadline as date = "2025-12-31 23:59:59"
 
 #### list
 ```javascript
--- Simple list
+// Simple list
 var numbers as list = list 1, 2, 3, 4, 5
 
--- Typed list
+// Typed list
 var names as list of text = list "Alice", "Bob", "Charlie"
 
--- Empty list
+// Empty list
 var items as list of number = empty list
 
--- Multi-type list (advanced)
+// Multi-type list (advanced)
 var mixed as list = list 1, "two", yes, 3.14
 ```
 
 #### record
 ```javascript
--- Define record type
+// Define record type
 type Person
     name as text
     age as number
     email as text
 end
 
--- Create record
+// Create record
 var student as Person = record {
     name: "Alice",
     age: 10,
     email: "alice@school.com"
 }
 
--- Access fields
+// Access fields
 show student.name
 show student.age
 ```
 
 #### map
 ```javascript
--- Key-value storage
+// Key-value storage
 var settings as map = map {
     "theme": "dark",
     "fontSize": 14,
     "autoSave": yes
 }
 
--- Access values
+// Access values
 var theme = settings["theme"]
 var size = settings["fontSize"]
 
--- Add/update
+// Add/update
 settings["language"] = "English"
 ```
 
@@ -348,7 +364,7 @@ var config as json = load json from "config.json"
 
 #### function type
 ```javascript
--- Function as value (advanced)
+// Function as value (advanced)
 var calculator as function(number, number) giving number
 calculator = to add
 ```
@@ -358,10 +374,10 @@ calculator = to add
 ### Variable Declaration (Simple)
 
 ```javascript
--- Declare with initial value
+// Declare with initial value
 var name as text = "Alice"
 
--- Type inference (intermediate)
+// Type inference (intermediate)
 var count = 42           -- Inferred as number
 var message = "Hello"    -- Inferred as text
 ```
@@ -369,13 +385,13 @@ var message = "Hello"    -- Inferred as text
 ### Variable Declaration (Advanced)
 
 ```javascript
--- Constant (cannot change)
+// Constant (cannot change)
 constant PI as number = 3.14159
 
--- Multiple declarations
+// Multiple declarations
 var x, y, z as number = 0
 
--- With scope
+// With scope
 var local userName as text = "Guest"
 var global appVersion as text = "1.0"
 ```
@@ -383,10 +399,10 @@ var global appVersion as text = "1.0"
 ### Variable Assignment
 
 ```javascript
--- Simple assignment
+// Simple assignment
 userName = "Bob"
 
--- Compound assignment (advanced)
+// Compound assignment (advanced)
 count = count + 1        -- Long form
 count += 1               -- Short form (advanced)
 ```
@@ -435,17 +451,30 @@ var negated = -value         -- Negation
 
 ### Comparison Operations
 
+EBS2 supports both natural language and symbolic comparison operators. Both forms are equivalent.
+
+#### Comparison Operator Table
+
+| Long Form (Natural) | Short Form | Description |
+|---------------------|------------|-------------|
+| `is equal to` | `=` or `==` | Equal |
+| `is not equal to` | `<>` or `!=` | Not equal |
+| `is greater than` | `>` | Greater than |
+| `is less than` | `<` | Less than |
+| `is greater than or equal to` | `>=` | Greater or equal |
+| `is less than or equal to` | `<=` | Less or equal |
+
 #### Natural Language (Beginner)
 ```javascript
-when age is greater than 12 then
+if age is greater than 12 then
     show "Teenager"
 end
 
-when score is equal to 100 then
+if score is equal to 100 then
     show "Perfect!"
 end
 
-when lives is not equal to 0 then
+if lives is not equal to 0 then
     show "Still alive"
 end
 ```
@@ -467,17 +496,27 @@ end
 
 ### Logical Operations
 
+EBS2 supports both natural language and symbolic logical operators. Both forms are equivalent.
+
+#### Logical Operator Table
+
+| Long Form (Natural) | Short Form | Description |
+|---------------------|------------|-------------|
+| `and` | `&&` | Logical AND |
+| `or` | `\|\|` | Logical OR |
+| `not` | `!` | Logical NOT |
+
 #### Natural Language (Beginner)
 ```javascript
-when age > 12 and age < 20 then
+if age > 12 and age < 20 then
     show "Teenager"
 end
 
-when day is "Saturday" or day is "Sunday" then
+if day is "Saturday" or day is "Sunday" then
     show "Weekend!"
 end
 
-when not isGameOver then
+if not isGameOver then
     continue playing
 end
 ```
@@ -500,13 +539,13 @@ end
 ### String Operations
 
 ```javascript
--- Concatenation
+// Concatenation
 var fullName = firstName + " " + lastName
 
--- Repetition
+// Repetition
 var stars = "*" * 5      -- "*****"
 
--- Interpolation (advanced)
+// Interpolation (advanced)
 var greeting = "Hello {name}, you are {age} years old"
     with name: "Alice" and age: 10
 ```
@@ -515,31 +554,31 @@ var greeting = "Hello {name}, you are {age} years old"
 
 ### Conditional Statements
 
-#### Simple When (Beginner)
+#### Simple If (Beginner)
 ```javascript
-when condition then
+if condition then
     -- code to run if true
 end
 ```
 
-#### When-Otherwise (Beginner)
+#### If-Else (Beginner)
 ```javascript
-when age < 13 then
+if age < 13 then
     show "Child"
-otherwise
+else
     show "Teen or Adult"
 end
 ```
 
 #### Multiple Conditions (Intermediate)
 ```javascript
-when score >= 90 then
+if score >= 90 then
     show "Grade A"
-otherwise when score >= 80 then
+else if score >= 80 then
     show "Grade B"
-otherwise when score >= 70 then
+else if score >= 70 then
     show "Grade C"
-otherwise
+else
     show "Grade D or F"
 end
 ```
@@ -559,12 +598,12 @@ end
 
 #### Repeat Times (Beginner)
 ```javascript
--- Fixed repetition
+// Fixed repetition
 repeat 10 times
     show "Hello"
 end
 
--- With counter
+// With counter
 repeat 5 times with counter
     show "Count: " + counter
 end
@@ -572,13 +611,13 @@ end
 
 #### Repeat While (Intermediate)
 ```javascript
--- Loop while condition is true
+// Loop while condition is true
 repeat while count < 100
     count = count + 1
     show count
 end
 
--- Loop until condition is true
+// Loop until condition is true
 repeat until finished
     process next item
 end
@@ -586,14 +625,14 @@ end
 
 #### For Each (Intermediate)
 ```javascript
--- Iterate over list
+// Iterate over list
 var fruits = list "apple", "banana", "cherry"
 
 for each fruit in fruits
     show "I like " + fruit
 end
 
--- With index (advanced)
+// With index (advanced)
 for each fruit in fruits with index
     show index + ": " + fruit
 end
@@ -601,17 +640,17 @@ end
 
 #### Numeric Range (Advanced)
 ```javascript
--- Count from 1 to 10
+// Count from 1 to 10
 for counter from 1 to 10
     show counter
 end
 
--- Count with step
+// Count with step
 for counter from 0 to 100 by 10
     show counter     -- 0, 10, 20, ..., 100
 end
 
--- Count backwards
+// Count backwards
 for counter from 10 down to 1
     show counter
 end
@@ -631,16 +670,16 @@ while condition
 ### Loop Control
 
 ```javascript
--- Exit loop early
+// Exit loop early
 for counter from 1 to 100
-    when counter = 50 then
+    if counter = 50 then
         exit loop        -- or: break
     end
 end
 
--- Skip to next iteration
+// Skip to next iteration
 for each item in items
-    when item is empty then
+    if item is empty then
         skip to next     -- or: continue
     end
     process item
@@ -648,6 +687,18 @@ end
 ```
 
 ## Functions
+
+EBS2 supports both natural language and traditional function syntax.
+
+### Function Definition Forms
+
+| Long Form (Natural) | Short Form (Traditional) |
+|---------------------|--------------------------|
+| `to functionName param` | `function functionName(param)` |
+| `give back value` | `return value` |
+| `call functionName with value` | `functionName(value)` |
+
+**Both forms are equivalent and can be mixed.** Choose based on your audience and preference.
 
 ### Simple Functions (Beginner)
 
@@ -657,7 +708,7 @@ to sayHello
     show "Hello World"
 end
 
--- Call it
+// Call it
 call sayHello
 ```
 
@@ -667,7 +718,7 @@ to greet person
     show "Hello " + person
 end
 
--- Call it
+// Call it
 call greet with "Alice"
 ```
 
@@ -677,7 +728,7 @@ to introduce person and age
     show person + " is " + age + " years old"
 end
 
--- Call it
+// Call it
 call introduce with person: "Alice" and age: 10
 ```
 
@@ -689,7 +740,7 @@ to double number
     give back number * 2
 end
 
--- Use it
+// Use it
 var result = call double with 5
 show result     -- Shows: 10
 ```
@@ -702,7 +753,7 @@ to divideWithRemainder dividend and divisor
     give back quotient and remainder
 end
 
--- Use it
+// Use it
 var quot, rem = call divideWithRemainder with dividend: 17 and divisor: 5
 show "Quotient: " + quot + ", Remainder: " + rem
 ```
@@ -715,10 +766,10 @@ to greet person and title: "Friend"
     show "Hello " + title + " " + person
 end
 
--- Call with default
+// Call with default
 call greet with "Alice"           -- "Hello Friend Alice"
 
--- Call with custom title
+// Call with custom title
 call greet with "Alice" and title: "Dr."  -- "Hello Dr. Alice"
 ```
 
@@ -732,14 +783,14 @@ to sum numbers...
     give back total
 end
 
--- Call with any number of arguments
+// Call with any number of arguments
 var result = call sum with 1, 2, 3, 4, 5
 ```
 
 #### Recursive Functions
 ```javascript
 to factorial n
-    when n <= 1 then
+    if n <= 1 then
         give back 1
     end
     give back n * call factorial with (n - 1)
@@ -774,7 +825,7 @@ screen HelloScreen
     end
 end
 
--- Show the screen
+// Show the screen
 main
     show screen HelloScreen
 end
@@ -1008,12 +1059,12 @@ end
 By default, errors stop the program and show a helpful message:
 
 ```javascript
--- This will auto-stop with helpful error
+// This will auto-stop with helpful error
 var data = read file "missing.txt"
 
--- Error shown:
--- "Cannot find file 'missing.txt'"
--- "Make sure the file exists in the same folder as your program"
+// Error shown:
+// "Cannot find file 'missing.txt'"
+// "Make sure the file exists in the same folder as your program"
 ```
 
 ### Try-Catch (Intermediate)
@@ -1062,7 +1113,7 @@ parse_error             -- Cannot parse data
 
 ```javascript
 to withdraw amount from account
-    when amount > account.balance then
+    if amount > account.balance then
         throw error "Insufficient funds"
     end
     account.balance = account.balance - amount
@@ -1074,32 +1125,32 @@ end
 ### Console Output (Beginner)
 
 ```javascript
--- Simple print
+// Simple print
 show "Hello World"
 
--- Print with new line
+// Print with new line
 show line "Hello World"
 
--- Print without new line
+// Print without new line
 show "Hello " then show "World"
 
--- Clear screen
+// Clear screen
 clear screen
 ```
 
 ### User Input (Beginner)
 
 ```javascript
--- Ask for text
+// Ask for text
 var name = ask "What is your name?"
 
--- Ask for number
+// Ask for number
 var age = ask number "How old are you?"
 
--- Ask yes/no question
+// Ask yes/no question
 var answer = ask yes or no "Do you want to continue?"
 
--- Choose from options
+// Choose from options
 var choice = ask to choose from "Red", "Green", "Blue"
     with prompt "Pick a color:"
 ```
@@ -1107,64 +1158,64 @@ var choice = ask to choose from "Red", "Green", "Blue"
 ### Text Functions (Beginner)
 
 ```javascript
--- Length
+// Length
 var len = length of "Hello"          -- 5
 
--- Uppercase/Lowercase
+// Uppercase/Lowercase
 var upper = uppercase "hello"         -- "HELLO"
 var lower = lowercase "HELLO"         -- "hello"
 
--- Find text
+// Find text
 var pos = find "lo" in "Hello"       -- 4
 var has = "Hello" contains "lo"      -- yes
 
--- Get part of text
+// Get part of text
 var part = take 3 from "Hello"       -- "Hel"
 var part = take from 2 to 4 in "Hello"  -- "ell"
 
--- Replace text
+// Replace text
 var result = replace "World" with "Everyone" in "Hello World"
 ```
 
 ### Text Functions (Advanced)
 
 ```javascript
--- Split text
+// Split text
 var parts = split "a,b,c" by ","     -- list "a", "b", "c"
 
--- Join text
+// Join text
 var joined = join list "a", "b", "c" with ","  -- "a,b,c"
 
--- Trim whitespace
+// Trim whitespace
 var trimmed = trim "  Hello  "       -- "Hello"
 
--- Format text
+// Format text
 var formatted = format "{name} is {age} years old"
     with name: "Alice" and age: 10
 
--- Repeat text
+// Repeat text
 var stars = repeat "*" times 5       -- "*****"
 
--- Reverse text
+// Reverse text
 var reversed = reverse "Hello"       -- "olleH"
 ```
 
 ### Number Functions (Beginner)
 
 ```javascript
--- Round numbers
+// Round numbers
 var rounded = round 3.7              -- 4
 var down = round down 3.7            -- 3
 var up = round up 3.2                -- 4
 
--- Absolute value
+// Absolute value
 var abs = absolute value of -5      -- 5
 
--- Min/Max
+// Min/Max
 var smallest = minimum of 5, 3, 8   -- 3
 var largest = maximum of 5, 3, 8    -- 8
 
--- Random number
+// Random number
 var dice = random from 1 to 6
 var chance = random                  -- 0.0 to 1.0
 ```
@@ -1172,17 +1223,17 @@ var chance = random                  -- 0.0 to 1.0
 ### Number Functions (Advanced)
 
 ```javascript
--- Power and roots
+// Power and roots
 var squared = 5 ^ 2                  -- 25
 var cubed = power 2 to 3             -- 8
 var root = square root of 16         -- 4
 
--- Trigonometry
+// Trigonometry
 var s = sin of 45 degrees
 var c = cos of 45 degrees
 var t = tan of 45 degrees
 
--- Convert angles
+// Convert angles
 var rads = 180 degrees to radians
 var degs = 3.14 radians to degrees
 ```
@@ -1190,56 +1241,56 @@ var degs = 3.14 radians to degrees
 ### List Functions (Beginner)
 
 ```javascript
--- Create list
+// Create list
 var numbers = list 1, 2, 3, 4, 5
 
--- Count items
+// Count items
 var count = count of numbers         -- 5
 
--- Get item
+// Get item
 var first = numbers at 1             -- 1 (1-based indexing)
 var last = numbers at end            -- 5
 
--- Add item
+// Add item
 add 6 to numbers
 add 0 to start of numbers
 
--- Remove item
+// Remove item
 remove 3 from numbers
 remove first from numbers
 remove last from numbers
 
--- Check if contains
+// Check if contains
 var has = numbers contains 3         -- yes/no
 ```
 
 ### List Functions (Advanced)
 
 ```javascript
--- Filter list
+// Filter list
 var evens = filter numbers where item mod 2 = 0
 
--- Transform list
+// Transform list
 var doubled = transform numbers with item * 2
 
--- Sort list
+// Sort list
 var sorted = sort numbers ascending
 var reversed = sort numbers descending
 
--- Reverse list
+// Reverse list
 var backwards = reverse numbers
 
--- Join lists
+// Join lists
 var combined = join numbers with list 6, 7, 8
 
--- Get subset
+// Get subset
 var subset = take from 2 to 4 in numbers
 
--- Find in list
+// Find in list
 var position = find 5 in numbers
 var found = find in numbers where item > 3
 
--- Sum and average
+// Sum and average
 var total = sum of numbers
 var avg = average of numbers
 ```
@@ -1247,18 +1298,18 @@ var avg = average of numbers
 ### Date and Time (Beginner)
 
 ```javascript
--- Get current date/time
+// Get current date/time
 var now = today
 var time = current time
 
--- Get parts
+// Get parts
 var year = year of now
 var month = month of now
 var day = day of now
 var hour = hour of time
 var minute = minute of time
 
--- Format date
+// Format date
 var formatted = format now as "YYYY-MM-DD"
 var pretty = format now as "Month DD, YYYY"
 ```
@@ -1266,22 +1317,22 @@ var pretty = format now as "Month DD, YYYY"
 ### Date and Time (Advanced)
 
 ```javascript
--- Create date
+// Create date
 var birthday = date "2015-03-15"
 var deadline = date "2025-12-31 23:59:59"
 
--- Date arithmetic
+// Date arithmetic
 var tomorrow = now + 1 day
 var nextWeek = now + 7 days
 var nextMonth = now + 1 month
 var nextYear = now + 1 year
 
--- Date difference
+// Date difference
 var age = years between birthday and now
 var days = days between start and end
 
--- Compare dates
-when now is after deadline then
+// Compare dates
+if now is after deadline then
     show "Overdue!"
 end
 ```
@@ -1289,47 +1340,47 @@ end
 ### File Functions (Intermediate)
 
 ```javascript
--- Read entire file
+// Read entire file
 var content = read file "data.txt"
 
--- Read as lines
+// Read as lines
 var lines = read lines from "data.txt"
 
--- Write to file
+// Write to file
 write "Hello World" to file "output.txt"
 
--- Append to file
+// Append to file
 append "More text" to file "log.txt"
 
--- Check if exists
+// Check if exists
 var exists = file "data.txt" exists
 
--- Delete file
+// Delete file
 delete file "temp.txt"
 
--- List files in folder
+// List files in folder
 var files = list files in "my_folder"
 ```
 
 ### File Functions (Advanced)
 
 ```javascript
--- Read with encoding
+// Read with encoding
 var content = read file "data.txt" with encoding "UTF-8"
 
--- Copy file
+// Copy file
 copy file "source.txt" to "backup.txt"
 
--- Move/Rename file
+// Move/Rename file
 move file "old.txt" to "new.txt"
 
--- Create folder
+// Create folder
 create folder "my_folder"
 
--- Delete folder
+// Delete folder
 delete folder "temp_folder"
 
--- Get file info
+// Get file info
 var size = size of file "data.txt"
 var modified = last modified date of file "data.txt"
 ```
@@ -1339,23 +1390,23 @@ var modified = last modified date of file "data.txt"
 ### Simple Import (Intermediate)
 
 ```javascript
--- Import all from another file
+// Import all from another file
 import "helpers.ebs"
 
--- Now can use functions from helpers.ebs
+// Now can use functions from helpers.ebs
 call functionFromHelpers
 ```
 
 ### Named Imports (Advanced)
 
 ```javascript
--- Import specific items
+// Import specific items
 import greet, calculate from "helpers.ebs"
 
--- Import with rename
+// Import with rename
 import greet as sayHello from "helpers.ebs"
 
--- Import all with namespace
+// Import all with namespace
 import helpers from "helpers.ebs"
 call helpers.greet with "Alice"
 ```
@@ -1363,9 +1414,9 @@ call helpers.greet with "Alice"
 ### Exports
 
 ```javascript
--- helpers.ebs
+// helpers.ebs
 
--- Mark functions for export
+// Mark functions for export
 export function greet person
     show "Hello " + person
 end
@@ -1378,7 +1429,7 @@ export function calculate sum of numbers
     give back total
 end
 
--- Private function (not exported)
+// Private function (not exported)
 to helperFunction
     -- only used internally
 end
@@ -1473,17 +1524,17 @@ my_project/
 ### Runtime Detection
 
 ```javascript
--- Check current runtime
-when running on browser then
+// Check current runtime
+if running on browser then
     show "Running in web browser"
-otherwise when running on desktop then
+else if running on desktop then
     show "Running as desktop app"
 end
 
--- Conditional features
-when has feature "database" then
+// Conditional features
+if has feature "database" then
     -- Use database features
-otherwise
+else
     -- Use alternative approach
 end
 ```
@@ -1494,7 +1545,7 @@ end
 
 1. **Use natural language keywords**
    ```javascript
-   when age is greater than 12 then
+   if age is greater than 12 then
        -- instead of: if age > 12 then
    ```
 
@@ -1513,11 +1564,11 @@ end
 4. **Break down complex logic**
    ```javascript
    -- Not recommended
-   when (age > 12 and age < 20) or isSpecial then
+   if (age > 12 and age < 20) or isSpecial then
    
    -- Better
    var isTeenager = age > 12 and age < 20
-   when isTeenager or isSpecial then
+   if isTeenager or isSpecial then
    ```
 
 ### For Advanced Users
@@ -1614,11 +1665,47 @@ type            = "number" | "text" | "yes/no" | "list" |
 
 ### Appendix A: Complete Keyword List
 
-**Beginner Keywords:** program, end, var, as, is, when, then, otherwise, repeat, times, for, each, in, to, call, with, and, give, back, show, hide, ask, screen, button, label, textbox, list, text, number, yes, no, true, false
+**Beginner Keywords:** program, end, var, as, is, if, then, else, repeat, times, for, each, in, to, call, with, and, give, back, show, hide, ask, screen, button, label, textbox, list, text, number, yes, no, true, false
 
 **Advanced Keywords:** function, return, try, catch, throw, import, from, export, record, map, json, while, until, break, continue, switch, case, default, const, let, async, await, class, extends, new
 
-### Appendix B: Complete Built-in Function List
+### Appendix B: Long Form vs Short Form Reference
+
+EBS2 supports both natural language (long form) and symbolic (short form) syntax. This table shows all equivalents:
+
+#### Comparison Operators
+| Long Form | Short Form | Example |
+|-----------|------------|---------|
+| `is equal to` | `=` or `==` | `if x is equal to 5` → `if x = 5` |
+| `is not equal to` | `<>` or `!=` | `if x is not equal to 5` → `if x <> 5` |
+| `is greater than` | `>` | `if x is greater than 5` → `if x > 5` |
+| `is less than` | `<` | `if x is less than 5` → `if x < 5` |
+| `is greater than or equal to` | `>=` | `if x is greater than or equal to 5` → `if x >= 5` |
+| `is less than or equal to` | `<=` | `if x is less than or equal to 5` → `if x <= 5` |
+
+#### Logical Operators
+| Long Form | Short Form | Example |
+|-----------|------------|---------|
+| `and` | `&&` | `if a and b` → `if a && b` |
+| `or` | `\|\|` | `if a or b` → `if a \|\| b` |
+| `not` | `!` | `if not done` → `if !done` |
+
+#### Function Syntax
+| Long Form | Short Form | Example |
+|-----------|------------|---------|
+| `to name params` | `function name(params)` | `to greet person` → `function greet(person)` |
+| `give back value` | `return value` | `give back x * 2` → `return x * 2` |
+| `call func with args` | `func(args)` | `call greet with "Alice"` → `greet("Alice")` |
+
+#### Loop Control
+| Long Form | Short Form | Example |
+|-----------|------------|---------|
+| `exit loop` | `break` | `exit loop` → `break` |
+| `skip to next` | `continue` | `skip to next` → `continue` |
+
+**Note:** Both forms are completely equivalent and can be mixed within the same program. Choose based on your audience and preference.
+
+### Appendix C: Complete Built-in Function List
 
 See section [Built-in Functions](#built-in-functions) for detailed documentation.
 
@@ -1632,18 +1719,18 @@ See section [Built-in Functions](#built-in-functions) for detailed documentation
 - File Operations (read, write, exists, ...)
 - Screen Operations (show screen, hide screen, ...)
 
-### Appendix C: Migration Checklist
+### Appendix D: Migration Checklist
 
 - [ ] Review breaking changes from EBS1
-- [ ] Update variable declarations (string → text)
-- [ ] Update control structures (if → when)
-- [ ] Update function definitions
+- [ ] Update variable declarations (string → text, int/float → number)
 - [ ] Update array indexing (0-based → 1-based)
-- [ ] Update comments (// → --)
-- [ ] Organize code into sections
+- [ ] Organize code into sections (optional but recommended)
 - [ ] Test in both HTML5 and Java runtimes
+- [ ] Consider using natural language syntax for beginner-facing code
 
-### Appendix D: Standard Library Organization
+**Note:** Comments (`//`), control structures (`if/else`), and most syntax remain compatible with EBS1.
+
+### Appendix E: Standard Library Organization
 
 ```
 ebs2/

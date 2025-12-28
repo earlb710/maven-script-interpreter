@@ -22,14 +22,31 @@ Every feature in EBS2 should have:
 - **Basic Form**: Simple, intuitive syntax for common use cases
 - **Advanced Form**: Optional parameters and features for complex requirements
 
-**Example Philosophy:**
-```javascript
-// SIMPLE: Print text
-print "Hello World"
+#### Language Efficiency: Dual Syntax Support
 
-// ADVANCED: Print with formatting
-print "Score: {score}" using {score: 100, color: "blue"}
+**EBS2 supports both long form (natural language) and short form (symbolic) syntax**, allowing users to choose based on their skill level and preference:
+
+**Long Form (Natural Language):**
+```javascript
+// Natural, beginner-friendly
+if age is greater than 12 then
+    show "Teenager"
+end
 ```
+
+**Short Form (Symbolic):**
+```javascript
+// Compact, developer-friendly
+if age > 12 then
+    show "Teenager"
+end
+```
+
+**Key Benefits:**
+- **Flexibility**: Users choose what works best for them
+- **Progressive Learning**: Start with long form, transition to short form
+- **No Forced Simplification**: Experienced developers aren't slowed down
+- **Value-Add Changes Only**: Changes from EBS1 only where they add value
 
 ### 2. Child-Friendly Language Design
 
@@ -108,7 +125,7 @@ HTML5 Runtime   Java Runtime
 #### 2.1 Natural Language Syntax
 ```javascript
 // Instead of: if (x > 10) { ... }
-when x is greater than 10 then
+if x is greater than 10 then
     show "X is large"
 end
 
@@ -199,30 +216,30 @@ show message "Save changes?"
 
 #### 4.1 Program Organization
 ```javascript
--- This is a comment
+// This is a comment
 
 program HelloWorld
 
--- Section 1: Settings (optional)
+// Section 1: Settings (optional)
 settings
     title "My First Program"
     version "1.0"
 end
 
--- Section 2: Variables (optional)
+// Section 2: Variables (optional)
 variables
     var name as text = "World"
     var count as number = 0
 end
 
--- Section 3: Functions (optional)
+// Section 3: Functions (optional)
 functions
     to greet someone
         show "Hello " + someone
     end
 end
 
--- Section 4: Screens (optional)
+// Section 4: Screens (optional)
 screens
     screen MainWindow
         title "Hello App"
@@ -238,7 +255,7 @@ screens
     end
 end
 
--- Section 5: Main code (required)
+// Section 5: Main code (required)
 main
     show screen MainWindow
 end
@@ -270,29 +287,29 @@ end
 
 #### Simple Forms
 ```javascript
--- Decision
-when condition then
+// Decision
+if condition then
     -- code
 end
 
--- Alternative
-when condition then
+// Alternative
+if condition then
     -- code
-otherwise
+else
     -- code
 end
 
--- Repeat fixed times
+// Repeat fixed times
 repeat 10 times
     -- code
 end
 
--- Repeat while condition
+// Repeat while condition
 repeat while condition
     -- code
 end
 
--- Repeat for each item
+// Repeat for each item
 for each item in list
     -- code
 end
@@ -300,23 +317,23 @@ end
 
 #### Advanced Forms
 ```javascript
--- Multiple conditions
-when condition1 then
+// Multiple conditions
+if condition1 then
     -- code
-otherwise when condition2 then
+otherwise if condition2 then
     -- code
-otherwise when condition3 then
+otherwise if condition3 then
     -- code
-otherwise
+else
     -- code
 end
 
--- Loop with counter
+// Loop with counter
 repeat with counter from 1 to 10
     -- counter available as variable
 end
 
--- Loop with step
+// Loop with step
 repeat with counter from 0 to 100 by 10
     -- increments by 10
 end
@@ -330,7 +347,7 @@ to greet
     show "Hello World"
 end
 
--- Call it
+// Call it
 call greet
 ```
 
@@ -378,7 +395,7 @@ screen MyWindow
     end
 end
 
--- Show it
+// Show it
 show screen MyWindow
 ```
 
@@ -414,9 +431,9 @@ end
 
 #### Simple (for beginners)
 ```javascript
--- Errors stop the program and show helpful message
+// Errors stop the program and show helpful message
 var data = read file "missing.txt"
--- Auto error: "Cannot find file 'missing.txt' in the current folder"
+// Auto error: "Cannot find file 'missing.txt' in the current folder"
 ```
 
 #### Advanced (for experienced users)
@@ -434,82 +451,82 @@ end
 
 #### Text Operations (Simple)
 ```javascript
--- Combine text
+// Combine text
 var full = "Hello" + " " + "World"
 
--- Get length
+// Get length
 var len = length of "Hello"
 
--- Convert case
+// Convert case
 var upper = uppercase "hello"
 var lower = lowercase "HELLO"
 
--- Find in text
+// Find in text
 var position = find "lo" in "Hello"
 ```
 
 #### Text Operations (Advanced)
 ```javascript
--- Replace with options
+// Replace with options
 var result = replace "old" with "new" in text 
     case sensitive
     replace all occurrences
 
--- Split text
+// Split text
 var parts = split text by delimiter "," 
     trim whitespace
     skip empty parts
 
--- Format text
+// Format text
 var formatted = format "{name} scored {score} points" 
     with name:"Alice" and score:100
 ```
 
 #### List Operations (Simple)
 ```javascript
--- Create list
+// Create list
 var numbers = list 1, 2, 3, 4, 5
 
--- Add to list
+// Add to list
 add 6 to numbers
 
--- Get item
+// Get item
 var first = numbers at 1  -- 1-based indexing for simplicity
 
--- Get count
+// Get count
 var count = count of numbers
 ```
 
 #### List Operations (Advanced)
 ```javascript
--- Filter list
+// Filter list
 var evens = filter numbers where item mod 2 equals 0
 
--- Transform list
+// Transform list
 var doubled = transform numbers with item * 2
 
--- Sort list
+// Sort list
 var sorted = sort numbers ascending
 
--- Find in list
+// Find in list
 var found = find in numbers where item > 3
 ```
 
 #### Screen Operations (Simple)
 ```javascript
--- Show message
+// Show message
 show "Hello World"
 
--- Ask for input
+// Ask for input
 var name = ask "What is your name?"
 
--- Show yes/no question
+// Show yes/no question
 var answer = ask yes or no "Do you want to continue?"
 ```
 
 #### Screen Operations (Advanced)
 ```javascript
--- Show custom dialog
+// Show custom dialog
 show dialog "Custom Dialog"
     with message "Choose an option"
     and icon information
@@ -517,7 +534,7 @@ show dialog "Custom Dialog"
     and default button ok
     store result in choice
 
--- Show notification
+// Show notification
 show notification "Task Complete"
     for duration 3 seconds
     with style success

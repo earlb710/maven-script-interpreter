@@ -67,12 +67,12 @@ EBS2 is designed with three core principles:
 
 #### 1️⃣ Natural Language Syntax
 ```javascript
--- Beginner-friendly
-when age is greater than 12 then
+// Beginner-friendly
+if age is greater than 12 then
     show "You're a teenager!"
 end
 
--- Or use traditional (advanced)
+// Or use traditional (advanced)
 if age > 12 then
     show "You're a teenager!"
 end
@@ -80,10 +80,10 @@ end
 
 #### 2️⃣ Two-Tier Functions
 ```javascript
--- SIMPLE: Sensible defaults
+// SIMPLE: Sensible defaults
 var content = read file "data.txt"
 
--- ADVANCED: Full control
+// ADVANCED: Full control
 var content = read file "data.txt"
     with encoding "UTF-8"
     and handle errors gracefully
@@ -160,19 +160,19 @@ end
 ### Syntax Cheat Sheet
 
 ```javascript
--- Variables
+// Variables
 var name as text = "Alice"
 var age as number = 10
 var ready as yes/no = yes
 
--- Decisions  
-when condition then
+// Decisions  
+if condition then
     -- do something
-otherwise
+else
     -- do something else
 end
 
--- Loops
+// Loops
 repeat 5 times
     -- do something
 end
@@ -181,12 +181,12 @@ for each item in list
     -- do something
 end
 
--- Functions
+// Functions
 to greet person
     show "Hello " + person
 end
 
--- Screens
+// Screens
 screen MyWindow
     title "My App"
     

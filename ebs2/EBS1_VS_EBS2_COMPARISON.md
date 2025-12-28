@@ -37,13 +37,13 @@ EBS2 is a redesigned version of the language with focus on:
 | Aspect | EBS1 | EBS2 |
 |--------|------|------|
 | **Target Audience** | General developers | Children first, developers second |
-| **Syntax Style** | C-like, symbolic | Natural language, English-like |
+| **Syntax Style** | C-like, symbolic | Simplified, beginner-friendly |
 | **Platforms** | Java/JavaFX desktop | HTML5 browser + Java desktop |
 | **Learning Curve** | Moderate (familiar to programmers) | Gentle (intuitive for children) |
 | **Structure** | Free-form | Organized sections |
 | **Type Names** | `string`, `int`, `float` | `text`, `number` |
 | **Indexing** | 0-based arrays | 1-based arrays (configurable) |
-| **Comments** | `//` and `/* */` | `--` and `--[[ ]]--` |
+| **Comments** | `//` and `/* */` | `//` and `/* */` |
 
 ## Philosophy and Design Goals
 
@@ -101,13 +101,13 @@ var count = 42;  // inferred as int
 
 #### EBS2
 ```javascript
--- Simpler type names
+// Simpler type names
 var name as text = "Alice"
 var age as number = 10
 var score as number = 95.5
 var active as yes/no = yes
 
--- Type inference (same)
+// Type inference (same)
 var count = 42
 ```
 
@@ -133,11 +133,11 @@ if age > 12 then {
 
 **EBS2 (Natural):**
 ```javascript
-when age is greater than 12 then
+if age is greater than 12 then
     show "Teenager"
-otherwise when age is greater than 5 then
+otherwise if age is greater than 5 then
     show "Child"
-otherwise
+else
     show "Preschooler"
 end
 ```
@@ -178,12 +178,12 @@ for fruit in fruits {
 
 **EBS2 (Simple):**
 ```javascript
--- Repeat n times
+// Repeat n times
 repeat 10 times with counter
     show counter
 end
 
--- For each
+// For each
 var fruits = list "apple", "banana", "cherry"
 for each fruit in fruits
     show fruit
@@ -240,11 +240,11 @@ print fruits.length;  // 2
 
 #### EBS2
 ```javascript
--- List with simple syntax
+// List with simple syntax
 var numbers = list 1, 2, 3, 4, 5
 show numbers at 1  -- "1" (1-based!)
 
--- Dynamic list
+// Dynamic list
 var fruits = list "apple", "banana"
 show fruits at 1  -- "apple"
 show count of fruits  -- 2
@@ -367,25 +367,22 @@ show screen MyWindow
 
 For basic programs, migration is straightforward:
 
-1. **Update Keywords**
-   - `if` → `when` (or keep `if` for advanced)
-   - `else` → `otherwise`
-   - `return` → `give back`
-   - `print` → `show`
-
-2. **Update Types**
+1. **Update Types**
    - `string` → `text`
    - `int`, `float`, `double` → `number`
    - `bool` → `yes/no` (or keep `bool`)
 
-3. **Update Syntax**
+2. **Update Syntax**
    - `var x: type` → `var x as type`
    - `{ }` → `end`
-   - `//` comments → `--` comments
 
-4. **Update Array Indexing**
-   - Subtract 1 from all array indices
+3. **Update Array Indexing**
+   - Subtract 1 from all array indices (EBS2 uses 1-based)
    - Or use compatibility mode for 0-based
+
+4. **Optional Changes**
+   - `return` → `give back` (for beginner-friendly code)
+   - `print` → `show` (for consistency)
 
 ### Automated Migration Tool
 
@@ -394,10 +391,9 @@ For basic programs, migration is straightforward:
 ebs2-migrate convert myapp.ebs --output myapp-v2.ebs
 
 # Options
---keep-symbolic    # Keep if/else instead of when/otherwise
 --zero-based       # Keep 0-based array indexing
 --minimal          # Minimal changes only
---full             # Full conversion to natural language
+--preserve-style   # Keep original code style where possible
 ```
 
 ### Migration Example
@@ -427,7 +423,7 @@ print "Average: " + avg;
 
 **EBS2 Code (Natural):**
 ```javascript
--- Calculate average score
+// Calculate average score
 to averageScore scores
     var total as number = 0
     var count as number = count of scores
@@ -436,7 +432,7 @@ to averageScore scores
         total = total + score
     end
     
-    when count is greater than 0 then
+    if count is greater than 0 then
         give back total / count
     otherwise
         give back 0
@@ -450,7 +446,7 @@ show "Average: " + avg
 
 **EBS2 Code (Symbolic, Advanced):**
 ```javascript
--- Calculate average score
+// Calculate average score
 function averageScore(scores)
     var total = 0
     var count = count of scores

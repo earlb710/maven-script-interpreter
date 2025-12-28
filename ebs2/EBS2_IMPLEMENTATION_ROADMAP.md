@@ -309,7 +309,7 @@ public class Ebs2Type {
 **Transpilation Strategy:**
 ```javascript
 // EBS2 Code:
-// when age > 12 then
+// if age > 12 then
 //     show "Teenager"
 // end
 
@@ -713,10 +713,10 @@ class EBS2Playground {
 
 **Graphics API:**
 ```javascript
--- Simple drawing
+// Simple drawing
 draw circle at x:100 y:100 radius:50 color:red
 
--- Advanced drawing with transformations
+// Advanced drawing with transformations
 with canvas MainCanvas
     save state
     rotate 45 degrees
@@ -727,10 +727,10 @@ end
 
 **Network API:**
 ```javascript
--- Simple HTTP request
+// Simple HTTP request
 var response = call http.get from "https://api.example.com/data"
 
--- Advanced with headers and error handling
+// Advanced with headers and error handling
 try
     var response = call http.post to "https://api.example.com/submit"
         with body {"name": "Alice", "age": 10}
@@ -852,7 +852,7 @@ public class GamePlugin implements EBS2Plugin {
 
 **Classes (optional, advanced):**
 ```javascript
--- Traditional class syntax for advanced users
+// Traditional class syntax for advanced users
 class Animal
     property name as text
     property age as number
@@ -879,7 +879,7 @@ async to loadData from url
     give back data
 end
 
--- Use it
+// Use it
 var userData = await call loadData from "https://api.example.com/user"
 ```
 

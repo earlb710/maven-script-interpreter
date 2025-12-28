@@ -69,7 +69,7 @@
 │     ├─ Feature Comparison Tables                                        │
 │     ├─ Migration Guide (automated tools)                                │
 │     ├─ Compatibility Mode                                               │
-│     └─ Decision Matrix (when to use each)                               │
+│     └─ Decision Matrix (if to use each)                               │
 └──────────────────────────────────────────────────────────────────────────┘
 
 ┌─ 🚀 BEGINNER TUTORIAL ──────────────────────────────────────────────────┐
@@ -107,7 +107,7 @@ Sections:            50+
 
 🌟 KEY INNOVATIONS DEFINED
 ──────────────────────────
-✅ Natural Language Syntax    → "when ... then" vs "if { }"
+✅ Natural Language Syntax    → "if ... then" vs "if { }"
 ✅ Two-Tier Functions         → Simple + Advanced variants
 ✅ Visual Block Editor        → Scratch-like for beginners
 ✅ Dual Runtime              → HTML5 browser + Java desktop
