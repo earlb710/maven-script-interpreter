@@ -77,10 +77,11 @@ var x = 10  // Comment after code
 program     end         var         variable    as          is
 if          then        else        repeat      times
 for         each        in          to          call
-with        and         give        back        print
+with        and         return      print
 log         hide        ask         screen      button
 label       textbox     array       text        number
 flag        true        false       const       constant    indicator
+record      type        function    procedure
 ```
 
 **Note:** All keywords are case-insensitive (`IF`, `if`, `If` all work the same).
@@ -96,8 +97,26 @@ async       await       class       extends     new
 
 ### Identifiers
 
+**User-defined names (variables, functions, procedures, types, record fields) are case-insensitive:**
+
 - Start with letter or underscore
 - Contain letters, digits, underscores
+- Case-insensitive: `myVar`, `MYVAR`, `MyVar` are the same identifier
+- Must be unique within the same scope (case-insensitive check)
+- String literals remain case-sensitive: `"Hello"` ≠ `"HELLO"`
+
+**Examples:**
+```javascript
+var userName = "Alice"
+print USERNAME              // Same as userName (case-insensitive)
+print UserName              // Same as userName (case-insensitive)
+
+function calculateTotal() as number
+    return 100
+end function
+
+var x = CALCULATETOTAL()    // Calls calculateTotal (case-insensitive)
+```
 - Case-sensitive for user-defined names
 - Cannot be reserved keywords
 
@@ -727,12 +746,19 @@ var grade as indicator ("A", "B", "C", "D", "F") = "B"
 **Named Record Types** - Define reusable record structures:
 
 ```javascript
-// Define record type
-type Person
+// Define record type with 'record type' keyword
+record type Person
     name as text
     age as number
     email as text
 end
+
+// Alternative with curly braces
+record type Student {
+    name as text
+    age as number
+    grade as number
+}
 
 // Create record instances
 var student as Person = record {
@@ -747,24 +773,25 @@ var teacher as Person = record {
     email: "bob@school.com"
 }
 
-// Access fields
+// Access fields (case-insensitive field names)
 print student.name      // "Alice"
-print student.age       // 10
+print student.NAME      // "Alice" (same field)
+print student.Age       // 10 (same field)
 student.age = 11        // Update field
 
 // Nested records
-type Address
+record type Address
     street as text
     city as text
     zipCode as text
 end
 
-type Employee
+record type Employee {
     name as text
     age as number
     address as Address
     salary as number
-end
+}
 
 var emp as Employee = record {
     name: "Charlie",
@@ -855,7 +882,7 @@ print config.database.name  // "mydb"
 
 ```javascript
 // Array of named record types
-type Student
+record type Student
     name as text
     age as number
     grade as number
@@ -866,9 +893,11 @@ var students as array.record(Student) =
     record { name: "Bob", age: 11, grade: 87 },
     record { name: "Charlie", age: 10, grade: 92 }
 
-// Access records in array
+// Access records in array (case-insensitive field names)
 print students[0].name     // "Alice"
+print students[0].NAME     // "Alice" (same field)
 print students[1].grade    // 87
+print students[1].GRADE    // 87 (same field)
 
 // Loop through records
 for each student in students {
