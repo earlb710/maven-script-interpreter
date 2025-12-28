@@ -200,13 +200,13 @@ for fruit in fruits {
 ```javascript
 // Repeat n times
 repeat 10 times with counter
-    show counter
+    print counter
 end repeat
 
 // For each
 var fruits = list "apple", "banana", "cherry"
 for each fruit in fruits
-    show fruit
+    print fruit
 end for
 ```
 
@@ -234,14 +234,14 @@ to greet person
 end function
 
 var message = call greet with "Alice"
-show message
+print message
 ```
 
 **Key Differences:**
 - EBS2: Natural definition `to greet person` vs `greet(name: string)`
 - EBS2: `return` vs `return`
 - EBS2: `call ... with` vs `call()`
-- EBS2: `show` vs `print`
+- Both use `print` for output
 
 ### Arrays/Lists
 
@@ -262,12 +262,12 @@ print fruits.length;  // 2
 ```javascript
 // Array with simple syntax
 var numbers = array 1, 2, 3, 4, 5
-show numbers at 0  -- "1" (0-based!)
+print numbers at 0  // "1" (0-based!)
 
 // Dynamic array
 var fruits = array "apple", "banana"
-show fruits at 0  -- "apple"
-show count of fruits  -- 2
+print fruits at 0  // "apple"
+print count of fruits  // 2
 ```
 
 **Key Differences:**
