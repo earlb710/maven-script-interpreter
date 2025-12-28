@@ -680,6 +680,7 @@ var last = numbers[99]      // Gets last element (for 100-item array)
 - `array.flag` - Array of boolean values only
 - `array.indicator` - Array of indicator values only
 - `array.date` - Array of date values only
+- `array.record` - Array of record instances only
 
 **Note:** Arrays are collections of multiple values that can be accessed by index. Use typed arrays for type safety.
 
@@ -730,17 +731,91 @@ type Person
     email as text
 end
 
-// Create record
+// Create record instances
 var student as Person = record {
     name: "Alice",
     age: 10,
     email: "alice@school.com"
 }
 
+var teacher as Person = record {
+    name: "Bob",
+    age: 35,
+    email: "bob@school.com"
+}
+
 // Access fields
-print student.name
-print student.age
+print student.name      // "Alice"
+print student.age       // 10
+student.age = 11        // Update field
+
+// Nested records
+type Address
+    street as text
+    city as text
+    zipCode as text
+end
+
+type Employee
+    name as text
+    age as number
+    address as Address
+    salary as number
+end
+
+var emp as Employee = record {
+    name: "Charlie",
+    age: 28,
+    address: record {
+        street: "123 Main St",
+        city: "Springfield",
+        zipCode: "12345"
+    },
+    salary: 50000
+}
+
+// Access nested fields
+print emp.address.city  // "Springfield"
 ```
+
+**Array of Records:**
+
+```javascript
+// Define a record type
+type Student
+    name as text
+    age as number
+    grade as number
+end
+
+// Array of records (array.record)
+var students as array.record(Student) = 
+    record { name: "Alice", age: 10, grade: 95 },
+    record { name: "Bob", age: 11, grade: 87 },
+    record { name: "Charlie", age: 10, grade: 92 }
+
+// Access records in array
+print students[0].name     // "Alice"
+print students[1].grade    // 87
+
+// Loop through records
+for each student in students {
+    print student.name + ": " + student.grade
+}
+
+// Modify records in array
+students[0].grade = 98
+
+// Add new record to array
+students.push(record { name: "Diana", age: 11, grade: 90 })
+```
+
+**Benefits:**
+- ✅ **Structured data** - Organize related information together
+- ✅ **Type safety** - Compiler enforces record structure
+- ✅ **Easy access** - Use dot notation: `student.name`
+- ✅ **Array.record** - Type-safe arrays of structured data
+- ✅ **Self-documenting** - Record type shows data structure
 
 #### map
 ```javascript
@@ -1161,15 +1236,68 @@ for each item in items
 end for
 ```
 
-## Functions
+## Functions and Procedures
 
-EBS2 supports both natural language and traditional function syntax.
+EBS2 distinguishes between **functions** (which return values) and **procedures** (which don't return values).
 
-### Function Definition Forms
+### Function vs Procedure
+
+**Function** - Has parameters and returns a value:
+```javascript
+// Short form - function with return type
+function calculateScore(points as number) as number {
+    return points * 10
+}
+
+// Long form - function with returns clause
+to calculateScore points as number returns number
+    return points * 10
+end function
+
+// Usage - returns a value
+var score = calculateScore(50)  // score = 500
+```
+
+**Procedure** - Has parameters but does NOT return a value:
+```javascript
+// Short form - procedure (no return type)
+procedure displayMessage(message as text) {
+    print message
+    log "Message displayed"
+}
+
+// Long form - procedure (no returns clause)
+to displayMessage message as text
+    print message
+    log "Message displayed"
+end procedure
+
+// Usage - just executes, no return value
+displayMessage("Hello World")
+```
+
+**Key Differences:**
+
+| Feature | Function | Procedure |
+|---------|----------|-----------|
+| **Definition** | `function name(params) as returnType` | `procedure name(params)` |
+| **Long Form** | `to name params returns type` | `to name params` (no returns) |
+| **Returns Value** | Yes (must use `return`) | No (no `return` statement) |
+| **Usage** | `var result = funcName(args)` | `procName(args)` |
+| **Purpose** | Calculate and return values | Perform actions/side effects |
+
+**Benefits:**
+- ✅ **Clear intent** - Function returns value, procedure performs action
+- ✅ **Type safety** - Return type declared for functions
+- ✅ **Better errors** - Compiler catches missing returns in functions
+- ✅ **Self-documenting** - Code clearly shows what returns values
+
+### Definition Forms
 
 | Long Form (Natural) | Short Form (Traditional) |
 |---------------------|--------------------------|
-| `to functionName param` | `function functionName(param)` |
+| `to functionName param returns type` | `function functionName(param) as type` |
+| `to procedureName param` | `procedure procedureName(param)` |
 | `return value` | `return value` |
 | `call functionName with value` | `functionName(value)` |
 

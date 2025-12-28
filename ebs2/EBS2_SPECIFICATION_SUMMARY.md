@@ -58,16 +58,20 @@ This document provides a summary of the EBS2 language specification and related 
 - Grammar Summary (EBNF)
 
 **Key Features:**
+- **Function/Procedure Distinction**: Functions return values (`function name(params) as type`), procedures don't (`procedure name(params)`)
+- **Record Types**: Structured data with type definitions (`type Person ... end`)
+- **Array.Record**: Type-safe arrays of records (`array.record(Person)`)
+- **Standard Return Keyword**: Uses `return` for returning values
 - **Flexible Syntax Options**: Choose between `end if` keywords or `{}` curly braces
 - **Case-Insensitive Keywords**: `if`, `IF`, `If` all work the same
 - **Natural language syntax**: `if ... then`, `repeat ... times`, `for each ... in`
 - **Symbolic alternatives for advanced users**: `if`, `while`, `&&`
 - **Single-line or multi-line blocks**: `if x < 5 then print "Small"` or multi-line with `end if`
 - **Semicolon separators**: Multiple commands on one line with `;`
-- **Range notation**: `array : 1..100` creates arrays easily with colon syntax
-- **Typed arrays**: `array.text`, `array.number`, `array.indicator` for type safety
+- **Range notation**: `array = 1..100` creates arrays easily with equals syntax
+- **Typed arrays**: `array.text`, `array.number`, `array.indicator`, `array.record` for type safety
 - **Number ranges**: `number 0..100` (int-backed) or `number -1.0..1.0` (double-backed) for range constraints
-- **Colon initialization**: Required for literals: `var x as type : value`
+- **Equals initialization**: Consistent syntax: `var x as type = value`
 - **0-based array indexing**: Consistent with mainstream languages
 - **Curly brace blocks with scoping**: Variables in `{}` blocks are local to that block
 - **Child-friendly error messages**

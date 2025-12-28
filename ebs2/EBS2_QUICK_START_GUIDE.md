@@ -380,39 +380,43 @@ end
 
 ## Creating Functions
 
-Functions are reusable blocks of code:
+Functions let you organize and reuse code. EBS2 has two types:
 
-### Simple Function
+### Procedures (No Return Value)
+
+**Procedures** perform actions but don't return a value:
 
 ```javascript
 program SayHello
 
-to greet
+// Procedure - just does something
+procedure greet() {
     print "Hello there!"
-end
+}
 
 main
-    call greet
-    call greet
-    call greet
+    greet()  // Call it
+    greet()  // Call it again
+    greet()  // Call it one more time
 end
 ```
 
 **Output:** "Hello there!" appears 3 times
 
-### Function with Input
+### Procedure with Input
 
 ```javascript
 program PersonalGreeting
 
-to greet person
+// Procedure with a parameter
+procedure greet(person as text) {
     print "Hello " + person + "!"
-end
+}
 
 main
-    call greet with "Alice"
-    call greet with "Bob"
-    call greet with "Charlie"
+    greet("Alice")
+    greet("Bob")
+    greet("Charlie")
 end
 ```
 
@@ -423,22 +427,29 @@ Hello Bob!
 Hello Charlie!
 ```
 
-### Function that Returns a Value
+### Functions (Return Value)
+
+**Functions** calculate and return a value:
 
 ```javascript
 program Calculator
 
-to add numbers a and b
+// Function - returns a value
+function add(a as number, b as number) as number {
     return a + b
-end
+}
 
 main
-    var result = call add with a:5 and b:3
+    var result = add(5, 3)
     print "5 + 3 = " + result
 end
 ```
 
 **Output:** `5 + 3 = 8`
+
+**Key Point:**
+- Use **procedure** when you just want to do something (like print or update)
+- Use **function** when you need to calculate and return a value
 
 ## Making Windows
 
