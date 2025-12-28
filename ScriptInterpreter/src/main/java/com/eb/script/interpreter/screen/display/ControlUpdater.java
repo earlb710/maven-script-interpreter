@@ -143,6 +143,8 @@ public class ControlUpdater {
             updateImageView(control, value);
         } else if (control instanceof Canvas) {
             updateCanvasView(control, value);
+        } else if (control instanceof TreeView) {
+            updateTreeView(control, value);
         } else if (control instanceof javafx.scene.layout.StackPane) {
             // Check if StackPane contains an ImageView (wrapped for background support)
             javafx.scene.layout.StackPane stackPane = (javafx.scene.layout.StackPane) control;
@@ -366,6 +368,110 @@ public class ControlUpdater {
         
         // Value not found in map, return original
         return dataValue;
+    }
+    
+    /**
+     * Updates a TreeView control with a value representing the selected item.
+     * Searches the tree hierarchy for an item with a matching value and selects it.
+     * If the value is null or empty, clears the selection.
+     * Uses a flag to prevent infinite loops with the selection listener.
+     * 
+     * @param control The TreeView control
+     * @param value The value of the tree item to select (String)
+     */
+    private static void updateTreeView(Node control, Object value) {
+        @SuppressWarnings("unchecked")
+        TreeView<String> treeView = (TreeView<String>) control;
+        
+        // Get the flag that prevents infinite loops
+        @SuppressWarnings("unchecked")
+        boolean[] updatingFromVariable = (boolean[]) control.getProperties().get("updatingFromVariable");
+        
+        // Set the flag to prevent the selection listener from updating the variable
+        if (updatingFromVariable != null) {
+            updatingFromVariable[0] = true;
+        }
+        
+        try {
+            if (value == null || (value instanceof String && ((String) value).isEmpty())) {
+                // Clear selection
+                treeView.getSelectionModel().clearSelection();
+                return;
+            }
+            
+            String targetValue = String.valueOf(value);
+            
+            // Find the tree item with the matching value
+            TreeItem<String> rootItem = treeView.getRoot();
+            if (rootItem == null) {
+                return;
+            }
+            
+            TreeItem<String> matchingItem = findTreeItemByValue(rootItem, targetValue);
+            if (matchingItem != null) {
+                // Expand parent nodes to make the item visible
+                expandParents(matchingItem);
+                
+                // Select the item
+                treeView.getSelectionModel().select(matchingItem);
+                
+                // Scroll to make the selected item visible
+                int index = treeView.getRow(matchingItem);
+                if (index >= 0) {
+                    treeView.scrollTo(index);
+                }
+            }
+        } finally {
+            // Reset the flag after updating
+            if (updatingFromVariable != null) {
+                updatingFromVariable[0] = false;
+            }
+        }
+    }
+    
+    /**
+     * Recursively searches for a TreeItem with the specified value.
+     * 
+     * @param item The tree item to start searching from
+     * @param targetValue The value to search for
+     * @return The matching TreeItem, or null if not found
+     */
+    private static TreeItem<String> findTreeItemByValue(TreeItem<String> item, String targetValue) {
+        if (item == null || targetValue == null) {
+            return null;
+        }
+        
+        // Check if this item matches
+        if (targetValue.equals(item.getValue())) {
+            return item;
+        }
+        
+        // Recursively search children
+        for (TreeItem<String> child : item.getChildren()) {
+            TreeItem<String> result = findTreeItemByValue(child, targetValue);
+            if (result != null) {
+                return result;
+            }
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Expands all parent nodes of the given tree item to make it visible.
+     * 
+     * @param item The tree item whose parents should be expanded
+     */
+    private static void expandParents(TreeItem<String> item) {
+        if (item == null) {
+            return;
+        }
+        
+        TreeItem<String> parent = item.getParent();
+        if (parent != null) {
+            parent.setExpanded(true);
+            expandParents(parent);
+        }
     }
     
     /**
