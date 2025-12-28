@@ -155,6 +155,7 @@ call array.add(itemsArray, clearBtn);
 
 // Create main area
 var mainArea: json = call json.jsonFromString("{}");
+mainArea = call json.set(mainArea, "name", "mainArea");
 mainArea = call json.set(mainArea, "type", "vbox");
 mainArea = call json.set(mainArea, "spacing", 10);
 mainArea = call json.set(mainArea, "padding", 15);

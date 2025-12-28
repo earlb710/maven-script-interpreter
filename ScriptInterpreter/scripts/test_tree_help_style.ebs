@@ -133,6 +133,7 @@ treeItem = call json.set(treeItem, "display", treeDisplay);
 call array.add(leftPanelItems, treeItem);
 
 var leftPanel: json = call json.jsonFromString("{}");
+leftPanel = call json.set(leftPanel, "name", "leftPanel");
 leftPanel = call json.set(leftPanel, "type", "vbox");
 leftPanel = call json.set(leftPanel, "items", leftPanelItems);
 
@@ -195,6 +196,7 @@ clearBtn = call json.set(clearBtn, "display", clearDisplay);
 call array.add(rightPanelItems, clearBtn);
 
 var rightPanel: json = call json.jsonFromString("{}");
+rightPanel = call json.set(rightPanel, "name", "rightPanel");
 rightPanel = call json.set(rightPanel, "type", "vbox");
 rightPanel = call json.set(rightPanel, "spacing", 10);
 rightPanel = call json.set(rightPanel, "padding", 15);
@@ -206,6 +208,7 @@ call array.add(areasArray, leftPanel);
 call array.add(areasArray, rightPanel);
 
 var mainArea: json = call json.jsonFromString("{}");
+mainArea = call json.set(mainArea, "name", "mainArea");
 mainArea = call json.set(mainArea, "type", "hbox");
 mainArea = call json.set(mainArea, "spacing", 10);
 mainArea = call json.set(mainArea, "padding", 10);
