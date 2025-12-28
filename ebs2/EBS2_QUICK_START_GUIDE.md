@@ -23,14 +23,14 @@ Let's start with the simplest program possible:
 program HelloWorld
 
 main
-    show "Hello World!"
+    print "Hello World!"
 end
 ```
 
 **What does this do?**
 - `program HelloWorld` - Names your program
 - `main` - Where your program starts
-- `show "Hello World!"` - Displays text on screen
+- `print "Hello World!"` - Displays text on screen
 - `end` - Marks the end of main
 
 **Try it yourself:**
@@ -50,7 +50,7 @@ program MyProgram
 
 main
     -- Your code goes here
-    show "This is where I write instructions"
+    print "This is where I write instructions"
 end
 ```
 
@@ -71,7 +71,7 @@ program GreetFriend
 
 main
     var name as text = "Sarah"
-    show "Hello " + name
+    print "Hello " + name
 end
 ```
 
@@ -87,7 +87,7 @@ main
     var oranges as number = 3
     var total = apples + oranges
     
-    show "Total fruit: " + total
+    print "Total fruit: " + total
 end
 ```
 
@@ -102,8 +102,8 @@ main
     var isSunny as yes/no = yes
     var isRaining as yes/no = no
     
-    show "Is it sunny? " + isSunny
-    show "Is it raining? " + isRaining
+    print "Is it sunny? " + isSunny
+    print "Is it raining? " + isRaining
 end
 ```
 
@@ -126,7 +126,7 @@ main
     var age as number = 12
     
     if age is greater than 12 then
-        show "You're a teenager!"
+        print "You're a teenager!"
     end
 end
 ```
@@ -140,9 +140,9 @@ main
     var age as number = 10
     
     if age is greater than 12 then
-        show "You're a teenager!"
+        print "You're a teenager!"
     otherwise
-        show "You're a child!"
+        print "You're a child!"
     end
 end
 ```
@@ -156,13 +156,13 @@ main
     var score as number = 85
     
     if score >= 90 then
-        show "Grade: A"
+        print "Grade: A"
     otherwise if score >= 80 then
-        show "Grade: B"
+        print "Grade: B"
     otherwise if score >= 70 then
-        show "Grade: C"
+        print "Grade: C"
     otherwise
-        show "Grade: D"
+        print "Grade: D"
     end
 end
 ```
@@ -183,7 +183,7 @@ program CountToTen
 
 main
     repeat 10 times with counter
-        show counter
+        print counter
     end
 end
 ```
@@ -199,7 +199,7 @@ main
     var fruits = list "apple", "banana", "cherry"
     
     for each fruit in fruits
-        show "I like " + fruit
+        print "I like " + fruit
     end
 end
 ```
@@ -220,11 +220,11 @@ main
     var count as number = 5
     
     repeat while count > 0
-        show count
+        print count
         count = count - 1
     end
     
-    show "Blast off!"
+    print "Blast off!"
 end
 ```
 
@@ -240,7 +240,7 @@ Functions are reusable blocks of code:
 program SayHello
 
 to greet
-    show "Hello there!"
+    print "Hello there!"
 end
 
 main
@@ -258,7 +258,7 @@ end
 program PersonalGreeting
 
 to greet person
-    show "Hello " + person + "!"
+    print "Hello " + person + "!"
 end
 
 main
@@ -286,7 +286,7 @@ end
 
 main
     var result = call add with a:5 and b:3
-    show "5 + 3 = " + result
+    print "5 + 3 = " + result
 end
 ```
 
@@ -312,13 +312,13 @@ screen HelloScreen
     button OkButton
         text "OK"
         when clicked
-            show "You clicked OK!"
+            print "You clicked OK!"
         end
     end
 end
 
 main
-    show screen HelloScreen
+    print screen HelloScreen
 end
 ```
 
@@ -342,13 +342,13 @@ screen InputScreen
         text "Submit"
         when clicked
             var name = get text from NameBox
-            show "Hello " + name + "!"
+            print "Hello " + name + "!"
         end
     end
 end
 
 main
-    show screen InputScreen
+    print screen InputScreen
 end
 ```
 
@@ -386,9 +386,23 @@ screen CounterScreen
 end
 
 main
-    show screen CounterScreen
+    print screen CounterScreen
 end
 ```
+
+### 💡 Tip: Using print vs log
+
+**print** - Shows output to the user (displays in your program's window)
+```javascript
+print "Hello, User!"  // Visible to everyone using your program
+```
+
+**log** - Writes debug messages (only visible in Debug View)
+```javascript
+log "Debug: count value is", count  // Only visible to you while debugging
+```
+
+Use `log` to help find problems in your code without cluttering the user's screen!
 
 ## What's Next
 
@@ -435,21 +449,21 @@ end
 ```javascript
 // Wrong
 if age > 12 then
-    show "Teenager"
+    print "Teenager"
 
 // Right
 if age > 12 then
-    show "Teenager"
+    print "Teenager"
 end
 ```
 
 **Forgot quotes around text:**
 ```javascript
 // Wrong
-show Hello World
+print Hello World
 
 // Right
-show "Hello World"
+print "Hello World"
 ```
 
 **Wrong variable type:**

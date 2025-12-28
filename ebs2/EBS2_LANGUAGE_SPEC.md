@@ -75,10 +75,10 @@ EBS2 is designed with three core principles:
 program     end         var         as          is
 if          then        else        repeat      times
 for         each        in          to          call
-with        and         give        back        show
-hide        ask         screen      button      label
-textbox     list        text        number      yes
-no          true        false
+with        and         give        back        print
+log         hide        ask         screen      button
+label       textbox     list        text        number
+yes         no          true        false
 ```
 
 #### Advanced Keywords
@@ -197,7 +197,7 @@ not          -- Logical NOT
 program HelloWorld
 
 main
-    show "Hello World"
+    print "Hello World"
 end
 ```
 
@@ -224,7 +224,7 @@ end
 // Optional: Function definitions
 functions
     to greet person
-        show "Hello " + person
+        print "Hello " + person
     end
     
     to calculate score
@@ -243,7 +243,7 @@ end
 // Required: Main entry point
 main
     -- Program starts here
-    show screen MainWindow
+    print screen MainWindow
 end
 ```
 
@@ -333,8 +333,8 @@ var student as Person = record {
 }
 
 // Access fields
-show student.name
-show student.age
+print student.name
+print student.age
 ```
 
 #### map
@@ -419,14 +419,14 @@ end
 functions
     to testScope
         var localVar as text = "Local"
-        show globalVar   -- Can access global
-        show localVar    -- Can access local
+        print globalVar   -- Can access global
+        print localVar    -- Can access local
     end
 end
 
 main
-    show globalVar      -- Can access
-    -- show localVar   -- ERROR: Cannot access
+    print globalVar      -- Can access
+    -- print localVar   -- ERROR: Cannot access
 end
 ```
 
@@ -467,30 +467,30 @@ EBS2 supports both natural language and symbolic comparison operators. Both form
 #### Natural Language (Beginner)
 ```javascript
 if age is greater than 12 then
-    show "Teenager"
+    print "Teenager"
 end
 
 if score is equal to 100 then
-    show "Perfect!"
+    print "Perfect!"
 end
 
 if lives is not equal to 0 then
-    show "Still alive"
+    print "Still alive"
 end
 ```
 
 #### Symbolic Form (Advanced)
 ```javascript
 if age > 12 then
-    show "Teenager"
+    print "Teenager"
 end
 
 if score = 100 then
-    show "Perfect!"
+    print "Perfect!"
 end
 
 if lives <> 0 then
-    show "Still alive"
+    print "Still alive"
 end
 ```
 
@@ -509,11 +509,11 @@ EBS2 supports both natural language and symbolic logical operators. Both forms a
 #### Natural Language (Beginner)
 ```javascript
 if age > 12 and age < 20 then
-    show "Teenager"
+    print "Teenager"
 end
 
 if day is "Saturday" or day is "Sunday" then
-    show "Weekend!"
+    print "Weekend!"
 end
 
 if not isGameOver then
@@ -524,11 +524,11 @@ end
 #### Symbolic Form (Advanced)
 ```javascript
 if (age > 12) && (age < 20) then
-    show "Teenager"
+    print "Teenager"
 end
 
 if (day = "Saturday") || (day = "Sunday") then
-    show "Weekend!"
+    print "Weekend!"
 end
 
 if !isGameOver then
@@ -564,22 +564,22 @@ end
 #### If-Else (Beginner)
 ```javascript
 if age < 13 then
-    show "Child"
+    print "Child"
 else
-    show "Teen or Adult"
+    print "Teen or Adult"
 end
 ```
 
 #### Multiple Conditions (Intermediate)
 ```javascript
 if score >= 90 then
-    show "Grade A"
+    print "Grade A"
 else if score >= 80 then
-    show "Grade B"
+    print "Grade B"
 else if score >= 70 then
-    show "Grade C"
+    print "Grade C"
 else
-    show "Grade D or F"
+    print "Grade D or F"
 end
 ```
 
@@ -600,12 +600,12 @@ end
 ```javascript
 // Fixed repetition
 repeat 10 times
-    show "Hello"
+    print "Hello"
 end
 
 // With counter
 repeat 5 times with counter
-    show "Count: " + counter
+    print "Count: " + counter
 end
 ```
 
@@ -614,7 +614,7 @@ end
 // Loop while condition is true
 repeat while count < 100
     count = count + 1
-    show count
+    print count
 end
 
 // Loop until condition is true
@@ -629,12 +629,12 @@ end
 var fruits = list "apple", "banana", "cherry"
 
 for each fruit in fruits
-    show "I like " + fruit
+    print "I like " + fruit
 end
 
 // With index (advanced)
 for each fruit in fruits with index
-    show index + ": " + fruit
+    print index + ": " + fruit
 end
 ```
 
@@ -642,17 +642,17 @@ end
 ```javascript
 // Count from 1 to 10
 for counter from 1 to 10
-    show counter
+    print counter
 end
 
 // Count with step
 for counter from 0 to 100 by 10
-    show counter     -- 0, 10, 20, ..., 100
+    print counter     -- 0, 10, 20, ..., 100
 end
 
 // Count backwards
 for counter from 10 down to 1
-    show counter
+    print counter
 end
 ```
 
@@ -705,7 +705,7 @@ EBS2 supports both natural language and traditional function syntax.
 #### Function without Parameters
 ```javascript
 to sayHello
-    show "Hello World"
+    print "Hello World"
 end
 
 // Call it
@@ -715,7 +715,7 @@ call sayHello
 #### Function with One Parameter
 ```javascript
 to greet person
-    show "Hello " + person
+    print "Hello " + person
 end
 
 // Call it
@@ -725,7 +725,7 @@ call greet with "Alice"
 #### Function with Multiple Parameters
 ```javascript
 to introduce person and age
-    show person + " is " + age + " years old"
+    print person + " is " + age + " years old"
 end
 
 // Call it
@@ -742,7 +742,7 @@ end
 
 // Use it
 var result = call double with 5
-show result     -- Shows: 10
+print result     -- Shows: 10
 ```
 
 #### Multiple Returns (Advanced)
@@ -755,7 +755,7 @@ end
 
 // Use it
 var quot, rem = call divideWithRemainder with dividend: 17 and divisor: 5
-show "Quotient: " + quot + ", Remainder: " + rem
+print "Quotient: " + quot + ", Remainder: " + rem
 ```
 
 ### Advanced Function Features
@@ -763,7 +763,7 @@ show "Quotient: " + quot + ", Remainder: " + rem
 #### Optional Parameters
 ```javascript
 to greet person and title: "Friend"
-    show "Hello " + title + " " + person
+    print "Hello " + title + " " + person
 end
 
 // Call with default
@@ -827,7 +827,7 @@ end
 
 // Show the screen
 main
-    show screen HelloScreen
+    print screen HelloScreen
 end
 ```
 
@@ -866,7 +866,7 @@ screen UserForm
         when clicked
             var name = get text from NameInput
             var age = get value from AgeInput
-            show "Hello " + name + ", you are " + age
+            print "Hello " + name + ", you are " + age
         end
     end
 end
@@ -1056,7 +1056,7 @@ end
 
 ### Automatic Error Handling (Beginner)
 
-By default, errors stop the program and show a helpful message:
+By default, errors stop the program and print a helpful message:
 
 ```javascript
 // This will auto-stop with helpful error
@@ -1072,9 +1072,9 @@ var data = read file "missing.txt"
 ```javascript
 try
     var data = read file "data.txt"
-    show "File loaded successfully"
+    print "File loaded successfully"
 catch
-    show "Could not load file, using defaults"
+    print "Could not load file, using defaults"
     var data = "default content"
 end
 ```
@@ -1086,13 +1086,13 @@ try
     var data = read file "data.txt"
     var number = convert data to number
 catch when file_not_found
-    show "File not found"
+    print "File not found"
     var data = "0"
 catch when invalid_conversion
-    show "File contents are not a valid number"
+    print "File contents are not a valid number"
     var number = 0
 catch otherwise as error
-    show "Unexpected error: " + error.message
+    print "Unexpected error: " + error.message
 end
 ```
 
@@ -1125,18 +1125,27 @@ end
 ### Console Output (Beginner)
 
 ```javascript
-// Simple print
-show "Hello World"
+// Print to output (displays in HTML document or JavaFX text area)
+print "Hello World"
 
 // Print with new line
-show line "Hello World"
+print line "Hello World"
 
 // Print without new line
-show "Hello " then show "World"
+print "Hello " then print "World"
 
-// Clear screen
+// Log to debug log (writes to log file, viewable in debug view)
+log "Debug message"
+log "Variable value:", myVariable
+
+// Clear output screen
 clear screen
 ```
+
+**Note:** 
+- `print` outputs to the main display (HTML document or JavaFX text area)
+- `log` writes to a debug log file and debug view (available on both HTML5 and JavaFX)
+- Both commands work identically across HTML5 and JavaFX platforms
 
 ### User Input (Beginner)
 
@@ -1333,7 +1342,7 @@ var days = days between start and end
 
 // Compare dates
 if now is after deadline then
-    show "Overdue!"
+    print "Overdue!"
 end
 ```
 
@@ -1418,7 +1427,7 @@ call helpers.greet with "Alice"
 
 // Mark functions for export
 export function greet person
-    show "Hello " + person
+    print "Hello " + person
 end
 
 export function calculate sum of numbers
@@ -1513,6 +1522,7 @@ my_project/
 - Number operations
 - List operations
 - Error handling
+- Console output (print and log)
 
 #### Platform-Specific
 - Advanced file operations
@@ -1521,14 +1531,46 @@ my_project/
 - Performance optimizations
 - Platform UI conventions
 
+### Output and Logging Implementation
+
+#### print Command
+**HTML5 Runtime:**
+- Outputs to HTML document (appends text nodes or updates designated output area)
+- Can target specific DOM elements
+- Supports HTML formatting when needed
+
+**Java Runtime:**
+- Adds text items to JavaFX TextFlow or TextArea
+- Updates the console/output pane
+- Maintains formatting and styling
+
+#### log Command
+**HTML5 Runtime:**
+- Writes to browser console (console.log)
+- Stores in IndexedDB or LocalStorage for persistence
+- Accessible via Debug View panel in the web IDE
+- Can export log file
+
+**Java Runtime:**
+- Writes to application log file
+- Accessible via Debug View window
+- Supports log rotation and file management
+- Can tail log in real-time
+
+**Common Behavior:**
+- Both commands are non-blocking
+- Both support multiple arguments
+- Both maintain timestamp and context information
+- Debug view is available on both platforms
+
 ### Runtime Detection
 
 ```javascript
 // Check current runtime
 if running on browser then
-    show "Running in web browser"
+    print "Running in web browser"
 else if running on desktop then
-    show "Running as desktop app"
+    print "Running as desktop app"
 end
 
 // Conditional features
@@ -1665,7 +1707,7 @@ type            = "number" | "text" | "yes/no" | "list" |
 
 ### Appendix A: Complete Keyword List
 
-**Beginner Keywords:** program, end, var, as, is, if, then, else, repeat, times, for, each, in, to, call, with, and, give, back, show, hide, ask, screen, button, label, textbox, list, text, number, yes, no, true, false
+**Beginner Keywords:** program, end, var, as, is, if, then, else, repeat, times, for, each, in, to, call, with, and, give, back, print, log, hide, ask, screen, button, label, textbox, list, text, number, yes, no, true, false
 
 **Advanced Keywords:** function, return, try, catch, throw, import, from, export, record, map, json, while, until, break, continue, switch, case, default, const, let, async, await, class, extends, new
 
@@ -1710,14 +1752,14 @@ EBS2 supports both natural language (long form) and symbolic (short form) syntax
 See section [Built-in Functions](#built-in-functions) for detailed documentation.
 
 **Categories:**
-- Console Output (show, clear, ...)
+- Console Output (print, log, clear, ...)
 - User Input (ask, choose, ...)
 - Text Operations (length, uppercase, split, ...)
 - Number Operations (round, absolute, random, ...)
 - List Operations (count, filter, sort, ...)
 - Date/Time (today, current time, format, ...)
 - File Operations (read, write, exists, ...)
-- Screen Operations (show screen, hide screen, ...)
+- Screen Operations (print screen, hide screen, ...)
 
 ### Appendix D: Migration Checklist
 

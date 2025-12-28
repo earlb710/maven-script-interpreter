@@ -69,12 +69,12 @@ EBS2 is designed with three core principles:
 ```javascript
 // Beginner-friendly
 if age is greater than 12 then
-    show "You're a teenager!"
+    print "You're a teenager!"
 end
 
 // Or use traditional (advanced)
 if age > 12 then
-    show "You're a teenager!"
+    print "You're a teenager!"
 end
 ```
 
@@ -183,7 +183,7 @@ end
 
 // Functions
 to greet person
-    show "Hello " + person
+    print "Hello " + person
 end
 
 // Screens

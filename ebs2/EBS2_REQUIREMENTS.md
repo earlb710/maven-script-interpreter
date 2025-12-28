@@ -30,7 +30,7 @@ Every feature in EBS2 should have:
 ```javascript
 // Natural, beginner-friendly
 if age is greater than 12 then
-    show "Teenager"
+    print "Teenager"
 end
 ```
 
@@ -38,7 +38,7 @@ end
 ```javascript
 // Compact, developer-friendly
 if age > 12 then
-    show "Teenager"
+    print "Teenager"
 end
 ```
 
@@ -126,7 +126,7 @@ HTML5 Runtime   Java Runtime
 ```javascript
 // Instead of: if (x > 10) { ... }
 if x is greater than 10 then
-    show "X is large"
+    print "X is large"
 end
 
 // Instead of: function add(a, b) { return a + b; }
@@ -203,10 +203,10 @@ var content = read file "data.txt"
     and handle errors gracefully
 
 // SIMPLE: Show message box
-show message "Hello!"
+print message "Hello!"
 
 // ADVANCED: Show message with title, icon, buttons
-show message "Save changes?" 
+print message "Save changes?" 
     titled "Confirm"
     with icon question
     and buttons yes_no_cancel
@@ -235,7 +235,7 @@ end
 // Section 3: Functions (optional)
 functions
     to greet someone
-        show "Hello " + someone
+        print "Hello " + someone
     end
 end
 
@@ -257,7 +257,7 @@ end
 
 // Section 5: Main code (required)
 main
-    show screen MainWindow
+    print screen MainWindow
 end
 ```
 
@@ -344,7 +344,7 @@ end
 #### Simple Functions
 ```javascript
 to greet
-    show "Hello World"
+    print "Hello World"
 end
 
 // Call it
@@ -354,7 +354,7 @@ call greet
 #### Functions with Parameters
 ```javascript
 to greet person
-    show "Hello " + person
+    print "Hello " + person
 end
 
 call greet with "Alice"
@@ -390,13 +390,13 @@ screen MyWindow
     button ClickMe
         text "Click Me"
         when clicked
-            show "Clicked!"
+            print "Clicked!"
         end
     end
 end
 
 // Show it
-show screen MyWindow
+print screen MyWindow
 ```
 
 #### Advanced Window with Layout
@@ -421,7 +421,7 @@ screen AdvancedWindow
         text "Submit"
         when clicked
             var name = get text from NameInput
-            show message "Hello " + name
+            print message "Hello " + name
         end
     end
 end
@@ -431,7 +431,7 @@ end
 
 #### Simple (for beginners)
 ```javascript
-// Errors stop the program and show helpful message
+// Errors stop the program and print helpful message
 var data = read file "missing.txt"
 // Auto error: "Cannot find file 'missing.txt' in the current folder"
 ```
@@ -441,7 +441,7 @@ var data = read file "missing.txt"
 try
     var data = read file "missing.txt"
 catch when file_not_found as error
-    show "Could not find file: " + error.message
+    print "Could not find file: " + error.message
     -- Use default data
     var data = "Default content"
 end
@@ -515,7 +515,7 @@ var found = find in numbers where item > 3
 #### Screen Operations (Simple)
 ```javascript
 // Show message
-show "Hello World"
+print "Hello World"
 
 // Ask for input
 var name = ask "What is your name?"
@@ -527,7 +527,7 @@ var answer = ask yes or no "Do you want to continue?"
 #### Screen Operations (Advanced)
 ```javascript
 // Show custom dialog
-show dialog "Custom Dialog"
+print dialog "Custom Dialog"
     with message "Choose an option"
     and icon information
     and buttons ok_cancel
@@ -535,7 +535,7 @@ show dialog "Custom Dialog"
     store result in choice
 
 // Show notification
-show notification "Task Complete"
+print notification "Task Complete"
     for duration 3 seconds
     with style success
     at position bottom_right

@@ -134,22 +134,22 @@ if age > 12 then {
 **EBS2 (Natural):**
 ```javascript
 if age is greater than 12 then
-    show "Teenager"
+    print "Teenager"
 otherwise if age is greater than 5 then
-    show "Child"
+    print "Child"
 else
-    show "Preschooler"
+    print "Preschooler"
 end
 ```
 
 **EBS2 (Symbolic - Advanced):**
 ```javascript
 if age > 12 then
-    show "Teenager"
+    print "Teenager"
 else if age > 5 then
-    show "Child"
+    print "Child"
 else
-    show "Preschooler"
+    print "Preschooler"
 end
 ```
 
@@ -441,7 +441,7 @@ end
 
 var results = list 85, 90, 78, 92, 88
 var avg = call averageScore with results
-show "Average: " + avg
+print "Average: " + avg
 ```
 
 **EBS2 Code (Symbolic, Advanced):**
@@ -464,7 +464,7 @@ end
 
 var results = list 85, 90, 78, 92, 88
 var avg = averageScore(results)
-show "Average: " + avg
+print "Average: " + avg
 ```
 
 ### Compatibility Mode

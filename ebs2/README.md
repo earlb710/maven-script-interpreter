@@ -38,9 +38,9 @@ end
 
 main
     if age is greater than 12 then
-        show "You're a teenager!"
+        print "You're a teenager!"
     else
-        show "You're a child!"
+        print "You're a child!"
     end
 end
 ```

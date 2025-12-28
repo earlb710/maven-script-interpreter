@@ -235,12 +235,12 @@ Support both for smooth learning curve:
 ```javascript
 // NATURAL (beginner)
 if age is greater than 12 then
-    show "Teenager"
+    print "Teenager"
 end
 
 // SYMBOLIC (advanced)
 if age > 12 then
-    show "Teenager"
+    print "Teenager"
 end
 ```
 

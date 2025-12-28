@@ -310,7 +310,7 @@ public class Ebs2Type {
 ```javascript
 // EBS2 Code:
 // if age > 12 then
-//     show "Teenager"
+//     print "Teenager"
 // end
 
 // Generated JavaScript:
@@ -739,7 +739,7 @@ try
     
     var data = parse json from response.body
 catch when network_error
-    show "Could not connect to server"
+    print "Could not connect to server"
 end
 ```
 
