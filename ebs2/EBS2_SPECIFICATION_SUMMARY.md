@@ -46,6 +46,11 @@ This document provides a summary of the EBS2 language specification and related 
 - Data Types (basic: number, number with ranges, text, flag, date; collections: array, array.text, array.number, indicator, record (named and anonymous), map)
 - Variables and Constants (var/variable for mutable, const/constant for immutable)
 - Operators (arithmetic, comparison, logical, string)
+  - **Modulo**: `mod` (long form) or `%` (short form)
+  - **Logical AND**: `and` (long form), `&&` (short form), or `&` (alternative)
+  - **Logical OR**: `or` (long form), `||` (short form), or `|` (alternative)
+  - **Logical NOT**: `not` (long form) or `!` (short form)
+  - **All operator forms are equivalent** - mix and match based on preference
 - Control Flow (if/then/else with optional natural language operators)
 - Functions (simple to advanced, with parameters, return values)
 - Screens and UI (components, layouts, events)
@@ -58,6 +63,7 @@ This document provides a summary of the EBS2 language specification and related 
 - Grammar Summary (EBNF)
 
 **Key Features:**
+- **Type Inference for Records**: `var person = record {...}` is valid (type inferred from record literal, no `as record` needed)
 - **Function/Procedure Distinction**: Functions return values (`function name(params) as type` or `function name() as type`), procedures don't (`procedure name(params)` or `procedure name()`). **Parentheses `()` are always required**, even with no parameters.
 - **Record Types**: Named structured data (`record type Person ... end`) and anonymous records (`var x as record = record {...}`). **Records can contain arrays and nested records**.
 - **Array.Record**: Type-safe arrays of named records (`array.record(Person)`) or anonymous records (`array.record`)

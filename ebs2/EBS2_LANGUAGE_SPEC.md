@@ -200,9 +200,11 @@ record {name: "Alice", age: 10}
 
 #### Arithmetic (Advanced)
 ```javascript
-mod  -- Modulo (remainder)
+mod  -- Modulo (remainder) - can also use %
 ^    -- Power
 ```
+
+**Note:** The modulo operator can be written as either `mod` (long form) or `%` (short form).
 
 #### Comparison (Natural Language)
 ```javascript
@@ -858,16 +860,25 @@ for each student in course.students {
 **Anonymous Record Types** - Inline record definitions without named types:
 
 ```javascript
-// Anonymous record (no type definition needed)
+// Anonymous record with explicit 'as record' type annotation
 var person as record = record {
     name: "Alice",
     age: 10,
     city: "Boston"
 }
 
+// Anonymous record with type inference (no 'as record' needed)
+var employee = record {
+    name: "Bob",
+    title: "Developer",
+    salary: 75000
+}
+
+// Both forms are equivalent and valid
+
 // Access fields the same way
 print person.name       // "Alice"
-print person.age        // 10
+print employee.title    // "Developer"
 person.age = 11         // Update field
 
 // Anonymous records in functions
@@ -909,8 +920,8 @@ var config as record = record {
 print config.server.host    // "localhost"
 print config.database.name  // "mydb"
 
-// Anonymous records with arrays
-var classroom as record = record {
+// Anonymous records with arrays - with type inference
+var classroom = record {
     roomNumber: "101",
     students: "Alice", "Bob", "Charlie", "Diana",
     grades: 95, 87, 92, 88,
@@ -1059,6 +1070,17 @@ variable userName as text = "Bob"    // Same as 'var'
 var count = 42           // Inferred as number
 var message = "Hello"    // Inferred as text
 
+// Type inference with records (no explicit 'as record' needed)
+var person = record {
+    name: "Alice",
+    age: 10
+}                        // Inferred as record
+
+var classroom = record {
+    students: "Alice", "Bob",
+    grades: 95, 87
+}                        // Inferred as record
+
 // Arrays with equals
 var fruits as array = "apple", "banana", "cherry"
 var numbers as array.number = 1, 2, 3, 4, 5
@@ -1174,10 +1196,17 @@ var quotient = 15 / 3    -- Division: 5
 
 #### Advanced Form
 ```javascript
+// Long form (natural language)
 var remainder = 17 mod 5     -- Modulo: 2
+
+// Short form (symbolic)
+var remainder = 17 % 5       -- Modulo: 2 (same as mod)
+
 var power = 2 ^ 8            -- Power: 256
 var negated = -value         -- Negation
 ```
+
+**Note:** The modulo operator can be written as either `mod` (long form) or `%` (short form) - both are equivalent.
 
 ### Comparison Operations
 
@@ -1230,11 +1259,15 @@ EBS2 supports both natural language and symbolic logical operators. Both forms a
 
 #### Logical Operator Table
 
-| Long Form (Natural) | Short Form | Description |
-|---------------------|------------|-------------|
-| `and` | `&&` | Logical AND |
-| `or` | `\|\|` | Logical OR |
-| `not` | `!` | Logical NOT |
+| Long Form (Natural) | Short Form | Alternative | Description |
+|---------------------|------------|-------------|-------------|
+| `and` | `&&` | `&` | Logical AND |
+| `or` | `\|\|` | `\|` | Logical OR |
+| `not` | `!` | - | Logical NOT |
+
+**Note:** For logical operators, both double and single symbols work:
+- `&&` and `&` both mean AND
+- `||` and `|` both mean OR
 
 #### Natural Language (Beginner)
 ```javascript
@@ -1265,6 +1298,48 @@ if !isGameOver then
     continue playing
 end if
 ```
+
+### Complete Operator Reference
+
+**EBS2 provides multiple forms for operators to support different coding styles:**
+
+#### Arithmetic Operators
+
+| Operation | Long Form | Short Form | Example |
+|-----------|-----------|------------|---------|
+| Addition | - | `+` | `5 + 3` |
+| Subtraction | - | `-` | `5 - 3` |
+| Multiplication | - | `*` | `5 * 3` |
+| Division | - | `/` | `15 / 3` |
+| Modulo | `mod` | `%` | `17 mod 5` or `17 % 5` |
+| Power | - | `^` | `2 ^ 8` |
+| Negation | - | `-` | `-value` |
+
+#### Comparison Operators
+
+| Operation | Long Form | Short Form | Alternative | Example |
+|-----------|-----------|------------|-------------|---------|
+| Equal | `is equal to` | `=` | `==` | `age = 10` |
+| Not Equal | `is not equal to` | `<>` | `!=` | `age <> 10` |
+| Greater Than | `is greater than` | `>` | - | `age > 10` |
+| Less Than | `is less than` | `<` | - | `age < 10` |
+| Greater or Equal | `is greater than or equal to` | `>=` | - | `age >= 10` |
+| Less or Equal | `is less than or equal to` | `<=` | - | `age <= 10` |
+
+#### Logical Operators
+
+| Operation | Long Form | Short Form | Alternative | Example |
+|-----------|-----------|------------|-------------|---------|
+| AND | `and` | `&&` | `&` | `age > 10 and age < 20` |
+| OR | `or` | `\|\|` | `\|` | `day = "Sat" or day = "Sun"` |
+| NOT | `not` | `!` | - | `not isGameOver` |
+
+**Key Points:**
+- ✅ All forms are equivalent - choose what works best for your style
+- ✅ Long forms (word-based) are great for beginners and readability
+- ✅ Short forms (symbolic) are great for experienced developers and efficiency
+- ✅ Alternative forms provide flexibility (e.g., `=` vs `==`, `<>` vs `!=`, `&` vs `&&`)
+- ✅ Mix and match forms in the same program as needed
 
 ### String Operations
 
