@@ -1,29 +1,63 @@
 // Test script to demonstrate bidirectional tree binding
 // The tree selection updates the variable, and setting the variable updates the tree selection
 
-// Build tree structure
-var treeData: array[*] = [];
-
+// Build tree structure using json.set for proper structure
 var docsChildren: array[*] = [];
-call array.add(docsChildren, {"value": "README.md"});
-call array.add(docsChildren, {"value": "TODO.txt"});
-call array.add(docsChildren, {"value": "Notes.md"});
+var readme: json = call json.jsonFromString("{}");
+readme = call json.set(readme, "value", "README.md");
+call array.add(docsChildren, readme);
+var todo: json = call json.jsonFromString("{}");
+todo = call json.set(todo, "value", "TODO.txt");
+call array.add(docsChildren, todo);
+var notes: json = call json.jsonFromString("{}");
+notes = call json.set(notes, "value", "Notes.md");
+call array.add(docsChildren, notes);
 
 var projectsChildren: array[*] = [];
-call array.add(projectsChildren, {"value": "Project1"});
-call array.add(projectsChildren, {"value": "Project2"});
-call array.add(projectsChildren, {"value": "Project3"});
+var proj1: json = call json.jsonFromString("{}");
+proj1 = call json.set(proj1, "value", "Project1");
+call array.add(projectsChildren, proj1);
+var proj2: json = call json.jsonFromString("{}");
+proj2 = call json.set(proj2, "value", "Project2");
+call array.add(projectsChildren, proj2);
+var proj3: json = call json.jsonFromString("{}");
+proj3 = call json.set(proj3, "value", "Project3");
+call array.add(projectsChildren, proj3);
 
 var imagesChildren: array[*] = [];
-call array.add(imagesChildren, {"value": "photo1.jpg"});
-call array.add(imagesChildren, {"value": "photo2.png"});
+var photo1: json = call json.jsonFromString("{}");
+photo1 = call json.set(photo1, "value", "photo1.jpg");
+call array.add(imagesChildren, photo1);
+var photo2: json = call json.jsonFromString("{}");
+photo2 = call json.set(photo2, "value", "photo2.png");
+call array.add(imagesChildren, photo2);
 
 var rootChildren: array[*] = [];
-call array.add(rootChildren, {"value": "Documents", "expanded": false, "children": $docsChildren});
-call array.add(rootChildren, {"value": "Projects", "expanded": false, "children": $projectsChildren});
-call array.add(rootChildren, {"value": "Images", "expanded": false, "children": $imagesChildren});
+var docsNode: json = call json.jsonFromString("{}");
+docsNode = call json.set(docsNode, "value", "Documents");
+docsNode = call json.set(docsNode, "expanded", false);
+docsNode = call json.set(docsNode, "children", docsChildren);
+call array.add(rootChildren, docsNode);
 
-call array.add(treeData, {"value": "Root", "expanded": true, "children": $rootChildren});
+var projectsNode: json = call json.jsonFromString("{}");
+projectsNode = call json.set(projectsNode, "value", "Projects");
+projectsNode = call json.set(projectsNode, "expanded", false);
+projectsNode = call json.set(projectsNode, "children", projectsChildren);
+call array.add(rootChildren, projectsNode);
+
+var imagesNode: json = call json.jsonFromString("{}");
+imagesNode = call json.set(imagesNode, "value", "Images");
+imagesNode = call json.set(imagesNode, "expanded", false);
+imagesNode = call json.set(imagesNode, "children", imagesChildren);
+call array.add(rootChildren, imagesNode);
+
+var rootNode: json = call json.jsonFromString("{}");
+rootNode = call json.set(rootNode, "value", "Root");
+rootNode = call json.set(rootNode, "expanded", true);
+rootNode = call json.set(rootNode, "children", rootChildren);
+
+var treeData: array[*] = [];
+call array.add(treeData, rootNode);
 
 screen TreeBindingTest = {
     "title": "Tree Bidirectional Binding Test",
@@ -69,7 +103,7 @@ screen TreeBindingTest = {
                         "type": "treeview",
                         "displayRecords": 12,
                         "showRoot": true,
-                        "treeItems": $treeData,
+                        "treeItems": [],
                         "onChange": "call scr.setProperty('TreeBindingTest.selectionLabel', 'labelText', 'Current selection: ' + selectedFile);"
                     }
                 },
@@ -126,6 +160,9 @@ screen TreeBindingTest = {
         }
     ]
 };
+
+// Inject tree items into the screen dynamically
+call scr.setProperty('TreeBindingTest.selectedFile', 'treeItems', treeData);
 
 show screen TreeBindingTest;
 

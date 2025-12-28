@@ -209,7 +209,7 @@ screen HelpStyleTreeTest = {
                                 "labelText": "Documentation Topics",
                                 "displayRecords": 20,
                                 "showRoot": false,
-                                "treeItems": $treeData,
+                                "treeItems": [],
                                 "onChange": "if selectedTopic != '' then { call scr.setProperty('HelpStyleTreeTest.topicTitle', 'labelText', 'Topic: ' + selectedTopic); call scr.setProperty('HelpStyleTreeTest.topicContent', 'labelText', 'Showing content for: ' + selectedTopic + '\\n\\nBidirectional binding:\\n• Click tree items to update variable\\n• Set variable to update tree selection\\n• Parents expand automatically\\n• Tree scrolls to selection'); } else { call scr.setProperty('HelpStyleTreeTest.topicTitle', 'labelText', 'Topic: (none)'); call scr.setProperty('HelpStyleTreeTest.topicContent', 'labelText', 'Select a topic from the tree or use navigation buttons.'); }"
                             }
                         }
@@ -336,6 +336,9 @@ screen HelpStyleTreeTest = {
         }
     ]
 };
+
+// Inject tree items into the screen dynamically
+call scr.setProperty('HelpStyleTreeTest.selectedTopic', 'treeItems', treeData);
 
 // Show the screen
 show screen HelpStyleTreeTest;
