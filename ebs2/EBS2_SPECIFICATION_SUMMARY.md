@@ -43,7 +43,7 @@ This document provides a summary of the EBS2 language specification and related 
 **Key Sections:**
 - Lexical Structure (keywords, identifiers, literals, operators; comments: single-line `//` only)
 - Program Structure (sections: settings, variables, functions, screens, main)
-- Data Types (basic: number, number with ranges, text, flag, date; collections: array, array.text, array.number, indicator, record, map)
+- Data Types (basic: number, number with ranges, text, flag, date; collections: array, array.text, array.number, indicator, record (named and anonymous), map)
 - Variables and Constants (var/variable for mutable, const/constant for immutable)
 - Operators (arithmetic, comparison, logical, string)
 - Control Flow (if/then/else with optional natural language operators)
@@ -59,8 +59,8 @@ This document provides a summary of the EBS2 language specification and related 
 
 **Key Features:**
 - **Function/Procedure Distinction**: Functions return values (`function name(params) as type`), procedures don't (`procedure name(params)`)
-- **Record Types**: Structured data with type definitions (`type Person ... end`)
-- **Array.Record**: Type-safe arrays of records (`array.record(Person)`)
+- **Record Types**: Named structured data (`type Person ... end`) and anonymous records (`var x as record = record {...}`)
+- **Array.Record**: Type-safe arrays of named records (`array.record(Person)`) or anonymous records (`array.record`)
 - **Standard Return Keyword**: Uses `return` for returning values
 - **Flexible Syntax Options**: Choose between `end if` keywords or `{}` curly braces
 - **Case-Insensitive Keywords**: `if`, `IF`, `If` all work the same

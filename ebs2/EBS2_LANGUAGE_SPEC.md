@@ -723,6 +723,9 @@ var grade as indicator ("A", "B", "C", "D", "F") = "B"
 - **`indicator`** - Single value that must be one of a predefined set: `myStatus = "active"`
 
 #### record
+
+**Named Record Types** - Define reusable record structures:
+
 ```javascript
 // Define record type
 type Person
@@ -778,17 +781,86 @@ var emp as Employee = record {
 print emp.address.city  // "Springfield"
 ```
 
+**Anonymous Record Types** - Inline record definitions without named types:
+
+```javascript
+// Anonymous record (no type definition needed)
+var person as record = record {
+    name: "Alice",
+    age: 10,
+    city: "Boston"
+}
+
+// Access fields the same way
+print person.name       // "Alice"
+print person.age        // 10
+person.age = 11         // Update field
+
+// Anonymous records in functions
+function createUser(name as text, email as text) as record {
+    return record {
+        name: name,
+        email: email,
+        createdAt: now(),
+        isActive: true
+    }
+}
+
+var user = createUser("Bob", "bob@email.com")
+print user.name         // "Bob"
+print user.isActive     // true
+
+// Array of anonymous records
+var points as array.record = 
+    record { x: 10, y: 20 },
+    record { x: 30, y: 40 },
+    record { x: 50, y: 60 }
+
+for each point in points {
+    print "X: " + point.x + ", Y: " + point.y
+}
+
+// Nested anonymous records
+var config as record = record {
+    server: record {
+        host: "localhost",
+        port: 8080
+    },
+    database: record {
+        name: "mydb",
+        user: "admin"
+    }
+}
+
+print config.server.host    // "localhost"
+print config.database.name  // "mydb"
+```
+
+**When to use each:**
+
+| Named Records | Anonymous Records |
+|---------------|-------------------|
+| Reusable structure needed | One-time or ad-hoc structure |
+| Complex data models | Simple temporary data |
+| Type safety across codebase | Flexibility and rapid prototyping |
+| Documentation important | Quick scripts and experiments |
+
+**Benefits of anonymous records:**
+- ✅ **Rapid prototyping** - No need to define types upfront
+- ✅ **Flexibility** - Structure can vary per instance
+- ✅ **Simplicity** - Less boilerplate for simple data
+- ✅ **Inline definition** - See structure where it's used
+
 **Array of Records:**
 
 ```javascript
-// Define a record type
+// Array of named record types
 type Student
     name as text
     age as number
     grade as number
 end
 
-// Array of records (array.record)
 var students as array.record(Student) = 
     record { name: "Alice", age: 10, grade: 95 },
     record { name: "Bob", age: 11, grade: 87 },
@@ -808,14 +880,25 @@ students[0].grade = 98
 
 // Add new record to array
 students.push(record { name: "Diana", age: 11, grade: 90 })
+
+// Array of anonymous records (no type definition)
+var points as array.record = 
+    record { x: 10, y: 20 },
+    record { x: 30, y: 40 },
+    record { x: 50, y: 60 }
+
+for each point in points {
+    print "Point: (" + point.x + ", " + point.y + ")"
+}
 ```
 
 **Benefits:**
 - ✅ **Structured data** - Organize related information together
-- ✅ **Type safety** - Compiler enforces record structure
+- ✅ **Type safety** - Named records enforce structure, anonymous allow flexibility
 - ✅ **Easy access** - Use dot notation: `student.name`
 - ✅ **Array.record** - Type-safe arrays of structured data
 - ✅ **Self-documenting** - Record type shows data structure
+- ✅ **Flexible** - Anonymous records for ad-hoc structures
 
 #### map
 ```javascript
