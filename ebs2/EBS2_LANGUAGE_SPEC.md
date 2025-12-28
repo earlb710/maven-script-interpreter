@@ -665,34 +665,34 @@ var deadline as date = "2025-12-31 23:59:59"
 
 #### array
 ```javascript
-// Array with equals initialization (consistent with assignment)
-var fruits as array = "apple", "banana", "cherry"
-var numbers as array = 1, 2, 3, 4, 5
+// Array literals use curly braces {}
+var fruits as array = {"apple", "banana", "cherry"}
+var numbers as array = {1, 2, 3, 4, 5}
 
-// Range syntax
-var numbers as array = 1..100     // Creates array [1, 2, 3, ..., 100]
-var letters as array = 'a'..'z'   // Creates array ['a', 'b', ..., 'z']
-var countdown as array = 10..1    // Creates array [10, 9, 8, ..., 1]
+// Range syntax (no curly braces for ranges)
+var sequence = 1..100          // Creates array {1, 2, 3, ..., 100}
+var letters = 'a'..'z'         // Creates array {'a', 'b', ..., 'z'}
+var countdown = 10..1          // Creates array {10, 9, 8, ..., 1}
 
-// Typed arrays with equals
-var names as array.text = "Alice", "Bob", "Charlie"
-var scores as array.number = 95, 87, 92, 88
-var flags as array.flag = true, false, true
+// Typed arrays with curly braces
+var names as array.text = {"Alice", "Bob", "Charlie"}
+var scores as array.number = {95, 87, 92, 88}
+var flags as array.flag = {true, false, true}
 
 // Typed indicator array (requires indicator definition)
-var statuses as array.indicator("new", "active", "done") = "new", "active", "done"
+var statuses as array.indicator("new", "active", "done") = {"new", "active", "done"}
 
 // Empty array
-var empty as array = 
-var emptyNames as array.text = 
+var empty = {}
+var emptyNames as array.text = {}
 
 // Multi-type array (only with base array type)
-var mixed as array = 1, "two", true, 3.14
+var mixed as array = {1, "two", true, 3.14}
 
 // Arrays are 0-indexed (like most programming languages)
 var first = numbers[0]      // Gets first element
 var second = numbers[1]     // Gets second element
-var last = numbers[99]      // Gets last element (for 100-item array)
+var last = numbers[4]       // Gets last element (for 5-item array)
 ```
 
 **Typed Arrays:**
@@ -818,8 +818,8 @@ end
 
 var team as Team = record {
     name: "Tigers",
-    members: "Alice", "Bob", "Charlie",
-    scores: 95, 87, 92
+    members: {"Alice", "Bob", "Charlie"},
+    scores: {95, 87, 92}
 }
 
 // Access array fields in records
@@ -842,10 +842,11 @@ end
 var course as Course = record {
     title: "Math 101",
     instructor: "Dr. Smith",
-    students: 
+    students: {
         record { name: "Alice", age: 10, grade: 95 },
-        record { name: "Bob", age: 11, grade: 87 },
-    grades: 95, 87, 90
+        record { name: "Bob", age: 11, grade: 87 }
+    },
+    grades: {95, 87, 90}
 }
 
 // Access nested arrays and records
@@ -896,10 +897,11 @@ print user.name         // "Bob"
 print user.isActive     // true
 
 // Array of anonymous records
-var points as array.record = 
+var points as array.record = {
     record { x: 10, y: 20 },
     record { x: 30, y: 40 },
     record { x: 50, y: 60 }
+}
 
 for each point in points {
     print "X: " + point.x + ", Y: " + point.y
@@ -923,9 +925,9 @@ print config.database.name  // "mydb"
 // Anonymous records with arrays - with type inference
 var classroom = record {
     roomNumber: "101",
-    students: "Alice", "Bob", "Charlie", "Diana",
-    grades: 95, 87, 92, 88,
-    equipment: "projector", "whiteboard", "computers"
+    students: {"Alice", "Bob", "Charlie", "Diana"},
+    grades: {95, 87, 92, 88},
+    equipment: {"projector", "whiteboard", "computers"}
 }
 
 // Access arrays within anonymous records
@@ -940,17 +942,18 @@ for each item in classroom.equipment {
 var school as record = record {
     name: "Elementary School",
     year: 2024,
-    classes: 
+    classes: {
         record { 
             name: "Math 101", 
-            students: "Alice", "Bob",
-            scores: 95, 87
+            students: {"Alice", "Bob"},
+            scores: {95, 87}
         },
         record { 
             name: "Science 101", 
-            students: "Charlie", "Diana",
-            scores: 92, 88
+            students: {"Charlie", "Diana"},
+            scores: {92, 88}
         }
+    }
 }
 
 // Access nested structures
@@ -984,10 +987,11 @@ record type Student
     grade as number
 end
 
-var students as array.record(Student) = 
+var students as array.record(Student) = {
     record { name: "Alice", age: 10, grade: 95 },
     record { name: "Bob", age: 11, grade: 87 },
     record { name: "Charlie", age: 10, grade: 92 }
+}
 
 // Access records in array (case-insensitive field names)
 print students[0].name     // "Alice"
@@ -1007,10 +1011,11 @@ students[0].grade = 98
 students.push(record { name: "Diana", age: 11, grade: 90 })
 
 // Array of anonymous records (no type definition)
-var points as array.record = 
+var points as array.record = {
     record { x: 10, y: 20 },
     record { x: 30, y: 40 },
     record { x: 50, y: 60 }
+}
 
 for each point in points {
     print "Point: (" + point.x + ", " + point.y + ")"
@@ -1077,13 +1082,13 @@ var person = record {
 }                        // Inferred as record
 
 var classroom = record {
-    students: "Alice", "Bob",
-    grades: 95, 87
+    students: {"Alice", "Bob"},
+    grades: {95, 87}
 }                        // Inferred as record
 
-// Arrays with equals
-var fruits as array = "apple", "banana", "cherry"
-var numbers as array.number = 1, 2, 3, 4, 5
+// Arrays with curly braces
+var fruits as array = {"apple", "banana", "cherry"}
+var numbers as array.number = {1, 2, 3, 4, 5}
 
 // Indicators with equals (required initialization)
 var status as indicator ("new", "pending") = "new"
@@ -1107,9 +1112,9 @@ var message = "Hello World"    // Same as: var message as text = "Hello World"
 var isActive = true            // Same as: var isActive as flag = true
 var hasError = false           // Same as: var hasError as flag = false
 
-// Array inference
-var items = 1, 2, 3, 4         // Same as: var items as array = 1, 2, 3, 4
-var names = "Alice", "Bob"     // Same as: var names as array = "Alice", "Bob"
+// Array inference with curly braces
+var items = {1, 2, 3, 4}       // Same as: var items as array = {1, 2, 3, 4}
+var names = {"Alice", "Bob"}   // Same as: var names as array = {"Alice", "Bob"}
 
 // Record inference (no 'as record' needed)
 var person = record {          // Same as: var person as record = record {...}
@@ -1136,7 +1141,7 @@ const APP_NAME = "MyApp"       // Same as: const APP_NAME as text = "MyApp"
 - ✅ **Flexible** - Can still use explicit types when needed
 
 **When to use explicit types:**
-- Typed arrays: `var scores as array.number = 95, 87, 92`
+- Typed arrays: `var scores as array.number = {95, 87, 92}`
 - Indicators: `var status as indicator ("new", "done") = "new"`
 - Number ranges: `var age as number 0..120 = 25`
 - When type isn't obvious: `var value as number = getUserInput()`
@@ -1145,7 +1150,7 @@ const APP_NAME = "MyApp"       // Same as: const APP_NAME as text = "MyApp"
 - ✅ Variables: `var x = 10`
 - ✅ Constants: `const MAX = 100`
 - ✅ Records: `var person = record {...}`
-- ✅ Arrays: `var items = 1, 2, 3`
+- ✅ Arrays: `var items = {1, 2, 3}`
 - ✅ All primitive types: number, text, flag
 
 ### Constant Declaration
@@ -1506,8 +1511,8 @@ end repeat
 
 #### For Each (Intermediate)
 ```javascript
-// Iterate over list
-var fruits = list "apple", "banana", "cherry"
+// Iterate over array
+var fruits = {"apple", "banana", "cherry"}
 
 for each fruit in fruits
     print "I like " + fruit
@@ -2154,10 +2159,10 @@ var result = replace "World" with "Everyone" in "Hello World"
 
 ```javascript
 // Split text
-var parts = split "a,b,c" by ","     -- list "a", "b", "c"
+var parts = split "a,b,c" by ","     -- {"a", "b", "c"}
 
 // Join text
-var joined = join list "a", "b", "c" with ","  -- "a,b,c"
+var joined = join {"a", "b", "c"} with ","  -- "a,b,c"
 
 // Trim whitespace
 var trimmed = trim "  Hello  "       -- "Hello"
@@ -2214,8 +2219,8 @@ var degs = 3.14 radians to degrees
 ### List Functions (Beginner)
 
 ```javascript
-// Create list
-var numbers = list 1, 2, 3, 4, 5
+// Create array
+var numbers = {1, 2, 3, 4, 5}
 
 // Count items
 var count = count of numbers         -- 5
@@ -2258,8 +2263,8 @@ var reversed = sort numbers descending
 // Reverse list
 var backwards = reverse numbers
 
-// Join lists
-var combined = join numbers with list 6, 7, 8
+// Join arrays
+var combined = join numbers with {6, 7, 8}
 
 // Get subset
 var subset = take from 2 to 4 in numbers
@@ -2596,7 +2601,7 @@ end if
 
 1. **Use type annotations**
    ```javascript
-   var scores as list of number = list 90, 85, 92
+   var scores as array.number = {90, 85, 92}
    ```
 
 2. **Leverage advanced features when appropriate**
