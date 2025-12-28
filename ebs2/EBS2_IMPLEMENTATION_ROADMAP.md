@@ -334,8 +334,8 @@ const ebs2_runtime = {
     show: (text) => console.log(text),
     ask: (prompt) => window.prompt(prompt),
     
-    // List operations (1-based indexing)
-    listAt: (list, index) => list[index - 1],
+    // Array operations (0-based indexing consistent with mainstream languages)
+    arrayAt: (array, index) => array[index],
     
     // Error handling
     throwError: (type, message) => { /* helpful errors */ }

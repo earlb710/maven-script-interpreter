@@ -59,8 +59,11 @@ EBS2 is designed with three core principles:
 **Single-line comments only:**
 
 ```javascript
-// Single line comment
+// Single line comment (C-style)
 var x = 10  // Comment after code
+
+-- Alternative comment style (Lua-style)
+var y = 20  -- Also works after code
 
 // Multi-line explanations use multiple single lines:
 // This is a longer explanation
@@ -68,7 +71,7 @@ var x = 10  // Comment after code
 // to describe complex logic
 ```
 
-**Note:** Block comments (`/* */`) are NOT supported. Use multiple `//` lines instead for clarity and simplicity.
+**Note:** Block comments (`/* */`) are NOT supported. Use multiple `//` or `--` lines instead for clarity and simplicity. Both comment styles are equivalent; use whichever you prefer.
 
 ### Keywords
 
@@ -2630,12 +2633,12 @@ end if
 
 | Feature | EBS1 | EBS2 |
 |---------|------|------|
-| Keywords | `if`, `while`, `var` | `when`, `repeat`, `var` |
+| Keywords | `if`, `while`, `var` | `if`, `repeat`, `var` |
 | Types | `string`, `int`, `float` | `text`, `number` |
-| Functions | `greet(name: string)` | `to greet person` |
-| Arrays | 0-based indexing | 1-based indexing (configurable) |
+| Functions | `greet(name: string)` | `greet(person as text)` or `to greet person` |
+| Arrays | 0-based indexing | 0-based indexing (consistent) |
 | Structure | Free-form | Organized sections |
-| Comments | `//` and `/* */` | `--` and `--[[ ]]--` |
+| Comments | `//` and `/* */` | `//` and `--` (single-line only) |
 
 ### Migration Tool
 
@@ -2772,12 +2775,11 @@ See section [Built-in Functions](#built-in-functions) for detailed documentation
 
 - [ ] Review breaking changes from EBS1
 - [ ] Update variable declarations (string → text, int/float → number)
-- [ ] Update array indexing (0-based → 1-based)
 - [ ] Organize code into sections (optional but recommended)
 - [ ] Test in both HTML5 and Java runtimes
 - [ ] Consider using natural language syntax for beginner-facing code
 
-**Note:** Comments (`//`), control structures (`if/else`), and most syntax remain compatible with EBS1.
+**Note:** Array indexing remains 0-based (consistent with EBS1). Comments (`//`), control structures (`if/else`), and most syntax remain compatible with EBS1.
 
 ### Appendix E: Standard Library Organization
 

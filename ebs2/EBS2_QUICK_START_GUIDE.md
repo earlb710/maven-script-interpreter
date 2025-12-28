@@ -57,7 +57,7 @@ end
 **Parts of a program:**
 - **program** - Gives your program a name
 - **main** - The starting point (required)
-- **//** or **--** - Comments (notes that the computer skips)
+- **//** or **--** - Comments (notes that the computer skips - both styles work)
 - **end** - Closes a section
 
 **Bonus Tip:** Keywords like `program`, `main`, `print`, `if`, `end` can be written in ANY CASE:
@@ -199,7 +199,7 @@ main
     
     if age is greater than 12 then
         print "You're a teenager!"
-    otherwise
+    else
         print "You're a child!"
     end
 end
@@ -215,11 +215,11 @@ main
     
     if score >= 90 then
         print "Grade: A"
-    otherwise if score >= 80 then
+    else if score >= 80 then
         print "Grade: B"
-    otherwise if score >= 70 then
+    else if score >= 70 then
         print "Grade: C"
-    otherwise
+    else
         print "Grade: D"
     end
 end
@@ -525,7 +525,7 @@ screen CounterScreen
     
     label CountLabel
         text "Clicks: 0"
-    end screen
+    end
     
     button ClickButton
         text "Click Me!"
@@ -773,7 +773,7 @@ screen MyScreen
         text "Click"
         when clicked
             -- do something
-        end screen
+        end
     end
 end
 ```

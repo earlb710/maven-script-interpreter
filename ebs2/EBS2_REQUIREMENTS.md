@@ -493,7 +493,7 @@ var numbers = list 1, 2, 3, 4, 5
 add 6 to numbers
 
 // Get item
-var first = numbers at 1  -- 0-based indexing for simplicity
+var first = numbers at 0  -- 0-based indexing (consistent with mainstream languages)
 
 // Get count
 var count = count of numbers
@@ -618,18 +618,18 @@ print notification "Task Complete"
 - Clear migration guide
 
 ### Breaking Changes from EBS1
-1. **Syntax**: More natural language keywords
-2. **Structure**: Required program organization
-3. **Types**: Simplified type names (text vs string)
-4. **Indexing**: 1-based arrays for beginners (configurable)
-5. **Functions**: Different definition syntax
+1. **Syntax**: More natural language keywords available
+2. **Structure**: Recommended program organization (optional)
+3. **Types**: Simplified type names (text vs string, number vs int/float)
+4. **Comments**: Both `//` and `--` supported (block comments not supported)
+5. **Functions**: More natural definition syntax available
 
 ## Open Questions
 
 1. **Block Editor**: Should we use existing framework (Blockly) or build custom?
 2. **Type System**: Strong typing vs dynamic typing for beginners?
-3. **Indexing**: 0-based (programmer standard) vs 1-based (natural counting)?
-4. **Keywords**: How natural is too natural? (e.g., "return" vs "return")
+3. **Natural Language**: How natural is optimal? (e.g., "is greater than" vs ">")
+4. **Keywords**: Use familiar keywords (if, else, return) or more natural ones?
 5. **Performance**: Acceptable performance tradeoffs for simplicity?
 
 ## References

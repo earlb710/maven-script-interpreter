@@ -43,7 +43,7 @@ EBS2 is a redesigned version of the language with focus on:
 | **Structure** | Free-form | Organized sections |
 | **Type Names** | `string`, `int`, `float` | `text`, `number` |
 | **Indexing** | 0-based arrays | 0-based arrays (consistent) |
-| **Comments** | `//` and `/* */` | `//` and `/* */` |
+| **Comments** | `//` and `/* */` | `//` and `--` (single-line only) |
 | **Block Syntax** | `{}` braces only | `end` keywords OR `{}` braces (choose one) |
 | **Single-Line Blocks** | Not supported | Supported: `if x < 5 then print "Small"` |
 | **Keyword Case** | Case-sensitive | Case-insensitive: `IF`/`if`/`If` all work |
@@ -260,20 +260,20 @@ print fruits.length;  // 2
 
 #### EBS2
 ```javascript
-// List with simple syntax
-var numbers = list 1, 2, 3, 4, 5
-show numbers at 1  -- "1" (1-based!)
+// Array with simple syntax
+var numbers = array 1, 2, 3, 4, 5
+show numbers at 0  -- "1" (0-based!)
 
-// Dynamic list
-var fruits = list "apple", "banana"
-show fruits at 1  -- "apple"
+// Dynamic array
+var fruits = array "apple", "banana"
+show fruits at 0  -- "apple"
 show count of fruits  -- 2
 ```
 
 **Key Differences:**
-- EBS1: 0-based indexing, EBS2: 1-based indexing (more natural for children)
-- EBS2: `list` keyword for creation
-- EBS2: `at` keyword for access (also supports `[1]`)
+- Both use 0-based indexing (consistent with mainstream languages)
+- EBS2: `array` keyword for creation
+- EBS2: `at` keyword for access (also supports `[0]`)
 - EBS2: `count of` vs `.length`
 
 ### Screens/UI
@@ -331,7 +331,7 @@ show screen MyWindow
 |---------|------|------|-------|
 | **Variables** | ✓ | ✓ | EBS2 simpler type names |
 | **Type Inference** | ✓ | ✓ | Both support |
-| **Arrays** | ✓ | ✓ | EBS2 uses 1-based indexing |
+| **Arrays** | ✓ | ✓ | Both use 0-based indexing |
 | **Records** | ✓ | ✓ | Similar in both |
 | **JSON** | ✓ | ✓ | Both support |
 | **Functions** | ✓ | ✓ | EBS2 more natural syntax |
@@ -396,11 +396,7 @@ For basic programs, migration is straightforward:
    - `var x: type` → `var x as type`
    - `{ }` → `end`
 
-3. **Update Array Indexing**
-   - Subtract 1 from all array indices (EBS2 uses 1-based)
-   - Or use compatibility mode for 0-based
-
-4. **Optional Changes**
+3. **Optional Changes**
    - `return` → `return` (for beginner-friendly code)
    - `print` → `show` (for consistency)
 
@@ -411,7 +407,6 @@ For basic programs, migration is straightforward:
 ebs2-migrate convert myapp.ebs --output myapp-v2.ebs
 
 # Options
---zero-based       # Keep 0-based array indexing
 --minimal          # Minimal changes only
 --preserve-style   # Keep original code style where possible
 ```
