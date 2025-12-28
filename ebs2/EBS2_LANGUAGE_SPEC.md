@@ -1045,6 +1045,97 @@ for each point in points {
 - ✅ **Self-documenting** - Record type shows data structure
 - ✅ **Flexible** - Anonymous records for ad-hoc structures
 
+### Record Extension (Advanced)
+
+**Extend existing record types to add new fields:**
+
+```javascript
+// Define base record type
+record type Person
+    name as text
+    age as number
+end record
+
+// Extend Person with additional fields
+record type Employee extends Person
+    employeeId as number
+    department as text
+    salary as number
+end record
+
+// Extend Employee further
+record type Manager extends Employee
+    teamSize as number
+    budget as number
+end record
+
+// Create instances
+var emp as Employee = record {
+    name: "Alice",
+    age: 30,
+    employeeId: 12345,
+    department: "Engineering",
+    salary: 75000
+}
+
+var mgr as Manager = record {
+    name: "Bob",
+    age: 40,
+    employeeId: 54321,
+    department: "Engineering",
+    salary: 95000,
+    teamSize: 8,
+    budget: 500000
+}
+
+// Access all fields (inherited and new)
+print emp.name              // "Alice" (from Person)
+print emp.department        // "Engineering" (from Employee)
+
+print mgr.name              // "Bob" (from Person)
+print mgr.salary            // 95000 (from Employee)
+print mgr.teamSize          // 8 (from Manager)
+```
+
+**Type checking with extended records:**
+
+```javascript
+// typeof shows all types in inheritance chain
+print typeof emp            // "Employee, Person"
+print typeof mgr            // "Manager, Employee, Person"
+
+// Check if record is of specific type (includes inheritance)
+if typeof emp contains "Person" then
+    print emp.name + " is a Person"
+end if
+
+if typeof mgr contains "Employee" then
+    print mgr.name + " is an Employee"
+end if
+
+// Type-specific conditionals
+if typeof value = "Manager" then
+    print "Manager with team size: " + value.teamSize
+else if typeof value contains "Employee" then
+    print "Employee in department: " + value.department
+else if typeof value contains "Person" then
+    print "Person named: " + value.name
+end if
+```
+
+**Benefits of Record Extension:**
+- ✅ **Code Reuse** - Inherit fields from base record types
+- ✅ **Type Hierarchy** - Build logical type relationships
+- ✅ **Maintainability** - Update base types and changes propagate
+- ✅ **Type Safety** - `typeof` returns full inheritance chain
+- ✅ **Flexibility** - Mix and match inheritance as needed
+
+**Note:** When extending records:
+- All fields from parent records are included
+- New fields are added (not overwritten)
+- `typeof` returns comma-separated list of all types in hierarchy
+- Field names must be unique across the inheritance chain
+
 #### map
 ```javascript
 // Key-value storage
@@ -1433,6 +1524,104 @@ var stars = "*" * 5      // "*****"
 var greeting = "Hello {name}, you are {age} years old"
     with name: "Alice" and age: 10
 ```
+
+### String Concatenation and Function Chaining (Best Practices)
+
+**String Concatenation:**
+
+```javascript
+// Simple concatenation with + operator
+var message = "Hello" + " " + "World"            // "Hello World"
+
+// Multiple concatenations
+var fullMessage = "Hello " + name + ", you are " + age + " years old"
+
+// With line breaks for readability (all on one line logically)
+var longMessage = "Dear " + recipient + ", " +
+                  "Your order #" + orderNumber + " " +
+                  "has been shipped."
+
+// Using text functions
+var parts = {"Hello", "World", "!"}
+var joined = join parts with " "                  // "Hello World !"
+
+// String interpolation (cleaner for complex strings)
+var formatted = format "Hello {name}, you are {age} years old"
+    with name: "Alice" and age: 10
+```
+
+**When to use each method:**
+
+| Method | Best For | Example |
+|--------|----------|---------|
+| `+` operator | Simple concatenation (2-3 parts) | `firstName + " " + lastName` |
+| Multi-line `+` | Complex messages with many parts | See above example |
+| `join` function | Combining array elements | `join names with ", "` |
+| `format` / interpolation | Template strings with variables | `format "Hello {name}"` |
+
+**Function Chaining:**
+
+```javascript
+// Text function chaining
+var result = uppercase trim "  hello world  "    // "HELLO WORLD"
+
+// Multiple transformations
+var cleaned = trim lowercase "  HELLO WORLD  "   // "hello world"
+
+// With explicit steps (more readable for complex chains)
+var input = "  MiXeD CaSe  "
+var step1 = trim input           // "MiXeD CaSe"
+var step2 = lowercase step1      // "mixed case"
+var result = uppercase step2     // "MIXED CASE"
+
+// Array function chaining
+var numbers = {1, 2, 3, 4, 5, 6}
+var evens = filter numbers where item mod 2 = 0
+var doubled = transform evens with item * 2
+print doubled                    // {4, 8, 12}
+
+// Method-style chaining (advanced - if supported)
+var text = "hello"
+var result = text.toUpper().trim()               // "HELLO"
+
+// Best practice: Use intermediate variables for clarity
+var original = "  hello world  "
+var trimmed = trim original
+var capitalized = uppercase trimmed
+print capitalized                // "HELLO WORLD"
+```
+
+**Best Practices:**
+
+1. **For Simple Concatenation:** Use `+` operator
+   ```javascript
+   var name = first + " " + last
+   ```
+
+2. **For Complex Templates:** Use `format` or interpolation
+   ```javascript
+   var msg = format "Hello {name}, order #{num} is ready"
+       with name: customer and num: orderID
+   ```
+
+3. **For Multiple Operations:** Use intermediate variables
+   ```javascript
+   var cleaned = trim input
+   var lower = lowercase cleaned
+   var result = uppercase lower
+   ```
+
+4. **For Array Joining:** Use `join` function
+   ```javascript
+   var csv = join items with ", "
+   ```
+
+5. **For Readability:** Break long concatenations across lines
+   ```javascript
+   var report = "Customer: " + name + "\n" +
+                "Order: " + orderNum + "\n" +
+                "Total: $" + total
+   ```
 
 ## Control Flow
 

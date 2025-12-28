@@ -258,7 +258,13 @@ record type Person
     name as text
     age as number
     email as text
-end function
+end record
+
+// Extend record with more fields
+record type Employee extends Person
+    employeeId as number
+    department as text
+end record
 
 var person as Person = {
     name: "Alice",
@@ -266,9 +272,20 @@ var person as Person = {
     email: "alice@example.com"
 }
 
+var emp as Employee = {
+    name: "Bob",
+    age: 35,
+    email: "bob@company.com",
+    employeeId: 12345,
+    department: "Engineering"
+}
+
 // Access fields
 print person.name              // "Alice"
-print person.age               // 30
+print emp.department           // "Engineering"
+
+// typeof shows inheritance chain
+print typeof emp               // "Employee, Person"
 
 // Anonymous record
 var point as record = {x: 10, y: 20}
