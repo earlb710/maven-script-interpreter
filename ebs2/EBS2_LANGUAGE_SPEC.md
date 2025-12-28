@@ -1089,6 +1089,65 @@ var numbers as array.number = 1, 2, 3, 4, 5
 var status as indicator ("new", "pending") = "new"
 ```
 
+### Type Inference from Assigned Values (NEW)
+
+**EBS2 automatically infers types from assigned values**, eliminating the need for explicit type annotations when the type is obvious:
+
+```javascript
+// Number inference
+var x = 123                    // Same as: var x as number = 123
+var price = 9.99               // Same as: var price as number = 9.99
+var count = 0                  // Same as: var count as number = 0
+
+// Text inference
+var name = "Alice"             // Same as: var name as text = "Alice"
+var message = "Hello World"    // Same as: var message as text = "Hello World"
+
+// Flag (boolean) inference
+var isActive = true            // Same as: var isActive as flag = true
+var hasError = false           // Same as: var hasError as flag = false
+
+// Array inference
+var items = 1, 2, 3, 4         // Same as: var items as array = 1, 2, 3, 4
+var names = "Alice", "Bob"     // Same as: var names as array = "Alice", "Bob"
+
+// Record inference (no 'as record' needed)
+var person = record {          // Same as: var person as record = record {...}
+    name: "Alice",
+    age: 10
+}
+
+var config = record {          // Same as: var config as record = record {...}
+    server: record {
+        host: "localhost",
+        port: 8080
+    }
+}
+
+// Constants also support type inference
+const PI = 3.14159             // Same as: const PI as number = 3.14159
+const APP_NAME = "MyApp"       // Same as: const APP_NAME as text = "MyApp"
+```
+
+**Benefits of Type Inference:**
+- ✅ **Less boilerplate** - Shorter, cleaner code
+- ✅ **Still type-safe** - Compiler enforces inferred types
+- ✅ **Readable** - Type is obvious from the value
+- ✅ **Flexible** - Can still use explicit types when needed
+
+**When to use explicit types:**
+- Typed arrays: `var scores as array.number = 95, 87, 92`
+- Indicators: `var status as indicator ("new", "done") = "new"`
+- Number ranges: `var age as number 0..120 = 25`
+- When type isn't obvious: `var value as number = getUserInput()`
+
+**Type inference works with:**
+- ✅ Variables: `var x = 10`
+- ✅ Constants: `const MAX = 100`
+- ✅ Records: `var person = record {...}`
+- ✅ Arrays: `var items = 1, 2, 3`
+- ✅ All primitive types: number, text, flag
+
 ### Constant Declaration
 
 Constants are declared with `const` or `constant` keywords and cannot be changed after initialization:

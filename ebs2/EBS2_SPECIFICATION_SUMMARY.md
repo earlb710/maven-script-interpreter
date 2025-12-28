@@ -63,6 +63,7 @@ This document provides a summary of the EBS2 language specification and related 
 - Grammar Summary (EBNF)
 
 **Key Features:**
+- **Comprehensive Type Inference**: Variables automatically infer type from assigned values - `var x = 123` is the same as `var x as number = 123`. Works for numbers, text, flags, arrays, and records.
 - **Type Inference for Records**: `var person = record {...}` is valid (type inferred from record literal, no `as record` needed)
 - **Function/Procedure Distinction**: Functions return values (`function name(params) as type` or `function name() as type`), procedures don't (`procedure name(params)` or `procedure name()`). **Parentheses `()` are always required**, even with no parameters.
 - **Record Types**: Named structured data (`record type Person ... end`) and anonymous records (`var x as record = record {...}`). **Records can contain arrays and nested records**.
