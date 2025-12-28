@@ -72,13 +72,13 @@ EBS2 is designed with three core principles:
 
 #### Basic Keywords (Beginner Level)
 ```
-program     end         var         as          is
+program     end         var         variable    as          is
 if          then        else        repeat      times
 for         each        in          to          call
 with        and         give        back        print
 log         hide        ask         screen      button
 label       textbox     list        text        number
-yes         no          true        false
+yes         no          true        false       const       constant
 ```
 
 #### Advanced Keywords
@@ -86,7 +86,7 @@ yes         no          true        false
 function    return      try         catch       throw
 import      from        export      record      map
 json        while       until       break       continue
-switch      case        default     const       let
+switch      case        default     let
 async       await       class       extends     new
 ```
 
@@ -244,7 +244,9 @@ end
 variables
     var userName as text = "Guest"
     var score as number = 0
-    var isPlaying as yes/no = no
+    variable isPlaying as yes/no = no    // 'variable' is same as 'var'
+    const MAX_SCORE as number = 1000     // Constants cannot change
+    constant APP_VERSION as text = "1.0" // 'constant' is same as 'const'
 end
 
 // Optional: Function definitions
@@ -687,26 +689,72 @@ calculator = to add
 ### Variable Declaration (Simple)
 
 ```javascript
-// Declare with initial value
+// Declare with initial value (both keywords work)
 var name as text = "Alice"
+variable userName as text = "Bob"    // Same as 'var'
 
 // Type inference (intermediate)
 var count = 42           -- Inferred as number
 var message = "Hello"    -- Inferred as text
 ```
 
+### Constant Declaration
+
+Constants are declared with `const` or `constant` keywords and cannot be changed after initialization:
+
+```javascript
+// Constant declaration (both keywords work)
+const PI as number = 3.14159
+constant MAX_USERS as number = 100    // Same as 'const'
+
+// Constants must be initialized
+const APP_NAME as text = "MyApp"
+
+// Attempting to change a constant causes an error
+PI = 3.14                // ERROR: Cannot assign to constant
+```
+
 ### Variable Declaration (Advanced)
 
 ```javascript
-// Constant (cannot change)
-constant PI as number = 3.14159
-
 // Multiple declarations
 var x, y, z as number = 0
 
 // With scope
 var local userName as text = "Guest"
 var global appVersion as text = "1.0"
+```
+
+### Variable vs Constant Keywords
+
+**All four keywords are supported:**
+
+| Keyword | Alternative | Purpose | Mutable |
+|---------|-------------|---------|---------|
+| `var` | `variable` | Declare a variable | Yes |
+| `const` | `constant` | Declare a constant | No |
+
+**Examples:**
+```javascript
+// Variables (can be changed)
+var count = 0
+variable total = 0       // Same as 'var'
+count = count + 1        // OK
+total = total + 5        // OK
+
+// Constants (cannot be changed)
+const MAX = 100
+constant LIMIT = 50      // Same as 'const'
+MAX = 200                // ERROR: Cannot assign to constant
+LIMIT = 75               // ERROR: Cannot assign to constant
+```
+
+**All keywords are case-insensitive:**
+```javascript
+VAR age = 10             // Same as 'var'
+VARIABLE score = 0       // Same as 'variable'
+CONST PI = 3.14          // Same as 'const'
+CONSTANT MAX = 100       // Same as 'constant'
 ```
 
 ### Variable Assignment
@@ -2025,7 +2073,8 @@ main            = "main" statement* "end"
 statement       = varDecl | assignment | ifStmt | loopStmt | 
                   functionCall | return | print | try-catch
 
-varDecl         = "var" identifier ["as" type] ["=" expression]
+varDecl         = ("var" | "variable") identifier ["as" type] ["=" expression]
+                | ("const" | "constant") identifier ["as" type] "=" expression
 assignment      = identifier "=" expression
 functionCall    = "call" identifier ["with" arguments]
 

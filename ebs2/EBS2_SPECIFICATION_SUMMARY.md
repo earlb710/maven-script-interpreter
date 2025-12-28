@@ -44,7 +44,7 @@ This document provides a summary of the EBS2 language specification and related 
 - Lexical Structure (keywords, identifiers, literals, operators)
 - Program Structure (sections: settings, variables, functions, screens, main)
 - Data Types (basic: number, text, yes/no, date; collections: list, record, map)
-- Variables (declaration, assignment, scope)
+- Variables and Constants (var/variable for mutable, const/constant for immutable)
 - Operators (arithmetic, comparison, logical, string)
 - Control Flow (if/then/else with optional natural language operators)
 - Functions (simple to advanced, with parameters, return values)

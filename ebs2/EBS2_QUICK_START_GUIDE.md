@@ -117,10 +117,35 @@ end
 ```
 
 **Remember:**
-- Use `var` to create a variable
+- Use `var` or `variable` to create a variable (both work the same)
+- Use `const` or `constant` for values that never change
 - Use `as text` for words
 - Use `as number` for numbers
 - Use `as yes/no` for true/false
+
+### Constants - Values That Never Change
+
+Sometimes you want to store a value that should NEVER change. Use `const` or `constant`:
+
+```javascript
+program GameSettings
+
+main
+    const MAX_PLAYERS as number = 4
+    constant GAME_NAME as text = "Super Fun Game"
+    
+    print "Game: " + GAME_NAME
+    print "Max players: " + MAX_PLAYERS
+    
+    // MAX_PLAYERS = 10  // ERROR! Cannot change a constant
+end
+```
+
+**When to use constants:**
+- Game settings that don't change (like max score)
+- Mathematical values (like PI = 3.14)
+- Configuration values (like app name)
+- Anything that should stay the same throughout your program
 
 ## Making Decisions
 
