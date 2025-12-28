@@ -338,6 +338,26 @@ print "Hello"                  // Display to user
 log "Debug message"            // Debug output only
 ```
 
+### Type Checking
+
+```javascript
+var x = 42
+print typeof x                 // "number"
+
+var name = "Alice"
+print typeof name              // "text"
+
+var items = {1, 2, 3}
+print typeof items             // "array"
+
+// Use in conditionals
+if typeof value = "number" then
+    print "It's a number"
+end if
+```
+
+**Type names:** `"number"`, `"text"`, `"flag"`, `"array"`, `"array.text"`, `"array.number"`, `"record"`, `"indicator"`, `"date"`, `"function"`, `"procedure"`
+
 ### String Operations
 
 ```javascript

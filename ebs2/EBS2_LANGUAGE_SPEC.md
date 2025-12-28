@@ -2335,6 +2335,69 @@ if now is after deadline then
 end if
 ```
 
+### Type Checking and Debugging (Intermediate)
+
+```javascript
+// Check the type of a variable
+var x = 42
+var type = typeof x              // "number"
+
+var name = "Alice"
+print typeof name                // "text"
+
+var items = {1, 2, 3}
+print typeof items               // "array"
+
+var person = record { name: "Bob", age: 30 }
+print typeof person              // "record"
+
+var flag = true
+print typeof flag                // "flag"
+
+// Use typeof for debugging
+log "x is of type:", typeof x
+
+// Use typeof in conditionals
+if typeof value = "number" then
+    print "It's a number: " + value
+else if typeof value = "text" then
+    print "It's text: " + value
+else if typeof value = "array" then
+    print "It's an array with " + (count of value) + " items"
+else if typeof value = "record" then
+    print "It's a record"
+else if typeof value = "flag" then
+    print "It's a boolean: " + value
+end if
+
+// Check specific array types
+var numbers = {1, 2, 3}
+print typeof numbers             // "array" (generic array)
+
+var names as array.text = {"Alice", "Bob"}
+print typeof names               // "array.text" (typed array)
+
+var students as array.record(Student) = { /* ... */ }
+print typeof students            // "array.record"
+```
+
+**Type Names Returned by `typeof`:**
+- `"number"` - for numeric values
+- `"text"` - for string values
+- `"flag"` - for boolean (yes/no, true/false)
+- `"array"` - for generic arrays
+- `"array.text"` - for typed text arrays
+- `"array.number"` - for typed number arrays
+- `"array.flag"` - for typed boolean arrays
+- `"array.record"` - for arrays of records
+- `"record"` - for record types
+- `"indicator"` - for indicator/enum types
+- `"date"` - for date/time values
+- `"function"` - for function references
+- `"procedure"` - for procedure references
+
+**Note:** Similar to Java's `instanceof`, `typeof` allows runtime type checking for debugging and conditional logic based on data types.
+
 ### File Functions (Intermediate)
 
 ```javascript

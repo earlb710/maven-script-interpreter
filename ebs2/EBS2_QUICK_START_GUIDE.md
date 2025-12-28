@@ -662,6 +662,48 @@ end main
 
 **Best practice:** Pick one style and stick with it in each project. Both work great!
 
+## 🔍 Checking Types (Debugging)
+
+When you're learning or debugging, it's helpful to check what type of data you have. Use `typeof` to find out:
+
+```javascript
+program TypeChecker
+
+main
+    var age = 10
+    var name = "Alice"
+    var scores = {95, 87, 92}
+    var ready = true
+    
+    // Check the type of each variable
+    print "age is:", typeof age           // Prints: number
+    print "name is:", typeof name         // Prints: text
+    print "scores is:", typeof scores     // Prints: array
+    print "ready is:", typeof ready       // Prints: flag
+    
+    // Use typeof to make decisions
+    var mystery = 42
+    
+    if typeof mystery = "number" then
+        print "It's a number: " + mystery
+    else if typeof mystery = "text" then
+        print "It's text: " + mystery
+    else
+        print "It's something else"
+    end if
+end main
+```
+
+**Why is this useful?**
+- **Debugging:** Helps you figure out what went wrong
+- **Learning:** Shows you what type your variables are
+- **Safety:** Check types before doing operations
+
+**Tip:** Use `typeof` with `log` to debug without showing output to users:
+```javascript
+log "The type of x is:", typeof x
+```
+
 ## What's Next
 
 ### Easy Projects to Try
