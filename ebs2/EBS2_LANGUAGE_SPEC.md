@@ -225,11 +225,11 @@ end
 functions
     to greet person
         print "Hello " + person
-    end
+    end function
     
     to calculate score
         give back score * 10
-    end
+    end function
 end
 
 // Optional: Screen definitions
@@ -237,7 +237,7 @@ screens
     screen MainWindow
         title "Main Screen"
         -- screen content
-    end
+    end screen
 end
 
 // Required: Main entry point
@@ -261,6 +261,54 @@ end
 3. Empty sections can be omitted
 
 4. Each section ends with `end` keyword
+
+### Block Ending Conventions
+
+**Control structures and functions use explicit endings** to make code clearer and easier to debug:
+
+```javascript
+// Explicit endings for control structures
+if condition then
+    // code
+end if
+
+repeat 10 times
+    // code
+end repeat
+
+for each item in list
+    // code
+end for
+
+while condition
+    // code
+end while
+
+// Explicit endings for functions
+to myFunction param
+    // code
+end function
+
+function myFunction(param) {
+    // code
+end function
+
+// Explicit endings for screens
+screen MyScreen
+    // content
+end screen
+
+// Program sections use simple 'end'
+main
+    // code
+end
+```
+
+**Benefits:**
+- Easier to match opening and closing blocks
+- Reduces debugging time
+- Makes code more readable
+- Helps catch mismatched blocks early
 
 ## Data Types
 
@@ -421,7 +469,7 @@ functions
         var localVar as text = "Local"
         print globalVar   -- Can access global
         print localVar    -- Can access local
-    end
+    end function
 end
 
 main
@@ -468,30 +516,30 @@ EBS2 supports both natural language and symbolic comparison operators. Both form
 ```javascript
 if age is greater than 12 then
     print "Teenager"
-end
+end if
 
 if score is equal to 100 then
     print "Perfect!"
-end
+end if
 
 if lives is not equal to 0 then
     print "Still alive"
-end
+end if
 ```
 
 #### Symbolic Form (Advanced)
 ```javascript
 if age > 12 then
     print "Teenager"
-end
+end if
 
 if score = 100 then
     print "Perfect!"
-end
+end if
 
 if lives <> 0 then
     print "Still alive"
-end
+end if
 ```
 
 ### Logical Operations
@@ -510,30 +558,30 @@ EBS2 supports both natural language and symbolic logical operators. Both forms a
 ```javascript
 if age > 12 and age < 20 then
     print "Teenager"
-end
+end if
 
 if day is "Saturday" or day is "Sunday" then
     print "Weekend!"
-end
+end if
 
 if not isGameOver then
     continue playing
-end
+end if
 ```
 
 #### Symbolic Form (Advanced)
 ```javascript
 if (age > 12) && (age < 20) then
     print "Teenager"
-end
+end if
 
 if (day = "Saturday") || (day = "Sunday") then
     print "Weekend!"
-end
+end if
 
 if !isGameOver then
     continue playing
-end
+end if
 ```
 
 ### String Operations
@@ -558,7 +606,7 @@ var greeting = "Hello {name}, you are {age} years old"
 ```javascript
 if condition then
     -- code to run if true
-end
+end if
 ```
 
 #### If-Else (Beginner)
@@ -567,7 +615,7 @@ if age < 13 then
     print "Child"
 else
     print "Teen or Adult"
-end
+end if
 ```
 
 #### Multiple Conditions (Intermediate)
@@ -580,7 +628,7 @@ else if score >= 70 then
     print "Grade C"
 else
     print "Grade D or F"
-end
+end if
 ```
 
 #### If Statement (Advanced)
@@ -591,7 +639,7 @@ else if otherCondition then
     -- code
 else
     -- code
-end
+end if
 ```
 
 ### Loops
@@ -601,12 +649,12 @@ end
 // Fixed repetition
 repeat 10 times
     print "Hello"
-end
+end repeat
 
 // With counter
 repeat 5 times with counter
     print "Count: " + counter
-end
+end repeat
 ```
 
 #### Repeat While (Intermediate)
@@ -615,12 +663,12 @@ end
 repeat while count < 100
     count = count + 1
     print count
-end
+end repeat
 
 // Loop until condition is true
 repeat until finished
     process next item
-end
+end repeat
 ```
 
 #### For Each (Intermediate)
@@ -630,12 +678,12 @@ var fruits = list "apple", "banana", "cherry"
 
 for each fruit in fruits
     print "I like " + fruit
-end
+end for
 
 // With index (advanced)
 for each fruit in fruits with index
     print index + ": " + fruit
-end
+end for
 ```
 
 #### Numeric Range (Advanced)
@@ -643,24 +691,24 @@ end
 // Count from 1 to 10
 for counter from 1 to 10
     print counter
-end
+end for
 
 // Count with step
 for counter from 0 to 100 by 10
     print counter     -- 0, 10, 20, ..., 100
-end
+end for
 
 // Count backwards
 for counter from 10 down to 1
     print counter
-end
+end for
 ```
 
 #### While Loop (Advanced)
 ```javascript
 while condition
     -- code
-end
+end while
 
 do
     -- code
@@ -673,17 +721,17 @@ while condition
 // Exit loop early
 for counter from 1 to 100
     if counter = 50 then
-        exit loop        -- or: break
-    end
-end
+        exit loop        // or: break
+    end if
+end for
 
 // Skip to next iteration
 for each item in items
     if item is empty then
-        skip to next     -- or: continue
-    end
+        skip to next     // or: continue
+    end if
     process item
-end
+end for
 ```
 
 ## Functions
@@ -706,7 +754,7 @@ EBS2 supports both natural language and traditional function syntax.
 ```javascript
 to sayHello
     print "Hello World"
-end
+end function
 
 // Call it
 call sayHello
@@ -716,7 +764,7 @@ call sayHello
 ```javascript
 to greet person
     print "Hello " + person
-end
+end function
 
 // Call it
 call greet with "Alice"
@@ -726,7 +774,7 @@ call greet with "Alice"
 ```javascript
 to introduce person and age
     print person + " is " + age + " years old"
-end
+end function
 
 // Call it
 call introduce with person: "Alice" and age: 10
@@ -738,7 +786,7 @@ call introduce with person: "Alice" and age: 10
 ```javascript
 to double number
     give back number * 2
-end
+end function
 
 // Use it
 var result = call double with 5
@@ -751,7 +799,7 @@ to divideWithRemainder dividend and divisor
     var quotient = dividend / divisor
     var remainder = dividend mod divisor
     give back quotient and remainder
-end
+end function
 
 // Use it
 var quot, rem = call divideWithRemainder with dividend: 17 and divisor: 5
@@ -764,7 +812,7 @@ print "Quotient: " + quot + ", Remainder: " + rem
 ```javascript
 to greet person and title: "Friend"
     print "Hello " + title + " " + person
-end
+end function
 
 // Call with default
 call greet with "Alice"           -- "Hello Friend Alice"
@@ -779,7 +827,7 @@ to sum numbers...
     var total = 0
     for each num in numbers
         total = total + num
-    end
+    end for
     give back total
 end
 
@@ -792,7 +840,7 @@ var result = call sum with 1, 2, 3, 4, 5
 to factorial n
     if n <= 1 then
         give back 1
-    end
+    end function
     give back n * call factorial with (n - 1)
 end
 ```
@@ -815,7 +863,7 @@ screen HelloScreen
     label WelcomeLabel
         text "Hello World!"
         size large
-    end
+    end screen
     
     button OkButton
         text "OK"
@@ -843,7 +891,7 @@ screen UserForm
     
     label NameLabel
         text "What is your name?"
-    end
+    end screen
     
     textbox NameInput
         placeholder "Enter your name"
@@ -885,7 +933,7 @@ screen GameScreen
         
         label ScoreLabel
             text "Score: 0"
-        end
+        end screen
         
         label LivesLabel
             text "Lives: 3"
@@ -1076,7 +1124,7 @@ try
 catch
     print "Could not load file, using defaults"
     var data = "default content"
-end
+end try
 ```
 
 ### Specific Error Types (Advanced)
@@ -1093,7 +1141,7 @@ catch when invalid_conversion
     var number = 0
 catch otherwise as error
     print "Unexpected error: " + error.message
-end
+end try
 ```
 
 ### Error Types
@@ -1115,7 +1163,7 @@ parse_error             -- Cannot parse data
 to withdraw amount from account
     if amount > account.balance then
         throw error "Insufficient funds"
-    end
+    end function
     account.balance = account.balance - amount
 end
 ```
@@ -1343,7 +1391,7 @@ var days = days between start and end
 // Compare dates
 if now is after deadline then
     print "Overdue!"
-end
+end if
 ```
 
 ### File Functions (Intermediate)
@@ -1434,14 +1482,14 @@ export function calculate sum of numbers
     var total = 0
     for each num in numbers
         total = total + num
-    end
+    end for
     give back total
 end
 
 // Private function (not exported)
 to helperFunction
     -- only used internally
-end
+end function
 ```
 
 ### Module Organization
@@ -1571,14 +1619,14 @@ if running on browser then
     print "Running in web browser"
 else if running on desktop then
     print "Running as desktop app"
-end
+end if
 
 // Conditional features
 if has feature "database" then
     -- Use database features
 else
     -- Use alternative approach
-end
+end if
 ```
 
 ## Best Practices
@@ -1632,7 +1680,7 @@ end
        var data = read file "config.json"
    catch when file_not_found
        var data = default configuration
-   end
+   end try
    ```
 
 4. **Organize code into modules**
@@ -1673,27 +1721,38 @@ program         = "program" identifier sections "end"
 sections        = [settings] [variables] [functions] [screens] main
 settings        = "settings" setting* "end"
 variables       = "variables" varDecl* "end"
-functions       = "functions" function* "end"
-screens         = "screens" screen* "end"
+functions       = "functions" function* "end" "functions"
+screens         = "screens" screen* "end" "screens"
 main            = "main" statement* "end"
 
 statement       = varDecl | assignment | ifStmt | loopStmt | 
-                  functionCall | return | show | try-catch
+                  functionCall | return | print | try-catch
 
 varDecl         = "var" identifier ["as" type] ["=" expression]
 assignment      = identifier "=" expression
 functionCall    = "call" identifier ["with" arguments]
 
-ifStmt          = "when" expression "then" statement* 
-                  ["otherwise" statement*] "end"
+ifStmt          = "if" expression "then" statement* 
+                  ["else" statement*] "end" "if"
 
 loopStmt        = repeatLoop | forEachLoop | whileLoop
 
 repeatLoop      = "repeat" (number | expression) "times" 
-                  statement* "end"
+                  statement* "end" "repeat"
 
 forEachLoop     = "for" "each" identifier "in" expression
-                  statement* "end"
+                  statement* "end" "for"
+
+whileLoop       = "while" expression statement* "end" "while"
+
+function        = ("to" identifier params | "function" identifier "(" params ")")
+                  statement* "end" "function"
+
+tryStmt         = "try" statement* 
+                  "catch" [errorCondition] statement* 
+                  "end" "try"
+
+screenDef       = "screen" identifier screenContent* "end" "screen"
 
 expression      = primary (operator primary)*
 primary         = literal | identifier | "(" expression ")" | functionCall

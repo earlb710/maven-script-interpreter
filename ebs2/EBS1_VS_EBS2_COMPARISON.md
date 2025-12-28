@@ -139,7 +139,7 @@ otherwise if age is greater than 5 then
     print "Child"
 else
     print "Preschooler"
-end
+end if
 ```
 
 **EBS2 (Symbolic - Advanced):**
@@ -150,7 +150,7 @@ else if age > 5 then
     print "Child"
 else
     print "Preschooler"
-end
+end if
 ```
 
 **Key Differences:**
@@ -181,13 +181,13 @@ for fruit in fruits {
 // Repeat n times
 repeat 10 times with counter
     show counter
-end
+end repeat
 
 // For each
 var fruits = list "apple", "banana", "cherry"
 for each fruit in fruits
     show fruit
-end
+end for
 ```
 
 **Key Differences:**
@@ -211,7 +211,7 @@ print message;
 ```javascript
 to greet person
     give back "Hello, " + person + "!"
-end
+end function
 
 var message = call greet with "Alice"
 show message
@@ -290,7 +290,7 @@ screen MyWindow
         text "Click Me"
         when clicked
             counter = counter + 1
-        end
+        end screen
     end
 end
 
@@ -430,13 +430,13 @@ to averageScore scores
     
     for each score in scores
         total = total + score
-    end
+    end for
     
     if count is greater than 0 then
         give back total / count
     otherwise
         give back 0
-    end
+    end if
 end
 
 var results = list 85, 90, 78, 92, 88
@@ -453,13 +453,13 @@ function averageScore(scores)
     
     for each score in scores
         total = total + score
-    end
+    end for
     
     if count > 0 then
         return total / count
     else
         return 0
-    end
+    end if
 end
 
 var results = list 85, 90, 78, 92, 88

@@ -31,7 +31,7 @@ Every feature in EBS2 should have:
 // Natural, beginner-friendly
 if age is greater than 12 then
     print "Teenager"
-end
+end if
 ```
 
 **Short Form (Symbolic):**
@@ -39,7 +39,7 @@ end
 // Compact, developer-friendly
 if age > 12 then
     print "Teenager"
-end
+end if
 ```
 
 **Key Benefits:**
@@ -127,17 +127,17 @@ HTML5 Runtime   Java Runtime
 // Instead of: if (x > 10) { ... }
 if x is greater than 10 then
     print "X is large"
-end
+end if
 
 // Instead of: function add(a, b) { return a + b; }
 to add numbers a and b
     give back a + b
-end
+end function
 
 // Instead of: for (i = 0; i < 10; i++)
 repeat 10 times
     print "Hello"
-end
+end repeat
 ```
 
 #### 2.2 Visual Block Mode
@@ -250,7 +250,7 @@ screens
             text "Click Me"
             when clicked
                 call greet with name
-            end
+            end screen
         end
     end
 end
@@ -290,29 +290,29 @@ end
 // Decision
 if condition then
     -- code
-end
+end if
 
 // Alternative
 if condition then
     -- code
 else
     -- code
-end
+end if
 
 // Repeat fixed times
 repeat 10 times
     -- code
-end
+end repeat
 
 // Repeat while condition
 repeat while condition
     -- code
-end
+end repeat
 
 // Repeat for each item
 for each item in list
     -- code
-end
+end for
 ```
 
 #### Advanced Forms
@@ -326,17 +326,17 @@ otherwise if condition3 then
     -- code
 else
     -- code
-end
+end if
 
 // Loop with counter
 repeat with counter from 1 to 10
     -- counter available as variable
-end
+end repeat
 
 // Loop with step
 repeat with counter from 0 to 100 by 10
     -- increments by 10
-end
+end repeat
 ```
 
 ### Functions
@@ -345,7 +345,7 @@ end
 ```javascript
 to greet
     print "Hello World"
-end
+end function
 
 // Call it
 call greet
@@ -355,7 +355,7 @@ call greet
 ```javascript
 to greet person
     print "Hello " + person
-end
+end function
 
 call greet with "Alice"
 ```
@@ -364,7 +364,7 @@ call greet with "Alice"
 ```javascript
 to add numbers a and b
     give back a + b
-end
+end function
 
 var result = call add with a:5 and b:3
 ```
@@ -375,7 +375,7 @@ to calculate sum of numbers
     var total = 0
     for each num in numbers
         total = total + num
-    end
+    end for
     give back total
 end
 ```
@@ -391,7 +391,7 @@ screen MyWindow
         text "Click Me"
         when clicked
             print "Clicked!"
-        end
+        end screen
     end
 end
 
@@ -410,7 +410,7 @@ screen AdvancedWindow
     
     label UserLabel
         text "Enter your name:"
-    end
+    end screen
     
     textbox NameInput
         placeholder "Your name here"
@@ -444,7 +444,7 @@ catch when file_not_found as error
     print "Could not find file: " + error.message
     -- Use default data
     var data = "Default content"
-end
+end try
 ```
 
 ### Built-in Functions (Partial List)

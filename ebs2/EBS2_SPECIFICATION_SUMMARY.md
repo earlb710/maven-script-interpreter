@@ -236,12 +236,12 @@ Support both for smooth learning curve:
 // NATURAL (beginner)
 if age is greater than 12 then
     print "Teenager"
-end
+end if
 
 // SYMBOLIC (advanced)
 if age > 12 then
     print "Teenager"
-end
+end if
 ```
 
 ### 3. 1-Based Indexing

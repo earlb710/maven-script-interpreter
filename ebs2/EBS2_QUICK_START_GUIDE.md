@@ -184,7 +184,7 @@ program CountToTen
 main
     repeat 10 times with counter
         print counter
-    end
+    end repeat
 end
 ```
 
@@ -200,7 +200,7 @@ main
     
     for each fruit in fruits
         print "I like " + fruit
-    end
+    end for
 end
 ```
 
@@ -222,7 +222,7 @@ main
     repeat while count > 0
         print count
         count = count - 1
-    end
+    end repeat
     
     print "Blast off!"
 end
@@ -366,7 +366,7 @@ screen CounterScreen
     
     label CountLabel
         text "Clicks: 0"
-    end
+    end screen
     
     button ClickButton
         text "Click Me!"
@@ -454,7 +454,7 @@ if age > 12 then
 // Right
 if age > 12 then
     print "Teenager"
-end
+end if
 ```
 
 **Forgot quotes around text:**
@@ -490,18 +490,18 @@ if condition then
     -- do something
 else
     -- do something else
-end
+end if
 ```
 
 #### Loops
 ```javascript
 repeat 5 times
     -- do something
-end
+end repeat
 
 for each item in list
     -- do something with item
-end
+end for
 ```
 
 #### Functions
@@ -509,7 +509,7 @@ end
 to functionName parameter
     -- do something
     give back result
-end
+end function
 ```
 
 #### Screens
@@ -521,7 +521,7 @@ screen MyScreen
         text "Click"
         when clicked
             -- do something
-        end
+        end screen
     end
 end
 ```
