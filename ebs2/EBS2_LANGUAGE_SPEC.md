@@ -1050,27 +1050,27 @@ for each point in points {
 **Extend existing record types to add new fields:**
 
 ```javascript
-// Define base record type
-record type Person
+// Define base record type (use Type suffix as naming convention)
+record type PersonType
     name as text
     age as number
 end record
 
-// Extend Person with additional fields
-record type Employee extends Person
+// Extend PersonType with additional fields
+record type EmployeeType extends PersonType
     employeeId as number
     department as text
     salary as number
 end record
 
-// Extend Employee further
-record type Manager extends Employee
+// Extend EmployeeType further
+record type ManagerType extends EmployeeType
     teamSize as number
     budget as number
 end record
 
 // Create instances
-var emp as Employee = record {
+var emp as EmployeeType = record {
     name: "Alice",
     age: 30,
     employeeId: 12345,
@@ -1078,7 +1078,7 @@ var emp as Employee = record {
     salary: 75000
 }
 
-var mgr as Manager = record {
+var mgr as ManagerType = record {
     name: "Bob",
     age: 40,
     employeeId: 54321,
@@ -1089,36 +1089,36 @@ var mgr as Manager = record {
 }
 
 // Access all fields (inherited and new)
-print emp.name              // "Alice" (from Person)
-print emp.department        // "Engineering" (from Employee)
+print emp.name              // "Alice" (from PersonType)
+print emp.department        // "Engineering" (from EmployeeType)
 
-print mgr.name              // "Bob" (from Person)
-print mgr.salary            // 95000 (from Employee)
-print mgr.teamSize          // 8 (from Manager)
+print mgr.name              // "Bob" (from PersonType)
+print mgr.salary            // 95000 (from EmployeeType)
+print mgr.teamSize          // 8 (from ManagerType)
 ```
 
 **Type checking with extended records:**
 
 ```javascript
 // typeof shows all types in inheritance chain
-print typeof emp            // "Employee, Person"
-print typeof mgr            // "Manager, Employee, Person"
+print typeof emp            // "EmployeeType, PersonType"
+print typeof mgr            // "ManagerType, EmployeeType, PersonType"
 
-// Check if record is of specific type (includes inheritance)
-if typeof emp contains "Person" then
-    print emp.name + " is a Person"
+// Check if record is of specific type (case-insensitive)
+if typeof emp = PersonType then
+    print emp.name + " is a PersonType"
 end if
 
-if typeof mgr contains "Employee" then
-    print mgr.name + " is an Employee"
+if typeof mgr = EmployeeType then
+    print mgr.name + " is an EmployeeType"
 end if
 
-// Type-specific conditionals
-if typeof value = "Manager" then
+// Type-specific conditionals with inheritance checking
+if typeof value = ManagerType then
     print "Manager with team size: " + value.teamSize
-else if typeof value contains "Employee" then
+else if typeof value = EmployeeType then
     print "Employee in department: " + value.department
-else if typeof value contains "Person" then
+else if typeof value = PersonType then
     print "Person named: " + value.name
 end if
 ```
@@ -1127,13 +1127,19 @@ end if
 - ✅ **Code Reuse** - Inherit fields from base record types
 - ✅ **Type Hierarchy** - Build logical type relationships
 - ✅ **Maintainability** - Update base types and changes propagate
-- ✅ **Type Safety** - `typeof` returns full inheritance chain
+- ✅ **Type Safety** - `typeof` uses type references (case-insensitive)
 - ✅ **Flexibility** - Mix and match inheritance as needed
+
+**Naming Convention:**
+- Always use `Type` suffix for record type names (e.g., `PersonType`, `EmployeeType`)
+- This distinguishes type definitions from variable names
+- Enables case-insensitive type checking with `typeof`
 
 **Note:** When extending records:
 - All fields from parent records are included
 - New fields are added (not overwritten)
-- `typeof` returns comma-separated list of all types in hierarchy
+- `typeof` can compare against type references directly (no strings needed)
+- Type checking is case-insensitive
 - Field names must be unique across the inheritance chain
 
 #### map
@@ -2546,7 +2552,7 @@ print typeof flag                // "flag"
 // Use typeof for debugging
 log "x is of type:", typeof x
 
-// Use typeof in conditionals
+// Use typeof in conditionals with primitives (use strings)
 if typeof value = "number" then
     print "It's a number: " + value
 else if typeof value = "text" then
@@ -2566,11 +2572,26 @@ print typeof numbers             // "array" (generic array)
 var names as array.text = {"Alice", "Bob"}
 print typeof names               // "array.text" (typed array)
 
-var students as array.record(Student) = { /* ... */ }
+var students as array.record(StudentType) = { /* ... */ }
 print typeof students            // "array.record"
+
+// For named record types, use type references (not strings)
+record type PersonType
+    name as text
+    age as number
+end record
+
+var employee as PersonType = record { name: "Alice", age: 30 }
+
+// Type checking with type references (case-insensitive, no strings)
+if typeof employee = PersonType then
+    print "Is a PersonType"
+end if
 ```
 
 **Type Names Returned by `typeof`:**
+
+For **primitive types**, `typeof` returns string values:
 - `"number"` - for numeric values
 - `"text"` - for string values
 - `"flag"` - for boolean (yes/no, true/false)
@@ -2579,11 +2600,16 @@ print typeof students            // "array.record"
 - `"array.number"` - for typed number arrays
 - `"array.flag"` - for typed boolean arrays
 - `"array.record"` - for arrays of records
-- `"record"` - for record types
 - `"indicator"` - for indicator/enum types
 - `"date"` - for date/time values
 - `"function"` - for function references
 - `"procedure"` - for procedure references
+
+For **named record types**, `typeof` returns the type itself (not a string):
+- Use type references directly: `if typeof x = PersonType then`
+- Comparison is case-insensitive
+- Do not use string literals for record type checking
+- Use `Type` suffix naming convention (e.g., `PersonType`, `EmployeeType`)
 
 **Note:** Similar to Java's `instanceof`, `typeof` allows runtime type checking for debugging and conditional logic based on data types.
 

@@ -253,26 +253,26 @@ var scores as array.number = 85, 90, 95
 ## Records
 
 ```javascript
-// Named record type
-record type Person
+// Named record type (use Type suffix as convention)
+record type PersonType
     name as text
     age as number
     email as text
 end record
 
 // Extend record with more fields
-record type Employee extends Person
+record type EmployeeType extends PersonType
     employeeId as number
     department as text
 end record
 
-var person as Person = {
+var person as PersonType = {
     name: "Alice",
     age: 30,
     email: "alice@example.com"
 }
 
-var emp as Employee = {
+var emp as EmployeeType = {
     name: "Bob",
     age: 35,
     email: "bob@company.com",
@@ -284,8 +284,10 @@ var emp as Employee = {
 print person.name              // "Alice"
 print emp.department           // "Engineering"
 
-// typeof shows inheritance chain
-print typeof emp               // "Employee, Person"
+// typeof with type references (case-insensitive)
+if typeof emp = PersonType then
+    print "Is a PersonType"
+end if
 
 // Anonymous record
 var point as record = {x: 10, y: 20}
