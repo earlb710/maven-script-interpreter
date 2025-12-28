@@ -133,7 +133,7 @@ end if
 
 // Instead of: function add(a, b) { return a + b; }
 to add numbers a and b
-    give back a + b
+    return a + b
 end function
 
 // Instead of: for (i = 0; i < 10; i++)
@@ -365,7 +365,7 @@ call greet with "Alice"
 #### Functions with Multiple Parameters
 ```javascript
 to add numbers a and b
-    give back a + b
+    return a + b
 end function
 
 var result = call add with a:5 and b:3
@@ -378,7 +378,7 @@ to calculate sum of numbers
     for each num in numbers
         total = total + num
     end for
-    give back total
+    return total
 end
 ```
 
@@ -629,7 +629,7 @@ print notification "Task Complete"
 1. **Block Editor**: Should we use existing framework (Blockly) or build custom?
 2. **Type System**: Strong typing vs dynamic typing for beginners?
 3. **Indexing**: 0-based (programmer standard) vs 1-based (natural counting)?
-4. **Keywords**: How natural is too natural? (e.g., "give back" vs "return")
+4. **Keywords**: How natural is too natural? (e.g., "return" vs "return")
 5. **Performance**: Acceptable performance tradeoffs for simplicity?
 
 ## References

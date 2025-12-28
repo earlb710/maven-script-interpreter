@@ -129,7 +129,7 @@ This document provides a summary of the EBS2 language specification and related 
 **Key Differences:**
 - Syntax: C-like → Natural language
 - Type names: `string`, `int` → `text`, `number`
-- Keywords: `if`, `else`, `return` → `when`, `otherwise`, `give back`
+- Keywords: `if`, `else`, `return` → `when`, `otherwise`, `return`
 - Indexing: 0-based → 1-based
 - Structure: Free-form → Organized sections
 - Runtime: Java only → HTML5 + Java
@@ -169,7 +169,7 @@ This document provides a summary of the EBS2 language specification and related 
 1. **Natural Language**
    - `if age is greater than 12 then` instead of `if (age > 12) {`
    - `repeat 10 times` instead of `for (i = 0; i < 10; i++)`
-   - `give back result` instead of `return result`
+   - `return result` instead of `return result`
 
 2. **Clear Structure**
    - Organized sections (variables, functions, screens, main)
@@ -344,7 +344,7 @@ Write once, deploy anywhere:
 ### Design Questions
 1. **Block Editor**: Blockly vs custom implementation?
 2. **Type System**: Strong typing vs dynamic for beginners?
-3. **Keywords**: How natural is optimal? ("give back" vs "return"?)
+3. **Keywords**: How natural is optimal? ("return" vs "return"?)
 4. **Indexing**: 1-based only or configurable?
 
 ### Implementation Questions

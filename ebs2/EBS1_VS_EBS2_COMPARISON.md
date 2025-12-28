@@ -230,7 +230,7 @@ print message;
 #### EBS2
 ```javascript
 to greet person
-    give back "Hello, " + person + "!"
+    return "Hello, " + person + "!"
 end function
 
 var message = call greet with "Alice"
@@ -239,7 +239,7 @@ show message
 
 **Key Differences:**
 - EBS2: Natural definition `to greet person` vs `greet(name: string)`
-- EBS2: `give back` vs `return`
+- EBS2: `return` vs `return`
 - EBS2: `call ... with` vs `call()`
 - EBS2: `show` vs `print`
 
@@ -401,7 +401,7 @@ For basic programs, migration is straightforward:
    - Or use compatibility mode for 0-based
 
 4. **Optional Changes**
-   - `return` → `give back` (for beginner-friendly code)
+   - `return` → `return` (for beginner-friendly code)
    - `print` → `show` (for consistency)
 
 ### Automated Migration Tool
@@ -453,9 +453,9 @@ to averageScore scores
     end for
     
     if count is greater than 0 then
-        give back total / count
+        return total / count
     otherwise
-        give back 0
+        return 0
     end if
 end
 

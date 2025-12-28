@@ -205,7 +205,7 @@ end
 |---------|------|------|
 | Syntax | C-like | Natural English |
 | Types | `string`, `int` | `text`, `number` |
-| Keywords | `if`, `return` | `when`, `give back` |
+| Keywords | `if`, `return` | `when`, `return` |
 | Indexing | 0-based | 1-based |
 | Platform | Java only | HTML5 + Java |
 | Structure | Free-form | Organized sections |

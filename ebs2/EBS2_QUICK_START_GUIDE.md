@@ -429,7 +429,7 @@ Hello Charlie!
 program Calculator
 
 to add numbers a and b
-    give back a + b
+    return a + b
 end
 
 main
@@ -749,7 +749,7 @@ end for
 ```javascript
 to functionName parameter
     -- do something
-    give back result
+    return result
 end function
 ```
 

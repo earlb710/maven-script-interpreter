@@ -876,7 +876,7 @@ call dog.speak
 async to loadData from url
     var response = await call http.get from url
     var data = parse json from response
-    give back data
+    return data
 end
 
 // Use it

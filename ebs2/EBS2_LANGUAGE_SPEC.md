@@ -260,7 +260,7 @@ functions
     end function
     
     to calculate score
-        give back score * 10
+        return score * 10
     end function
 end
 
@@ -1170,7 +1170,7 @@ EBS2 supports both natural language and traditional function syntax.
 | Long Form (Natural) | Short Form (Traditional) |
 |---------------------|--------------------------|
 | `to functionName param` | `function functionName(param)` |
-| `give back value` | `return value` |
+| `return value` | `return value` |
 | `call functionName with value` | `functionName(value)` |
 
 **Both forms are equivalent and can be mixed.** Choose based on your audience and preference.
@@ -1212,7 +1212,7 @@ call introduce with person: "Alice" and age: 10
 #### Simple Return (Intermediate)
 ```javascript
 to double number
-    give back number * 2
+    return number * 2
 end function
 
 // Use it
@@ -1225,7 +1225,7 @@ print result     -- Shows: 10
 to divideWithRemainder dividend and divisor
     var quotient = dividend / divisor
     var remainder = dividend mod divisor
-    give back quotient and remainder
+    return quotient and remainder
 end function
 
 // Use it
@@ -1255,7 +1255,7 @@ to sum numbers...
     for each num in numbers
         total = total + num
     end for
-    give back total
+    return total
 end
 
 // Call with any number of arguments
@@ -1266,15 +1266,15 @@ var result = call sum with 1, 2, 3, 4, 5
 ```javascript
 to factorial n
     if n <= 1 then
-        give back 1
+        return 1
     end function
-    give back n * call factorial with (n - 1)
+    return n * call factorial with (n - 1)
 end
 ```
 
 #### Anonymous Functions (Advanced)
 ```javascript
-var doubler = function(x) { give back x * 2 }
+var doubler = function(x) { return x * 2 }
 
 var result = call doubler with 5
 ```
@@ -1915,7 +1915,7 @@ export function calculate sum of numbers
     for each num in numbers
         total = total + num
     end for
-    give back total
+    return total
 end
 
 // Private function (not exported)
@@ -2249,7 +2249,7 @@ EBS2 supports both natural language (long form) and symbolic (short form) syntax
 | Long Form | Short Form | Example |
 |-----------|------------|---------|
 | `to name params` | `function name(params)` | `to greet person` → `function greet(person)` |
-| `give back value` | `return value` | `give back x * 2` → `return x * 2` |
+| `return value` | `return value` | `return x * 2` → `return x * 2` |
 | `call func with args` | `func(args)` | `call greet with "Alice"` → `greet("Alice")` |
 
 #### Loop Control
