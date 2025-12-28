@@ -491,7 +491,7 @@ var numbers = list 1, 2, 3, 4, 5
 add 6 to numbers
 
 // Get item
-var first = numbers at 1  -- 1-based indexing for simplicity
+var first = numbers at 1  -- 0-based indexing for simplicity
 
 // Get count
 var count = count of numbers

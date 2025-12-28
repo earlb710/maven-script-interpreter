@@ -37,13 +37,15 @@ EBS2 is a redesigned version of the language with focus on:
 | Aspect | EBS1 | EBS2 |
 |--------|------|------|
 | **Target Audience** | General developers | Children first, developers second |
-| **Syntax Style** | C-like, symbolic | Simplified, beginner-friendly |
+| **Syntax Style** | C-like, symbolic | Dual: Natural + Symbolic |
 | **Platforms** | Java/JavaFX desktop | HTML5 browser + Java desktop |
 | **Learning Curve** | Moderate (familiar to programmers) | Gentle (intuitive for children) |
 | **Structure** | Free-form | Organized sections |
 | **Type Names** | `string`, `int`, `float` | `text`, `number` |
-| **Indexing** | 0-based arrays | 1-based arrays (configurable) |
+| **Indexing** | 0-based arrays | 0-based arrays (consistent) |
 | **Comments** | `//` and `/* */` | `//` and `/* */` |
+| **Block Syntax** | Multi-line only | Single-line or multi-line |
+| **JavaFX Output** | TextFlow/TextArea | WebView (HTML rendering) |
 
 ## Philosophy and Design Goals
 

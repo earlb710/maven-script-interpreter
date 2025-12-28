@@ -264,7 +264,38 @@ end
 
 ### Block Ending Conventions
 
-**Control structures and functions use explicit endings** to make code clearer and easier to debug:
+**Single-line vs Multi-line blocks:**
+
+EBS2 supports both compact single-line and explicit multi-line block syntax:
+
+```javascript
+// SINGLE-LINE: No end keyword needed
+if x < 5 then print "Small"
+repeat 3 times print "Hello"
+for i from 1 to 5 print i
+
+// MULTI-LINE: Explicit end keyword required
+if x < 5 then
+    print "Small"
+    log "Value checked"
+end if
+
+repeat 3 times
+    print "Hello"
+    print "World"
+end repeat
+
+// MULTIPLE COMMANDS ON ONE LINE: Use semicolon separator
+if x < 5 then print "Small"; log "Checked"; x = x + 1
+```
+
+**When to use each:**
+
+- **Single-line**: Simple, one-command blocks - more compact
+- **Multi-line**: Multiple commands or complex logic - more readable
+- **Semicolon**: Multiple commands on same line - use sparingly
+
+**Control structures with explicit multi-line endings:**
 
 ```javascript
 // Explicit endings for control structures
@@ -354,6 +385,11 @@ var deadline as date = "2025-12-31 23:59:59"
 // Simple list
 var numbers as list = list 1, 2, 3, 4, 5
 
+// Range syntax
+var numbers as list = list 1..100     // Creates list [1, 2, 3, ..., 100]
+var letters as list = list 'a'..'z'   // Creates list ['a', 'b', ..., 'z']
+var countdown as list = list 10..1    // Creates list [10, 9, 8, ..., 1]
+
 // Typed list
 var names as list of text = list "Alice", "Bob", "Charlie"
 
@@ -362,6 +398,11 @@ var items as list of number = empty list
 
 // Multi-type list (advanced)
 var mixed as list = list 1, "two", yes, 3.14
+
+// Arrays are 0-indexed (like most programming languages)
+var first = numbers[0]      // Gets first element
+var second = numbers[1]     // Gets second element
+var last = numbers[99]      // Gets last element (for 100-item array)
 ```
 
 #### record
@@ -604,18 +645,29 @@ var greeting = "Hello {name}, you are {age} years old"
 
 #### Simple If (Beginner)
 ```javascript
+// Multi-line form (requires end if)
 if condition then
     -- code to run if true
 end if
+
+// Single-line form (no end if needed)
+if age < 5 then print "Preschooler"
+
+// Multiple commands on one line (separated by semicolon)
+if age < 5 then print "Young"; log "Age checked"
 ```
 
 #### If-Else (Beginner)
 ```javascript
+// Multi-line form
 if age < 13 then
     print "Child"
 else
     print "Teen or Adult"
 end if
+
+// Single-line form
+if age < 13 then print "Child" else print "Teen or Adult"
 ```
 
 #### Multiple Conditions (Intermediate)
@@ -646,15 +698,21 @@ end if
 
 #### Repeat Times (Beginner)
 ```javascript
-// Fixed repetition
+// Multi-line form
 repeat 10 times
     print "Hello"
 end repeat
 
-// With counter
+// Single-line form
+repeat 10 times print "Hello"
+
+// With counter (multi-line)
 repeat 5 times with counter
     print "Count: " + counter
 end repeat
+
+// With counter (single-line)
+repeat 5 times with counter print "Count: " + counter
 ```
 
 #### Repeat While (Intermediate)
@@ -1304,8 +1362,13 @@ var numbers = list 1, 2, 3, 4, 5
 // Count items
 var count = count of numbers         -- 5
 
-// Get item
-var first = numbers at 1             -- 1 (1-based indexing)
+// Get item (0-based indexing like most programming languages)
+var first = numbers[0]               -- 1
+var second = numbers[1]              -- 2
+var last = numbers[4]                -- 5
+
+// Alternative syntax (long form)
+var first = numbers at 0             -- 1
 var last = numbers at end            -- 5
 
 // Add item
@@ -1543,9 +1606,14 @@ my_project/
 
 **Target:** Desktop applications  
 **Execution:** EBS2 → Bytecode → JVM  
-**UI Framework:** JavaFX  
+**UI Framework:** JavaFX with WebView for output  
 **Graphics:** JavaFX Canvas  
 **Storage:** Native file system
+
+**Output Implementation:**
+- Default screen uses JavaFX WebView component
+- Renders HTML content just like a browser
+- Ensures identical print behavior with HTML5 runtime
 
 **Capabilities:**
 - Full file system access
@@ -1553,6 +1621,7 @@ my_project/
 - Database connectivity
 - Network operations
 - Plugin support
+- HTML rendering via WebView
 
 **Limitations:**
 - Requires JVM installation
@@ -1588,9 +1657,12 @@ my_project/
 - Supports HTML formatting when needed
 
 **Java Runtime:**
-- Adds text items to JavaFX TextFlow or TextArea
-- Updates the console/output pane
-- Maintains formatting and styling
+- Uses a default screen with a WebView component (HTML rendering)
+- Outputs HTML content just like the browser version
+- **Ensures identical behavior** between HTML5 and JavaFX
+- Maintains consistent formatting and styling across platforms
+
+**Benefit:** By using WebView in JavaFX, the print command produces identical output on both platforms. HTML formatting, CSS styling, and layout work the same way.
 
 #### log Command
 **HTML5 Runtime:**
@@ -1608,6 +1680,7 @@ my_project/
 **Common Behavior:**
 - Both commands are non-blocking
 - Both support multiple arguments
+- Both support semicolon-separated multi-command lines
 - Both maintain timestamp and context information
 - Debug view is available on both platforms
 
@@ -1732,18 +1805,20 @@ varDecl         = "var" identifier ["as" type] ["=" expression]
 assignment      = identifier "=" expression
 functionCall    = "call" identifier ["with" arguments]
 
-ifStmt          = "if" expression "then" statement* 
-                  ["else" statement*] "end" "if"
+ifStmt          = "if" expression "then" 
+                  (statement "end" "if" | singleStatement)
+                  ["else" (statement* "end" "if" | singleStatement)]
 
 loopStmt        = repeatLoop | forEachLoop | whileLoop
 
 repeatLoop      = "repeat" (number | expression) "times" 
-                  statement* "end" "repeat"
+                  (statement* "end" "repeat" | singleStatement)
 
 forEachLoop     = "for" "each" identifier "in" expression
-                  statement* "end" "for"
+                  (statement* "end" "for" | singleStatement)
 
-whileLoop       = "while" expression statement* "end" "while"
+whileLoop       = "while" expression 
+                  (statement* "end" "while" | singleStatement)
 
 function        = ("to" identifier params | "function" identifier "(" params ")")
                   statement* "end" "function"
@@ -1754,11 +1829,20 @@ tryStmt         = "try" statement*
 
 screenDef       = "screen" identifier screenContent* "end" "screen"
 
+statement       = varDecl | assignment | ifStmt | loopStmt | 
+                  functionCall | return | print | try-catch
+
+singleStatement = simpleStatement [";" simpleStatement]*
+simpleStatement = varDecl | assignment | functionCall | return | print
+
 expression      = primary (operator primary)*
 primary         = literal | identifier | "(" expression ")" | functionCall
-literal         = number | text | boolean | list
+literal         = number | text | boolean | list | range
 
-type            = "number" | "text" | "yes/no" | "list" | 
+list            = "list" (elements | range)
+range           = expression ".." expression
+
+type            = "number" | "text" | "yes/no" | "date" | "list" | 
                   "list" "of" type | record | map
 ```
 

@@ -174,6 +174,29 @@ end
 - `<=` means "less than or equal to"
 - `=` means "equal to"
 
+### Short Form (One Line)
+
+For simple checks, you can write everything on one line:
+
+```javascript
+program QuickCheck
+
+main
+    var age as number = 8
+    
+    // One line - no 'end if' needed!
+    if age < 5 then print "Preschooler"
+    if age >= 5 then print "School age"
+    
+    // Multiple commands on one line with semicolon
+    if age < 10 then print "Young"; log "Age checked"
+end
+```
+
+**When to use:**
+- **One line**: Simple, single command
+- **Multiple lines**: Complex logic or multiple commands
+
 ## Repeating Things
 
 ### Repeat a Fixed Number of Times
@@ -229,6 +252,37 @@ end
 ```
 
 **Output:** 5, 4, 3, 2, 1, Blast off!
+
+## Working with Lists
+
+Lists let you store multiple values together:
+
+### Creating Lists
+
+```javascript
+program ListExample
+
+main
+    // Simple list
+    var numbers = list 1, 2, 3, 4, 5
+    
+    // Range syntax (creates all numbers from 1 to 10)
+    var oneToTen = list 1..10
+    
+    // Large range (creates 1 to 100)
+    var oneToHundred = list 1..100
+    
+    // Get items from list (starts at 0!)
+    print numbers[0]  // Prints: 1 (first item)
+    print numbers[1]  // Prints: 2 (second item)
+    print numbers[4]  // Prints: 5 (fifth item)
+end
+```
+
+**Remember:** Lists start counting from 0, just like most programming languages!
+- `numbers[0]` = first item
+- `numbers[1]` = second item
+- `numbers[2]` = third item
 
 ## Creating Functions
 

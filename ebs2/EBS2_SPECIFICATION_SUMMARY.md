@@ -244,7 +244,7 @@ if age > 12 then
 end if
 ```
 
-### 3. 1-Based Indexing
+### 3. 0-Based Indexing
 
 More natural for children (who count starting from 1):
 
