@@ -2,384 +2,250 @@
 // test_tree_help_style.ebs - Tree Bidirectional Binding Test (Help Style)
 // ============================================================================
 // This script tests the bidirectional tree binding feature with a tree
-// structure similar to the help system, demonstrating:
-// - Tree selection updating the variable
-// - Variable updates triggering tree selection changes
-// - Nested categories with icons and expanded states
-// - Navigation buttons for programmatic selection
+// structure similar to the help system
 // ============================================================================
 
 print "Tree Bidirectional Binding Test - Help Style";
 print "=============================================";
 
-// Build tree structure dynamically
-var treeData: array[*] = [];
-
-// Build main documentation branch
-var docChildren: array[*] = [];
-
-// Getting Started section
+// Build tree structure using json.set() like help.ebs
 var gettingStartedChildren: array[*] = [];
-call array.add(gettingStartedChildren, {"value": "Introduction", "icon": "icons/help-page.png"});
-call array.add(gettingStartedChildren, {"value": "Installation", "icon": "icons/help-page.png"});
-call array.add(gettingStartedChildren, {"value": "Quick Start", "icon": "icons/help-page.png"});
-call array.add(gettingStartedChildren, {"value": "First Program", "icon": "icons/help-page.png"});
+var introNode: json = call json.jsonFromString("{}");
+introNode = call json.set(introNode, "value", "Introduction");
+introNode = call json.set(introNode, "icon", "icons/help-page.png");
+call array.add(gettingStartedChildren, introNode);
 
-var gettingStartedNode: json = {
-    "value": "Getting Started",
-    "icon": "icons/tree-node.png",
-    "expanded": true,
-    "children": $gettingStartedChildren
-};
-call array.add(docChildren, gettingStartedNode);
+var installNode: json = call json.jsonFromString("{}");
+installNode = call json.set(installNode, "value", "Installation");
+installNode = call json.set(installNode, "icon", "icons/help-page.png");
+call array.add(gettingStartedChildren, installNode);
 
-// Language Basics section with nested Variables
+var gettingStartedNode: json = call json.jsonFromString("{}");
+gettingStartedNode = call json.set(gettingStartedNode, "value", "Getting Started");
+gettingStartedNode = call json.set(gettingStartedNode, "icon", "icons/tree-node.png");
+gettingStartedNode = call json.set(gettingStartedNode, "expanded", true);
+gettingStartedNode = call json.set(gettingStartedNode, "children", gettingStartedChildren);
+
 var variablesChildren: array[*] = [];
-call array.add(variablesChildren, {"value": "Declaration", "icon": "icons/info-page.png"});
-call array.add(variablesChildren, {"value": "Types", "icon": "icons/info-page.png"});
-call array.add(variablesChildren, {"value": "Scope", "icon": "icons/info-page.png"});
+var declNode: json = call json.jsonFromString("{}");
+declNode = call json.set(declNode, "value", "Declaration");
+declNode = call json.set(declNode, "icon", "icons/info-page.png");
+call array.add(variablesChildren, declNode);
 
-var variablesNode: json = {
-    "value": "Variables",
-    "icon": "icons/tree-node.png",
-    "expanded": false,
-    "children": $variablesChildren
-};
+var typesNode: json = call json.jsonFromString("{}");
+typesNode = call json.set(typesNode, "value", "Types");
+typesNode = call json.set(typesNode, "icon", "icons/info-page.png");
+call array.add(variablesChildren, typesNode);
+
+var variablesNode: json = call json.jsonFromString("{}");
+variablesNode = call json.set(variablesNode, "value", "Variables");
+variablesNode = call json.set(variablesNode, "icon", "icons/tree-node.png");
+variablesNode = call json.set(variablesNode, "expanded", false);
+variablesNode = call json.set(variablesNode, "children", variablesChildren);
 
 var langBasicsChildren: array[*] = [];
 call array.add(langBasicsChildren, variablesNode);
-call array.add(langBasicsChildren, {"value": "Operators", "icon": "icons/info-page.png"});
-call array.add(langBasicsChildren, {"value": "Functions", "icon": "icons/info-page.png"});
-call array.add(langBasicsChildren, {"value": "Control Flow", "icon": "icons/info-page.png"});
 
-var langBasicsNode: json = {
-    "value": "Language Basics",
-    "icon": "icons/tree-node.png",
-    "expanded": false,
-    "children": $langBasicsChildren
-};
+var langBasicsNode: json = call json.jsonFromString("{}");
+langBasicsNode = call json.set(langBasicsNode, "value", "Language Basics");
+langBasicsNode = call json.set(langBasicsNode, "icon", "icons/tree-node.png");
+langBasicsNode = call json.set(langBasicsNode, "expanded", false);
+langBasicsNode = call json.set(langBasicsNode, "children", langBasicsChildren);
+
+var docChildren: array[*] = [];
+call array.add(docChildren, gettingStartedNode);
 call array.add(docChildren, langBasicsNode);
 
-// Data Structures section
-var dataStructChildren: array[*] = [];
-call array.add(dataStructChildren, {"value": "Arrays", "icon": "icons/info-page.png"});
-call array.add(dataStructChildren, {"value": "JSON", "icon": "icons/info-page.png"});
-call array.add(dataStructChildren, {"value": "Maps", "icon": "icons/info-page.png"});
+var docRootNode: json = call json.jsonFromString("{}");
+docRootNode = call json.set(docRootNode, "value", "Documentation");
+docRootNode = call json.set(docRootNode, "icon", "icons/tree-node.png");
+docRootNode = call json.set(docRootNode, "expanded", true);
+docRootNode = call json.set(docRootNode, "children", docChildren);
 
-var dataStructNode: json = {
-    "value": "Data Structures",
-    "icon": "icons/tree-node.png",
-    "expanded": false,
-    "children": $dataStructChildren
-};
-call array.add(docChildren, dataStructNode);
-
-// Screen Components section with nested controls
-var inputControlsChildren: array[*] = [];
-call array.add(inputControlsChildren, {"value": "TextField", "icon": "icons/normal-page.png"});
-call array.add(inputControlsChildren, {"value": "TextArea", "icon": "icons/normal-page.png"});
-call array.add(inputControlsChildren, {"value": "CheckBox", "icon": "icons/normal-page.png"});
-
-var inputControlsNode: json = {
-    "value": "Input Controls",
-    "icon": "icons/tree-node.png",
-    "expanded": false,
-    "children": $inputControlsChildren
-};
-
-var screenCompChildren: array[*] = [];
-call array.add(screenCompChildren, inputControlsNode);
-call array.add(screenCompChildren, {"value": "Button", "icon": "icons/normal-page.png"});
-call array.add(screenCompChildren, {"value": "TreeView", "icon": "icons/normal-page.png"});
-
-var screenCompNode: json = {
-    "value": "Screen Components",
-    "icon": "icons/tree-node.png",
-    "expanded": false,
-    "children": $screenCompChildren
-};
-call array.add(docChildren, screenCompNode);
-
-// Create Documentation root
-var documentationNode: json = {
-    "value": "Documentation",
-    "icon": "icons/tree-node.png",
-    "expanded": true,
-    "children": $docChildren
-};
-call array.add(treeData, documentationNode);
-
-// Build Examples branch
-var examplesChildren: array[*] = [];
-call array.add(examplesChildren, {"value": "Hello World", "icon": "icons/help-page.png"});
-call array.add(examplesChildren, {"value": "Calculator", "icon": "icons/help-page.png"});
-call array.add(examplesChildren, {"value": "File Manager", "icon": "icons/help-page.png"});
-
-var examplesNode: json = {
-    "value": "Examples",
-    "icon": "icons/tree-node.png",
-    "expanded": false,
-    "children": $examplesChildren
-};
-call array.add(treeData, examplesNode);
-
-// Build API Reference branch
-var strFuncChildren: array[*] = [];
-call array.add(strFuncChildren, {"value": "str.trim", "icon": "icons/help-page.png"});
-call array.add(strFuncChildren, {"value": "str.split", "icon": "icons/help-page.png"});
-call array.add(strFuncChildren, {"value": "str.replace", "icon": "icons/help-page.png"});
-
-var strFuncNode: json = {
-    "value": "String Functions",
-    "icon": "icons/tree-node.png",
-    "expanded": false,
-    "children": $strFuncChildren
-};
-
-var arrayFuncChildren: array[*] = [];
-call array.add(arrayFuncChildren, {"value": "array.add", "icon": "icons/help-page.png"});
-call array.add(arrayFuncChildren, {"value": "array.remove", "icon": "icons/help-page.png"});
-call array.add(arrayFuncChildren, {"value": "array.sort", "icon": "icons/help-page.png"});
-
-var arrayFuncNode: json = {
-    "value": "Array Functions",
-    "icon": "icons/tree-node.png",
-    "expanded": false,
-    "children": $arrayFuncChildren
-};
-
+// API Reference branch
 var apiChildren: array[*] = [];
-call array.add(apiChildren, strFuncNode);
-call array.add(apiChildren, arrayFuncNode);
+var builtinsNode: json = call json.jsonFromString("{}");
+builtinsNode = call json.set(builtinsNode, "value", "Built-in Functions");
+builtinsNode = call json.set(builtinsNode, "icon", "icons/help-page.png");
+call array.add(apiChildren, builtinsNode);
 
-var apiNode: json = {
-    "value": "API Reference",
-    "icon": "icons/tree-node.png",
-    "expanded": false,
-    "children": $apiChildren
-};
-call array.add(treeData, apiNode);
+var apiRootNode: json = call json.jsonFromString("{}");
+apiRootNode = call json.set(apiRootNode, "value", "API Reference");
+apiRootNode = call json.set(apiRootNode, "icon", "icons/tree-node.png");
+apiRootNode = call json.set(apiRootNode, "expanded", false);
+apiRootNode = call json.set(apiRootNode, "children", apiChildren);
 
-// Define the screen with JSON syntax
-screen HelpStyleTreeTest = {
-    "title": "Tree Bidirectional Binding - Help Style Demo",
-    "width": 900,
-    "height": 650,
-    "vars": [
-        {
-            "name": "selectedTopic",
-            "type": "string",
-            "default": ""
-        },
-        {
-            "name": "topicTitle",
-            "type": "string",
-            "default": "Topic: (none selected)",
-            "display": {
-                "type": "label",
-                "itemFontSize": "18px",
-                "itemBold": true
-            }
-        },
-        {
-            "name": "topicContent",
-            "type": "string",
-            "default": "Select a topic from the tree or use the navigation buttons below.",
-            "display": {
-                "type": "label",
-                "itemFontSize": "12px"
-            }
-        }
-    ],
-    "area": [
-        {
-            "name": "mainLayout",
-            "type": "hbox",
-            "areas": [
-                {
-                    "name": "leftPanel",
-                    "type": "vbox",
-                    "hgrow": "always",
-                    "items": [
-                        {
-                            "name": "selectedTopic", 
-                            "varRef": "selectedTopic",
-                            "display": {
-                                "type": "treeview",
-                                "labelText": "Documentation Topics",
-                                "displayRecords": 20,
-                                "showRoot": false,
-                                "treeItems": [],
-                                "onChange": "if selectedTopic != '' then { call scr.setProperty('HelpStyleTreeTest.topicTitle', 'labelText', 'Topic: ' + selectedTopic); call scr.setProperty('HelpStyleTreeTest.topicContent', 'labelText', 'Showing content for: ' + selectedTopic + '\\n\\nBidirectional binding:\\n• Click tree items to update variable\\n• Set variable to update tree selection\\n• Parents expand automatically\\n• Tree scrolls to selection'); } else { call scr.setProperty('HelpStyleTreeTest.topicTitle', 'labelText', 'Topic: (none)'); call scr.setProperty('HelpStyleTreeTest.topicContent', 'labelText', 'Select a topic from the tree or use navigation buttons.'); }"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "name": "rightPanel",
-                    "type": "vbox",
-                    "hgrow": "always",
-                    "items": [
-                        {"name": "topicTitle", "varRef": "topicTitle"},
-                        {"name": "separator1", "display": {"type": "separator"}},
-                        {"name": "topicContent", "varRef": "topicContent"},
-                        {"name": "separator2", "display": {"type": "separator"}},
-                        {
-                            "name": "navTitle",
-                            "display": {
-                                "type": "label",
-                                "labelText": "Quick Navigation (Tests Bidirectional Binding)",
-                                "itemFontSize": "14px",
-                                "itemBold": true
-                            }
-                        },
-                        {
-                            "name": "btn1",
-                            "display": {
-                                "type": "button",
-                                "labelText": "Introduction",
-                                "onClick": "selectedTopic = 'Introduction';"
-                            }
-                        },
-                        {
-                            "name": "btn2",
-                            "display": {
-                                "type": "button",
-                                "labelText": "Quick Start",
-                                "onClick": "selectedTopic = 'Quick Start';"
-                            }
-                        },
-                        {
-                            "name": "btn3",
-                            "display": {
-                                "type": "button",
-                                "labelText": "Variables",
-                                "onClick": "selectedTopic = 'Variables';"
-                            }
-                        },
-                        {
-                            "name": "btn4",
-                            "display": {
-                                "type": "button",
-                                "labelText": "Declaration",
-                                "onClick": "selectedTopic = 'Declaration';"
-                            }
-                        },
-                        {
-                            "name": "btn5",
-                            "display": {
-                                "type": "button",
-                                "labelText": "TreeView",
-                                "onClick": "selectedTopic = 'TreeView';"
-                            }
-                        },
-                        {
-                            "name": "btn6",
-                            "display": {
-                                "type": "button",
-                                "labelText": "TextField",
-                                "onClick": "selectedTopic = 'TextField';"
-                            }
-                        },
-                        {
-                            "name": "btn7",
-                            "display": {
-                                "type": "button",
-                                "labelText": "str.trim",
-                                "onClick": "selectedTopic = 'str.trim';"
-                            }
-                        },
-                        {
-                            "name": "btn8",
-                            "display": {
-                                "type": "button",
-                                "labelText": "array.sort",
-                                "onClick": "selectedTopic = 'array.sort';"
-                            }
-                        },
-                        {
-                            "name": "btn9",
-                            "display": {
-                                "type": "button",
-                                "labelText": "Calculator",
-                                "onClick": "selectedTopic = 'Calculator';"
-                            }
-                        },
-                        {
-                            "name": "btnRoot",
-                            "display": {
-                                "type": "button",
-                                "labelText": "Documentation (Root)",
-                                "onClick": "selectedTopic = 'Documentation';"
-                            }
-                        },
-                        {
-                            "name": "btnClear",
-                            "display": {
-                                "type": "button",
-                                "labelText": "Clear Selection",
-                                "onClick": "selectedTopic = '';"
-                            }
-                        },
-                        {
-                            "name": "instructionsLabel",
-                            "display": {
-                                "type": "label",
-                                "labelText": "Instructions: Click tree items OR click buttons to test bidirectional binding",
-                                "itemFontSize": "11px",
-                                "itemItalic": true
-                            }
-                        }
-                    ]
-                }
-            ]
-        }
-    ]
-};
+// Root level
+var rootChildren: array[*] = [];
+call array.add(rootChildren, docRootNode);
+call array.add(rootChildren, apiRootNode);
 
-// Convert screen to JSON, inject tree items, then show
-var screenJson: json = HelpStyleTreeTest;
-var areaArray: json = call json.get(screenJson, "area");
-if areaArray != null && areaArray.length > 0 then {
-    var mainLayout: json = areaArray[0];
-    var areas: json = call json.get(mainLayout, "areas");
-    if areas != null && areas.length > 0 then {
-        // Get left panel (index 0)
-        var leftPanel: json = areas[0];
-        var items: json = call json.get(leftPanel, "items");
-        if items != null && items.length > 0 then {
-            // Get the selectedTopic tree item (index 0)
-            var treeItem: json = items[0];
-            var display: json = call json.get(treeItem, "display");
-            if display != null then {
-                // Set treeItems in the display
-                display = call json.set(display, "treeItems", treeData);
-                treeItem = call json.set(treeItem, "display", display);
-                items = call json.set(items, 0, treeItem);
-                leftPanel = call json.set(leftPanel, "items", items);
-                areas = call json.set(areas, 0, leftPanel);
-                mainLayout = call json.set(mainLayout, "areas", areas);
-                areaArray = call json.set(areaArray, 0, mainLayout);
-                screenJson = call json.set(screenJson, "area", areaArray);
-            }
+var rootNode: json = call json.jsonFromString("{}");
+rootNode = call json.set(rootNode, "value", "Help Topics");
+rootNode = call json.set(rootNode, "icon", "icons/tree-node.png");
+rootNode = call json.set(rootNode, "expanded", true);
+rootNode = call json.set(rootNode, "children", rootChildren);
+
+var treeData: array[*] = [];
+call array.add(treeData, rootNode);
+
+// Create screen JSON definition
+var screenJson: json = call json.jsonFromString("{}");
+screenJson = call json.set(screenJson, "title", "Help Style Tree Test");
+screenJson = call json.set(screenJson, "width", 900);
+screenJson = call json.set(screenJson, "height", 600);
+
+// Build vars array
+var varsArray: array[*] = [];
+var selectedTopicVar: json = call json.jsonFromString("{}");
+selectedTopicVar = call json.set(selectedTopicVar, "name", "selectedTopic");
+selectedTopicVar = call json.set(selectedTopicVar, "type", "string");
+selectedTopicVar = call json.set(selectedTopicVar, "default", "");
+call array.add(varsArray, selectedTopicVar);
+
+var topicTitleVar: json = call json.jsonFromString("{}");
+topicTitleVar = call json.set(topicTitleVar, "name", "topicTitle");
+topicTitleVar = call json.set(topicTitleVar, "type", "string");
+topicTitleVar = call json.set(topicTitleVar, "default", "Select a topic from the tree");
+call array.add(varsArray, topicTitleVar);
+
+var topicContentVar: json = call json.jsonFromString("{}");
+topicContentVar = call json.set(topicContentVar, "name", "topicContent");
+topicContentVar = call json.set(topicContentVar, "type", "string");
+topicContentVar = call json.set(topicContentVar, "default", "Click a topic in the tree to view its content");
+call array.add(varsArray, topicContentVar);
+
+screenJson = call json.set(screenJson, "vars", varsArray);
+
+// Build left panel (tree)
+var leftPanelItems: array[*] = [];
+
+var treeItem: json = call json.jsonFromString("{}");
+treeItem = call json.set(treeItem, "name", "selectedTopic");
+treeItem = call json.set(treeItem, "varRef", "selectedTopic");
+var treeDisplay: json = call json.jsonFromString("{}");
+treeDisplay = call json.set(treeDisplay, "type", "treeview");
+treeDisplay = call json.set(treeDisplay, "treeItems", []);
+treeDisplay = call json.set(treeDisplay, "minWidth", 300);
+treeDisplay = call json.set(treeDisplay, "minHeight", 500);
+treeDisplay = call json.set(treeDisplay, "onChange", "topicTitle = 'Topic: ' + selectedTopic; topicContent = 'Content for: ' + selectedTopic;");
+treeItem = call json.set(treeItem, "display", treeDisplay);
+call array.add(leftPanelItems, treeItem);
+
+var leftPanel: json = call json.jsonFromString("{}");
+leftPanel = call json.set(leftPanel, "type", "vbox");
+leftPanel = call json.set(leftPanel, "items", leftPanelItems);
+
+// Build right panel (content)
+var rightPanelItems: array[*] = [];
+
+var titleItem: json = call json.jsonFromString("{}");
+titleItem = call json.set(titleItem, "name", "topicTitle");
+titleItem = call json.set(titleItem, "varRef", "topicTitle");
+var titleDisplay: json = call json.jsonFromString("{}");
+titleDisplay = call json.set(titleDisplay, "type", "label");
+titleDisplay = call json.set(titleDisplay, "itemBold", true);
+titleDisplay = call json.set(titleDisplay, "itemFontSize", "16px");
+titleItem = call json.set(titleItem, "display", titleDisplay);
+call array.add(rightPanelItems, titleItem);
+
+var contentItem: json = call json.jsonFromString("{}");
+contentItem = call json.set(contentItem, "name", "topicContent");
+contentItem = call json.set(contentItem, "varRef", "topicContent");
+var contentDisplay: json = call json.jsonFromString("{}");
+contentDisplay = call json.set(contentDisplay, "type", "label");
+contentItem = call json.set(contentItem, "display", contentDisplay);
+call array.add(rightPanelItems, contentItem);
+
+// Navigation buttons
+var selectIntroBtn: json = call json.jsonFromString("{}");
+selectIntroBtn = call json.set(selectIntroBtn, "name", "selectIntroBtn");
+var selectIntroDisplay: json = call json.jsonFromString("{}");
+selectIntroDisplay = call json.set(selectIntroDisplay, "type", "button");
+selectIntroDisplay = call json.set(selectIntroDisplay, "labelText", "Go to Introduction");
+selectIntroDisplay = call json.set(selectIntroDisplay, "onClick", "selectedTopic = 'Introduction';");
+selectIntroBtn = call json.set(selectIntroBtn, "display", selectIntroDisplay);
+call array.add(rightPanelItems, selectIntroBtn);
+
+var selectDeclBtn: json = call json.jsonFromString("{}");
+selectDeclBtn = call json.set(selectDeclBtn, "name", "selectDeclBtn");
+var selectDeclDisplay: json = call json.jsonFromString("{}");
+selectDeclDisplay = call json.set(selectDeclDisplay, "type", "button");
+selectDeclDisplay = call json.set(selectDeclDisplay, "labelText", "Go to Declaration");
+selectDeclDisplay = call json.set(selectDeclDisplay, "onClick", "selectedTopic = 'Declaration';");
+selectDeclBtn = call json.set(selectDeclBtn, "display", selectDeclDisplay);
+call array.add(rightPanelItems, selectDeclBtn);
+
+var selectBuiltinsBtn: json = call json.jsonFromString("{}");
+selectBuiltinsBtn = call json.set(selectBuiltinsBtn, "name", "selectBuiltinsBtn");
+var selectBuiltinsDisplay: json = call json.jsonFromString("{}");
+selectBuiltinsDisplay = call json.set(selectBuiltinsDisplay, "type", "button");
+selectBuiltinsDisplay = call json.set(selectBuiltinsDisplay, "labelText", "Go to Built-in Functions");
+selectBuiltinsDisplay = call json.set(selectBuiltinsDisplay, "onClick", "selectedTopic = 'Built-in Functions';");
+selectBuiltinsBtn = call json.set(selectBuiltinsBtn, "display", selectBuiltinsDisplay);
+call array.add(rightPanelItems, selectBuiltinsBtn);
+
+var clearBtn: json = call json.jsonFromString("{}");
+clearBtn = call json.set(clearBtn, "name", "clearBtn");
+var clearDisplay: json = call json.jsonFromString("{}");
+clearDisplay = call json.set(clearDisplay, "type", "button");
+clearDisplay = call json.set(clearDisplay, "labelText", "Clear Selection");
+clearDisplay = call json.set(clearDisplay, "onClick", "selectedTopic = '';");
+clearBtn = call json.set(clearBtn, "display", clearDisplay);
+call array.add(rightPanelItems, clearBtn);
+
+var rightPanel: json = call json.jsonFromString("{}");
+rightPanel = call json.set(rightPanel, "type", "vbox");
+rightPanel = call json.set(rightPanel, "spacing", 10);
+rightPanel = call json.set(rightPanel, "padding", 15);
+rightPanel = call json.set(rightPanel, "items", rightPanelItems);
+
+// Create main layout with two areas side by side
+var areasArray: array[*] = [];
+call array.add(areasArray, leftPanel);
+call array.add(areasArray, rightPanel);
+
+var mainArea: json = call json.jsonFromString("{}");
+mainArea = call json.set(mainArea, "type", "hbox");
+mainArea = call json.set(mainArea, "spacing", 10);
+mainArea = call json.set(mainArea, "padding", 10);
+mainArea = call json.set(mainArea, "areas", areasArray);
+
+var areaArray: array[*] = [];
+call array.add(areaArray, mainArea);
+screenJson = call json.set(screenJson, "area", areaArray);
+
+// Inject treeItems into the screen JSON
+var area: json = areaArray[0];
+var areas: json = call json.get(area, "areas");
+if areas != null && areas.length > 0 then {
+    var leftPanelArea: json = areas[0];
+    var items: json = call json.get(leftPanelArea, "items");
+    if items != null && items.length > 0 then {
+        var treeItemFromArea: json = items[0];
+        var display: json = call json.get(treeItemFromArea, "display");
+        if display != null then {
+            display = call json.set(display, "treeItems", treeData);
+            treeItemFromArea = call json.set(treeItemFromArea, "display", display);
+            items = call json.set(items, 0, treeItemFromArea);
+            leftPanelArea = call json.set(leftPanelArea, "items", items);
+            areas = call json.set(areas, 0, leftPanelArea);
+            area = call json.set(area, "areas", areas);
+            areaArray = call json.set(areaArray, 0, area);
+            screenJson = call json.set(screenJson, "area", areaArray);
         }
     }
 }
 
+// Define the screen using the modified JSON
+screen HelpStyleTreeTest = screenJson;
+
 // Show the screen
-show screen screenJson;
+show screen HelpStyleTreeTest;
 
 print "";
-print "Test Instructions:";
-print "==================";
-print "1. Click on tree items - observe the variable updates and content changes";
-print "2. Click Quick Navigation buttons - observe tree selection updates";
-print "3. Notice how nested items cause parent nodes to expand automatically";
-print "4. Notice how the tree scrolls to make selected items visible";
-print "5. Test 'Clear Selection' button to clear the tree selection";
-print "";
-print "The tree structure mimics the help system with:";
-print "- Root node with icon";
-print "- Multiple levels of nesting (up to 4 levels)";
-print "- Different icon types for different node types";
-print "- Expanded and collapsed states";
+print "Test Features:";
+print "- Click tree items to see content updates";
+print "- Use buttons to programmatically select items";
+print "- Tree expands parent nodes automatically";
+print "- Tree scrolls to show selected items";

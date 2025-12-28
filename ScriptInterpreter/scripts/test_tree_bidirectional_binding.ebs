@@ -59,131 +59,132 @@ rootNode = call json.set(rootNode, "children", rootChildren);
 var treeData: array[*] = [];
 call array.add(treeData, rootNode);
 
-screen TreeBindingTest = {
-    "title": "Tree Bidirectional Binding Test",
-    "width": 700,
-    "height": 500,
-    "vars": [
-        {
-            "name": "selectedFile",
-            "type": "string",
-            "default": ""
-        },
-        {
-            "name": "instructionsLabel",
-            "type": "string",
-            "default": "Test bidirectional tree binding: Click tree items OR set the variable using buttons",
-            "display": {
-                "type": "label",
-                "itemFontSize": "14px",
-                "itemBold": true
-            }
-        },
-        {
-            "name": "selectionLabel",
-            "type": "string",
-            "default": "Current selection: (none)",
-            "display": {
-                "type": "label",
-                "itemFontSize": "12px"
-            }
-        }
-    ],
-    "area": [
-        {
-            "name": "mainArea",
-            "type": "vbox",
-            "items": [
-                {"name": "instructionsLabel", "varRef": "instructionsLabel"},
-                {"name": "selectionLabel", "varRef": "selectionLabel"},
-                {
-                    "name": "selectedFile", 
-                    "varRef": "selectedFile",
-                    "display": {
-                        "type": "treeview",
-                        "displayRecords": 12,
-                        "showRoot": true,
-                        "treeItems": [],
-                        "onChange": "call scr.setProperty('TreeBindingTest.selectionLabel', 'labelText', 'Current selection: ' + selectedFile);"
-                    }
-                },
-                {
-                    "name": "selectRootBtn",
-                    "display": {
-                        "type": "button",
-                        "labelText": "Select Root",
-                        "onClick": "selectedFile = 'Root';"
-                    }
-                },
-                {
-                    "name": "selectDocBtn",
-                    "display": {
-                        "type": "button",
-                        "labelText": "Select Documents",
-                        "onClick": "selectedFile = 'Documents';"
-                    }
-                },
-                {
-                    "name": "selectReadmeBtn",
-                    "display": {
-                        "type": "button",
-                        "labelText": "Select README.md",
-                        "onClick": "selectedFile = 'README.md';"
-                    }
-                },
-                {
-                    "name": "selectProject2Btn",
-                    "display": {
-                        "type": "button",
-                        "labelText": "Select Project2",
-                        "onClick": "selectedFile = 'Project2';"
-                    }
-                },
-                {
-                    "name": "clearBtn",
-                    "display": {
-                        "type": "button",
-                        "labelText": "Clear Selection",
-                        "onClick": "selectedFile = '';"
-                    }
-                },
-                {
-                    "name": "resultsLabel",
-                    "display": {
-                        "type": "label",
-                        "labelText": "Test: Click tree items, then click buttons to verify bidirectional binding",
-                        "itemFontSize": "11px",
-                        "itemItalic": true
-                    }
-                }
-            ]
-        }
-    ]
-};
+// Create screen JSON definition
+var screenJson: json = call json.jsonFromString("{}");
+screenJson = call json.set(screenJson, "title", "Tree Bidirectional Binding Test");
+screenJson = call json.set(screenJson, "width", 700);
+screenJson = call json.set(screenJson, "height", 500);
 
-// Convert screen to JSON, inject tree items, then show
-var screenJson: json = TreeBindingTest;
-var areaArray: json = call json.get(screenJson, "area");
-if areaArray != null && areaArray.length > 0 then {
-    var mainArea: json = areaArray[0];
-    var items: json = call json.get(mainArea, "items");
-    if items != null && items.length > 0 then {
-        // Find the selectedFile item (index 2 after instructionsLabel and selectionLabel)
-        var treeItem: json = items[2];
-        var display: json = call json.get(treeItem, "display");
-        if display != null then {
-            // Set treeItems in the display
-            display = call json.set(display, "treeItems", treeData);
-            treeItem = call json.set(treeItem, "display", display);
-            items = call json.set(items, 2, treeItem);
-            mainArea = call json.set(mainArea, "items", items);
-            areaArray = call json.set(areaArray, 0, mainArea);
-            screenJson = call json.set(screenJson, "area", areaArray);
-        }
+// Build vars array
+var varsArray: array[*] = [];
+var selectedFileVar: json = call json.jsonFromString("{}");
+selectedFileVar = call json.set(selectedFileVar, "name", "selectedFile");
+selectedFileVar = call json.set(selectedFileVar, "type", "string");
+selectedFileVar = call json.set(selectedFileVar, "default", "");
+call array.add(varsArray, selectedFileVar);
+
+var selectionLabelVar: json = call json.jsonFromString("{}");
+selectionLabelVar = call json.set(selectionLabelVar, "name", "selectionLabel");
+selectionLabelVar = call json.set(selectionLabelVar, "type", "string");
+selectionLabelVar = call json.set(selectionLabelVar, "default", "No selection");
+call array.add(varsArray, selectionLabelVar);
+
+screenJson = call json.set(screenJson, "vars", varsArray);
+
+// Build area array
+var itemsArray: array[*] = [];
+
+// Tree item
+var treeItem: json = call json.jsonFromString("{}");
+treeItem = call json.set(treeItem, "name", "selectedFile");
+treeItem = call json.set(treeItem, "varRef", "selectedFile");
+var treeDisplay: json = call json.jsonFromString("{}");
+treeDisplay = call json.set(treeDisplay, "type", "treeview");
+treeDisplay = call json.set(treeDisplay, "treeItems", []);
+treeDisplay = call json.set(treeDisplay, "minWidth", 300);
+treeDisplay = call json.set(treeDisplay, "minHeight", 400);
+treeDisplay = call json.set(treeDisplay, "onChange", "selectionLabel = 'Selected: ' + selectedFile;");
+treeItem = call json.set(treeItem, "display", treeDisplay);
+call array.add(itemsArray, treeItem);
+
+// Label item
+var labelItem: json = call json.jsonFromString("{}");
+labelItem = call json.set(labelItem, "name", "selectionLabel");
+labelItem = call json.set(labelItem, "varRef", "selectionLabel");
+var labelDisplay: json = call json.jsonFromString("{}");
+labelDisplay = call json.set(labelDisplay, "type", "label");
+labelDisplay = call json.set(labelDisplay, "itemBold", true);
+labelItem = call json.set(labelItem, "display", labelDisplay);
+call array.add(itemsArray, labelItem);
+
+// Button items
+var selectRootBtn: json = call json.jsonFromString("{}");
+selectRootBtn = call json.set(selectRootBtn, "name", "selectRootBtn");
+var selectRootDisplay: json = call json.jsonFromString("{}");
+selectRootDisplay = call json.set(selectRootDisplay, "type", "button");
+selectRootDisplay = call json.set(selectRootDisplay, "labelText", "Select Root");
+selectRootDisplay = call json.set(selectRootDisplay, "onClick", "selectedFile = 'Root';");
+selectRootBtn = call json.set(selectRootBtn, "display", selectRootDisplay);
+call array.add(itemsArray, selectRootBtn);
+
+var selectDocsBtn: json = call json.jsonFromString("{}");
+selectDocsBtn = call json.set(selectDocsBtn, "name", "selectDocsBtn");
+var selectDocsDisplay: json = call json.jsonFromString("{}");
+selectDocsDisplay = call json.set(selectDocsDisplay, "type", "button");
+selectDocsDisplay = call json.set(selectDocsDisplay, "labelText", "Select Documents");
+selectDocsDisplay = call json.set(selectDocsDisplay, "onClick", "selectedFile = 'Documents';");
+selectDocsBtn = call json.set(selectDocsBtn, "display", selectDocsDisplay);
+call array.add(itemsArray, selectDocsBtn);
+
+var selectReadmeBtn: json = call json.jsonFromString("{}");
+selectReadmeBtn = call json.set(selectReadmeBtn, "name", "selectReadmeBtn");
+var selectReadmeDisplay: json = call json.jsonFromString("{}");
+selectReadmeDisplay = call json.set(selectReadmeDisplay, "type", "button");
+selectReadmeDisplay = call json.set(selectReadmeDisplay, "labelText", "Select README.md");
+selectReadmeDisplay = call json.set(selectReadmeDisplay, "onClick", "selectedFile = 'README.md';");
+selectReadmeBtn = call json.set(selectReadmeBtn, "display", selectReadmeDisplay);
+call array.add(itemsArray, selectReadmeBtn);
+
+var selectProject2Btn: json = call json.jsonFromString("{}");
+selectProject2Btn = call json.set(selectProject2Btn, "name", "selectProject2Btn");
+var selectProject2Display: json = call json.jsonFromString("{}");
+selectProject2Display = call json.set(selectProject2Display, "type", "button");
+selectProject2Display = call json.set(selectProject2Display, "labelText", "Select Project2");
+selectProject2Display = call json.set(selectProject2Display, "onClick", "selectedFile = 'Project2';");
+selectProject2Btn = call json.set(selectProject2Btn, "display", selectProject2Display);
+call array.add(itemsArray, selectProject2Btn);
+
+var clearBtn: json = call json.jsonFromString("{}");
+clearBtn = call json.set(clearBtn, "name", "clearBtn");
+var clearDisplay: json = call json.jsonFromString("{}");
+clearDisplay = call json.set(clearDisplay, "type", "button");
+clearDisplay = call json.set(clearDisplay, "labelText", "Clear Selection");
+clearDisplay = call json.set(clearDisplay, "onClick", "selectedFile = '';");
+clearBtn = call json.set(clearBtn, "display", clearDisplay);
+call array.add(itemsArray, clearBtn);
+
+// Create main area
+var mainArea: json = call json.jsonFromString("{}");
+mainArea = call json.set(mainArea, "type", "vbox");
+mainArea = call json.set(mainArea, "spacing", 10);
+mainArea = call json.set(mainArea, "padding", 15);
+mainArea = call json.set(mainArea, "items", itemsArray);
+
+var areaArray: array[*] = [];
+call array.add(areaArray, mainArea);
+screenJson = call json.set(screenJson, "area", areaArray);
+
+// Inject treeItems into the screen JSON
+var area: json = areaArray[0];
+var items: json = call json.get(area, "items");
+if items != null && items.length > 0 then {
+    var treeItemFromArea: json = items[0];
+    var display: json = call json.get(treeItemFromArea, "display");
+    if display != null then {
+        display = call json.set(display, "treeItems", treeData);
+        treeItemFromArea = call json.set(treeItemFromArea, "display", display);
+        items = call json.set(items, 0, treeItemFromArea);
+        area = call json.set(area, "items", items);
+        areaArray = call json.set(areaArray, 0, area);
+        screenJson = call json.set(screenJson, "area", areaArray);
     }
 }
 
-show screen screenJson;
+// Define the screen using the modified JSON
+screen TreeBindingTest = screenJson;
+
+// Show the screen
+show screen TreeBindingTest;
 
 print "Tree Bidirectional Binding Test";
 print "================================";
