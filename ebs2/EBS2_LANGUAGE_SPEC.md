@@ -2484,6 +2484,216 @@ var total = sum of numbers
 var avg = average of numbers
 ```
 
+### Common Operations for Text and Arrays (Unified Syntax)
+
+Many operations work identically on both text (strings) and arrays, making the language consistent and easy to learn. Here's a comprehensive guide to these unified operations:
+
+**Length/Count:**
+```javascript
+// Works for both text and arrays
+var textLen = length of "Hello"              // 5
+var arrayLen = length of {1, 2, 3, 4}        // 4
+
+// Alternative: count of
+var textCount = count of "Hello"             // 5 (same as length)
+var arrayCount = count of {1, 2, 3}          // 3
+```
+
+**Contains/Membership:**
+```javascript
+// Check if text contains substring
+var hasSubstring = "Hello World" contains "World"   // yes
+
+// Check if array contains element
+var hasElement = {1, 2, 3, 4} contains 3            // yes
+
+// Alternative: in operator
+var found = "lo" in "Hello"                         // yes
+var found = 3 in {1, 2, 3, 4}                       // yes
+```
+
+**Empty Check:**
+```javascript
+// Check if text is empty
+var empty = isEmpty "Hello"                  // no
+var empty = isEmpty ""                       // yes
+
+// Check if array is empty
+var empty = isEmpty {1, 2, 3}               // no
+var empty = isEmpty {}                       // yes
+
+// Alternative: check length
+if length of text = 0 then print "Empty"
+if length of array = 0 then print "Empty"
+```
+
+**Find/Search:**
+```javascript
+// Find position in text (0-based)
+var pos = find "lo" in "Hello"              // 3 (0-based index)
+var pos = find "x" in "Hello"               // -1 (not found)
+
+// Find element in array
+var idx = find 3 in {1, 2, 3, 4}            // 2 (0-based index)
+var idx = find 10 in {1, 2, 3, 4}           // -1 (not found)
+
+// Advanced: find with condition (arrays only)
+var found = find in numbers where item > 5
+```
+
+**Starts With / Ends With:**
+```javascript
+// Text operations
+var starts = "Hello World" starts with "Hello"      // yes
+var ends = "Hello World" ends with "World"          // yes
+
+// Array operations (checking first/last elements)
+var starts = {1, 2, 3} starts with 1                // yes
+var ends = {1, 2, 3} ends with 3                    // yes
+```
+
+**Split (Text → Array):**
+```javascript
+// Split text into array by delimiter
+var parts = split "a,b,c" by ","            // {"a", "b", "c"}
+var words = split "Hello World" by " "      // {"Hello", "World"}
+
+// Split by character
+var chars = split "Hello" by ""             // {"H", "e", "l", "l", "o"}
+```
+
+**Join (Array → Text):**
+```javascript
+// Join array elements into text
+var text = join {"a", "b", "c"} with ","    // "a,b,c"
+var sentence = join {"Hello", "World"} with " "  // "Hello World"
+
+// Join without separator
+var text = join {"H", "e", "l", "l", "o"} with ""  // "Hello"
+```
+
+**Replace:**
+```javascript
+// Replace in text
+var result = replace "World" with "Everyone" in "Hello World"
+// Result: "Hello Everyone"
+
+// Replace all occurrences
+var result = replace all "l" with "L" in "Hello"
+// Result: "HeLLo"
+
+// Replace in array (find and replace element)
+var result = replace 2 with 20 in {1, 2, 3, 2}
+// Result: {1, 20, 3, 2}  (only first occurrence)
+
+var result = replace all 2 with 20 in {1, 2, 3, 2}
+// Result: {1, 20, 3, 20}  (all occurrences)
+```
+
+**Add/Append:**
+```javascript
+// Add to text (concatenation)
+var text = "Hello"
+var result = text + " World"                 // "Hello World"
+
+// Add to array
+var numbers = {1, 2, 3}
+add 4 to numbers                             // {1, 2, 3, 4}
+add 0 to start of numbers                    // {0, 1, 2, 3, 4}
+
+// Alternative: append/prepend
+append 5 to numbers                          // Add to end
+prepend 0 to numbers                         // Add to start
+```
+
+**Slice/Substring (Get Part):**
+```javascript
+// Get part of text (0-based)
+var part = take 3 from "Hello"              // "Hel" (first 3 characters)
+var part = take from 1 to 3 in "Hello"      // "el" (index 1 to 2, exclusive end)
+
+// Get part of array
+var part = take 3 from {1, 2, 3, 4, 5}      // {1, 2, 3}
+var part = take from 1 to 3 in {1, 2, 3, 4, 5}  // {2, 3}
+
+// Alternative bracket notation
+var part = "Hello"[1..3]                     // "el"
+var part = {1, 2, 3, 4, 5}[1..3]            // {2, 3}
+```
+
+**Reverse:**
+```javascript
+// Reverse text
+var reversed = reverse "Hello"              // "olleH"
+
+// Reverse array
+var reversed = reverse {1, 2, 3, 4}         // {4, 3, 2, 1}
+```
+
+**Quick Reference Table:**
+
+| Operation | Text Example | Array Example | Returns |
+|-----------|--------------|---------------|---------|
+| `length of` | `length of "Hello"` | `length of {1,2,3}` | number |
+| `count of` | `count of "Hello"` | `count of {1,2,3}` | number |
+| `isEmpty` | `isEmpty ""` | `isEmpty {}` | flag (yes/no) |
+| `contains` | `"Hello" contains "lo"` | `{1,2,3} contains 2` | flag |
+| `find in` | `find "lo" in "Hello"` | `find 2 in {1,2,3}` | number (index or -1) |
+| `starts with` | `"Hello" starts with "He"` | `{1,2,3} starts with 1` | flag |
+| `ends with` | `"Hello" ends with "lo"` | `{1,2,3} ends with 3` | flag |
+| `split by` | `split "a,b" by ","` | N/A | array |
+| `join with` | N/A | `join {"a","b"} with ","` | text |
+| `replace with in` | `replace "a" with "b" in "cat"` | `replace 1 with 10 in {1,2,3}` | text/array |
+| `take from` | `take 2 from "Hello"` | `take 2 from {1,2,3}` | text/array |
+| `reverse` | `reverse "Hello"` | `reverse {1,2,3}` | text/array |
+
+**Best Practices:**
+
+1. **Consistent Syntax:** Use the same operation names for both text and arrays
+   ```javascript
+   if data contains searchValue then
+       // Works whether data is text or array
+   end if
+   ```
+
+2. **Type Checking:** Use `typeof` to handle both types elegantly
+   ```javascript
+   if data typeof text then
+       var parts = split data by ","
+   else if data typeof array then
+       var text = join data with ","
+   end if
+   ```
+
+3. **Readability:** Use natural language operations
+   ```javascript
+   // Clear and readable
+   if message starts with "Error" then
+       log "Error detected"
+   end if
+   
+   // Also clear
+   if scores contains 100 then
+       print "Perfect score found!"
+   end if
+   ```
+
+4. **Chain Operations:** Many operations can be chained
+   ```javascript
+   // Text operations
+   var result = reverse uppercase trim "  hello  "    // "OLLEH"
+   
+   // Array operations  
+   var result = reverse sort {3, 1, 2}                // {3, 2, 1}
+   ```
+
+5. **Handle Empty Cases:** Always check for empty text/arrays
+   ```javascript
+   if not isEmpty data then
+       // Process data
+   end if
+   ```
+
 ### Date and Time (Beginner)
 
 ```javascript

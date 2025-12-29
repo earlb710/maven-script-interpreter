@@ -396,6 +396,58 @@ end if
 ### String Operations
 
 ```javascript
+var upper = uppercase "hello"          // "HELLO"
+var lower = lowercase "HELLO"          // "hello"
+var trimmed = trim "  hi  "           // "hi"
+var parts = split "a,b,c" by ","      // {"a", "b", "c"}
+var text = join {"a", "b"} with ","   // "a,b"
+```
+
+### Common Text & Array Operations
+
+Many operations work on both text and arrays with unified syntax:
+
+```javascript
+// Length/Count
+var len = length of "Hello"           // 5
+var len = length of {1, 2, 3}         // 3
+
+// Contains/Search
+var has = "Hello" contains "lo"       // yes
+var has = {1, 2, 3} contains 2        // yes
+
+// Empty check
+var empty = isEmpty ""                // yes
+var empty = isEmpty {}                // yes
+
+// Find position (0-based, returns -1 if not found)
+var pos = find "lo" in "Hello"        // 3
+var idx = find 2 in {1, 2, 3}         // 1
+
+// Starts/Ends with
+var starts = "Hello" starts with "He" // yes
+var ends = {1, 2, 3} ends with 3      // yes
+
+// Replace
+var result = replace "a" with "b" in "cat"  // "cbt"
+var result = replace 1 with 10 in {1, 2, 3} // {10, 2, 3}
+
+// Take/Slice
+var part = take 3 from "Hello"        // "Hel"
+var part = take 2 from {1, 2, 3, 4}   // {1, 2}
+
+// Reverse
+var rev = reverse "Hello"             // "olleH"
+var rev = reverse {1, 2, 3}           // {3, 2, 1}
+
+// Split/Join (convert between text and array)
+var arr = split "a,b,c" by ","        // {"a", "b", "c"}
+var txt = join {"a", "b", "c"} with "," // "a,b,c"
+```
+
+### Array Operations
+
+```javascript
 var text = "Hello World"
 var upper = text.toUpper()     // "HELLO WORLD"
 var lower = text.toLower()     // "hello world"
