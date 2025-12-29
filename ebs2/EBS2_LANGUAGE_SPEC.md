@@ -2657,6 +2657,20 @@ var reversed = "Hello".reverse()             // "olleH"
 var reversed = {1, 2, 3, 4}.reverse()        // {4, 3, 2, 1}
 ```
 
+**Sort (Arrays Only):**
+```javascript
+// Sort array in ascending order (default)
+var sorted = {3, 1, 4, 1, 5}.sort()                    // {1, 1, 3, 4, 5}
+var sorted = {3, 1, 4, 1, 5}.sort("ascending")         // {1, 1, 3, 4, 5}
+
+// Sort array in descending order
+var sorted = {3, 1, 4, 1, 5}.sort("descending")        // {5, 4, 3, 1, 1}
+
+// Sort with chaining
+var result = {3, 1, 2}.sort().reverse()                // {3, 2, 1}
+var result = {3, 1, 2}.sort("descending")              // {3, 2, 1}
+```
+
 **Method Chaining Examples:**
 ```javascript
 // Chain text operations
@@ -2708,6 +2722,8 @@ var result = "hello,world".split(",").join(" ").toUpper()
 | `.add(x)` | N/A (use `+`) | `{1,2,3}.add(4)` | array |
 | `.addFirst(x)` | N/A (use `+`) | `{1,2,3}.addFirst(0)` | array |
 | `.reverse()` | `"Hello".reverse()` | `{1,2,3}.reverse()` | text/array |
+| `.sort()` | N/A | `{3,1,2}.sort()` | array (ascending) |
+| `.sort(order)` | N/A | `{3,1,2}.sort("descending")` | array (asc/desc) |
 
 **Best Practices:**
 
