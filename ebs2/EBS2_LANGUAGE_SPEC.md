@@ -469,7 +469,7 @@ for each item in items {
 }
 
 // For range
-for i from 1 to 10 {
+for i = 1 to 10 loop {
     print i
 }
 
@@ -1911,18 +1911,13 @@ end for
 #### Numeric Range (Advanced)
 ```javascript
 // Count from 1 to 10
-for counter from 1 to 10
+for counter = 1 to 10 loop
     print counter
 end for
 
 // Count with step
-for counter from 0 to 100 by 10
+for counter = 0 to 100 step 10 loop
     print counter     // 0, 10, 20, ..., 100
-end for
-
-// Count backwards
-for counter from 10 down to 1
-    print counter
 end for
 ```
 
@@ -1941,7 +1936,7 @@ while condition
 
 ```javascript
 // Exit loop early
-for counter from 1 to 100
+for counter = 1 to 100 loop
     if counter = 50 then
         exit loop        // or: break
     end if

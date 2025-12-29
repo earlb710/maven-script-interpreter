@@ -139,7 +139,7 @@ main
     print "Number of students: " + course.students.length.toText()
     print ""
     print "Student Grades:"
-    for i = 0 to course.students.length - 1 then
+    for i = 0 to course.students.length - 1 loop
         print "  " + course.students[i] + ": " + course.grades[i].toText()
     end for
     print ""

@@ -56,7 +56,7 @@ end function
 // Function to filter tasks by completion status
 getCompletedTasks(tasks as array.record) return array.record
     var completed = {}
-    for i = 0 to tasks.length - 1 then
+    for i = 0 to tasks.length - 1 loop
         if tasks[i].completed then
             completed.append(tasks[i])
         end if
@@ -67,7 +67,7 @@ end function
 // Function to count pending tasks
 countPendingTasks(tasks as array.record) return number
     var count = 0
-    for i = 0 to tasks.length - 1 then
+    for i = 0 to tasks.length - 1 loop
         if not tasks[i].completed then
             count++
         end if
@@ -78,7 +78,7 @@ end function
 // Function to get overdue tasks
 getOverdueTasks(tasks as array.record, currentDate as date) return array.record
     var overdue = {}
-    for i = 0 to tasks.length - 1 then
+    for i = 0 to tasks.length - 1 loop
         if not tasks[i].completed and tasks[i].dueDate < currentDate then
             overdue.append(tasks[i])
         end if
@@ -131,7 +131,7 @@ main
     
     // Display all tasks
     print "=== All Tasks ==="
-    for i = 0 to project.tasks.length - 1 then
+    for i = 0 to project.tasks.length - 1 loop
         displayTask(project.tasks[i])
         print ""
     end for
@@ -154,7 +154,7 @@ main
     var overdueTasks = getOverdueTasks(project.tasks, currentDate)
     if overdueTasks.length > 0 then
         print "Found " + overdueTasks.length.toText() + " overdue task(s):"
-        for i = 0 to overdueTasks.length - 1 then
+        for i = 0 to overdueTasks.length - 1 loop
             var task = overdueTasks[i]
             var daysOverdue = currentDate - task.dueDate
             print "  - " + task.title + " (Due: " + task.dueDate.toText() + ", " + daysOverdue.toText(0) + " days overdue)"
@@ -171,7 +171,7 @@ main
     var mediumCount = 0
     var lowCount = 0
     
-    for i = 0 to project.tasks.length - 1 then
+    for i = 0 to project.tasks.length - 1 loop
         var task = project.tasks[i]
         case task.priority {
             "Critical": criticalCount++;
@@ -193,7 +193,7 @@ main
     var earliestDue = project.tasks[0].dueDate
     var latestDue = project.tasks[0].dueDate
     
-    for i = 1 to project.tasks.length - 1 then
+    for i = 1 to project.tasks.length - 1 loop
         if project.tasks[i].dueDate < earliestDue then
             earliestDue = project.tasks[i].dueDate
         end if

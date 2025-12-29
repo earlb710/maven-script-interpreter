@@ -50,7 +50,7 @@ end function
 // Function with array parameter
 sumArray(numbers as array.number) return number
     var total = 0
-    for i = 0 to numbers.length - 1 then
+    for i = 0 to numbers.length - 1 loop
         total = total + numbers[i]
     end for
     return total
@@ -59,7 +59,7 @@ end function
 // Function that returns an array
 getRange(start as number, end as number) return array.number
     var result = {}
-    for i = start to end then
+    for i = start to end loop
         result.append(i)
     end for
     return result
