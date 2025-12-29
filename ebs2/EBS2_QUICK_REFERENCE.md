@@ -493,6 +493,7 @@ var result = "Hello".replace(1, "a")      // "Hallo"
 var result = {10, 20, 30}.replace(1, 25)  // {10, 25, 30}
 
 var part = "Hello".copy(1, 4)         // "ell" (0-based, end exclusive)
+var part = "Hello".substring(1, 4)    // "ell" (alias for copy)
 var part = {1, 2, 3, 4, 5}.copy(1, 4) // {2, 3, 4}
 
 var rev = "Hello".reverse()           // "olleH"
@@ -503,6 +504,23 @@ var arr = "a,b,c".split(",")          // {"a", "b", "c"}
 
 // Array-specific: join (array → text)
 var txt = {"a", "b", "c"}.join(",")   // "a,b,c"
+
+// Text-specific: head/tail/lead
+var first = "Hello World".head(5)     // "Hello"
+var first = "Hello World".lead(5)     // "Hello" (alias)
+var last = "Hello World".tail(5)      // "World"
+
+// Text-specific: padding
+var padded = "42".padLeft(5, "0")     // "00042"
+var padded = "Hi".padRight(5, " ")    // "Hi   "
+var padded = "Hi".padCenter(6, " ")   // "  Hi  "
+
+// Text-specific: trimming
+var trimmed = "  Hello  ".trim()      // "Hello"
+var trimmed = "  Hello  ".trimLeft()  // "Hello  "
+var trimmed = "  Hello  ".trimRight() // "  Hello"
+var upper = "hello".toUpper()         // "HELLO"
+var lower = "HELLO".toLower()         // "hello"
 
 // Method chaining examples
 var result = "a,b,c".split(",").join(".")        // "a.b.c"
@@ -523,14 +541,19 @@ var appended = nums.append(4)                    // {1, 2, 3, 4} - alias for add
 var removed = nums.remove(1)                     // {1, 3} - remove at index
 ```
 
-### Array Operations
+### Text-Specific Methods
 
 ```javascript
 var text = "Hello World"
-var upper = text.toUpper()     // "HELLO WORLD"
-var lower = text.toLower()     // "hello world"
-var len = text.length          // 11
-var sub = text.substring(0, 5) // "Hello"
+var upper = text.toUpper()             // "HELLO WORLD"
+var lower = text.toLower()             // "hello world"
+var len = text.length                  // 11
+var sub = text.substring(0, 5)         // "Hello"
+var part = text.copy(0, 5)             // "Hello" (same as substring)
+var first5 = text.head(5)              // "Hello"
+var last5 = text.tail(5)               // "World"
+var padded = "42".padLeft(5, "0")      // "00042"
+var trimmed = "  Hi  ".trim()          // "Hi"
 ```
 
 ### Math Operations
@@ -582,15 +605,36 @@ try {
 ## Type Conversion
 
 ```javascript
-// To number
-var num = number("42")         // String to number
-var floatNum = number("3.14")  // String to decimal
+// Text to number
+var num = "42".toNumber()              // 42
+var num = "3.14".toNumber()            // 3.14
+var int = "3.99".toInt()               // 3
 
-// To text
-var str = text(42)             // Number to string
+// Number to text
+var text = 42.toText()                 // "42"
+var text = 3.14159.toText(2)           // "3.14" (2 decimals)
 
-// To flag
-var bool = flag("true")        // String to boolean
+// Text to flag
+var flag = "yes".toFlag()              // yes
+var flag = "true".toFlag()             // yes
+var flag = "0".toFlag()                // no
+
+// Number to flag
+var flag = 1.toFlag()                  // yes
+var flag = 0.toFlag()                  // no
+
+// Flag to number/text
+var num = yes.toNumber()               // 1
+var text = no.toText()                 // "no"
+
+// Date conversions
+var date = "2025-12-29".toDate()       // date value
+var text = today.toText("MM/DD/YYYY")  // "12/29/2025"
+var days = today.toNumber()            // days since epoch
+
+// Text to array
+var chars = "Hello".toArray()          // {"H", "e", "l", "l", "o"}
+var parts = "a,b,c".toArray(",")       // {"a", "b", "c"}
 ```
 
 ---

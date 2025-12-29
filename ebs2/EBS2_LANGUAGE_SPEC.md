@@ -2662,6 +2662,128 @@ var total = sum of numbers
 var avg = average of numbers
 ```
 
+### Type Conversion/Casting
+
+EBS2 provides clean methods for converting between primitive types. All conversion methods are chainable.
+
+**Number Conversions:**
+```javascript
+// Convert text to number
+var num = "42".toNumber()                    // 42
+var num = "3.14".toNumber()                  // 3.14
+var num = "invalid".toNumber()               // 0 (invalid strings return 0)
+
+// Convert to integer (truncates decimals)
+var int = "3.99".toInt()                     // 3
+var int = 3.99.toInt()                       // 3
+
+// Convert flag to number
+var num = yes.toNumber()                     // 1
+var num = no.toNumber()                      // 0
+```
+
+**Text Conversions:**
+```javascript
+// Convert number to text
+var text = 42.toText()                       // "42"
+var text = 3.14159.toText()                  // "3.14159"
+
+// Convert with formatting
+var text = 3.14159.toText(2)                 // "3.14" (2 decimal places)
+var text = 1234.56.toText(0)                 // "1235" (no decimals, rounded)
+
+// Convert flag to text
+var text = yes.toText()                      // "yes"
+var text = no.toText()                       // "no"
+
+// Convert array to text (joins with commas by default)
+var text = {1, 2, 3}.toText()                // "1, 2, 3"
+var text = {"a", "b", "c"}.toText()          // "a, b, c"
+```
+
+**Flag (Boolean) Conversions:**
+```javascript
+// Convert number to flag
+var flag = 1.toFlag()                        // yes
+var flag = 0.toFlag()                        // no
+var flag = 42.toFlag()                       // yes (non-zero = yes)
+
+// Convert text to flag
+var flag = "yes".toFlag()                    // yes
+var flag = "no".toFlag()                     // no
+var flag = "true".toFlag()                   // yes
+var flag = "false".toFlag()                  // no
+var flag = "1".toFlag()                      // yes
+var flag = "0".toFlag()                      // no
+var flag = "".toFlag()                       // no (empty = no)
+var flag = "anything".toFlag()               // yes (non-empty = yes)
+```
+
+**Date Conversions:**
+```javascript
+// Convert text to date
+var date = "2025-12-29".toDate()             // date value
+var date = "12/29/2025".toDate()             // date value
+var date = "Dec 29, 2025".toDate()           // date value
+
+// Convert number (days since epoch) to date
+var date = 19351.toDate()                    // date value
+
+// Convert date to text
+var text = today.toText()                    // "2025-12-29"
+var text = today.toText("MM/DD/YYYY")        // "12/29/2025"
+var text = today.toText("MMM D, YYYY")       // "Dec 29, 2025"
+
+// Convert date to number (days since epoch)
+var days = today.toNumber()                  // 19351 (example)
+```
+
+**Array Conversions:**
+```javascript
+// Convert text to array of characters
+var chars = "Hello".toArray()                // {"H", "e", "l", "l", "o"}
+
+// Convert text to array by splitting
+var words = "a b c".toArray(" ")             // {"a", "b", "c"} (split by space)
+var parts = "a,b,c".toArray(",")             // {"a", "b", "c"} (split by comma)
+
+// Convert range to array
+var nums = (1..5).toArray()                  // {1, 2, 3, 4, 5}
+```
+
+**Chaining Conversions:**
+```javascript
+// Complex conversions with chaining
+var result = "42".toNumber().toText()        // "42"
+var result = "3.99".toNumber().toInt().toText()  // "3"
+
+// Process and convert
+var total = {"1", "2", "3"}
+    .transform(x => x.toNumber())
+    .sum()
+    .toText()                                // "6"
+
+// Format currency
+var amount = "1234.567".toNumber().toText(2)  // "1234.57"
+```
+
+**Type Checking with Conversions:**
+```javascript
+// Safe conversions with type checking
+if value typeof text then
+    var num = value.toNumber()
+else if value typeof number then
+    var text = value.toText()
+end if
+
+// Validate before converting
+if input.isEmpty then
+    var num = 0
+else
+    var num = input.toNumber()
+end if
+```
+
 ### Common Operations for Text and Arrays (Method Syntax)
 
 Many operations work identically on both text (strings) and arrays using clean, chainable method syntax. This approach enables powerful functional-style programming and easy-to-read code.
@@ -2805,6 +2927,10 @@ Use `.replaceFirst()`, `.replaceLast()`, or `.replaceAll()` for explicit search-
 var part = "Hello".copy(0, 3)                // "Hel" (from 0 to 3, exclusive)
 var part = "Hello".copy(1, 4)                // "ell" (from 1 to 4, exclusive)
 
+// Substring (alias for copy) - same parameters
+var part = "Hello".substring(0, 3)           // "Hel"
+var part = "Hello".substring(1, 4)           // "ell"
+
 // Copy part of array
 var part = {1, 2, 3, 4, 5}.copy(1, 4)        // {2, 3, 4} (from 1 to 4, exclusive)
 var part = {1, 2, 3, 4, 5}.copy(0, 3)        // {1, 2, 3}
@@ -2812,6 +2938,56 @@ var part = {1, 2, 3, 4, 5}.copy(0, 3)        // {1, 2, 3}
 // Alternative bracket notation for ranges
 var part = "Hello"[1..4]                     // "ell"
 var part = {1, 2, 3, 4, 5}[1..4]            // {2, 3, 4}
+```
+
+**Head/Tail/Lead (Get Characters from Start/End):**
+```javascript
+// Get first N characters (head or lead)
+var first = "Hello World".head(5)            // "Hello"
+var first = "Hello World".lead(5)            // "Hello" (alias for head)
+
+// Get last N characters (tail)
+var last = "Hello World".tail(5)             // "World"
+
+// Works with single character
+var firstChar = "Hello".head(1)              // "H"
+var lastChar = "Hello".tail(1)               // "o"
+```
+
+**Padding:**
+```javascript
+// Pad left (add characters to start until reaching length)
+var padded = "42".padLeft(5, "0")            // "00042"
+var padded = "Hi".padLeft(5, " ")            // "   Hi"
+var padded = "x".padLeft(3, "*")             // "**x"
+
+// Pad right (add characters to end until reaching length)
+var padded = "42".padRight(5, "0")           // "42000"
+var padded = "Hi".padRight(5, " ")           // "Hi   "
+var padded = "x".padRight(3, "*")            // "x**"
+
+// Pad both sides evenly
+var padded = "Hi".padCenter(6, " ")          // "  Hi  "
+var padded = "42".padCenter(5, "0")          // "00420"
+
+// Default padding character is space
+var padded = "Hi".padLeft(5)                 // "   Hi"
+var padded = "Hi".padRight(5)                // "Hi   "
+```
+
+**Trim:**
+```javascript
+// Remove whitespace from start and end
+var trimmed = "  Hello  ".trim()             // "Hello"
+var trimmed = "\n\tHello\t\n".trim()         // "Hello"
+
+// Remove from start only
+var trimmed = "  Hello  ".trimLeft()         // "Hello  "
+var trimmed = "  Hello  ".trimStart()        // "Hello  " (alias)
+
+// Remove from end only
+var trimmed = "  Hello  ".trimRight()        // "  Hello"
+var trimmed = "  Hello  ".trimEnd()          // "  Hello" (alias)
 ```
 
 **Add/Append:**
