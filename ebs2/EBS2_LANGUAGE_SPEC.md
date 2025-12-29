@@ -2514,7 +2514,8 @@ var hasElement = {1, 2, 3, 4}.contains(10)             // no
 
 **Find/Search:**
 ```javascript
-// Find position in text (0-based, returns -1 if not found)
+// Find first occurrence (same as .find())
+var pos = "Hello".findFirst("l")            // 2 (first 'l', 0-based)
 var pos = "Hello".find("lo")                // 3 (0-based index)
 var pos = "Hello".find("x")                 // -1 (not found)
 
@@ -2522,9 +2523,14 @@ var pos = "Hello".find("x")                 // -1 (not found)
 var pos = "Hello".findLast("l")             // 3 (last 'l')
 
 // Find element in array
+var idx = {1, 2, 3, 4}.findFirst(2)         // 1 (first occurrence)
 var idx = {1, 2, 3, 4}.find(3)              // 2 (0-based index)
 var idx = {1, 2, 3, 4}.find(10)             // -1 (not found)
 var idx = {1, 2, 3, 2}.findLast(2)          // 3 (last occurrence)
+
+// Get element at index (0-based)
+var char = "Hello".find(1)                  // "e" (character at index 1)
+var item = {10, 20, 30}.find(1)             // 20 (element at index 1)
 ```
 
 **Starts With / Ends With:**
@@ -2572,16 +2578,31 @@ var result = "Hello World".replace("o", "0")
 var result = "a,b,c,a".replaceFirst("a", "x")
 // Result: "x,b,c,a"
 
+// Replace last occurrence
+var result = "a,b,c,a".replaceLast("a", "x")
+// Result: "a,b,c,x"
+
 // Replace all occurrences
 var result = "Hello".replaceAll("l", "L")
 // Result: "HeLLo"
+
+// Replace at specific index (0-based)
+var result = "Hello".replace(1, "a")
+// Result: "Hallo" (replaces character at index 1)
 
 // Replace in array (find and replace element)
 var result = {1, 2, 3, 2}.replace(2, 20)
 // Result: {1, 20, 3, 2}  (only first occurrence)
 
+var result = {1, 2, 1, 2}.replaceLast(2, 20)
+// Result: {1, 2, 1, 20}  (last occurrence only)
+
 var result = {1, 2, 3, 2}.replaceAll(2, 20)
 // Result: {1, 20, 3, 20}  (all occurrences)
+
+// Replace element at specific index (0-based)
+var result = {10, 20, 30}.replace(1, 25)
+// Result: {10, 25, 30} (replaces element at index 1)
 ```
 
 **Copy/Slice (Get Part):**
@@ -2655,13 +2676,17 @@ var result = "hello,world".split(",").join(" ").toUpper()
 | `.isEmpty` | `"".isEmpty` | `{}.isEmpty` | flag (yes/no) |
 | `.contains(x)` | `"Hello".contains("lo")` | `{1,2,3}.contains(2)` | flag |
 | `.find(x)` | `"Hello".find("lo")` | `{1,2,3}.find(2)` | number (index or -1) |
+| `.find(int)` | `"Hello".find(1)` | `{10,20,30}.find(1)` | text/element at index |
+| `.findFirst(x)` | `"Hello".findFirst("l")` | `{1,2,1}.findFirst(1)` | number (index or -1) |
 | `.findLast(x)` | `"Hello".findLast("l")` | `{1,2,3,2}.findLast(2)` | number (index or -1) |
 | `.startsWith(x)` | `"Hello".startsWith("He")` | `{1,2,3}.startsWith(1)` | flag |
 | `.endsWith(x)` | `"Hello".endsWith("lo")` | `{1,2,3}.endsWith(3)` | flag |
 | `.split(sep)` | `"a,b".split(",")` | N/A | array |
 | `.join(sep)` | N/A | `{"a","b"}.join(",")` | text |
 | `.replace(a, b)` | `"cat".replace("a","b")` | `{1,2,3}.replace(1,10)` | text/array |
+| `.replace(int, x)` | `"Hello".replace(1,"a")` | `{10,20,30}.replace(1,25)` | text/array (at index) |
 | `.replaceFirst(a, b)` | `"aa".replaceFirst("a","b")` | `{1,2,1}.replaceFirst(1,10)` | text/array |
+| `.replaceLast(a, b)` | `"aa".replaceLast("a","b")` | `{1,2,1}.replaceLast(1,10)` | text/array |
 | `.replaceAll(a, b)` | `"aa".replaceAll("a","b")` | `{1,2,1}.replaceAll(1,10)` | text/array |
 | `.copy(start, end)` | `"Hello".copy(1,4)` | `{1,2,3,4,5}.copy(1,4)` | text/array |
 | `.add(x)` | N/A (use `+`) | `{1,2,3}.add(4)` | array |

@@ -420,8 +420,13 @@ var has = {1, 2, 3}.contains(2)       // yes
 
 var pos = "Hello".find("lo")          // 3 (0-based, -1 if not found)
 var idx = {1, 2, 3}.find(2)           // 1
+var first = "Hello".findFirst("l")    // 2 (first occurrence)
 var last = "Hello".findLast("l")      // 3 (last occurrence)
 var last = {1, 2, 1}.findLast(1)      // 2
+
+// Get element at index (overloaded find)
+var char = "Hello".find(1)            // "e" (character at index 1)
+var item = {10, 20, 30}.find(1)       // 20 (element at index 1)
 
 var starts = "Hello".startsWith("He") // yes
 var ends = {1, 2, 3}.endsWith(3)      // yes
@@ -429,7 +434,12 @@ var ends = {1, 2, 3}.endsWith(3)      // yes
 var result = "cat".replace("a", "b")  // "cbt" (first occurrence)
 var result = {1, 2, 3}.replace(1, 10) // {10, 2, 3}
 var result = "aa".replaceFirst("a", "b")  // "ba"
+var result = "aa".replaceLast("a", "b")   // "ab"
 var result = "aa".replaceAll("a", "b")    // "bb"
+
+// Replace at specific index (0-based)
+var result = "Hello".replace(1, "a")      // "Hallo"
+var result = {10, 20, 30}.replace(1, 25)  // {10, 25, 30}
 
 var part = "Hello".copy(1, 4)         // "ell" (0-based, end exclusive)
 var part = {1, 2, 3, 4, 5}.copy(1, 4) // {2, 3, 4}
