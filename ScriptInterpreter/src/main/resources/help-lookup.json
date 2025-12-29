@@ -24,8 +24,8 @@
     {
       "keyword": "function",
       "short_description": "Declares a user-defined function",
-      "long_help": "The 'function' keyword is used to declare custom functions. It is optional - functions can be declared with or without this keyword. Functions can accept parameters, specify return types, and encapsulate reusable code logic. They are invoked using the 'call' keyword.",
-      "example": "// Basic function (with optional 'function' keyword)\nfunction greet {\n  print \"Hello!\";\n}\n\n// Function without 'function' keyword (traditional)\ngreet {\n  print \"Hello!\";\n}\n\n// Function with parameters and return type\nfunction add(a: int, b: int) return int {\n  return a + b;\n}\n\n// Function with default parameters\nfunction greet(name: string = \"World\") return string {\n  return \"Hello, \" + name + \"!\";\n}\n\n// Calling functions\ncall greet;\nvar sum = call add(5, 3);\nvar msg = call greet(\"Alice\");"
+      "long_help": "The 'function' keyword is REQUIRED to declare custom functions (EBS2 syntax). Functions can accept parameters, specify return types, and encapsulate reusable code logic. They are invoked using the 'call' keyword.",
+      "example": "// Basic function\nfunction greet() {\n  print \"Hello!\";\n}\n\n// Function with parameters and return type\nfunction add(a: int, b: int) return int {\n  return a + b;\n}\n\n// Function with default parameters\nfunction greet(name: string = \"World\") return string {\n  return \"Hello, \" + name + \"!\";\n}\n\n// Calling functions\ncall greet();\nvar sum: int = call add(5, 3);\nvar msg: string = call greet(\"Alice\");"
     },
     {
       "keyword": "return",
@@ -50,6 +50,30 @@
       "short_description": "Alternative branch in conditional",
       "long_help": "The 'else' keyword provides an alternative execution path when the 'if' condition evaluates to false.",
       "example": "if score >= 60 then {\n  print \"Pass\";\n} else {\n  print \"Fail\";\n}"
+    },
+    {
+      "keyword": "for",
+      "short_description": "Loop statement",
+      "long_help": "The 'for' keyword creates a loop. Supports two styles: C-style 'for (init; condition; increment) { }' and range-based 'for var = start to end [step n] loop { }'.",
+      "example": "// C-style for loop\nfor (var i: int = 0; i < 5; i++) {\n  print i;\n}\n\n// Range-based for loop\nfor i = 1 to 5 loop {\n  print i;\n}\n\n// With step\nfor i = 0 to 10 step 2 loop {\n  print i;\n}"
+    },
+    {
+      "keyword": "to",
+      "short_description": "Range end in for loop",
+      "long_help": "The 'to' keyword specifies the end value in a range-based for loop.",
+      "example": "for i = 1 to 10 loop {\n  print i;\n}"
+    },
+    {
+      "keyword": "step",
+      "short_description": "Loop increment",
+      "long_help": "The 'step' keyword specifies the increment value in a range-based for loop. Default is 1.",
+      "example": "for i = 0 to 10 step 2 loop {\n  print i;  // 0, 2, 4, 6, 8, 10\n}"
+    },
+    {
+      "keyword": "loop",
+      "short_description": "Introduces for loop body",
+      "long_help": "The 'loop' keyword introduces the body of a range-based for loop.",
+      "example": "for i = 1 to 5 loop {\n  print \"Iteration: \" + i;\n}"
     },
     {
       "keyword": "foreach",
