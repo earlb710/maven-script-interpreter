@@ -162,6 +162,39 @@ var end as date = "2025-01-01 12:00:00"
 var halfDay = end - start      // 0.5 days (12 hours)
 ```
 
+### Case Statement
+
+```javascript
+// Match against specific values (any primitive type)
+case variable {
+    value1: statement
+    value2: statement
+    default: statement
+}
+
+// Examples
+case day {
+    1: dayName = "Monday"
+    2: dayName = "Tuesday"
+    3: dayName = "Wednesday"
+    default: dayName = "Invalid"
+}
+
+case grade {
+    "A": message = "Excellent!"
+    "B": message = "Good!"
+    "C": message = "OK"
+    default: message = "Invalid"
+}
+
+// Multiple statements (use semicolon)
+case command {
+    "start": print "Starting"; gameRunning = true
+    "stop": print "Stopping"; gameRunning = false
+    default: print "Unknown"
+}
+```
+
 ---
 
 ## Loops

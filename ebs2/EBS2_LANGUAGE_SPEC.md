@@ -1723,6 +1723,141 @@ else
 end if
 ```
 
+#### Case Statement (Advanced)
+
+The `case` statement provides a concise way to handle multiple value comparisons. It's particularly useful when matching against specific values rather than ranges or complex conditions.
+
+**Syntax:**
+```javascript
+case variable {
+    value1: statement1
+    value2: statement2
+    value3: statement3
+    default: defaultStatement
+}
+```
+
+**Single Statement per Case:**
+```javascript
+// Integer values
+var day = 3
+var dayName = ""
+
+case day {
+    1: dayName = "Monday"
+    2: dayName = "Tuesday"
+    3: dayName = "Wednesday"
+    4: dayName = "Thursday"
+    5: dayName = "Friday"
+    6: dayName = "Saturday"
+    7: dayName = "Sunday"
+    default: dayName = "Invalid"
+}
+
+// Text values
+var grade = "A"
+var message = ""
+
+case grade {
+    "A": message = "Excellent!"
+    "B": message = "Good job!"
+    "C": message = "Satisfactory"
+    "D": message = "Needs improvement"
+    "F": message = "Failed"
+    default: message = "Invalid grade"
+}
+
+// Number values with decimals
+var rating = 4.5
+
+case rating {
+    1.0: print "Poor"
+    2.0: print "Fair"
+    3.0: print "Good"
+    4.0: print "Very Good"
+    5.0: print "Excellent"
+    default: print "Invalid rating"
+}
+
+// Flag values
+var active = true
+
+case active {
+    true: print "Status: Active"
+    false: print "Status: Inactive"
+    default: print "Status: Unknown"
+}
+```
+
+**Multiple Statements per Case:**
+```javascript
+// Use semicolons to separate multiple statements
+var command = "start"
+
+case command {
+    "start": print "Starting..."; gameRunning = true
+    "stop": print "Stopping..."; gameRunning = false
+    "pause": print "Pausing..."; gamePaused = true
+    "resume": print "Resuming..."; gamePaused = false
+    default: print "Unknown command"; log "Invalid: " + command
+}
+```
+
+**Practical Examples:**
+```javascript
+// Menu selection
+var choice = 2
+
+case choice {
+    1: print "New Game"; startNewGame()
+    2: print "Load Game"; loadGame()
+    3: print "Settings"; showSettings()
+    4: print "Exit"; exitGame()
+    default: print "Invalid choice"
+}
+
+// HTTP status codes
+var statusCode = 404
+
+case statusCode {
+    200: print "OK"
+    201: print "Created"
+    400: print "Bad Request"
+    401: print "Unauthorized"
+    404: print "Not Found"
+    500: print "Server Error"
+    default: print "Unknown status: " + statusCode
+}
+
+// Temperature scale conversion
+var scale = "F"
+var temp = 32.0
+var celsius = 0.0
+
+case scale {
+    "C": celsius = temp
+    "F": celsius = (temp - 32) * 5 / 9
+    "K": celsius = temp - 273.15
+    default: print "Unknown scale"; celsius = 0
+}
+```
+
+**Key Points:**
+- Works with any primitive type: `number`, `text`, `flag`
+- Each case tests for exact equality (`=`)
+- Use colon (`:`) to separate value from statement
+- Use semicolon (`;`) to separate multiple statements in one case
+- `default` case is optional but recommended
+- No fall-through between cases (each case is independent)
+- More concise than multiple `if-else if` statements for value matching
+
+**When to Use:**
+- ✅ Matching against specific known values
+- ✅ Simple assignments or single statements per case
+- ✅ Menu selections, status codes, day/month names
+- ❌ Range checks or complex conditions (use `if-else if` instead)
+- ❌ Multiple statements requiring complex logic (use `if-else if` instead)
+
 ### Loops
 
 #### Repeat Times (Beginner)
