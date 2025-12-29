@@ -1380,6 +1380,49 @@ var negated = -value         // Negation
 
 **Note:** The modulo operator can be written as either `mod` (long form) or `%` (short form) - both are equivalent.
 
+#### Date Arithmetic
+
+Date subtraction returns the number of days (with fractional precision) between two dates:
+
+```javascript
+var startDate as date = "2025-01-01"
+var endDate as date = "2025-01-16"
+
+// Date subtraction returns days as number (with decimal precision)
+var days = endDate - startDate          // 15.0 days
+var daysDiff = date1 - date2            // Positive if date1 is after date2
+
+// Fractional days (includes time component)
+var start as date = "2025-01-01 00:00:00"
+var end as date = "2025-01-01 12:00:00"
+var halfDay = end - start               // 0.5 days (12 hours = 0.5 days)
+
+// Practical examples
+var dueDate as date = "2025-12-31"
+var today as date = today
+var remaining = dueDate - today         // Days until due (e.g., 15.234)
+
+if remaining < 0 then
+    print "Overdue by " + (-remaining) + " days"
+else if remaining < 7 then
+    print "Due soon: " + remaining + " days left"
+else
+    print "Due in " + remaining + " days"
+end if
+
+// Date addition with numbers (add days)
+var tomorrow = today + 1                // Add 1 day
+var nextWeek = today + 7                // Add 7 days
+var twoWeeksAgo = today - 14            // Subtract 14 days
+```
+
+**Key Points:**
+- `date - date` returns a `number` representing days (with decimal precision)
+- Positive result: first date is after second date
+- Negative result: first date is before second date
+- Includes fractional days for time components (e.g., 0.5 = 12 hours, 0.25 = 6 hours)
+- `date + number` or `date - number` adds/subtracts days
+
 ### Comparison Operations
 
 EBS2 supports both natural language and symbolic comparison operators. Both forms are equivalent.

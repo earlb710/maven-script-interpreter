@@ -144,6 +144,24 @@ count--        // count is now 6 (post-decrement)
 --count        // count is now 5 (pre-decrement)
 ```
 
+### Date Arithmetic
+
+```javascript
+// Date subtraction returns days (number with decimal precision)
+var days = date1 - date2       // e.g., 15.234 days
+var daysLeft = dueDate - today // Days until due date
+
+// Date addition/subtraction with numbers (adds/subtracts days)
+var tomorrow = today + 1       // Add 1 day
+var nextWeek = today + 7       // Add 7 days
+var lastWeek = today - 7       // Subtract 7 days
+
+// Examples with fractional days
+var start as date = "2025-01-01 00:00:00"
+var end as date = "2025-01-01 12:00:00"
+var halfDay = end - start      // 0.5 days (12 hours)
+```
+
 ---
 
 ## Loops
