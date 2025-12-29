@@ -2514,24 +2514,33 @@ var hasElement = {1, 2, 3, 4}.contains(10)             // no
 
 **Find/Search:**
 ```javascript
-// Find first occurrence (same as .find())
+// Find first occurrence (explicitly named method)
 var pos = "Hello".findFirst("l")            // 2 (first 'l', 0-based)
-var pos = "Hello".find("lo")                // 3 (0-based index)
+var pos = "Hello".find("lo")                // 3 (0-based index, searches for substring)
 var pos = "Hello".find("x")                 // -1 (not found)
 
 // Find last occurrence
 var pos = "Hello".findLast("l")             // 3 (last 'l')
 
-// Find element in array
+// Find element in array (searches for value)
 var idx = {1, 2, 3, 4}.findFirst(2)         // 1 (first occurrence)
 var idx = {1, 2, 3, 4}.find(3)              // 2 (0-based index)
 var idx = {1, 2, 3, 4}.find(10)             // -1 (not found)
 var idx = {1, 2, 3, 2}.findLast(2)          // 3 (last occurrence)
 
-// Get element at index (0-based)
+// Get element at index - .find() overloaded with integer parameter
+// Note: When parameter is integer, returns element at that index instead of searching
 var char = "Hello".find(1)                  // "e" (character at index 1)
 var item = {10, 20, 30}.find(1)             // 20 (element at index 1)
+var char = "Hello".find(0)                  // "H" (first character)
+var item = {10, 20, 30}.find(0)             // 10 (first element)
 ```
+
+**Note on `.find()` overloading:** The `.find()` method behavior depends on parameter type:
+- **String/Element parameter:** Searches for the value and returns index (or -1 if not found)
+- **Integer parameter:** Returns the element at that index (0-based access)
+
+This dual behavior provides convenience but use `.findFirst()` when searching to avoid ambiguity.
 
 **Starts With / Ends With:**
 ```javascript
@@ -2570,11 +2579,11 @@ var text = {"H", "e", "l", "l", "o"}.join("")  // "Hello"
 
 **Replace:**
 ```javascript
-// Replace first occurrence in text
+// Replace first occurrence by value (searches and replaces)
 var result = "Hello World".replace("o", "0")
 // Result: "Hell0 World"
 
-// Replace first occurrence with replaceFirst
+// Replace first occurrence with replaceFirst (explicit naming)
 var result = "a,b,c,a".replaceFirst("a", "x")
 // Result: "x,b,c,a"
 
@@ -2586,11 +2595,12 @@ var result = "a,b,c,a".replaceLast("a", "x")
 var result = "Hello".replaceAll("l", "L")
 // Result: "HeLLo"
 
-// Replace at specific index (0-based)
+// Replace at specific index - .replace() overloaded with integer first parameter
+// Note: When first parameter is integer, replaces at that index instead of searching
 var result = "Hello".replace(1, "a")
 // Result: "Hallo" (replaces character at index 1)
 
-// Replace in array (find and replace element)
+// Replace in array (searches for value and replaces first occurrence)
 var result = {1, 2, 3, 2}.replace(2, 20)
 // Result: {1, 20, 3, 2}  (only first occurrence)
 
@@ -2604,6 +2614,12 @@ var result = {1, 2, 3, 2}.replaceAll(2, 20)
 var result = {10, 20, 30}.replace(1, 25)
 // Result: {10, 25, 30} (replaces element at index 1)
 ```
+
+**Note on `.replace()` overloading:** The `.replace()` method behavior depends on first parameter type:
+- **String/Element as first parameter:** Searches for the value and replaces first occurrence
+- **Integer as first parameter:** Replaces the element at that index (0-based)
+
+Use `.replaceFirst()`, `.replaceLast()`, or `.replaceAll()` for explicit search-and-replace behavior.
 
 **Copy/Slice (Get Part):**
 ```javascript
