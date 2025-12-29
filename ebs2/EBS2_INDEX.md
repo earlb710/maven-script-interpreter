@@ -12,14 +12,22 @@ This specification defines EBS2, a redesigned scripting language focused on begi
 
 | Document | Size | Lines | Purpose |
 |----------|------|-------|---------|
-| [📋 Summary](EBS2_SPECIFICATION_SUMMARY.md) | 11KB | 395 | Executive overview and key decisions |
-| [🎯 Requirements](EBS2_REQUIREMENTS.md) | 15KB | 636 | Core requirements and design goals |
-| [📖 Language Spec](EBS2_LANGUAGE_SPEC.md) | 33KB | 1,682 | Complete formal specification |
-| [🗺️ Roadmap](EBS2_IMPLEMENTATION_ROADMAP.md) | 32KB | 1,278 | 12-month phased implementation plan |
-| [⚖️ Comparison](EBS1_VS_EBS2_COMPARISON.md) | 15KB | 598 | EBS1 vs EBS2 comparison and migration |
-| [🚀 Quick Start](EBS2_QUICK_START_GUIDE.md) | 9KB | 563 | Beginner-friendly tutorial |
+| [📋 Summary](EBS2_SPECIFICATION_SUMMARY.md) | 13.5KB | 420 | Executive overview and key decisions |
+| [🎯 Requirements](EBS2_REQUIREMENTS.md) | 15.9KB | 655 | Core requirements and design goals |
+| [📖 Language Spec](EBS2_LANGUAGE_SPEC.md) | 69.2KB | 2,818 | Complete formal specification |
+| [🗺️ Roadmap](EBS2_IMPLEMENTATION_ROADMAP.md) | 31.8KB | 1,278 | 12-month phased implementation plan |
+| [⚖️ Comparison](EBS1_VS_EBS2_COMPARISON.md) | 15.3KB | 614 | EBS1 vs EBS2 comparison and migration |
+| [🚀 Quick Start](EBS2_QUICK_START_GUIDE.md) | 16.5KB | 829 | Beginner-friendly tutorial |
+| [⚡ Quick Reference](EBS2_QUICK_REFERENCE.md) | 9.0KB | 350 | One-page syntax reference card |
 
-**Total Documentation:** 115KB, 5,152 lines
+**Quality Assurance:**
+| Document | Size | Purpose |
+|----------|------|---------|
+| [🔍 Issues Analysis](DOCUMENTATION_ISSUES_ANALYSIS.md) | 10.4KB | Analysis of documentation issues |
+| [✅ Optimization Summary](DOCUMENTATION_OPTIMIZATION_SUMMARY.md) | 11.3KB | Summary of improvements made |
+
+**Total Core Documentation:** 172KB, 6,974 lines  
+**Total with QA:** 192KB, 7,600+ lines
 
 ## 📖 Reading Guide
 
@@ -205,8 +213,8 @@ end
 |---------|------|------|
 | Syntax | C-like | Natural English |
 | Types | `string`, `int` | `text`, `number` |
-| Keywords | `if`, `return` | `when`, `return` |
-| Indexing | 0-based | 1-based |
+| Keywords | `if`, `return` | `if`, `return` |
+| Indexing | 0-based | 0-based |
 | Platform | Java only | HTML5 + Java |
 | Structure | Free-form | Organized sections |
 

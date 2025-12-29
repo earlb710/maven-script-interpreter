@@ -1,0 +1,137 @@
+// EBS2 Example: Functions
+// This script demonstrates function definitions, parameters, return values, and scope
+
+// Function with no parameters and no return value
+procedure greet
+    print "Hello from EBS2!"
+end procedure
+
+// Function with parameters
+procedure greetPerson(name as text)
+    print "Hello, " + name + "!"
+end procedure
+
+// Function with return value
+add(a as number, b as number) return number
+    return a + b
+end function
+
+// Function with multiple parameters and return value
+calculateArea(width as number, height as number) return number
+    return width * height
+end function
+
+// Function with default behavior
+getGreeting(name as text, formal as flag) return text
+    if formal then
+        return "Good day, Mr./Ms. " + name
+    else
+        return "Hey, " + name + "!"
+    end if
+end function
+
+// Recursive function
+factorial(n as number) return number
+    if n <= 1 then
+        return 1
+    else
+        return n * factorial(n - 1)
+    end if
+end function
+
+// Function using text operations
+capitalize(text as text) return text
+    if text.length = 0 then
+        return text
+    end if
+    return text.head(1).toUpper() + text.tail(text.length - 1).toLower()
+end function
+
+// Function with array parameter
+sumArray(numbers as array.number) return number
+    var total = 0
+    for i = 0 to numbers.length - 1 then
+        total = total + numbers[i]
+    end for
+    return total
+end function
+
+// Function that returns an array
+getRange(start as number, end as number) return array.number
+    var result = {}
+    for i = start to end then
+        result.append(i)
+    end for
+    return result
+end function
+
+main
+    print "=== Function Examples ==="
+    print ""
+    
+    // Call procedure with no parameters
+    print "Calling greet():"
+    greet()
+    print ""
+    
+    // Call procedure with parameters
+    print "Calling greetPerson():"
+    greetPerson("Alice")
+    greetPerson("Bob")
+    print ""
+    
+    // Call function with return value
+    print "=== Functions with Return Values ==="
+    var sum = add(5, 3)
+    print "add(5, 3) = " + sum.toText()
+    
+    var area = calculateArea(10, 5)
+    print "calculateArea(10, 5) = " + area.toText()
+    print ""
+    
+    // Call function with conditional logic
+    print "=== Conditional Functions ==="
+    var greeting1 = getGreeting("Smith", yes)
+    var greeting2 = getGreeting("Alice", no)
+    print greeting1
+    print greeting2
+    print ""
+    
+    // Call recursive function
+    print "=== Recursive Functions ==="
+    var fact5 = factorial(5)
+    print "factorial(5) = " + fact5.toText()
+    
+    var fact7 = factorial(7)
+    print "factorial(7) = " + fact7.toText()
+    print ""
+    
+    // Call text manipulation function
+    print "=== Text Manipulation Functions ==="
+    var cap1 = capitalize("hello")
+    var cap2 = capitalize("WORLD")
+    print "capitalize('hello') = " + cap1
+    print "capitalize('WORLD') = " + cap2
+    print ""
+    
+    // Call array function
+    print "=== Array Functions ==="
+    var numbers = {1, 2, 3, 4, 5}
+    var total = sumArray(numbers)
+    print "sumArray({1,2,3,4,5}) = " + total.toText()
+    print ""
+    
+    // Call function that returns array
+    print "=== Functions Returning Arrays ==="
+    var range = getRange(10, 15)
+    print "getRange(10, 15) = " + range.toText()
+    print ""
+    
+    // Inline function calls
+    print "=== Inline Function Calls ==="
+    print "Direct call: add(10, 20) = " + add(10, 20).toText()
+    print "Nested calls: add(add(1, 2), add(3, 4)) = " + add(add(1, 2), add(3, 4)).toText()
+    print ""
+    
+    print "Script completed successfully!"
+end main

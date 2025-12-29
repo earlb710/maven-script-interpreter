@@ -1,0 +1,111 @@
+// EBS2 Example: Array Operations
+// This script demonstrates array manipulation, sorting, and searching
+
+main
+    print "=== Array Creation ==="
+    var numbers = {5, 2, 8, 1, 9, 3}
+    var names = {"Alice", "Bob", "Charlie", "Diana"}
+    var range = 1..10
+    
+    print "Numbers: " + numbers.toText()
+    print "Names: " + names.toText()
+    print "Range (1..10): " + range.toText()
+    print ""
+    
+    // Array properties
+    print "=== Array Properties ==="
+    print "Numbers length: " + numbers.length.toText()
+    print "Numbers isEmpty: " + numbers.isEmpty.toText()
+    var empty = {}
+    print "Empty array isEmpty: " + empty.isEmpty.toText()
+    print ""
+    
+    // Array access
+    print "=== Array Access ==="
+    print "First number: " + numbers[0].toText()
+    print "Last number: " + numbers[numbers.length - 1].toText()
+    print "Element at index 2: " + numbers.find(2).toText()
+    print ""
+    
+    // Array search
+    print "=== Array Search ==="
+    print "Contains 8: " + numbers.contains(8).toText()
+    print "Contains 99: " + numbers.contains(99).toText()
+    print "Find 8: " + numbers.find(8).toText()
+    print "FindFirst 2: " + numbers.findFirst(2).toText()
+    print ""
+    
+    // Array with duplicates
+    var dups = {1, 2, 3, 2, 4, 2, 5}
+    print "Array with duplicates: " + dups.toText()
+    print "FindFirst 2: " + dups.findFirst(2).toText()
+    print "FindLast 2: " + dups.findLast(2).toText()
+    print ""
+    
+    // Array manipulation
+    print "=== Array Manipulation ==="
+    var list = {1, 2, 3}
+    print "Original: " + list.toText()
+    
+    list.append(4)
+    print "After append(4): " + list.toText()
+    
+    list.add(5)
+    print "After add(5): " + list.toText()
+    
+    list.add(2, 99)
+    print "After add(2, 99): " + list.toText()
+    
+    list.remove(2)
+    print "After remove(2): " + list.toText()
+    print ""
+    
+    // Array sorting
+    print "=== Array Sorting ==="
+    var unsorted = {5, 2, 8, 1, 9, 3, 7, 4, 6}
+    print "Unsorted: " + unsorted.toText()
+    print "Sort (ascending): " + unsorted.sort().toText()
+    print "Sort (descending): " + unsorted.sort("descending").toText()
+    print "ReverseSort: " + unsorted.reverseSort().toText()
+    print ""
+    
+    // Array slicing
+    print "=== Array Slicing ==="
+    var values = {10, 20, 30, 40, 50, 60}
+    print "Original: " + values.toText()
+    print "Copy(0, 3): " + values.copy(0, 3).toText()
+    print "Copy(2, 5): " + values.copy(2, 5).toText()
+    print ""
+    
+    // Array replace
+    print "=== Array Replace ==="
+    var items = {1, 2, 3, 4, 5}
+    print "Original: " + items.toText()
+    print "Replace(2, 99): " + items.replace(2, 99).toText()
+    print ""
+    
+    var items2 = {1, 2, 3, 2, 4, 2}
+    print "Original: " + items2.toText()
+    print "ReplaceAll(2, 9): " + items2.replaceAll(2, 9).toText()
+    print "ReplaceFirst(2, 8): " + items2.replaceFirst(2, 8).toText()
+    print "ReplaceLast(2, 7): " + items2.replaceLast(2, 7).toText()
+    print ""
+    
+    // Method chaining
+    print "=== Method Chaining ==="
+    var data = {3, 1, 4, 1, 5, 9, 2, 6}
+    var processed = data.sort.reverse
+    print "Original: " + data.toText()
+    print "Sort → Reverse: " + processed.toText()
+    print ""
+    
+    // Array iteration
+    print "=== Array Iteration ==="
+    var fruits = {"Apple", "Banana", "Cherry"}
+    for i = 0 to fruits.length - 1 then
+        print (i + 1).toText() + ". " + fruits[i]
+    end for
+    print ""
+    
+    print "Script completed successfully!"
+end main

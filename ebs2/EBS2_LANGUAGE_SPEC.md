@@ -59,7 +59,7 @@ EBS2 is designed with three core principles:
 **Single-line comments only:**
 
 ```javascript
-// Single line comment
+// Single line comment (C-style)
 var x = 10  // Comment after code
 
 // Multi-line explanations use multiple single lines:
@@ -153,19 +153,19 @@ print USERNAME            // "BOB"
 
 #### Number Literals
 ```javascript
-42          -- Integer
-3.14        -- Decimal
-1_000_000   -- Underscore separators for readability
-0xFF        -- Hexadecimal (advanced)
-0b1010      -- Binary (advanced)
+42          // Integer
+3.14        // Decimal
+1_000_000   // Underscore separators for readability
+0xFF        // Hexadecimal (advanced)
+0b1010      // Binary (advanced)
 ```
 
 #### Text Literals
 ```javascript
-"Hello World"           -- Double quotes
-'Single quotes work'    -- Single quotes (same as double)
-"Line 1\nLine 2"       -- Escape sequences
-"She said \"Hi\""      -- Escaped quotes
+"Hello World"           // Double quotes
+'Single quotes work'    // Single quotes (same as double)
+"Line 1\nLine 2"       // Escape sequences
+"She said \"Hi\""      // Escaped quotes
 ```
 
 #### Boolean Literals
@@ -192,52 +192,63 @@ record {name: "Alice", age: 10}
 
 #### Arithmetic (Simple)
 ```javascript
-+    -- Addition
--    -- Subtraction
-*    -- Multiplication
-/    -- Division
++    // Addition
+-    // Subtraction
+*    // Multiplication
+/    // Division
 ```
 
 #### Arithmetic (Advanced)
 ```javascript
-mod  -- Modulo (remainder) - can also use %
-^    -- Power
+mod  // Modulo (remainder) - can also use %
+^    // Power
+++   // Increment (add 1)
+--   // Decrement (subtract 1)
 ```
 
 **Note:** The modulo operator can be written as either `mod` (long form) or `%` (short form).
 
+**Increment/Decrement Usage:**
+```javascript
+var count = 5
+count++        // count is now 6 (post-increment)
+++count        // count is now 7 (pre-increment)
+count--        // count is now 6 (post-decrement)
+--count        // count is now 5 (pre-decrement)
+```
+
 #### Comparison (Natural Language)
 ```javascript
-is equal to              -- ==
-is not equal to          -- !=
-is greater than          -- >
-is less than             -- <
-is greater than or equal to  -- >=
-is less than or equal to     -- <=
+is equal to              // ==
+is not equal to          // !=
+is greater than          // >
+is less than             // <
+is greater than or equal to  // >=
+is less than or equal to     // <=
 ```
 
 #### Comparison (Symbolic - Advanced)
 ```javascript
-=    -- Equal
-<>   -- Not equal (also !=)
->    -- Greater than
-<    -- Less than
->=   -- Greater or equal
-<=   -- Less or equal
+=    // Equal
+<>   // Not equal (also !=)
+>    // Greater than
+<    // Less than
+>=   // Greater or equal
+<=   // Less or equal
 ```
 
 #### Logical (Natural Language)
 ```javascript
-and          -- Logical AND
-or           -- Logical OR
-not          -- Logical NOT
+and          // Logical AND
+or           // Logical OR
+not          // Logical NOT
 ```
 
 #### Logical (Symbolic - Advanced)
 ```javascript
-&&   -- AND
-||   -- OR
-!    -- NOT
+&&   // AND
+||   // OR
+!    // NOT
 ```
 
 ## Program Structure
@@ -249,7 +260,7 @@ program HelloWorld
 
 main
     print "Hello World"
-end
+end main
 ```
 
 ### Complete Program Structure
@@ -263,7 +274,7 @@ settings
     version "1.0.0"
     author "Student Name"
     description "What this program does"
-end
+end settings
 
 // Optional: Global variables
 variables
@@ -272,7 +283,7 @@ variables
     variable isPlaying as yes/no = no    // 'variable' is same as 'var'
     const MAX_SCORE as number = 1000     // Constants cannot change
     constant APP_VERSION as text = "1.0" // 'constant' is same as 'const'
-end
+end variables
 
 // Optional: Function definitions
 functions
@@ -283,21 +294,21 @@ functions
     to calculate score
         return score * 10
     end function
-end
+end functions
 
 // Optional: Screen definitions
 screens
     screen MainWindow
         title "Main Screen"
-        -- screen content
+        // screen content
     end screen
-end
+end screens
 
 // Required: Main entry point
 main
-    -- Program starts here
+    // Program starts here
     print screen MainWindow
-end
+end main
 ```
 
 ### Section Rules
@@ -321,8 +332,10 @@ end
 
 EBS2 supports both compact single-line and explicit multi-line block syntax:
 
+**Key Rule:** `end` statements are **optional** for single-command blocks, **required** for multi-command blocks.
+
 ```javascript
-// SINGLE-LINE: No end keyword needed
+// SINGLE-LINE: No end keyword needed (optional)
 if x < 5 then print "Small"
 repeat 3 times print "Hello"
 for i from 1 to 5 print i
@@ -338,15 +351,15 @@ repeat 3 times
     print "World"
 end repeat
 
-// MULTIPLE COMMANDS ON ONE LINE: Use semicolon separator
+// MULTIPLE COMMANDS ON ONE LINE: Use semicolon separator, no end needed
 if x < 5 then print "Small"; log "Checked"; x = x + 1
 ```
 
 **When to use each:**
 
-- **Single-line**: Simple, one-command blocks - more compact
-- **Multi-line**: Multiple commands or complex logic - more readable
-- **Semicolon**: Multiple commands on same line - use sparingly
+- **Single-line (no end)**: Simple, one-command blocks - more compact
+- **Multi-line (with end)**: Multiple commands or complex logic - more readable
+- **Semicolon (no end)**: Multiple commands on same line - use sparingly
 
 **Control structures with explicit multi-line endings:**
 
@@ -385,7 +398,7 @@ end screen
 // Program sections use simple 'end'
 main
     // code
-end
+end main
 ```
 
 **Benefits:**
@@ -671,8 +684,10 @@ var numbers as array = {1, 2, 3, 4, 5}
 
 // Range syntax (no curly braces for ranges)
 var sequence = 1..100          // Creates array {1, 2, 3, ..., 100}
-var letters = 'a'..'z'         // Creates array {'a', 'b', ..., 'z'}
+var subset = 43..79            // Creates array {43, 44, 45, ..., 79}
+var negatives = -10..10        // Creates array {-10, -9, -8, ..., 0, 1, ..., 10}
 var countdown = 10..1          // Creates array {10, 9, 8, ..., 1}
+var letters = 'a'..'z'         // Creates array {'a', 'b', ..., 'z'}
 
 // Typed arrays with curly braces
 var names as array.text = {"Alice", "Bob", "Charlie"}
@@ -753,7 +768,7 @@ record type Person
     name as text
     age as number
     email as text
-end
+end function
 
 // Alternative with curly braces
 record type Student {
@@ -786,7 +801,7 @@ record type Address
     street as text
     city as text
     zipCode as text
-end
+end function
 
 record type Employee {
     name as text
@@ -814,7 +829,7 @@ record type Team
     name as text
     members as array.text
     scores as array.number
-end
+end label
 
 var team as Team = record {
     name: "Tigers",
@@ -837,7 +852,7 @@ record type Course
     instructor as text
     students as array.record(Student)
     grades as array.number
-end
+end record
 
 var course as Course = record {
     title: "Math 101",
@@ -985,7 +1000,7 @@ record type Student
     name as text
     age as number
     grade as number
-end
+end function
 
 var students as array.record(Student) = {
     record { name: "Alice", age: 10, grade: 95 },
@@ -1029,6 +1044,99 @@ for each point in points {
 - ✅ **Array.record** - Type-safe arrays of structured data
 - ✅ **Self-documenting** - Record type shows data structure
 - ✅ **Flexible** - Anonymous records for ad-hoc structures
+
+### Record Extension (Advanced)
+
+**Extend existing record types to add new fields:**
+
+```javascript
+// Define base record type (use Type suffix as naming convention)
+record type PersonType
+    name as text
+    age as number
+end record
+
+// Extend PersonType with additional fields
+record type EmployeeType extends PersonType
+    employeeId as number
+    department as text
+    salary as number
+end record
+
+// Extend EmployeeType further
+record type ManagerType extends EmployeeType
+    teamSize as number
+    budget as number
+end record
+
+// Create instances
+var emp as EmployeeType = record {
+    name: "Alice",
+    age: 30,
+    employeeId: 12345,
+    department: "Engineering",
+    salary: 75000
+}
+
+var mgr as ManagerType = record {
+    name: "Bob",
+    age: 40,
+    employeeId: 54321,
+    department: "Engineering",
+    salary: 95000,
+    teamSize: 8,
+    budget: 500000
+}
+
+// Access all fields (inherited and new)
+print emp.name              // "Alice" (from PersonType)
+print emp.department        // "Engineering" (from EmployeeType)
+
+print mgr.name              // "Bob" (from PersonType)
+print mgr.salary            // 95000 (from EmployeeType)
+print mgr.teamSize          // 8 (from ManagerType)
+```
+
+**Type checking with extended records:**
+
+```javascript
+// Check if record is of specific type (postfix typeof operator)
+if emp typeof PersonType then
+    print emp.name + " is a PersonType"
+end if
+
+if mgr typeof EmployeeType then
+    print mgr.name + " is an EmployeeType"
+end if
+
+// Type-specific conditionals with inheritance checking
+if value typeof ManagerType then
+    print "Manager with team size: " + value.teamSize
+else if value typeof EmployeeType then
+    print "Employee in department: " + value.department
+else if value typeof PersonType then
+    print "Person named: " + value.name
+end if
+```
+
+**Benefits of Record Extension:**
+- ✅ **Code Reuse** - Inherit fields from base record types
+- ✅ **Type Hierarchy** - Build logical type relationships
+- ✅ **Maintainability** - Update base types and changes propagate
+- ✅ **Type Safety** - Postfix `typeof` operator (case-insensitive)
+- ✅ **Flexibility** - Mix and match inheritance as needed
+
+**Naming Convention:**
+- Always use `Type` suffix for record type names (e.g., `PersonType`, `EmployeeType`)
+- This distinguishes type definitions from variable names
+- Enables case-insensitive type checking with postfix `typeof`
+
+**Note:** When extending records:
+- All fields from parent records are included
+- New fields are added (not overwritten)
+- Use postfix `typeof` operator: `variable typeof TypeName`
+- Type checking is case-insensitive
+- Field names must be unique across the inheritance chain
 
 #### map
 ```javascript
@@ -1219,8 +1327,8 @@ CONSTANT MAX = 100       // Same as 'constant'
 userName = "Bob"
 
 // Compound assignment (advanced)
-count = count + 1        -- Long form
-count += 1               -- Short form (advanced)
+count = count + 1        // Long form
+count += 1               // Short form (advanced)
 ```
 
 ### Variable Scope
@@ -1230,20 +1338,20 @@ program ScopeExample
 
 variables
     var globalVar as text = "Global"
-end
+end variables
 
 functions
     to testScope
         var localVar as text = "Local"
         print globalVar   -- Can access global
-        print localVar    -- Can access local
+        print localVar    // Can access local
     end function
-end
+end functions
 
 main
-    print globalVar      -- Can access
-    -- print localVar   -- ERROR: Cannot access
-end
+    print globalVar      // Can access
+    // print localVar   -- ERROR: Cannot access
+end main
 ```
 
 ## Operators
@@ -1252,25 +1360,68 @@ end
 
 #### Simple Form
 ```javascript
-var sum = 5 + 3          -- Addition: 8
-var diff = 5 - 3         -- Subtraction: 2
-var product = 5 * 3      -- Multiplication: 15
-var quotient = 15 / 3    -- Division: 5
+var sum = 5 + 3          // Addition: 8
+var diff = 5 - 3         // Subtraction: 2
+var product = 5 * 3      // Multiplication: 15
+var quotient = 15 / 3    // Division: 5
 ```
 
 #### Advanced Form
 ```javascript
 // Long form (natural language)
-var remainder = 17 mod 5     -- Modulo: 2
+var remainder = 17 mod 5     // Modulo: 2
 
 // Short form (symbolic)
-var remainder = 17 % 5       -- Modulo: 2 (same as mod)
+var remainder = 17 % 5       // Modulo: 2 (same as mod)
 
-var power = 2 ^ 8            -- Power: 256
-var negated = -value         -- Negation
+var power = 2 ^ 8            // Power: 256
+var negated = -value         // Negation
 ```
 
 **Note:** The modulo operator can be written as either `mod` (long form) or `%` (short form) - both are equivalent.
+
+#### Date Arithmetic
+
+Date subtraction returns the number of days (with fractional precision) between two dates:
+
+```javascript
+var startDate as date = "2025-01-01"
+var endDate as date = "2025-01-16"
+
+// Date subtraction returns days as number (with decimal precision)
+var days = endDate - startDate          // 15.0 days
+var daysDiff = date1 - date2            // Positive if date1 is after date2
+
+// Fractional days (includes time component)
+var start as date = "2025-01-01 00:00:00"
+var end as date = "2025-01-01 12:00:00"
+var halfDay = end - start               // 0.5 days (12 hours = 0.5 days)
+
+// Practical examples
+var dueDate as date = "2025-12-31"
+var today as date = today
+var remaining = dueDate - today         // Days until due (e.g., 15.234)
+
+if remaining < 0 then
+    print "Overdue by " + (-remaining) + " days"
+else if remaining < 7 then
+    print "Due soon: " + remaining + " days left"
+else
+    print "Due in " + remaining + " days"
+end if
+
+// Date addition with numbers (add days)
+var tomorrow = today + 1                // Add 1 day
+var nextWeek = today + 7                // Add 7 days
+var twoWeeksAgo = today - 14            // Subtract 14 days
+```
+
+**Key Points:**
+- `date - date` returns a `number` representing days (with decimal precision)
+- Positive result: first date is after second date
+- Negative result: first date is before second date
+- Includes fractional days for time components (e.g., 0.5 = 12 hours, 0.25 = 6 hours)
+- `date + number` or `date - number` adds/subtracts days
 
 ### Comparison Operations
 
@@ -1412,12 +1563,110 @@ end if
 var fullName = firstName + " " + lastName
 
 // Repetition
-var stars = "*" * 5      -- "*****"
+var stars = "*" * 5      // "*****"
 
 // Interpolation (advanced)
 var greeting = "Hello {name}, you are {age} years old"
     with name: "Alice" and age: 10
 ```
+
+### String Concatenation and Function Chaining (Best Practices)
+
+**String Concatenation:**
+
+```javascript
+// Simple concatenation with + operator
+var message = "Hello" + " " + "World"            // "Hello World"
+
+// Multiple concatenations
+var fullMessage = "Hello " + name + ", you are " + age + " years old"
+
+// With line breaks for readability (all on one line logically)
+var longMessage = "Dear " + recipient + ", " +
+                  "Your order #" + orderNumber + " " +
+                  "has been shipped."
+
+// Using text functions
+var parts = {"Hello", "World", "!"}
+var joined = join parts with " "                  // "Hello World !"
+
+// String interpolation (cleaner for complex strings)
+var formatted = format "Hello {name}, you are {age} years old"
+    with name: "Alice" and age: 10
+```
+
+**When to use each method:**
+
+| Method | Best For | Example |
+|--------|----------|---------|
+| `+` operator | Simple concatenation (2-3 parts) | `firstName + " " + lastName` |
+| Multi-line `+` | Complex messages with many parts | See above example |
+| `join` function | Combining array elements | `join names with ", "` |
+| `format` / interpolation | Template strings with variables | `format "Hello {name}"` |
+
+**Function Chaining:**
+
+```javascript
+// Text function chaining
+var result = uppercase trim "  hello world  "    // "HELLO WORLD"
+
+// Multiple transformations
+var cleaned = trim lowercase "  HELLO WORLD  "   // "hello world"
+
+// With explicit steps (more readable for complex chains)
+var input = "  MiXeD CaSe  "
+var step1 = trim input           // "MiXeD CaSe"
+var step2 = lowercase step1      // "mixed case"
+var result = uppercase step2     // "MIXED CASE"
+
+// Array function chaining
+var numbers = {1, 2, 3, 4, 5, 6}
+var evens = filter numbers where item mod 2 = 0
+var doubled = transform evens with item * 2
+print doubled                    // {4, 8, 12}
+
+// Method-style chaining (advanced - if supported)
+var text = "hello"
+var result = text.toUpper().trim()               // "HELLO"
+
+// Best practice: Use intermediate variables for clarity
+var original = "  hello world  "
+var trimmed = trim original
+var capitalized = uppercase trimmed
+print capitalized                // "HELLO WORLD"
+```
+
+**Best Practices:**
+
+1. **For Simple Concatenation:** Use `+` operator
+   ```javascript
+   var name = first + " " + last
+   ```
+
+2. **For Complex Templates:** Use `format` or interpolation
+   ```javascript
+   var msg = format "Hello {name}, order #{num} is ready"
+       with name: customer and num: orderID
+   ```
+
+3. **For Multiple Operations:** Use intermediate variables
+   ```javascript
+   var cleaned = trim input
+   var lower = lowercase cleaned
+   var result = uppercase lower
+   ```
+
+4. **For Array Joining:** Use `join` function
+   ```javascript
+   var csv = join items with ", "
+   ```
+
+5. **For Readability:** Break long concatenations across lines
+   ```javascript
+   var report = "Customer: " + name + "\n" +
+                "Order: " + orderNum + "\n" +
+                "Total: $" + total
+   ```
 
 ## Control Flow
 
@@ -1427,7 +1676,7 @@ var greeting = "Hello {name}, you are {age} years old"
 ```javascript
 // Multi-line form (requires end if)
 if condition then
-    -- code to run if true
+    // code to run if true
 end if
 
 // Single-line form (no end if needed)
@@ -1466,13 +1715,148 @@ end if
 #### If Statement (Advanced)
 ```javascript
 if condition then
-    -- code
+    // code
 else if otherCondition then
-    -- code
+    // code
 else
-    -- code
+    // code
 end if
 ```
+
+#### Case Statement (Advanced)
+
+The `case` statement provides a concise way to handle multiple value comparisons. It's particularly useful when matching against specific values rather than ranges or complex conditions.
+
+**Syntax:**
+```javascript
+case variable {
+    value1: statement1
+    value2: statement2
+    value3: statement3
+    default: defaultStatement
+}
+```
+
+**Single Statement per Case:**
+```javascript
+// Integer values
+var day = 3
+var dayName = ""
+
+case day {
+    1: dayName = "Monday"
+    2: dayName = "Tuesday"
+    3: dayName = "Wednesday"
+    4: dayName = "Thursday"
+    5: dayName = "Friday"
+    6: dayName = "Saturday"
+    7: dayName = "Sunday"
+    default: dayName = "Invalid"
+}
+
+// Text values
+var grade = "A"
+var message = ""
+
+case grade {
+    "A": message = "Excellent!"
+    "B": message = "Good job!"
+    "C": message = "Satisfactory"
+    "D": message = "Needs improvement"
+    "F": message = "Failed"
+    default: message = "Invalid grade"
+}
+
+// Number values with decimals
+var rating = 4.5
+
+case rating {
+    1.0: print "Poor"
+    2.0: print "Fair"
+    3.0: print "Good"
+    4.0: print "Very Good"
+    5.0: print "Excellent"
+    default: print "Invalid rating"
+}
+
+// Flag values
+var active = true
+
+case active {
+    true: print "Status: Active"
+    false: print "Status: Inactive"
+    default: print "Status: Unknown"
+}
+```
+
+**Multiple Statements per Case:**
+```javascript
+// Use semicolons to separate multiple statements
+var command = "start"
+
+case command {
+    "start": print "Starting..."; gameRunning = true
+    "stop": print "Stopping..."; gameRunning = false
+    "pause": print "Pausing..."; gamePaused = true
+    "resume": print "Resuming..."; gamePaused = false
+    default: print "Unknown command"; log "Invalid: " + command
+}
+```
+
+**Practical Examples:**
+```javascript
+// Menu selection
+var choice = 2
+
+case choice {
+    1: print "New Game"; startNewGame()
+    2: print "Load Game"; loadGame()
+    3: print "Settings"; showSettings()
+    4: print "Exit"; exitGame()
+    default: print "Invalid choice"
+}
+
+// HTTP status codes
+var statusCode = 404
+
+case statusCode {
+    200: print "OK"
+    201: print "Created"
+    400: print "Bad Request"
+    401: print "Unauthorized"
+    404: print "Not Found"
+    500: print "Server Error"
+    default: print "Unknown status: " + statusCode
+}
+
+// Temperature scale conversion
+var scale = "F"
+var temp = 32.0
+var celsius = 0.0
+
+case scale {
+    "C": celsius = temp
+    "F": celsius = (temp - 32) * 5 / 9
+    "K": celsius = temp - 273.15
+    default: print "Unknown scale"; celsius = 0
+}
+```
+
+**Key Points:**
+- Works with any primitive type: `number`, `text`, `flag`
+- Each case tests for exact equality (`=`)
+- Use colon (`:`) to separate value from statement
+- Use semicolon (`;`) to separate multiple statements in one case
+- `default` case is optional but recommended
+- No fall-through between cases (each case is independent)
+- More concise than multiple `if-else if` statements for value matching
+
+**When to Use:**
+- ✅ Matching against specific known values
+- ✅ Simple assignments or single statements per case
+- ✅ Menu selections, status codes, day/month names
+- ❌ Range checks or complex conditions (use `if-else if` instead)
+- ❌ Multiple statements requiring complex logic (use `if-else if` instead)
 
 ### Loops
 
@@ -1533,7 +1917,7 @@ end for
 
 // Count with step
 for counter from 0 to 100 by 10
-    print counter     -- 0, 10, 20, ..., 100
+    print counter     // 0, 10, 20, ..., 100
 end for
 
 // Count backwards
@@ -1545,11 +1929,11 @@ end for
 #### While Loop (Advanced)
 ```javascript
 while condition
-    -- code
+    // code
 end while
 
 do
-    -- code
+    // code
 while condition
 ```
 
@@ -1711,7 +2095,7 @@ end function
 
 // Use it
 var result = call double with 5
-print result     -- Shows: 10
+print result     // Shows: 10
 ```
 
 #### Multiple Returns (Advanced)
@@ -1736,7 +2120,7 @@ to greet person and title: "Friend"
 end function
 
 // Call with default
-call greet with "Alice"           -- "Hello Friend Alice"
+call greet with "Alice"           // "Hello Friend Alice"
 
 // Call with custom title
 call greet with "Alice" and title: "Dr."  -- "Hello Dr. Alice"
@@ -1750,7 +2134,7 @@ to sum numbers...
         total = total + num
     end for
     return total
-end
+end function
 
 // Call with any number of arguments
 var result = call sum with 1, 2, 3, 4, 5
@@ -1763,7 +2147,7 @@ to factorial n
         return 1
     end function
     return n * call factorial with (n - 1)
-end
+end procedure
 ```
 
 #### Anonymous Functions (Advanced)
@@ -1788,16 +2172,16 @@ screen HelloScreen
     
     button OkButton
         text "OK"
-        when clicked
+        if clicked
             hide screen HelloScreen
-        end
-    end
-end
+        end when
+    end button
+end label
 
 // Show the screen
 main
     print screen HelloScreen
-end
+end main
 ```
 
 ### Screen with Layout (Intermediate)
@@ -1817,28 +2201,28 @@ screen UserForm
     textbox NameInput
         placeholder "Enter your name"
         max length 50
-    end
+    end textbox
     
     label AgeLabel
         text "How old are you?"
-    end
+    end label
     
     numberbox AgeInput
         minimum 1
         maximum 120
         default 10
-    end
+    end label
     
     button SubmitButton
         text "Submit"
         style primary
-        when clicked
+        if clicked
             var name = get text from NameInput
             var age = get value from AgeInput
             print "Hello " + name + ", you are " + age
-        end
-    end
-end
+        end when
+    end button
+end screen
 ```
 
 ### Screen with Multiple Areas (Advanced)
@@ -1858,15 +2242,15 @@ screen GameScreen
         
         label LivesLabel
             text "Lives: 3"
-        end
+        end label
         
         button PauseButton
             text "Pause"
-            when clicked
+            if clicked
                 pause game
-            end
-        end
-    end
+            end when
+        end button
+    end label
     
     area GameCanvas at center
         canvas MainCanvas
@@ -1874,16 +2258,16 @@ screen GameScreen
             height fill
             when draw
                 draw game graphics
-            end
-        end
-    end
+            end screen
+        end screen
+    end function
     
     area BottomBar at bottom height 40
         label StatusLabel
             text "Ready to play!"
-        end
-    end
-end
+        end label
+    end procedure
+end procedure
 ```
 
 ### UI Components
@@ -1896,7 +2280,7 @@ label MyLabel
     style normal | bold | italic
     color red | blue | green | black | "##FF0000"
     align left | center | right
-end
+end label
 ```
 
 #### Buttons
@@ -1906,10 +2290,10 @@ button MyButton
     icon "star.png"
     style primary | secondary | success | danger
     enabled yes | no
-    when clicked
-        -- code to run
-    end
-end
+    if clicked
+        // code to run
+    end when
+end button
 ```
 
 #### Text Input
@@ -1918,11 +2302,11 @@ textbox MyInput
     placeholder "Enter text..."
     default "Initial value"
     max length 100
-    when changed
+    if changed
         var text = get text from MyInput
-        -- react to changes
-    end
-end
+        // react to changes
+    end textbox
+end function
 ```
 
 #### Number Input
@@ -1932,11 +2316,11 @@ numberbox MyNumber
     maximum 100
     default 50
     step 1
-    when changed
+    if changed
         var value = get value from MyNumber
-        -- react to changes
-    end
-end
+        // react to changes
+    end function
+end settings
 ```
 
 #### Checkboxes
@@ -1944,11 +2328,11 @@ end
 checkbox MyCheckbox
     text "I agree"
     checked no
-    when toggled
+    if toggled
         var isChecked = is checked MyCheckbox
-        -- react to toggle
-    end
-end
+        // react to toggle
+    end if
+end checkbox
 ```
 
 #### Radio Buttons
@@ -1957,21 +2341,21 @@ radiogroup Difficulty
     radio Easy
         text "Easy"
         checked yes
-    end
+    end radio
     
     radio Medium
         text "Medium"
-    end
+    end radio
     
     radio Hard
         text "Hard"
-    end
+    end radio
     
-    when changed
+    if changed
         var selected = get selected from Difficulty
-        -- selected is "Easy", "Medium", or "Hard"
-    end
-end
+        // selected is "Easy", "Medium", or "Hard"
+    end if
+end radiogroup
 ```
 
 #### Dropdowns
@@ -1981,11 +2365,11 @@ dropdown ColorChoice
     option "Green"
     option "Blue"
     selected "Red"
-    when changed
+    if changed
         var color = get selected from ColorChoice
-        -- react to selection
-    end
-end
+        // react to selection
+    end if
+end dropdown
 ```
 
 #### Lists
@@ -1993,11 +2377,11 @@ end
 listbox FruitList
     items list "Apple", "Banana", "Cherry"
     multiple selection no
-    when selected
+    if selected
         var fruit = get selected from FruitList
-        -- react to selection
-    end
-end
+        // react to selection
+    end if
+end listbox
 ```
 
 #### Canvas (for graphics)
@@ -2008,17 +2392,17 @@ canvas DrawingCanvas
     background white
     
     when draw
-        -- Drawing commands
+        // Drawing commands
         draw rectangle at x:10 y:10 width:50 height:50 color:red
         draw circle at x:100 y:100 radius:30 color:blue
         draw line from x1:0 y1:0 to x2:100 y2:100 color:black width:2
-    end
+    end if
     
-    when clicked at x and y
-        -- React to clicks
+    if clicked at x and y
+        // React to clicks
         draw circle at x:x y:y radius:5 color:black
-    end
-end
+    end if
+end canvas
 ```
 
 ## Error Handling
@@ -2068,14 +2452,14 @@ end try
 ### Error Types
 
 ```javascript
-file_not_found          -- File doesn't exist
-file_access_denied      -- No permission to read/write
-invalid_conversion      -- Cannot convert type
-division_by_zero        -- Math error
-index_out_of_range      -- Array access error
-null_value              -- Null reference
-network_error           -- Internet connection issue
-parse_error             -- Cannot parse data
+file_not_found          // File doesn't exist
+file_access_denied      // No permission to read/write
+invalid_conversion      // Cannot convert type
+division_by_zero        // Math error
+index_out_of_range      // Array access error
+null_value              // Null reference
+network_error           // Internet connection issue
+parse_error             // Cannot parse data
 ```
 
 ### Throwing Errors (Advanced)
@@ -2084,9 +2468,9 @@ parse_error             -- Cannot parse data
 to withdraw amount from account
     if amount > account.balance then
         throw error "Insufficient funds"
-    end function
+    end if
     account.balance = account.balance - amount
-end
+end function
 ```
 
 ## Built-in Functions
@@ -2137,18 +2521,18 @@ var choice = ask to choose from "Red", "Green", "Blue"
 
 ```javascript
 // Length
-var len = length of "Hello"          -- 5
+var len = length of "Hello"          // 5
 
 // Uppercase/Lowercase
-var upper = uppercase "hello"         -- "HELLO"
-var lower = lowercase "HELLO"         -- "hello"
+var upper = uppercase "hello"         // "HELLO"
+var lower = lowercase "HELLO"         // "hello"
 
 // Find text
-var pos = find "lo" in "Hello"       -- 4
-var has = "Hello" contains "lo"      -- yes
+var pos = find "lo" in "Hello"       // 4
+var has = "Hello" contains "lo"      // yes
 
 // Get part of text
-var part = take 3 from "Hello"       -- "Hel"
+var part = take 3 from "Hello"       // "Hel"
 var part = take from 2 to 4 in "Hello"  -- "ell"
 
 // Replace text
@@ -2159,52 +2543,52 @@ var result = replace "World" with "Everyone" in "Hello World"
 
 ```javascript
 // Split text
-var parts = split "a,b,c" by ","     -- {"a", "b", "c"}
+var parts = split "a,b,c" by ","     // {"a", "b", "c"}
 
 // Join text
 var joined = join {"a", "b", "c"} with ","  -- "a,b,c"
 
 // Trim whitespace
-var trimmed = trim "  Hello  "       -- "Hello"
+var trimmed = trim "  Hello  "       // "Hello"
 
 // Format text
 var formatted = format "{name} is {age} years old"
     with name: "Alice" and age: 10
 
 // Repeat text
-var stars = repeat "*" times 5       -- "*****"
+var stars = repeat "*" times 5       // "*****"
 
 // Reverse text
-var reversed = reverse "Hello"       -- "olleH"
+var reversed = reverse "Hello"       // "olleH"
 ```
 
 ### Number Functions (Beginner)
 
 ```javascript
 // Round numbers
-var rounded = round 3.7              -- 4
-var down = round down 3.7            -- 3
-var up = round up 3.2                -- 4
+var rounded = round 3.7              // 4
+var down = round down 3.7            // 3
+var up = round up 3.2                // 4
 
 // Absolute value
-var abs = absolute value of -5      -- 5
+var abs = absolute value of -5      // 5
 
 // Min/Max
 var smallest = minimum of 5, 3, 8   -- 3
-var largest = maximum of 5, 3, 8    -- 8
+var largest = maximum of 5, 3, 8    // 8
 
 // Random number
 var dice = random from 1 to 6
-var chance = random                  -- 0.0 to 1.0
+var chance = random                  // 0.0 to 1.0
 ```
 
 ### Number Functions (Advanced)
 
 ```javascript
 // Power and roots
-var squared = 5 ^ 2                  -- 25
-var cubed = power 2 to 3             -- 8
-var root = square root of 16         -- 4
+var squared = 5 ^ 2                  // 25
+var cubed = power 2 to 3             // 8
+var root = square root of 16         // 4
 
 // Trigonometry
 var s = sin of 45 degrees
@@ -2223,16 +2607,16 @@ var degs = 3.14 radians to degrees
 var numbers = {1, 2, 3, 4, 5}
 
 // Count items
-var count = count of numbers         -- 5
+var count = count of numbers         // 5
 
 // Get item (0-based indexing like most programming languages)
-var first = numbers[0]               -- 1
-var second = numbers[1]              -- 2
-var last = numbers[4]                -- 5
+var first = numbers[0]               // 1
+var second = numbers[1]              // 2
+var last = numbers[4]                // 5
 
 // Alternative syntax (long form)
-var first = numbers at 0             -- 1
-var last = numbers at end            -- 5
+var first = numbers at 0             // 1
+var last = numbers at end            // 5
 
 // Add item
 add 6 to numbers
@@ -2244,7 +2628,7 @@ remove first from numbers
 remove last from numbers
 
 // Check if contains
-var has = numbers contains 3         -- yes/no
+var has = numbers contains 3         // yes/no
 ```
 
 ### List Functions (Advanced)
@@ -2277,6 +2661,501 @@ var found = find in numbers where item > 3
 var total = sum of numbers
 var avg = average of numbers
 ```
+
+### Type Conversion/Casting
+
+EBS2 provides clean methods for converting between primitive types. All conversion methods are chainable.
+
+**Number Conversions:**
+```javascript
+// Convert text to number
+var num = "42".toNumber()                    // 42
+var num = "3.14".toNumber()                  // 3.14
+var num = "invalid".toNumber()               // 0 (invalid strings return 0)
+
+// Convert to integer (truncates decimals)
+var int = "3.99".toInt()                     // 3
+var int = 3.99.toInt()                       // 3
+
+// Convert flag to number
+var num = yes.toNumber()                     // 1
+var num = no.toNumber()                      // 0
+```
+
+**Text Conversions:**
+```javascript
+// Convert number to text
+var text = 42.toText()                       // "42"
+var text = 3.14159.toText()                  // "3.14159"
+
+// Convert with formatting
+var text = 3.14159.toText(2)                 // "3.14" (2 decimal places)
+var text = 1234.56.toText(0)                 // "1235" (no decimals, rounded)
+
+// Convert flag to text
+var text = yes.toText()                      // "yes"
+var text = no.toText()                       // "no"
+
+// Convert array to text (joins with commas by default)
+var text = {1, 2, 3}.toText()                // "1, 2, 3"
+var text = {"a", "b", "c"}.toText()          // "a, b, c"
+```
+
+**Flag (Boolean) Conversions:**
+```javascript
+// Convert number to flag
+var flag = 1.toFlag()                        // yes
+var flag = 0.toFlag()                        // no
+var flag = 42.toFlag()                       // yes (non-zero = yes)
+
+// Convert text to flag
+var flag = "yes".toFlag()                    // yes
+var flag = "no".toFlag()                     // no
+var flag = "true".toFlag()                   // yes
+var flag = "false".toFlag()                  // no
+var flag = "1".toFlag()                      // yes
+var flag = "0".toFlag()                      // no
+var flag = "".toFlag()                       // no (empty = no)
+var flag = "anything".toFlag()               // yes (non-empty = yes)
+```
+
+**Date Conversions:**
+```javascript
+// Convert text to date
+var date = "2025-12-29".toDate()             // date value
+var date = "12/29/2025".toDate()             // date value
+var date = "Dec 29, 2025".toDate()           // date value
+
+// Convert number (days since epoch) to date
+var date = 19351.toDate()                    // date value
+
+// Convert date to text
+var text = today.toText()                    // "2025-12-29"
+var text = today.toText("MM/DD/YYYY")        // "12/29/2025"
+var text = today.toText("MMM D, YYYY")       // "Dec 29, 2025"
+
+// Convert date to number (days since epoch)
+var days = today.toNumber()                  // 19351 (example)
+```
+
+**Array Conversions:**
+```javascript
+// Convert text to array of characters
+var chars = "Hello".toArray()                // {"H", "e", "l", "l", "o"}
+
+// Convert text to array by splitting
+var words = "a b c".toArray(" ")             // {"a", "b", "c"} (split by space)
+var parts = "a,b,c".toArray(",")             // {"a", "b", "c"} (split by comma)
+
+// Convert range to array
+var nums = (1..5).toArray()                  // {1, 2, 3, 4, 5}
+```
+
+**Chaining Conversions:**
+```javascript
+// Complex conversions with chaining
+var result = "42".toNumber().toText()        // "42"
+var result = "3.99".toNumber().toInt().toText()  // "3"
+
+// Process and convert
+var total = {"1", "2", "3"}
+    .transform(x => x.toNumber())
+    .sum()
+    .toText()                                // "6"
+
+// Format currency
+var amount = "1234.567".toNumber().toText(2)  // "1234.57"
+```
+
+**Type Checking with Conversions:**
+```javascript
+// Safe conversions with type checking
+if value typeof text then
+    var num = value.toNumber()
+else if value typeof number then
+    var text = value.toText()
+end if
+
+// Validate before converting
+if input.isEmpty then
+    var num = 0
+else
+    var num = input.toNumber()
+end if
+```
+
+### Common Operations for Text and Arrays (Method Syntax)
+
+Many operations work identically on both text (strings) and arrays using clean, chainable method syntax. This approach enables powerful functional-style programming and easy-to-read code.
+
+**Property Access (length, isEmpty):**
+```javascript
+// Works for both text and arrays
+var textLen = "Hello".length                 // 5
+var arrayLen = {1, 2, 3, 4}.length          // 4
+
+// Check if empty
+var empty = "".isEmpty                       // yes
+var empty = {}.isEmpty                       // yes
+var notEmpty = "Hello".isEmpty               // no
+var notEmpty = {1, 2, 3}.isEmpty            // no
+```
+
+**Contains/Search:**
+```javascript
+// Check if text contains substring
+var hasSubstring = "Hello World".contains("World")     // yes
+var hasSubstring = "Hello World".contains("xyz")       // no
+
+// Check if array contains element
+var hasElement = {1, 2, 3, 4}.contains(3)              // yes
+var hasElement = {1, 2, 3, 4}.contains(10)             // no
+```
+
+**Find/Search:**
+```javascript
+// Find first occurrence (explicitly named method)
+var pos = "Hello".findFirst("l")            // 2 (first 'l', 0-based)
+var pos = "Hello".find("lo")                // 3 (0-based index, searches for substring)
+var pos = "Hello".find("x")                 // -1 (not found)
+
+// Find last occurrence
+var pos = "Hello".findLast("l")             // 3 (last 'l')
+
+// Find element in array (searches for value)
+var idx = {1, 2, 3, 4}.findFirst(2)         // 1 (first occurrence)
+var idx = {1, 2, 3, 4}.find(3)              // 2 (0-based index)
+var idx = {1, 2, 3, 4}.find(10)             // -1 (not found)
+var idx = {1, 2, 3, 2}.findLast(2)          // 3 (last occurrence)
+
+// Get element at index - .find() overloaded with integer parameter
+// Note: When parameter is integer, returns element at that index instead of searching
+var char = "Hello".find(1)                  // "e" (character at index 1)
+var item = {10, 20, 30}.find(1)             // 20 (element at index 1)
+var char = "Hello".find(0)                  // "H" (first character)
+var item = {10, 20, 30}.find(0)             // 10 (first element)
+```
+
+**Note on `.find()` overloading:** The `.find()` method behavior depends on parameter type:
+- **String/Element parameter:** Searches for the value and returns index (or -1 if not found)
+- **Integer parameter:** Returns the element at that index (0-based access)
+
+This dual behavior provides convenience but use `.findFirst()` when searching to avoid ambiguity.
+
+**Starts With / Ends With:**
+```javascript
+// Text operations
+var starts = "Hello World".startsWith("Hello")      // yes
+var ends = "Hello World".endsWith("World")          // yes
+
+// Array operations (checking first/last elements)
+var starts = {1, 2, 3}.startsWith(1)                // yes
+var ends = {1, 2, 3}.endsWith(3)                    // yes
+```
+
+**Split (Text → Array):**
+```javascript
+// Split text into array by delimiter
+var parts = "a,b,c".split(",")               // {"a", "b", "c"}
+var words = "Hello World".split(" ")         // {"Hello", "World"}
+
+// Split by character
+var chars = "Hello".split("")                // {"H", "e", "l", "l", "o"}
+
+// Note: split() is not available for arrays (doesn't make sense)
+```
+
+**Join (Array → Text):**
+```javascript
+// Join array elements into text
+var text = {"a", "b", "c"}.join(",")         // "a,b,c"
+var sentence = {"Hello", "World"}.join(" ")  // "Hello World"
+
+// Join without separator
+var text = {"H", "e", "l", "l", "o"}.join("")  // "Hello"
+
+// Note: join() is not available for text (use split first if needed)
+```
+
+**Replace:**
+```javascript
+// Replace first occurrence by value (searches and replaces)
+var result = "Hello World".replace("o", "0")
+// Result: "Hell0 World"
+
+// Replace first occurrence with replaceFirst (explicit naming)
+var result = "a,b,c,a".replaceFirst("a", "x")
+// Result: "x,b,c,a"
+
+// Replace last occurrence
+var result = "a,b,c,a".replaceLast("a", "x")
+// Result: "a,b,c,x"
+
+// Replace all occurrences
+var result = "Hello".replaceAll("l", "L")
+// Result: "HeLLo"
+
+// Replace at specific index - .replace() overloaded with integer first parameter
+// Note: When first parameter is integer, replaces at that index instead of searching
+var result = "Hello".replace(1, "a")
+// Result: "Hallo" (replaces character at index 1)
+
+// Replace in array (searches for value and replaces first occurrence)
+var result = {1, 2, 3, 2}.replace(2, 20)
+// Result: {1, 20, 3, 2}  (only first occurrence)
+
+var result = {1, 2, 1, 2}.replaceLast(2, 20)
+// Result: {1, 2, 1, 20}  (last occurrence only)
+
+var result = {1, 2, 3, 2}.replaceAll(2, 20)
+// Result: {1, 20, 3, 20}  (all occurrences)
+
+// Replace element at specific index (0-based)
+var result = {10, 20, 30}.replace(1, 25)
+// Result: {10, 25, 30} (replaces element at index 1)
+```
+
+**Note on `.replace()` overloading:** The `.replace()` method behavior depends on first parameter type:
+- **String/Element as first parameter:** Searches for the value and replaces first occurrence
+- **Integer as first parameter:** Replaces the element at that index (0-based)
+
+Use `.replaceFirst()`, `.replaceLast()`, or `.replaceAll()` for explicit search-and-replace behavior.
+
+**Copy/Slice (Get Part):**
+```javascript
+// Copy part of text (0-based, end is exclusive)
+var part = "Hello".copy(0, 3)                // "Hel" (from 0 to 3, exclusive)
+var part = "Hello".copy(1, 4)                // "ell" (from 1 to 4, exclusive)
+
+// Substring (alias for copy) - same parameters
+var part = "Hello".substring(0, 3)           // "Hel"
+var part = "Hello".substring(1, 4)           // "ell"
+
+// Copy part of array
+var part = {1, 2, 3, 4, 5}.copy(1, 4)        // {2, 3, 4} (from 1 to 4, exclusive)
+var part = {1, 2, 3, 4, 5}.copy(0, 3)        // {1, 2, 3}
+
+// Alternative bracket notation for ranges
+var part = "Hello"[1..4]                     // "ell"
+var part = {1, 2, 3, 4, 5}[1..4]            // {2, 3, 4}
+```
+
+**Head/Tail/Lead (Get Characters from Start/End):**
+```javascript
+// Get first N characters (head or lead)
+var first = "Hello World".head(5)            // "Hello"
+var first = "Hello World".lead(5)            // "Hello" (alias for head)
+
+// Get last N characters (tail)
+var last = "Hello World".tail(5)             // "World"
+
+// Works with single character
+var firstChar = "Hello".head(1)              // "H"
+var lastChar = "Hello".tail(1)               // "o"
+```
+
+**Padding:**
+```javascript
+// Pad left (add characters to start until reaching length)
+var padded = "42".padLeft(5, "0")            // "00042"
+var padded = "Hi".padLeft(5, " ")            // "   Hi"
+var padded = "x".padLeft(3, "*")             // "**x"
+
+// Pad right (add characters to end until reaching length)
+var padded = "42".padRight(5, "0")           // "42000"
+var padded = "Hi".padRight(5, " ")           // "Hi   "
+var padded = "x".padRight(3, "*")            // "x**"
+
+// Pad both sides evenly
+var padded = "Hi".padCenter(6, " ")          // "  Hi  "
+var padded = "42".padCenter(5, "0")          // "00420"
+
+// Default padding character is space
+var padded = "Hi".padLeft(5)                 // "   Hi"
+var padded = "Hi".padRight(5)                // "Hi   "
+```
+
+**Trim:**
+```javascript
+// Remove whitespace from start and end
+var trimmed = "  Hello  ".trim()             // "Hello"
+var trimmed = "\n\tHello\t\n".trim()         // "Hello"
+
+// Remove from start only
+var trimmed = "  Hello  ".trimLeft()         // "Hello  "
+var trimmed = "  Hello  ".trimStart()        // "Hello  " (alias)
+
+// Remove from end only
+var trimmed = "  Hello  ".trimRight()        // "  Hello"
+var trimmed = "  Hello  ".trimEnd()          // "  Hello" (alias)
+```
+
+**Add/Append:**
+```javascript
+// Add to text (concatenation)
+var text = "Hello"
+var result = text + " World"                 // "Hello World"
+
+// Add to array (returns new array)
+var numbers = {1, 2, 3}
+var result = numbers.add(4)                  // {1, 2, 3, 4} - add at end
+var result = numbers.add(1, 99)              // {1, 99, 2, 3} - insert at index 1
+var result = numbers.append(4)               // {1, 2, 3, 4} - alias for add(x)
+var result = numbers.addFirst(0)             // {0, 1, 2, 3} - add at start
+
+// Remove from array (returns new array)
+var result = numbers.remove(1)               // {1, 3} - remove element at index 1
+```
+
+**Reverse:**
+```javascript
+// Reverse text
+var reversed = "Hello".reverse()             // "olleH"
+
+// Reverse array
+var reversed = {1, 2, 3, 4}.reverse()        // {4, 3, 2, 1}
+```
+
+**Sort (Arrays Only):**
+```javascript
+// Sort array in ascending order (default)
+var sorted = {3, 1, 4, 1, 5}.sort()                    // {1, 1, 3, 4, 5}
+var sorted = {3, 1, 4, 1, 5}.sort("ascending")         // {1, 1, 3, 4, 5}
+
+// Sort array in descending order - use .reverseSort()
+var sorted = {3, 1, 4, 1, 5}.reverseSort()             // {5, 4, 3, 1, 1}
+
+// Alternative: sort with parameter (less convenient)
+var sorted = {3, 1, 4, 1, 5}.sort("descending")        // {5, 4, 3, 1, 1}
+
+// Sort with chaining - parentheses optional for methods with optional parameters
+var result = {3, 1, 2}.sort                            // {1, 2, 3}
+var result = {3, 1, 2}.reverseSort                     // {3, 2, 1}
+```
+
+**Note on Optional Parentheses:**
+For methods with optional parameters (like `.sort()`, `.reverseSort()`, `.reverse()`, etc.), parentheses are optional when calling without arguments:
+```javascript
+// Both are valid and equivalent
+var result = {3, 1, 2}.sort()
+var result = {3, 1, 2}.sort
+
+// Descending sort
+var result = {3, 1, 2}.reverseSort()
+var result = {3, 1, 2}.reverseSort
+
+// When providing arguments, parentheses are required
+var result = {3, 1, 2}.sort("descending")
+```
+
+**Method Chaining Examples:**
+```javascript
+// Chain text operations
+var result = "a,b,c".split(",").join(".")
+// Result: "a.b.c"
+
+var result = "  hello  ".trim().toUpper().reverse()
+// Result: "OLLEH"
+
+var result = "a,b,c,a".replaceFirst("a", "x").findLast("x")
+// Result: 6 (index of last 'x')
+
+// Chain array operations
+var result = {3, 1, 4, 1, 5}.reverseSort()
+// Result: {5, 4, 3, 1, 1}
+
+var result = {1, 2, 3, 4, 5}.copy(1, 4).reverse()
+// Result: {4, 3, 2}
+
+// Mixed chaining (text to array and back)
+var result = "a,b,c".split(",").reverse().join("-")
+// Result: "c-b-a"
+
+var result = "hello,world".split(",").join(" ").toUpper()
+// Result: "HELLO WORLD"
+```
+
+**Quick Reference Table:**
+
+| Operation | Text Example | Array Example | Returns |
+|-----------|--------------|---------------|---------|
+| `.length` | `"Hello".length` | `{1,2,3}.length` | number |
+| `.isEmpty` | `"".isEmpty` | `{}.isEmpty` | flag (yes/no) |
+| `.contains(x)` | `"Hello".contains("lo")` | `{1,2,3}.contains(2)` | flag |
+| `.find(x)` | `"Hello".find("lo")` | `{1,2,3}.find(2)` | number (index or -1) |
+| `.find(int)` | `"Hello".find(1)` | `{10,20,30}.find(1)` | text/element at index |
+| `.findFirst(x)` | `"Hello".findFirst("l")` | `{1,2,1}.findFirst(1)` | number (index or -1) |
+| `.findLast(x)` | `"Hello".findLast("l")` | `{1,2,3,2}.findLast(2)` | number (index or -1) |
+| `.startsWith(x)` | `"Hello".startsWith("He")` | `{1,2,3}.startsWith(1)` | flag |
+| `.endsWith(x)` | `"Hello".endsWith("lo")` | `{1,2,3}.endsWith(3)` | flag |
+| `.split(sep)` | `"a,b".split(",")` | N/A | array |
+| `.join(sep)` | N/A | `{"a","b"}.join(",")` | text |
+| `.replace(a, b)` | `"cat".replace("a","b")` | `{1,2,3}.replace(1,10)` | text/array |
+| `.replace(int, x)` | `"Hello".replace(1,"a")` | `{10,20,30}.replace(1,25)` | text/array (at index) |
+| `.replaceFirst(a, b)` | `"aa".replaceFirst("a","b")` | `{1,2,1}.replaceFirst(1,10)` | text/array |
+| `.replaceLast(a, b)` | `"aa".replaceLast("a","b")` | `{1,2,1}.replaceLast(1,10)` | text/array |
+| `.replaceAll(a, b)` | `"aa".replaceAll("a","b")` | `{1,2,1}.replaceAll(1,10)` | text/array |
+| `.copy(start, end)` | `"Hello".copy(1,4)` | `{1,2,3,4,5}.copy(1,4)` | text/array |
+| `.add(x)` | N/A (use `+`) | `{1,2,3}.add(4)` | array (add at end) |
+| `.add(idx, x)` | N/A | `{1,2,3}.add(1,99)` | array (insert at index) |
+| `.append(x)` | N/A (use `+`) | `{1,2,3}.append(4)` | array (alias for add) |
+| `.addFirst(x)` | N/A (use `+`) | `{1,2,3}.addFirst(0)` | array (add at start) |
+| `.remove(idx)` | N/A | `{1,2,3}.remove(1)` | array (remove at index) |
+| `.reverse()` | `"Hello".reverse()` | `{1,2,3}.reverse()` | text/array (reverse order) |
+| `.sort()` | N/A | `{3,1,2}.sort()` or `{3,1,2}.sort` | array (ascending) |
+| `.reverseSort()` | N/A | `{3,1,2}.reverseSort()` or `{3,1,2}.reverseSort` | array (descending) |
+| `.sort(order)` | N/A | `{3,1,2}.sort("descending")` | array (asc/desc) |
+
+**Note:** Methods with optional parameters like `.sort()`, `.reverseSort()`, and `.reverse()` can be called without parentheses when no arguments are provided: `{3,1,2}.sort.reverse` is equivalent to `{3,1,2}.sort().reverse()`.
+
+**Best Practices:**
+
+1. **Use Method Chaining for Clarity:** Chain operations to create readable pipelines
+   ```javascript
+   // Clear data transformation pipeline
+   var result = rawData.trim().split(",").reverse().join(" | ")
+   
+   // Multi-step array processing
+   var filtered = numbers.copy(0, 5).reverse().add(100)
+   ```
+
+2. **Type Checking:** Use `typeof` to handle both types elegantly
+   ```javascript
+   if data typeof text then
+       var parts = data.split(",")
+   else if data typeof array then
+       var text = data.join(",")
+   end if
+   ```
+
+3. **Properties vs Methods:** Use properties (no parentheses) for state, methods for actions
+   ```javascript
+   // Property access (no parentheses)
+   if message.length > 100 then print "Too long"
+   if items.isEmpty then print "No items"
+   
+   // Method calls (with parentheses, even if no arguments)
+   var reversed = text.reverse()
+   var upper = text.toUpper()
+   ```
+
+4. **Immutability:** Most methods return new values without modifying originals
+   ```javascript
+   var original = "hello"
+   var upper = original.toUpper()    // "HELLO"
+   print original                     // Still "hello"
+   
+   var nums = {1, 2, 3}
+   var extended = nums.add(4)        // {1, 2, 3, 4}
+   print nums                        // Still {1, 2, 3}
+   ```
+
+5. **Handle Empty Cases:** Check before processing
+   ```javascript
+   if not data.isEmpty then
+       var processed = data.split(",").join(";")
+   end if
+   ```
 
 ### Date and Time (Beginner)
 
@@ -2319,6 +3198,82 @@ if now is after deadline then
     print "Overdue!"
 end if
 ```
+
+### Type Checking and Debugging (Intermediate)
+
+```javascript
+// Check the type of a variable (postfix typeof operator)
+var x = 42
+var name = "Alice"
+var items = {1, 2, 3}
+var person = record { name: "Bob", age: 30 }
+var flag = true
+
+// Use typeof in conditionals (no strings - use type keywords)
+if value typeof number then
+    print "It's a number: " + value
+else if value typeof text then
+    print "It's text: " + value
+else if value typeof array then
+    print "It's an array with " + (count of value) + " items"
+else if value typeof record then
+    print "It's a record"
+else if value typeof flag then
+    print "It's a boolean: " + value
+end if
+
+// Check specific array types
+var numbers = {1, 2, 3}
+var names as array.text = {"Alice", "Bob"}
+var students as array.record(StudentType) = { /* ... */ }
+
+// For named record types, use type references
+record type PersonType
+    name as text
+    age as number
+end record
+
+var employee as PersonType = record { name: "Alice", age: 30 }
+
+// Type checking with type references (case-insensitive, postfix)
+if employee typeof PersonType then
+    print "Is a PersonType"
+end if
+
+// Combined type checks
+if x typeof number then
+    print "x is a number"
+end if
+
+if names typeof array then
+    print "names is an array"
+end if
+```
+
+**Type Keywords for `typeof` Operator:**
+
+Use type keywords (not strings) with postfix `typeof` operator:
+- `number` - for numeric values
+- `text` - for string values
+- `flag` - for boolean (yes/no, true/false)
+- `array` - for generic arrays
+- `record` - for anonymous record types
+- `indicator` - for indicator/enum types
+- `date` - for date/time values
+- `function` - for function references
+- `procedure` - for procedure references
+
+For **named record types**, use the type name directly:
+- Use type references: `if x typeof PersonType then`
+- Comparison is case-insensitive
+- Use `Type` suffix naming convention (e.g., `PersonType`, `EmployeeType`)
+
+**Syntax:**
+- Postfix operator: `variable typeof TypeName`
+- No `=` operator needed
+- No string literals - use type keywords or type references directly
+
+**Note:** Similar to Java's `instanceof`, `typeof` allows runtime type checking for debugging and conditional logic based on data types.
 
 ### File Functions (Intermediate)
 
@@ -2402,7 +3357,7 @@ call helpers.greet with "Alice"
 // Mark functions for export
 export function greet person
     print "Hello " + person
-end
+end function
 
 export function calculate sum of numbers
     var total = 0
@@ -2410,11 +3365,11 @@ export function calculate sum of numbers
         total = total + num
     end for
     return total
-end
+end function
 
 // Private function (not exported)
 to helperFunction
-    -- only used internally
+    // only used internally
 end function
 ```
 
@@ -2422,12 +3377,12 @@ end function
 
 ```
 my_project/
-├── main.ebs           -- Main program file
-├── helpers.ebs        -- Helper functions
-├── ui.ebs            -- Screen definitions
-├── data.ebs          -- Data handling
+├── main.ebs           // Main program file
+├── helpers.ebs        // Helper functions
+├── ui.ebs            // Screen definitions
+├── data.ebs          // Data handling
 └── modules/
-    ├── math.ebs      -- Math utilities
+    ├── math.ebs      // Math utilities
     └── graphics.ebs  -- Graphics functions
 ```
 
@@ -2559,9 +3514,9 @@ end if
 
 // Conditional features
 if has feature "database" then
-    -- Use database features
+    // Use database features
 else
-    -- Use alternative approach
+    // Use alternative approach
 end if
 ```
 
@@ -2572,7 +3527,7 @@ end if
 1. **Use natural language keywords**
    ```javascript
    if age is greater than 12 then
-       -- instead of: if age > 12 then
+       // instead of: if age > 12 then
    ```
 
 2. **Use descriptive names**
@@ -2630,12 +3585,12 @@ end if
 
 | Feature | EBS1 | EBS2 |
 |---------|------|------|
-| Keywords | `if`, `while`, `var` | `when`, `repeat`, `var` |
+| Keywords | `if`, `while`, `var` | `if`, `repeat`, `var` |
 | Types | `string`, `int`, `float` | `text`, `number` |
-| Functions | `greet(name: string)` | `to greet person` |
-| Arrays | 0-based indexing | 1-based indexing (configurable) |
+| Functions | `greet(name: string)` | `greet(person as text)` or `to greet person` |
+| Arrays | 0-based indexing | 0-based indexing (consistent) |
 | Structure | Free-form | Organized sections |
-| Comments | `//` and `/* */` | `--` and `--[[ ]]--` |
+| Comments | `//` and `/* */` | `//` only (single-line) |
 
 ### Migration Tool
 
@@ -2772,26 +3727,25 @@ See section [Built-in Functions](#built-in-functions) for detailed documentation
 
 - [ ] Review breaking changes from EBS1
 - [ ] Update variable declarations (string → text, int/float → number)
-- [ ] Update array indexing (0-based → 1-based)
 - [ ] Organize code into sections (optional but recommended)
 - [ ] Test in both HTML5 and Java runtimes
 - [ ] Consider using natural language syntax for beginner-facing code
 
-**Note:** Comments (`//`), control structures (`if/else`), and most syntax remain compatible with EBS1.
+**Note:** Array indexing remains 0-based (consistent with EBS1). Comments (`//`), control structures (`if/else`), and most syntax remain compatible with EBS1.
 
 ### Appendix E: Standard Library Organization
 
 ```
 ebs2/
-├── core/           -- Core language features (always loaded)
-├── text/           -- Extended text functions
-├── math/           -- Advanced math functions
-├── collections/    -- Advanced list, map operations
-├── files/          -- File I/O operations
-├── network/        -- HTTP, WebSocket functions
-├── graphics/       -- Drawing and animation
-├── ui/            -- UI components and helpers
-└── database/      -- Database connectivity (Java only)
+├── core/           // Core language features (always loaded)
+├── text/           // Extended text functions
+├── math/           // Advanced math functions
+├── collections/    // Advanced list, map operations
+├── files/          // File I/O operations
+├── network/        // HTTP, WebSocket functions
+├── graphics/       // Drawing and animation
+├── ui/            // UI components and helpers
+└── database/      // Database connectivity (Java only)
 ```
 
 ---

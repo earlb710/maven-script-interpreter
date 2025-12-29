@@ -24,7 +24,7 @@ program HelloWorld
 
 main
     print "Hello World!"
-end
+end main
 ```
 
 **What does this do?**
@@ -49,15 +49,15 @@ program MyProgram
 // The computer ignores comments
 
 main
-    -- Your code goes here
+    // Your code goes here
     print "This is where I write instructions"
-end
+end main
 ```
 
 **Parts of a program:**
 - **program** - Gives your program a name
 - **main** - The starting point (required)
-- **//** or **--** - Comments (notes that the computer skips)
+- **//** - Comments (notes that the computer skips)
 - **end** - Closes a section
 
 **Bonus Tip:** Keywords like `program`, `main`, `print`, `if`, `end` can be written in ANY CASE:
@@ -81,7 +81,7 @@ program GreetFriend
 main
     var name as text = "Sarah"
     print "Hello " + name
-end
+end main
 ```
 
 **Output:** `Hello Sarah`
@@ -97,7 +97,7 @@ main
     var total = apples + oranges
     
     print "Total fruit: " + total
-end
+end main
 ```
 
 **Output:** `Total fruit: 8`
@@ -118,7 +118,7 @@ main
     
     print "Score: " + score
     print "Temperature: " + temperature
-end
+end main
 ```
 
 **Benefits:**
@@ -137,7 +137,7 @@ main
     
     print "Is it sunny? " + isSunny
     print "Is it raining? " + isRaining
-end
+end main
 ```
 
 **Remember:**
@@ -162,7 +162,7 @@ main
     print "Max players: " + MAX_PLAYERS
     
     // MAX_PLAYERS = 10  // ERROR! Cannot change a constant
-end
+end main
 ```
 
 **When to use constants:**
@@ -185,8 +185,8 @@ main
     
     if age is greater than 12 then
         print "You're a teenager!"
-    end
-end
+    end if
+end main
 ```
 
 ### Decision with Otherwise
@@ -199,10 +199,10 @@ main
     
     if age is greater than 12 then
         print "You're a teenager!"
-    otherwise
+    else
         print "You're a child!"
-    end
-end
+    end if
+end main
 ```
 
 ### Multiple Choices
@@ -215,14 +215,14 @@ main
     
     if score >= 90 then
         print "Grade: A"
-    otherwise if score >= 80 then
+    else if score >= 80 then
         print "Grade: B"
-    otherwise if score >= 70 then
+    else if score >= 70 then
         print "Grade: C"
-    otherwise
+    else
         print "Grade: D"
-    end
-end
+    end if
+end main
 ```
 
 **Tip:** You can also use shortcuts like `>` instead of `is greater than`:
@@ -234,7 +234,7 @@ end
 
 ### Short Form (One Line)
 
-For simple checks, you can write everything on one line:
+For simple checks, you can write everything on one line. The `end` keyword is **optional** for single-command blocks:
 
 ```javascript
 program QuickCheck
@@ -242,18 +242,18 @@ program QuickCheck
 main
     var age as number = 8
     
-    // One line - no 'end if' needed!
+    // One line - no 'end if' needed (optional)!
     if age < 5 then print "Preschooler"
     if age >= 5 then print "School age"
     
-    // Multiple commands on one line with semicolon
+    // Multiple commands on one line with semicolon - no 'end if' needed
     if age < 10 then print "Young"; log "Age checked"
-end
+end main
 ```
 
 **When to use:**
-- **One line**: Simple, single command
-- **Multiple lines**: Complex logic or multiple commands
+- **One line (no end)**: Simple, single command
+- **Multiple lines (with end)**: Complex logic or multiple commands
 
 ## Repeating Things
 
@@ -266,7 +266,7 @@ main
     repeat 10 times with counter
         print counter
     end repeat
-end
+end main
 ```
 
 **Output:** Numbers 1 through 10
@@ -282,7 +282,7 @@ main
     for each fruit in fruits
         print "I like " + fruit
     end for
-end
+end main
 ```
 
 **Output:**
@@ -306,7 +306,7 @@ main
     end repeat
     
     print "Blast off!"
-end
+end main
 ```
 
 **Output:** 5, 4, 3, 2, 1, Blast off!
@@ -333,11 +333,17 @@ main
     // Large range (creates 1 to 100)
     var oneToHundred as array = 1..100
     
+    // Arbitrary ranges
+    var subset as array = 43..79      // Creates [43, 44, 45, ..., 79]
+    
+    // Negative ranges
+    var negatives as array = -10..10  // Creates [-10, -9, ..., 0, 1, ..., 10]
+    
     // Get items from array (starts at 0!)
     print numbers[0]  // Prints: 1 (first item)
     print numbers[1]  // Prints: 2 (second item)
     print fruits[0]   // Prints: apple (first fruit)
-end
+end main
 ```
 
 **Remember:** Lists start counting from 0, just like most programming languages!
@@ -366,7 +372,7 @@ main
     
     // This would be an ERROR:
     // lightColor = "blue"  // ERROR! "blue" is not allowed
-end
+end main
 ```
 
 **Indicator vs List:**
@@ -398,7 +404,7 @@ main
     greet()  // Call it
     greet()  // Call it again
     greet()  // Call it one more time
-end
+end main
 ```
 
 **Output:** "Hello there!" appears 3 times
@@ -417,7 +423,7 @@ main
     greet("Alice")
     greet("Bob")
     greet("Charlie")
-end
+end main
 ```
 
 **Output:**
@@ -442,7 +448,7 @@ function add(a as number, b as number) as number {
 main
     var result = add(5, 3)
     print "5 + 3 = " + result
-end
+end main
 ```
 
 **Output:** `5 + 3 = 8`
@@ -466,19 +472,19 @@ screen HelloScreen
     label WelcomeText
         text "Welcome to EBS2!"
         size large
-    end
+    end label
     
     button OkButton
         text "OK"
-        when clicked
+        if clicked
             print "You clicked OK!"
-        end
-    end
-end
+        end when
+    end button
+end screen
 
 main
     print screen HelloScreen
-end
+end main
 ```
 
 ### Interactive Input
@@ -491,24 +497,24 @@ screen InputScreen
     
     label PromptLabel
         text "Please enter your name:"
-    end
+    end label
     
     textbox NameBox
         placeholder "Type your name here"
-    end
+    end textbox
     
     button SubmitButton
         text "Submit"
-        when clicked
+        if clicked
             var name = get text from NameBox
             print "Hello " + name + "!"
-        end
-    end
-end
+        end when
+    end button
+end screen
 
 main
     print screen InputScreen
-end
+end main
 ```
 
 ### Counter Button
@@ -518,35 +524,35 @@ program CounterApp
 
 variables
     var count as number = 0
-end
+end variables
 
 screen CounterScreen
     title "Click Counter"
     
     label CountLabel
         text "Clicks: 0"
-    end screen
+    end label
     
     button ClickButton
         text "Click Me!"
-        when clicked
+        if clicked
             count = count + 1
             update CountLabel text "Clicks: " + count
-        end
-    end
+        end when
+    end button
     
     button ResetButton
         text "Reset"
-        when clicked
+        if clicked
             count = 0
             update CountLabel text "Clicks: 0"
-        end
-    end
-end
+        end when
+    end button
+end screen
 
 main
     print screen CounterScreen
-end
+end main
 ```
 
 ### 💡 Tip: Using print vs log
@@ -582,7 +588,7 @@ main
     } else {
         print "You're a child!"
     }
-end
+end main
 ```
 
 ### Using Curly Braces for Loops
@@ -601,7 +607,7 @@ main
     for each fruit in fruits {
         print fruit
     }
-end
+end main
 ```
 
 ### Using Curly Braces for Functions
@@ -614,11 +620,11 @@ functions
         print "Hello " + name
         return "Greeting sent"
     }
-end
+end function
 
 main
     var result = greet("Alice")
-end
+end main
 ```
 
 ### Variable Scope with Curly Braces
@@ -639,7 +645,7 @@ main
     
     print x              // Still works: prints 10
     print y              // ERROR: y doesn't exist here!
-end
+end main
 ```
 
 ### Which Style Should You Use?
@@ -655,6 +661,57 @@ end
 - You're working with experienced developers
 
 **Best practice:** Pick one style and stick with it in each project. Both work great!
+
+## 🔍 Checking Types (Debugging)
+
+When you're learning or debugging, it's helpful to check what type of data you have. Use the postfix `typeof` operator to find out:
+
+```javascript
+program TypeChecker
+
+main
+    var age = 10
+    var name = "Alice"
+    var scores = {95, 87, 92}
+    var ready = true
+    
+    // Use typeof to make decisions (postfix operator with type keywords)
+    var mystery = 42
+    
+    if mystery typeof number then
+        print "It's a number: " + mystery
+    else if mystery typeof text then
+        print "It's text: " + mystery
+    else
+        print "It's something else"
+    end if
+    
+    // Check different types
+    if age typeof number then
+        print "age is a number"
+    end if
+    
+    if name typeof text then
+        print "name is text"
+    end if
+    
+    if scores typeof array then
+        print "scores is an array"
+    end if
+    
+    if ready typeof flag then
+        print "ready is a boolean"
+    end if
+end main
+```
+
+**Why is this useful?**
+- **Debugging:** Helps you figure out what went wrong
+- **Learning:** Shows you what type your variables are
+- **Safety:** Check types before doing operations
+
+**Syntax:** `variable typeof TypeName` (postfix operator, no strings)
+**Type keywords:** `number`, `text`, `flag`, `array`, `record`
 
 ## What's Next
 
@@ -739,27 +796,27 @@ var ready as yes/no = yes
 #### Decisions
 ```javascript
 if condition then
-    -- do something
+    // do something
 else
-    -- do something else
+    // do something else
 end if
 ```
 
 #### Loops
 ```javascript
 repeat 5 times
-    -- do something
+    // do something
 end repeat
 
 for each item in array
-    -- do something with item
+    // do something with item
 end for
 ```
 
 #### Functions
 ```javascript
 to functionName parameter
-    -- do something
+    // do something
     return result
 end function
 ```
@@ -771,11 +828,11 @@ screen MyScreen
     
     button MyButton
         text "Click"
-        when clicked
-            -- do something
-        end screen
-    end
-end
+        if clicked
+            // do something
+        end when
+    end button
+end screen
 ```
 
 ### Practice Exercises

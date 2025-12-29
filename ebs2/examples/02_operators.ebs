@@ -1,0 +1,76 @@
+// EBS2 Example: Operators
+// This script demonstrates arithmetic, comparison, logical, and increment/decrement operators
+
+main
+    print "=== Arithmetic Operators ==="
+    var a = 10
+    var b = 3
+    
+    print "a = " + a.toText() + ", b = " + b.toText()
+    print "a + b = " + (a + b).toText()
+    print "a - b = " + (a - b).toText()
+    print "a * b = " + (a * b).toText()
+    print "a / b = " + (a / b).toText(2)
+    print "a mod b = " + (a mod b).toText()
+    print ""
+    
+    // Increment and decrement operators
+    print "=== Increment/Decrement Operators ==="
+    var count = 5
+    print "Initial count: " + count.toText()
+    
+    count++
+    print "After count++: " + count.toText()
+    
+    ++count
+    print "After ++count: " + count.toText()
+    
+    count--
+    print "After count--: " + count.toText()
+    
+    --count
+    print "After --count: " + count.toText()
+    print ""
+    
+    // Comparison operators
+    print "=== Comparison Operators ==="
+    var x = 10
+    var y = 20
+    
+    print "x = " + x.toText() + ", y = " + y.toText()
+    print "x = y: " + (x = y).toText()
+    print "x <> y: " + (x <> y).toText()
+    print "x < y: " + (x < y).toText()
+    print "x > y: " + (x > y).toText()
+    print "x <= y: " + (x <= y).toText()
+    print "x >= y: " + (x >= y).toText()
+    print ""
+    
+    // Logical operators
+    print "=== Logical Operators ==="
+    var isAdult = yes
+    var hasLicense = yes
+    var canDrive = isAdult and hasLicense
+    
+    print "isAdult: " + isAdult.toText()
+    print "hasLicense: " + hasLicense.toText()
+    print "canDrive (isAdult and hasLicense): " + canDrive.toText()
+    print ""
+    
+    var isMorning = yes
+    var isEvening = no
+    var needsLight = isMorning or isEvening
+    
+    print "isMorning: " + isMorning.toText()
+    print "isEvening: " + isEvening.toText()
+    print "needsLight (isMorning or isEvening): " + needsLight.toText()
+    print ""
+    
+    var isReady = yes
+    var isNotReady = not isReady
+    print "isReady: " + isReady.toText()
+    print "isNotReady (not isReady): " + isNotReady.toText()
+    print ""
+    
+    print "Script completed successfully!"
+end main

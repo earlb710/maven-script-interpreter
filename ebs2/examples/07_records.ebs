@@ -1,0 +1,166 @@
+// EBS2 Example: Records
+// This script demonstrates record types, record literals, and record extension
+
+// Define basic record type
+record type PersonType
+    name as text
+    age as number
+    email as text
+end record
+
+// Define record with extension
+record type EmployeeType extends PersonType
+    employeeId as number
+    department as text
+    salary as number
+end record
+
+// Define record with further extension
+record type ManagerType extends EmployeeType
+    teamSize as number
+    budget as number
+end record
+
+// Define record with array field
+record type CourseType
+    title as text
+    instructor as text
+    students as array.text
+    grades as array.number
+end record
+
+main
+    print "=== Basic Record Usage ==="
+    
+    // Create a basic record
+    var person as PersonType = record {
+        name: "Alice Johnson",
+        age: 28,
+        email: "alice@example.com"
+    }
+    
+    print "Person Information:"
+    print "  Name: " + person.name
+    print "  Age: " + person.age.toText()
+    print "  Email: " + person.email
+    print ""
+    
+    // Check record type
+    if person typeof PersonType then
+        print "person is a PersonType"
+    end if
+    print ""
+    
+    // Create extended record
+    print "=== Record Extension ==="
+    var employee as EmployeeType = record {
+        name: "Bob Smith",
+        age: 35,
+        email: "bob@company.com",
+        employeeId: 12345,
+        department: "Engineering",
+        salary: 75000
+    }
+    
+    print "Employee Information:"
+    print "  Name: " + employee.name
+    print "  Age: " + employee.age.toText()
+    print "  Email: " + employee.email
+    print "  Employee ID: " + employee.employeeId.toText()
+    print "  Department: " + employee.department
+    print "  Salary: $" + employee.salary.toText(2)
+    print ""
+    
+    // Check type hierarchy
+    if employee typeof EmployeeType then
+        print "employee is an EmployeeType"
+    end if
+    
+    if employee typeof PersonType then
+        print "employee is also a PersonType (inherited)"
+    end if
+    print ""
+    
+    // Create manager record
+    print "=== Multi-Level Extension ==="
+    var manager as ManagerType = record {
+        name: "Carol Davis",
+        age: 42,
+        email: "carol@company.com",
+        employeeId: 54321,
+        department: "Product",
+        salary: 120000,
+        teamSize: 8,
+        budget: 500000
+    }
+    
+    print "Manager Information:"
+    print "  Name: " + manager.name
+    print "  Department: " + manager.department
+    print "  Team Size: " + manager.teamSize.toText()
+    print "  Budget: $" + manager.budget.toText(0)
+    print ""
+    
+    // Type checking with inheritance
+    if manager typeof ManagerType then
+        print "manager is a ManagerType"
+    end if
+    
+    if manager typeof EmployeeType then
+        print "manager is an EmployeeType (inherited)"
+    end if
+    
+    if manager typeof PersonType then
+        print "manager is a PersonType (inherited)"
+    end if
+    print ""
+    
+    // Anonymous records
+    print "=== Anonymous Records ==="
+    var point = record {
+        x: 10,
+        y: 20
+    }
+    
+    print "Point: (" + point.x.toText() + ", " + point.y.toText() + ")"
+    print ""
+    
+    // Records with arrays
+    print "=== Records with Arrays ==="
+    var course as CourseType = record {
+        title: "Introduction to EBS2",
+        instructor: "Prof. Smith",
+        students: {"Alice", "Bob", "Charlie"},
+        grades: {95, 87, 92}
+    }
+    
+    print "Course: " + course.title
+    print "Instructor: " + course.instructor
+    print "Number of students: " + course.students.length.toText()
+    print ""
+    print "Student Grades:"
+    for i = 0 to course.students.length - 1 then
+        print "  " + course.students[i] + ": " + course.grades[i].toText()
+    end for
+    print ""
+    
+    // Nested records
+    print "=== Nested Records ==="
+    var company = record {
+        name: "Tech Corp",
+        location: "San Francisco",
+        ceo: record {
+            name: "Jane Doe",
+            age: 50,
+            email: "jane@techcorp.com"
+        }
+    }
+    
+    print "Company: " + company.name
+    print "Location: " + company.location
+    print "CEO: " + company.ceo.name
+    print "CEO Email: " + company.ceo.email
+    print ""
+    
+    print "Script completed successfully!"
+end main

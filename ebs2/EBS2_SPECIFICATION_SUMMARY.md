@@ -145,8 +145,8 @@ This document provides a summary of the EBS2 language specification and related 
 **Key Differences:**
 - Syntax: C-like → Natural language
 - Type names: `string`, `int` → `text`, `number`
-- Keywords: `if`, `else`, `return` → `when`, `otherwise`, `return`
-- Indexing: 0-based → 1-based
+- Keywords: `if`, `else`, `return` → `if`, `else`, `return` (kept familiar)
+- Indexing: Both use 0-based (consistent with mainstream languages)
 - Structure: Free-form → Organized sections
 - Runtime: Java only → HTML5 + Java
 
@@ -207,9 +207,9 @@ This document provides a summary of the EBS2 language specification and related 
 **"Don't make simple things harder"**
 
 1. **Symbolic Alternatives**
-   - Can use `if`, `else`, `&&`, `||` if preferred
+   - Can use `if`, `else`, `&&`, `||` (standard syntax)
    - Can use traditional function syntax
-   - Can use 0-based indexing (configurable)
+   - 0-based indexing (standard)
 
 2. **Advanced Features**
    - Classes and objects (optional)
@@ -360,8 +360,8 @@ Write once, deploy anywhere:
 ### Design Questions
 1. **Block Editor**: Blockly vs custom implementation?
 2. **Type System**: Strong typing vs dynamic for beginners?
-3. **Keywords**: How natural is optimal? ("return" vs "return"?)
-4. **Indexing**: 1-based only or configurable?
+3. **Keywords**: How natural is optimal? ("return" vs "give back"?)
+4. **Natural Language Operators**: Full English or symbolic? ("is greater than" vs ">")
 
 ### Implementation Questions
 1. **Performance**: Acceptable tradeoffs for simplicity?

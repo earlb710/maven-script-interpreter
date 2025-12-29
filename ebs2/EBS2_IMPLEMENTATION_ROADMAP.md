@@ -331,11 +331,11 @@ const ebs2_runtime = {
     isEqualTo: (a, b) => a === b,
     
     // Built-in functions
-    show: (text) => console.log(text),
+    print: (text) => console.log(text),
     ask: (prompt) => window.prompt(prompt),
     
-    // List operations (1-based indexing)
-    listAt: (list, index) => list[index - 1],
+    // Array operations (0-based indexing consistent with mainstream languages)
+    arrayAt: (array, index) => array[index],
     
     // Error handling
     throwError: (type, message) => { /* helpful errors */ }
@@ -863,8 +863,8 @@ class Animal
     end
     
     to speak
-        show name + " makes a sound"
-    end
+        print name + " makes a sound"
+    end function
 end
 
 var dog = new Animal with "Buddy" and 3
