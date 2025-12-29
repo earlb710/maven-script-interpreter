@@ -457,9 +457,17 @@ var txt = {"a", "b", "c"}.join(",")   // "a,b,c"
 var result = "a,b,c".split(",").join(".")        // "a.b.c"
 var result = "  hello  ".trim().toUpper()        // "HELLO"
 var sorted = {3, 1, 2}.sort()                    // {1, 2, 3} - ascending (default)
+var sorted = {3, 1, 2}.sort.reverse              // {3, 2, 1} - optional parentheses
 var sorted = {3, 1, 2}.sort("ascending")         // {1, 2, 3}
 var sorted = {3, 1, 2}.sort("descending")        // {3, 2, 1}
 var result = "a,b,c,a".replaceFirst("a", "x").findLast("x")  // 6
+
+// Array modification
+var nums = {1, 2, 3}
+var added = nums.add(4)                          // {1, 2, 3, 4} - add at end
+var inserted = nums.add(1, 99)                   // {1, 99, 2, 3} - insert at index
+var appended = nums.append(4)                    // {1, 2, 3, 4} - alias for add
+var removed = nums.remove(1)                     // {1, 3} - remove at index
 ```
 
 ### Array Operations
