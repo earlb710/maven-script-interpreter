@@ -2484,110 +2484,119 @@ var total = sum of numbers
 var avg = average of numbers
 ```
 
-### Common Operations for Text and Arrays (Unified Syntax)
+### Common Operations for Text and Arrays (Method Syntax)
 
-Many operations work identically on both text (strings) and arrays, making the language consistent and easy to learn. Here's a comprehensive guide to these unified operations:
+Many operations work identically on both text (strings) and arrays using clean, chainable method syntax. This approach enables powerful functional-style programming and easy-to-read code.
 
-**Length/Count:**
+**Property Access (length, isEmpty):**
 ```javascript
 // Works for both text and arrays
-var textLen = length of "Hello"              // 5
-var arrayLen = length of {1, 2, 3, 4}        // 4
+var textLen = "Hello".length                 // 5
+var arrayLen = {1, 2, 3, 4}.length          // 4
 
-// Alternative: count of
-var textCount = count of "Hello"             // 5 (same as length)
-var arrayCount = count of {1, 2, 3}          // 3
+// Check if empty
+var empty = "".isEmpty                       // yes
+var empty = {}.isEmpty                       // yes
+var notEmpty = "Hello".isEmpty               // no
+var notEmpty = {1, 2, 3}.isEmpty            // no
 ```
 
-**Contains/Membership:**
+**Contains/Search:**
 ```javascript
 // Check if text contains substring
-var hasSubstring = "Hello World" contains "World"   // yes
+var hasSubstring = "Hello World".contains("World")     // yes
+var hasSubstring = "Hello World".contains("xyz")       // no
 
 // Check if array contains element
-var hasElement = {1, 2, 3, 4} contains 3            // yes
-
-// Alternative: in operator
-var found = "lo" in "Hello"                         // yes
-var found = 3 in {1, 2, 3, 4}                       // yes
-```
-
-**Empty Check:**
-```javascript
-// Check if text is empty
-var empty = isEmpty "Hello"                  // no
-var empty = isEmpty ""                       // yes
-
-// Check if array is empty
-var empty = isEmpty {1, 2, 3}               // no
-var empty = isEmpty {}                       // yes
-
-// Alternative: check length
-if length of text = 0 then print "Empty"
-if length of array = 0 then print "Empty"
+var hasElement = {1, 2, 3, 4}.contains(3)              // yes
+var hasElement = {1, 2, 3, 4}.contains(10)             // no
 ```
 
 **Find/Search:**
 ```javascript
-// Find position in text (0-based)
-var pos = find "lo" in "Hello"              // 3 (0-based index)
-var pos = find "x" in "Hello"               // -1 (not found)
+// Find position in text (0-based, returns -1 if not found)
+var pos = "Hello".find("lo")                // 3 (0-based index)
+var pos = "Hello".find("x")                 // -1 (not found)
+
+// Find last occurrence
+var pos = "Hello".findLast("l")             // 3 (last 'l')
 
 // Find element in array
-var idx = find 3 in {1, 2, 3, 4}            // 2 (0-based index)
-var idx = find 10 in {1, 2, 3, 4}           // -1 (not found)
-
-// Advanced: find with condition (arrays only)
-var found = find in numbers where item > 5
+var idx = {1, 2, 3, 4}.find(3)              // 2 (0-based index)
+var idx = {1, 2, 3, 4}.find(10)             // -1 (not found)
+var idx = {1, 2, 3, 2}.findLast(2)          // 3 (last occurrence)
 ```
 
 **Starts With / Ends With:**
 ```javascript
 // Text operations
-var starts = "Hello World" starts with "Hello"      // yes
-var ends = "Hello World" ends with "World"          // yes
+var starts = "Hello World".startsWith("Hello")      // yes
+var ends = "Hello World".endsWith("World")          // yes
 
 // Array operations (checking first/last elements)
-var starts = {1, 2, 3} starts with 1                // yes
-var ends = {1, 2, 3} ends with 3                    // yes
+var starts = {1, 2, 3}.startsWith(1)                // yes
+var ends = {1, 2, 3}.endsWith(3)                    // yes
 ```
 
 **Split (Text → Array):**
 ```javascript
 // Split text into array by delimiter
-var parts = split "a,b,c" by ","            // {"a", "b", "c"}
-var words = split "Hello World" by " "      // {"Hello", "World"}
+var parts = "a,b,c".split(",")               // {"a", "b", "c"}
+var words = "Hello World".split(" ")         // {"Hello", "World"}
 
 // Split by character
-var chars = split "Hello" by ""             // {"H", "e", "l", "l", "o"}
+var chars = "Hello".split("")                // {"H", "e", "l", "l", "o"}
+
+// Note: split() is not available for arrays (doesn't make sense)
 ```
 
 **Join (Array → Text):**
 ```javascript
 // Join array elements into text
-var text = join {"a", "b", "c"} with ","    // "a,b,c"
-var sentence = join {"Hello", "World"} with " "  // "Hello World"
+var text = {"a", "b", "c"}.join(",")         // "a,b,c"
+var sentence = {"Hello", "World"}.join(" ")  // "Hello World"
 
 // Join without separator
-var text = join {"H", "e", "l", "l", "o"} with ""  // "Hello"
+var text = {"H", "e", "l", "l", "o"}.join("")  // "Hello"
+
+// Note: join() is not available for text (use split first if needed)
 ```
 
 **Replace:**
 ```javascript
-// Replace in text
-var result = replace "World" with "Everyone" in "Hello World"
-// Result: "Hello Everyone"
+// Replace first occurrence in text
+var result = "Hello World".replace("o", "0")
+// Result: "Hell0 World"
+
+// Replace first occurrence with replaceFirst
+var result = "a,b,c,a".replaceFirst("a", "x")
+// Result: "x,b,c,a"
 
 // Replace all occurrences
-var result = replace all "l" with "L" in "Hello"
+var result = "Hello".replaceAll("l", "L")
 // Result: "HeLLo"
 
 // Replace in array (find and replace element)
-var result = replace 2 with 20 in {1, 2, 3, 2}
+var result = {1, 2, 3, 2}.replace(2, 20)
 // Result: {1, 20, 3, 2}  (only first occurrence)
 
-var result = replace all 2 with 20 in {1, 2, 3, 2}
+var result = {1, 2, 3, 2}.replaceAll(2, 20)
 // Result: {1, 20, 3, 20}  (all occurrences)
+```
+
+**Copy/Slice (Get Part):**
+```javascript
+// Copy part of text (0-based, end is exclusive)
+var part = "Hello".copy(0, 3)                // "Hel" (from 0 to 3, exclusive)
+var part = "Hello".copy(1, 4)                // "ell" (from 1 to 4, exclusive)
+
+// Copy part of array
+var part = {1, 2, 3, 4, 5}.copy(1, 4)        // {2, 3, 4} (from 1 to 4, exclusive)
+var part = {1, 2, 3, 4, 5}.copy(0, 3)        // {1, 2, 3}
+
+// Alternative bracket notation for ranges
+var part = "Hello"[1..4]                     // "ell"
+var part = {1, 2, 3, 4, 5}[1..4]            // {2, 3, 4}
 ```
 
 **Add/Append:**
@@ -2596,101 +2605,115 @@ var result = replace all 2 with 20 in {1, 2, 3, 2}
 var text = "Hello"
 var result = text + " World"                 // "Hello World"
 
-// Add to array
+// Add to array (returns new array)
 var numbers = {1, 2, 3}
-add 4 to numbers                             // {1, 2, 3, 4}
-add 0 to start of numbers                    // {0, 1, 2, 3, 4}
-
-// Alternative: append/prepend
-append 5 to numbers                          // Add to end
-prepend 0 to numbers                         // Add to start
-```
-
-**Slice/Substring (Get Part):**
-```javascript
-// Get part of text (0-based)
-var part = take 3 from "Hello"              // "Hel" (first 3 characters)
-var part = take from 1 to 3 in "Hello"      // "el" (index 1 to 2, exclusive end)
-
-// Get part of array
-var part = take 3 from {1, 2, 3, 4, 5}      // {1, 2, 3}
-var part = take from 1 to 3 in {1, 2, 3, 4, 5}  // {2, 3}
-
-// Alternative bracket notation
-var part = "Hello"[1..3]                     // "el"
-var part = {1, 2, 3, 4, 5}[1..3]            // {2, 3}
+var result = numbers.add(4)                  // {1, 2, 3, 4}
+var result = numbers.addFirst(0)             // {0, 1, 2, 3}
 ```
 
 **Reverse:**
 ```javascript
 // Reverse text
-var reversed = reverse "Hello"              // "olleH"
+var reversed = "Hello".reverse()             // "olleH"
 
 // Reverse array
-var reversed = reverse {1, 2, 3, 4}         // {4, 3, 2, 1}
+var reversed = {1, 2, 3, 4}.reverse()        // {4, 3, 2, 1}
+```
+
+**Method Chaining Examples:**
+```javascript
+// Chain text operations
+var result = "a,b,c".split(",").join(".")
+// Result: "a.b.c"
+
+var result = "  hello  ".trim().toUpper().reverse()
+// Result: "OLLEH"
+
+var result = "a,b,c,a".replaceFirst("a", "x").findLast("x")
+// Result: 6 (index of last 'x')
+
+// Chain array operations
+var result = {3, 1, 4, 1, 5}.sort().reverse()
+// Result: {5, 4, 3, 1, 1}
+
+var result = {1, 2, 3, 4, 5}.copy(1, 4).reverse()
+// Result: {4, 3, 2}
+
+// Mixed chaining (text to array and back)
+var result = "a,b,c".split(",").reverse().join("-")
+// Result: "c-b-a"
+
+var result = "hello,world".split(",").join(" ").toUpper()
+// Result: "HELLO WORLD"
 ```
 
 **Quick Reference Table:**
 
 | Operation | Text Example | Array Example | Returns |
 |-----------|--------------|---------------|---------|
-| `length of` | `length of "Hello"` | `length of {1,2,3}` | number |
-| `count of` | `count of "Hello"` | `count of {1,2,3}` | number |
-| `isEmpty` | `isEmpty ""` | `isEmpty {}` | flag (yes/no) |
-| `contains` | `"Hello" contains "lo"` | `{1,2,3} contains 2` | flag |
-| `find in` | `find "lo" in "Hello"` | `find 2 in {1,2,3}` | number (index or -1) |
-| `starts with` | `"Hello" starts with "He"` | `{1,2,3} starts with 1` | flag |
-| `ends with` | `"Hello" ends with "lo"` | `{1,2,3} ends with 3` | flag |
-| `split by` | `split "a,b" by ","` | N/A | array |
-| `join with` | N/A | `join {"a","b"} with ","` | text |
-| `replace with in` | `replace "a" with "b" in "cat"` | `replace 1 with 10 in {1,2,3}` | text/array |
-| `take from` | `take 2 from "Hello"` | `take 2 from {1,2,3}` | text/array |
-| `reverse` | `reverse "Hello"` | `reverse {1,2,3}` | text/array |
+| `.length` | `"Hello".length` | `{1,2,3}.length` | number |
+| `.isEmpty` | `"".isEmpty` | `{}.isEmpty` | flag (yes/no) |
+| `.contains(x)` | `"Hello".contains("lo")` | `{1,2,3}.contains(2)` | flag |
+| `.find(x)` | `"Hello".find("lo")` | `{1,2,3}.find(2)` | number (index or -1) |
+| `.findLast(x)` | `"Hello".findLast("l")` | `{1,2,3,2}.findLast(2)` | number (index or -1) |
+| `.startsWith(x)` | `"Hello".startsWith("He")` | `{1,2,3}.startsWith(1)` | flag |
+| `.endsWith(x)` | `"Hello".endsWith("lo")` | `{1,2,3}.endsWith(3)` | flag |
+| `.split(sep)` | `"a,b".split(",")` | N/A | array |
+| `.join(sep)` | N/A | `{"a","b"}.join(",")` | text |
+| `.replace(a, b)` | `"cat".replace("a","b")` | `{1,2,3}.replace(1,10)` | text/array |
+| `.replaceFirst(a, b)` | `"aa".replaceFirst("a","b")` | `{1,2,1}.replaceFirst(1,10)` | text/array |
+| `.replaceAll(a, b)` | `"aa".replaceAll("a","b")` | `{1,2,1}.replaceAll(1,10)` | text/array |
+| `.copy(start, end)` | `"Hello".copy(1,4)` | `{1,2,3,4,5}.copy(1,4)` | text/array |
+| `.add(x)` | N/A (use `+`) | `{1,2,3}.add(4)` | array |
+| `.addFirst(x)` | N/A (use `+`) | `{1,2,3}.addFirst(0)` | array |
+| `.reverse()` | `"Hello".reverse()` | `{1,2,3}.reverse()` | text/array |
 
 **Best Practices:**
 
-1. **Consistent Syntax:** Use the same operation names for both text and arrays
+1. **Use Method Chaining for Clarity:** Chain operations to create readable pipelines
    ```javascript
-   if data contains searchValue then
-       // Works whether data is text or array
-   end if
+   // Clear data transformation pipeline
+   var result = rawData.trim().split(",").reverse().join(" | ")
+   
+   // Multi-step array processing
+   var filtered = numbers.copy(0, 5).reverse().add(100)
    ```
 
 2. **Type Checking:** Use `typeof` to handle both types elegantly
    ```javascript
    if data typeof text then
-       var parts = split data by ","
+       var parts = data.split(",")
    else if data typeof array then
-       var text = join data with ","
+       var text = data.join(",")
    end if
    ```
 
-3. **Readability:** Use natural language operations
+3. **Properties vs Methods:** Use properties (no parentheses) for state, methods for actions
    ```javascript
-   // Clear and readable
-   if message starts with "Error" then
-       log "Error detected"
-   end if
+   // Property access (no parentheses)
+   if message.length > 100 then print "Too long"
+   if items.isEmpty then print "No items"
    
-   // Also clear
-   if scores contains 100 then
-       print "Perfect score found!"
-   end if
+   // Method calls (with parentheses, even if no arguments)
+   var reversed = text.reverse()
+   var upper = text.toUpper()
    ```
 
-4. **Chain Operations:** Many operations can be chained
+4. **Immutability:** Most methods return new values without modifying originals
    ```javascript
-   // Text operations
-   var result = reverse uppercase trim "  hello  "    // "OLLEH"
+   var original = "hello"
+   var upper = original.toUpper()    // "HELLO"
+   print original                     // Still "hello"
    
-   // Array operations  
-   var result = reverse sort {3, 1, 2}                // {3, 2, 1}
+   var nums = {1, 2, 3}
+   var extended = nums.add(4)        // {1, 2, 3, 4}
+   print nums                        // Still {1, 2, 3}
    ```
 
-5. **Handle Empty Cases:** Always check for empty text/arrays
+5. **Handle Empty Cases:** Check before processing
    ```javascript
-   if not isEmpty data then
-       // Process data
+   if not data.isEmpty then
+       var processed = data.split(",").join(";")
    end if
    ```
 

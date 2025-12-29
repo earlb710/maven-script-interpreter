@@ -399,50 +399,55 @@ end if
 var upper = uppercase "hello"          // "HELLO"
 var lower = lowercase "HELLO"          // "hello"
 var trimmed = trim "  hi  "           // "hi"
-var parts = split "a,b,c" by ","      // {"a", "b", "c"}
-var text = join {"a", "b"} with ","   // "a,b"
+var parts = "a,b,c".split(",")        // {"a", "b", "c"}
+var text = {"a", "b"}.join(",")       // "a,b"
 ```
 
-### Common Text & Array Operations
+### Common Text & Array Operations (Method Syntax)
 
-Many operations work on both text and arrays with unified syntax:
+Many operations work on both text and arrays using chainable method syntax:
 
 ```javascript
-// Length/Count
-var len = length of "Hello"           // 5
-var len = length of {1, 2, 3}         // 3
+// Properties (no parentheses)
+var len = "Hello".length              // 5
+var len = {1, 2, 3}.length            // 3
+var empty = "".isEmpty                // yes
+var empty = {}.isEmpty                // yes
 
-// Contains/Search
-var has = "Hello" contains "lo"       // yes
-var has = {1, 2, 3} contains 2        // yes
+// Methods for both text and arrays
+var has = "Hello".contains("lo")      // yes
+var has = {1, 2, 3}.contains(2)       // yes
 
-// Empty check
-var empty = isEmpty ""                // yes
-var empty = isEmpty {}                // yes
+var pos = "Hello".find("lo")          // 3 (0-based, -1 if not found)
+var idx = {1, 2, 3}.find(2)           // 1
+var last = "Hello".findLast("l")      // 3 (last occurrence)
+var last = {1, 2, 1}.findLast(1)      // 2
 
-// Find position (0-based, returns -1 if not found)
-var pos = find "lo" in "Hello"        // 3
-var idx = find 2 in {1, 2, 3}         // 1
+var starts = "Hello".startsWith("He") // yes
+var ends = {1, 2, 3}.endsWith(3)      // yes
 
-// Starts/Ends with
-var starts = "Hello" starts with "He" // yes
-var ends = {1, 2, 3} ends with 3      // yes
+var result = "cat".replace("a", "b")  // "cbt" (first occurrence)
+var result = {1, 2, 3}.replace(1, 10) // {10, 2, 3}
+var result = "aa".replaceFirst("a", "b")  // "ba"
+var result = "aa".replaceAll("a", "b")    // "bb"
 
-// Replace
-var result = replace "a" with "b" in "cat"  // "cbt"
-var result = replace 1 with 10 in {1, 2, 3} // {10, 2, 3}
+var part = "Hello".copy(1, 4)         // "ell" (0-based, end exclusive)
+var part = {1, 2, 3, 4, 5}.copy(1, 4) // {2, 3, 4}
 
-// Take/Slice
-var part = take 3 from "Hello"        // "Hel"
-var part = take 2 from {1, 2, 3, 4}   // {1, 2}
+var rev = "Hello".reverse()           // "olleH"
+var rev = {1, 2, 3}.reverse()         // {3, 2, 1}
 
-// Reverse
-var rev = reverse "Hello"             // "olleH"
-var rev = reverse {1, 2, 3}           // {3, 2, 1}
+// Text-specific: split (text → array)
+var arr = "a,b,c".split(",")          // {"a", "b", "c"}
 
-// Split/Join (convert between text and array)
-var arr = split "a,b,c" by ","        // {"a", "b", "c"}
-var txt = join {"a", "b", "c"} with "," // "a,b,c"
+// Array-specific: join (array → text)
+var txt = {"a", "b", "c"}.join(",")   // "a,b,c"
+
+// Method chaining examples
+var result = "a,b,c".split(",").join(".")        // "a.b.c"
+var result = "  hello  ".trim().toUpper()        // "HELLO"
+var result = {3, 1, 2}.sort().reverse()          // {3, 2, 1}
+var result = "a,b,c,a".replaceFirst("a", "x").findLast("x")  // 6
 ```
 
 ### Array Operations
