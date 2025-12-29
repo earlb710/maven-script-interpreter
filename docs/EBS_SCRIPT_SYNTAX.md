@@ -881,8 +881,14 @@ while (hasMore) {
 
 ### For Loops
 
-#### Traditional For Loop (C-style)
+EBS supports two types of for loops:
+
+#### C-Style For Loops
+
+Traditional three-part for loops with initialization, condition, and increment:
+
 ```javascript
+// Basic for loop
 for (var i: int = 0; i < 10; i++) {
     print i;
 }
@@ -899,7 +905,29 @@ for (var i: int = 1; i <= 5; i++) {
 }
 ```
 
-#### For Loop Parts
+#### Range-Based For Loops (EBS2 Syntax)
+
+Simple range-based iteration using `to` and `loop` keywords:
+
+```javascript
+// Basic range loop
+for i = 1 to 5 loop {
+    print "Iteration: " + i;
+}
+
+// Range with step
+for i = 0 to 10 step 2 loop {
+    print "Even number: " + i;
+}
+
+// Iterating over array indices
+var items: array[*] = ["apple", "banana", "orange"];
+for i = 0 to items.length - 1 loop {
+    print "Item " + i + ": " + items[i];
+}
+```
+
+#### For Loop Parts (C-Style)
 - **Initializer**: Executed once before loop starts (can be `var` declaration or assignment)
 - **Condition**: Evaluated before each iteration; loop continues while true
 - **Increment**: Executed after each iteration
@@ -1583,51 +1611,36 @@ for (var i: int = 0; i < employees.length; i++) {
 
 ### Function Declaration
 
-EBS supports function declarations with or without the optional `function` keyword. Both styles are equivalent.
+**As of EBS2 syntax, function declarations MUST start with the `function` keyword.**
 
 #### Basic Function
 ```javascript
-// Without 'function' keyword (traditional)
-greet {
+// Function without parameters
+function greet() {
     print "Hello!";
 }
 
-// With 'function' keyword (beginner-friendly)
-function greet {
-    print "Hello!";
-}
-
-call greet;
+call greet();
 ```
 
 #### Function with Return Type
 ```javascript
-// Without 'function' keyword
-getValue return int {
+// Function with return value
+function getValue() return int {
     return 42;
 }
 
-// With 'function' keyword
-function getValue return int {
-    return 42;
-}
-
-var x = call getValue();
+var x: int = call getValue();
 ```
 
 #### Function with Parameters
 ```javascript
-// Without 'function' keyword
-add(a: int, b: int) return int {
-    return a + b;
-}
-
-// With 'function' keyword
+// Function with parameters and return value
 function add(a: int, b: int) return int {
     return a + b;
 }
 
-var sum = call add(5, 3);
+var sum: int = call add(5, 3);
 ```
 
 #### Function with Default Parameters
@@ -1636,8 +1649,8 @@ function greet(name: string = "World") return string {
     return "Hello, " + name + "!";
 }
 
-var msg1 = call greet();           // "Hello, World!"
-var msg2 = call greet("Alice");    // "Hello, Alice!"
+var msg1: string = call greet();           // "Hello, World!"
+var msg2: string = call greet("Alice");    // "Hello, Alice!"
 ```
 
 ### Function Calls

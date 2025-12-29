@@ -5,9 +5,9 @@ This grammar is reconstructed from Parser.java / Token.java in the attached proj
 
 LEXICAL
 -------
-keywords   = "var" | "const" | "print" | "call" | "return" | "if" | "then" | "else" | "while" | "do" | "break" | "exit" | "continue" 
+keywords   = "var" | "const" | "print" | "call" | "return" | "if" | "then" | "else" | "while" | "do" | "for" | "to" | "step" | "loop" | "break" | "exit" | "continue" 
            | "null" | "true" | "false" 
-           | "import" | "foreach" | "in"
+           | "import" | "foreach" | "in" | "function"
            | "try" | "exceptions" | "when"
            | "connect" | "use" | "cursor" | "open" | "close" | "connection"
            | "select" | "from" | "where" | "order" | "by" | "group" | "having"
@@ -31,14 +31,13 @@ statement    = varDecl
              | ifStmt
              | whileStmt
              | doWhileStmt
+             | forStmt                    (*  C-style or range-based for loop         *)
              | breakStmt
              | continueStmt
              | tryStmt
              | raiseStmt
              | block
-             | namedBlock                  (*  name { ... }                     *)
-             | namedBlockWithReturn        (*  name return Type { ... }         *)
-             | namedBlockWithParams        (*  name (paramDefList?) [return T] { ... }  *)
+             | functionDecl                (*  function name [(...)] [return T] { ... } *)
              | callStmt
              | returnStmt
              | printStmt
@@ -52,13 +51,8 @@ statement    = varDecl
 block        = "{" blockStatement* "}" ;
 blockStatement = statement ;                    (* unrestricted; nests blocks   *)
 
-namedBlock   = identifier "{" blockStatement* "}" ;
-
-namedBlockWithReturn
-             = identifier "return" typeName "{" blockStatement* "}" ;
-
-namedBlockWithParams
-             = identifier "(" paramDefList? ")" ("return" typeName)? "{" blockStatement* "}" ;
+functionDecl = "function" identifier [ "(" paramDefList? ")" ] [ "return" typeName ] "{" blockStatement* "}" ;
+             (* Function declarations MUST start with 'function' keyword as of EBS2 syntax *)
 
 paramDefList = paramDef ( "," paramDef )* ;
 paramDef     = identifier ":" typeName ("=" expression)? ;
@@ -85,6 +79,15 @@ elsePart     = "else" ( ifStmt | block | statement ) ;
 whileStmt    = "while" ( "(" expression ")" | expression ["then"] ) block ;
 
 doWhileStmt  = "do" block "while" "(" expression ")" ";" ;
+
+forStmt      = "for" ( cStyleFor | rangeBasedFor ) ;
+
+cStyleFor    = "(" [initializer] ";" [expression] ";" [increment] ")" block ;
+             (* C-style for loop: for (var i = 0; i < 10; i++) { } *)
+
+rangeBasedFor = identifier "=" expression "to" expression ["step" expression] "loop" block ;
+              (* Range-based for loop (EBS2 syntax): for i = 1 to 5 loop { } *)
+              (* With step: for i = 0 to 10 step 2 loop { } *)
 
 EXCEPTION HANDLING
 ------------------
