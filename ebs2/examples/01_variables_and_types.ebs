@@ -1,0 +1,74 @@
+// EBS2 Example: Variables and Types
+// This script demonstrates variable declarations, type annotations, and type checking
+
+main
+    print "=== Variables and Types ==="
+    print ""
+    
+    // Basic variable declarations with type annotations
+    var age as number = 25
+    var name as text = "Alice"
+    var isActive as flag = yes
+    var salary as number = 75000.50
+    
+    print "Name: " + name
+    print "Age: " + age.toText()
+    print "Active: " + isActive.toText()
+    print "Salary: $" + salary.toText(2)
+    print ""
+    
+    // Type checking with typeof
+    print "=== Type Checking ==="
+    if age typeof number then
+        print "age is a number"
+    end if
+    
+    if name typeof text then
+        print "name is text"
+    end if
+    
+    if isActive typeof flag then
+        print "isActive is a flag"
+    end if
+    print ""
+    
+    // Arrays with different types
+    var numbers as array.number = {1, 2, 3, 4, 5}
+    var names as array.text = {"Alice", "Bob", "Charlie"}
+    var flags as array.flag = {yes, no, yes}
+    
+    print "=== Arrays ==="
+    print "Numbers: " + numbers.toText()
+    print "First number: " + numbers[0].toText()
+    print "Array length: " + numbers.length.toText()
+    print ""
+    
+    // Array ranges
+    var sequence = 1..10
+    var negRange = -5..5
+    var subset = 43..47
+    
+    print "Sequence (1..10): " + sequence.toText()
+    print "Negative range (-5..5): " + negRange.toText()
+    print "Subset (43..47): " + subset.toText()
+    print ""
+    
+    // Type conversions
+    print "=== Type Conversions ==="
+    var numText = "42"
+    var convertedNum = numText.toNumber()
+    print "Text '42' to number: " + convertedNum.toText()
+    
+    var flagText = "yes"
+    var convertedFlag = flagText.toFlag()
+    print "Text 'yes' to flag: " + convertedFlag.toText()
+    
+    var numToText = 3.14159
+    print "Number 3.14159 to text (2 decimals): " + numToText.toText(2)
+    
+    var flagToNum = yes
+    print "Flag 'yes' to number: " + flagToNum.toNumber().toText()
+    print ""
+    
+    print "Script completed successfully!"
+end main

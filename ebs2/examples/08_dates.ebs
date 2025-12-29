@@ -1,0 +1,114 @@
+// EBS2 Example: Date Operations
+// This script demonstrates date creation, arithmetic, and comparisons
+
+main
+    print "=== Date Creation and Display ==="
+    
+    // Create dates from text
+    var today as date = "2025-12-29"
+    var birthday as date = "2000-06-15"
+    var meetingTime as date = "2025-12-29 14:30:00"
+    
+    print "Today: " + today.toText()
+    print "Birthday: " + birthday.toText()
+    print "Meeting time: " + meetingTime.toText()
+    print ""
+    
+    // Date arithmetic - addition/subtraction with numbers
+    print "=== Date Arithmetic (Days) ==="
+    var tomorrow = today + 1
+    var yesterday = today - 1
+    var nextWeek = today + 7
+    var lastMonth = today - 30
+    
+    print "Today: " + today.toText()
+    print "Tomorrow: " + tomorrow.toText()
+    print "Yesterday: " + yesterday.toText()
+    print "Next week: " + nextWeek.toText()
+    print "30 days ago: " + lastMonth.toText()
+    print ""
+    
+    // Date subtraction - returns number of days
+    print "=== Date Subtraction (Days Difference) ==="
+    var daysUntilBday = birthday - today
+    var age = today - birthday
+    
+    print "Days from today to birthday: " + daysUntilBday.toText(2) + " days"
+    print "Age in days: " + age.toText(2) + " days"
+    print "Age in years: " + (age / 365.25).toText(1) + " years"
+    print ""
+    
+    // Date differences with time components
+    print "=== Time Component Differences ==="
+    var start as date = "2025-12-29 09:00:00"
+    var end as date = "2025-12-29 17:30:00"
+    var duration = end - start
+    
+    print "Start time: " + start.toText()
+    print "End time: " + end.toText()
+    print "Duration: " + duration.toText(2) + " days"
+    print "Duration in hours: " + (duration * 24).toText(1) + " hours"
+    print ""
+    
+    // Half-day calculation
+    var morning as date = "2025-12-29 00:00:00"
+    var noon as date = "2025-12-29 12:00:00"
+    var halfDay = noon - morning
+    
+    print "Morning: " + morning.toText()
+    print "Noon: " + noon.toText()
+    print "Half day: " + halfDay.toText(1) + " days (should be 0.5)"
+    print ""
+    
+    // Date comparisons
+    print "=== Date Comparisons ==="
+    var date1 as date = "2025-12-25"
+    var date2 as date = "2025-12-31"
+    
+    print "Date1: " + date1.toText()
+    print "Date2: " + date2.toText()
+    print "date1 < date2: " + (date1 < date2).toText()
+    print "date1 > date2: " + (date1 > date2).toText()
+    print "date1 = date2: " + (date1 = date2).toText()
+    print ""
+    
+    // Practical date calculations
+    print "=== Practical Examples ==="
+    
+    // Calculate deadline
+    var projectStart as date = "2025-01-01"
+    var daysAllocated = 90
+    var deadline = projectStart + daysAllocated
+    print "Project start: " + projectStart.toText()
+    print "Days allocated: " + daysAllocated.toText()
+    print "Deadline: " + deadline.toText()
+    print ""
+    
+    // Calculate elapsed time
+    var orderDate as date = "2025-12-20"
+    var currentDate as date = "2025-12-29"
+    var daysElapsed = currentDate - orderDate
+    print "Order date: " + orderDate.toText()
+    print "Current date: " + currentDate.toText()
+    print "Days since order: " + daysElapsed.toText(0) + " days"
+    print ""
+    
+    // Check if date is in range
+    var checkDate as date = "2025-12-15"
+    var rangeStart as date = "2025-12-01"
+    var rangeEnd as date = "2025-12-31"
+    var inRange = checkDate >= rangeStart and checkDate <= rangeEnd
+    
+    print "Checking if " + checkDate.toText() + " is in December 2025:"
+    print "  Range: " + rangeStart.toText() + " to " + rangeEnd.toText()
+    print "  In range: " + inRange.toText()
+    print ""
+    
+    // Calculate days until event
+    var eventDate as date = "2026-01-01"
+    var daysUntil = eventDate - today
+    print "Days until New Year 2026: " + daysUntil.toText(0) + " days"
+    print ""
+    
+    print "Script completed successfully!"
+end main

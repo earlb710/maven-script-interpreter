@@ -1,0 +1,96 @@
+// EBS2 Example: Text Operations
+// This script demonstrates text/string manipulation methods
+
+main
+    print "=== Basic Text Operations ==="
+    var text = "Hello World"
+    
+    print "Original: " + text
+    print "Length: " + text.length.toText()
+    print "Upper: " + text.toUpper()
+    print "Lower: " + text.toLower()
+    print "Reverse: " + text.reverse()
+    print ""
+    
+    // Substring operations
+    print "=== Substring Operations ==="
+    var message = "Welcome to EBS2"
+    
+    print "Original: " + message
+    print "Substring(0, 7): " + message.substring(0, 7)
+    print "Copy(8, 10): " + message.copy(8, 10)
+    print "Head(7): " + message.head(7)
+    print "Tail(4): " + message.tail(4)
+    print "Lead(7): " + message.lead(7)
+    print ""
+    
+    // Search and find
+    print "=== Search and Find ==="
+    var sentence = "The quick brown fox jumps over the lazy dog"
+    
+    print "Original: " + sentence
+    print "Contains 'fox': " + sentence.contains("fox").toText()
+    print "Starts with 'The': " + sentence.startsWith("The").toText()
+    print "Ends with 'dog': " + sentence.endsWith("dog").toText()
+    print "Find 'fox': " + sentence.find("fox").toText()
+    print "Find 'the': " + sentence.findFirst("the").toText()
+    print "FindLast 'the': " + sentence.findLast("the").toText()
+    print ""
+    
+    // Replace operations
+    print "=== Replace Operations ==="
+    var text2 = "a,b,c,a,b,c"
+    
+    print "Original: " + text2
+    print "Replace 'a' with 'X': " + text2.replaceAll("a", "X")
+    print "ReplaceFirst 'a' with 'X': " + text2.replaceFirst("a", "X")
+    print "ReplaceLast 'a' with 'X': " + text2.replaceLast("a", "X")
+    print ""
+    
+    // Padding operations
+    print "=== Padding Operations ==="
+    var num = "42"
+    
+    print "Original: '" + num + "'"
+    print "PadLeft(5, '0'): '" + num.padLeft(5, "0") + "'"
+    print "PadRight(5, '0'): '" + num.padRight(5, "0") + "'"
+    print "PadCenter(7, '-'): '" + num.padCenter(7, "-") + "'"
+    print ""
+    
+    // Trim operations
+    print "=== Trim Operations ==="
+    var padded = "   Hello World   "
+    
+    print "Original: '" + padded + "'"
+    print "Trim: '" + padded.trim() + "'"
+    print "TrimLeft: '" + padded.trimLeft() + "'"
+    print "TrimRight: '" + padded.trimRight() + "'"
+    print "TrimStart: '" + padded.trimStart() + "'"
+    print "TrimEnd: '" + padded.trimEnd() + "'"
+    print ""
+    
+    // Split and join
+    print "=== Split and Join ==="
+    var csv = "apple,banana,cherry"
+    var parts = csv.split(",")
+    
+    print "Original CSV: " + csv
+    print "Split by ',': " + parts.toText()
+    print "Join with ' | ': " + parts.join(" | ")
+    print ""
+    
+    // Method chaining
+    print "=== Method Chaining ==="
+    var input = "  hello world  "
+    var result = input.trim().toUpper().replace(" ", "_")
+    
+    print "Input: '" + input + "'"
+    print "Trim → ToUpper → Replace: '" + result + "'"
+    print ""
+    
+    var complex = "a,b,c".split(",").join(".").toUpper()
+    print "Complex chain: 'a,b,c' → split(',') → join('.') → toUpper() = '" + complex + "'"
+    print ""
+    
+    print "Script completed successfully!"
+end main

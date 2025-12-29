@@ -1,0 +1,93 @@
+// EBS2 Example: Control Flow
+// This script demonstrates if/then/else, case statements, and loops
+
+main
+    print "=== If/Then/Else Statements ==="
+    var score = 85
+    
+    if score >= 90 then
+        print "Grade: A"
+    else if score >= 80 then
+        print "Grade: B"
+    else if score >= 70 then
+        print "Grade: C"
+    else if score >= 60 then
+        print "Grade: D"
+    else
+        print "Grade: F"
+    end if
+    print ""
+    
+    // Single-line if (end is optional)
+    var temp = 25
+    if temp > 30 then print "It's hot!"
+    if temp < 10 then print "It's cold!"
+    if temp >= 10 and temp <= 30 then print "It's comfortable!"
+    print ""
+    
+    // Case statement for value matching
+    print "=== Case Statement ==="
+    var dayNum = 3
+    var dayName as text
+    
+    case dayNum {
+        1: dayName = "Monday";
+        2: dayName = "Tuesday";
+        3: dayName = "Wednesday";
+        4: dayName = "Thursday";
+        5: dayName = "Friday";
+        6: dayName = "Saturday";
+        7: dayName = "Sunday";
+        default: dayName = "Invalid day"
+    }
+    
+    print "Day " + dayNum.toText() + " is " + dayName
+    print ""
+    
+    // Case with text values
+    var status = "active"
+    var message as text
+    
+    case status {
+        "active": message = "User is active";
+        "inactive": message = "User is inactive";
+        "pending": message = "User is pending approval";
+        default: message = "Unknown status"
+    }
+    
+    print "Status: " + status + " - " + message
+    print ""
+    
+    // While loop
+    print "=== While Loop ==="
+    var counter = 1
+    while counter <= 5 then
+        print "Counter: " + counter.toText()
+        counter++
+    end while
+    print ""
+    
+    // For loop
+    print "=== For Loop ==="
+    for i = 1 to 5 then
+        print "Iteration: " + i.toText()
+    end for
+    print ""
+    
+    // For loop with step
+    print "=== For Loop with Step ==="
+    for i = 0 to 10 step 2 then
+        print "Even number: " + i.toText()
+    end for
+    print ""
+    
+    // Loop through array
+    print "=== Loop Through Array ==="
+    var fruits = {"Apple", "Banana", "Cherry", "Date"}
+    for i = 0 to fruits.length - 1 then
+        print (i + 1).toText() + ". " + fruits[i]
+    end for
+    print ""
+    
+    print "Script completed successfully!"
+end main
