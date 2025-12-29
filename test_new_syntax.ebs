@@ -1,0 +1,34 @@
+// Test script for new EBS2 syntax changes
+// 1. Range-based for loop with "loop" keyword
+// 2. Function must start with "function" keyword
+
+print "=== Test 1: Range-based for loop (for i = 1 to 5 loop) ===";
+for i = 1 to 5 loop {
+    print "Iteration: " + i;
+}
+
+print "";
+print "=== Test 2: Range-based for loop with step ===";
+for i = 0 to 10 step 2 loop {
+    print "Even number: " + i;
+}
+
+print "";
+print "=== Test 3: Function with 'function' keyword ===";
+function add(a: int, b: int) return int {
+    return a + b;
+}
+
+var result: int = call add(5, 7);
+print "5 + 7 = " + result;
+
+print "";
+print "=== Test 4: foreach loop (existing syntax, should still work) ===";
+var fruits: array[*] = ["apple", "banana", "orange"];
+
+foreach fruit in fruits {
+    print "Fruit: " + fruit;
+}
+
+print "";
+print "=== All tests completed successfully! ===";

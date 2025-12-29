@@ -559,26 +559,8 @@ public class Parser {
         } else if (match(EbsTokenType.CLOSE)) {
             return closeCursorStatement();
         } else if (match(EbsTokenType.FUNCTION)) {
-            // Optional 'function' keyword before function definitions
+            // Function declarations must start with 'function' keyword
             return functionDeclaration();
-        } else if (matchAll(EbsTokenType.IDENTIFIER, EbsTokenType.LBRACE)) {
-            EbsToken n = peek();
-            advance(2);
-            return block((String) n.literal);
-        } else if (matchAll(EbsTokenType.IDENTIFIER, EbsTokenType.RETURN)) {
-            EbsToken n = peek();
-            advance();
-            ReturnTypeInfo typeInfo = blockParameterReturn();
-            consume(EbsTokenType.LBRACE, "Expected { after return type.");
-            BlockStatement bs = block((String) n.literal);
-            if (typeInfo != null) {
-                bs.setReturnType(typeInfo.dataType, typeInfo.recordType, typeInfo.bitmapType, typeInfo.intmapType);
-            }
-            return bs;
-        } else if (matchAll(EbsTokenType.IDENTIFIER, EbsTokenType.LPAREN)) {
-            EbsToken n = peek();
-            advance(2);
-            return blockParameters((String) n.literal);
         } else if (match(EbsTokenType.LBRACE)) {
             return block();
         } else if (match(EbsTokenType.CALL)) {
@@ -3179,39 +3161,95 @@ public class Parser {
     private Statement forStatement() throws ParseError {
         int line = previous().line; // 'for'
 
-        consume(EbsTokenType.LPAREN, "Expected '(' after 'for'.");
+        // Check for range-based for loop: for var = start to end [step n] loop { }
+        // vs C-style for loop: for (init; condition; increment) { }
+        if (check(EbsTokenType.LPAREN)) {
+            // C-style for loop
+            consume(EbsTokenType.LPAREN, "Expected '(' after 'for'.");
 
-        // Initializer (var declaration or assignment)
-        Statement initializer;
-        if (match(EbsTokenType.SEMICOLON)) {
-            initializer = null;  // No initializer
-        } else if (match(EbsTokenType.VAR)) {
-            initializer = varDeclaration(false);
+            // Initializer (var declaration or assignment)
+            Statement initializer;
+            if (match(EbsTokenType.SEMICOLON)) {
+                initializer = null;  // No initializer
+            } else if (match(EbsTokenType.VAR)) {
+                initializer = varDeclaration(false);
+            } else {
+                initializer = assignmentStatement();
+            }
+
+            // Condition
+            Expression condition = null;
+            if (!check(EbsTokenType.SEMICOLON)) {
+                condition = expression();
+            }
+            consume(EbsTokenType.SEMICOLON, "Expected ';' after loop condition.");
+
+            // Increment
+            Statement increment = null;
+            if (!check(EbsTokenType.RPAREN)) {
+                increment = assignmentStatement(false);
+            }
+            consume(EbsTokenType.RPAREN, "Expected ')' after for clauses.");
+
+            // Body
+            consume(EbsTokenType.LBRACE, "Expected '{' to start for body.");
+            loopDepth++;
+            BlockStatement body = (BlockStatement) block();
+            loopDepth--;
+
+            return new ForStatement(line, initializer, condition, increment, body);
         } else {
-            initializer = assignmentStatement();
+            // Range-based for loop: for var = start to end [step n] loop { }
+            EbsToken var = consume(EbsTokenType.IDENTIFIER, "Expected loop variable name after 'for'.");
+            String varName = (String) var.literal;
+            
+            consume(EbsTokenType.EQUAL, "Expected '=' after loop variable.");
+            Expression start = expression();
+            
+            consume(EbsTokenType.TO, "Expected 'to' in for loop.");
+            Expression end = expression();
+            
+            // Optional step
+            Expression step = null;
+            if (match(EbsTokenType.STEP)) {
+                step = expression();
+            }
+            
+            consume(EbsTokenType.LOOP, "Expected 'loop' after for range specification.");
+            
+            // Body
+            consume(EbsTokenType.LBRACE, "Expected '{' to start for body.");
+            loopDepth++;
+            BlockStatement body = (BlockStatement) block();
+            loopDepth--;
+            
+            // Transform range-based for loop into C-style for loop
+            // for i = 1 to 5 loop { } becomes: for (var i = 1; i <= 5; i++) { }
+            // for i = 0 to 10 step 2 loop { } becomes: for (var i = 0; i <= 10; i += 2) { }
+            
+            VarStatement initializer = new VarStatement(line, varName, DataType.INTEGER, start, false);
+            
+            EbsToken leToken = new EbsToken(EbsTokenType.BOOL_LT_EQ, "<=", line, 0, 0);
+            Expression condition = new BinaryExpression(line, new VariableExpression(line, varName), 
+                                                       leToken, end);
+            
+            Statement increment;
+            if (step != null) {
+                // i += step
+                Expression right = step;
+                Expression value = new BinaryExpression(line, new VariableExpression(line, varName), 
+                    new EbsToken(EbsTokenType.PLUS, "+", line, 0, 0), right);
+                increment = new AssignStatement(line, varName, value);
+            } else {
+                // i++
+                Expression value = new BinaryExpression(line, new VariableExpression(line, varName), 
+                    new EbsToken(EbsTokenType.PLUS, "+", line, 0, 0),
+                    new LiteralExpression(EbsTokenType.INTEGER, 1));
+                increment = new AssignStatement(line, varName, value);
+            }
+            
+            return new ForStatement(line, initializer, condition, increment, body);
         }
-
-        // Condition
-        Expression condition = null;
-        if (!check(EbsTokenType.SEMICOLON)) {
-            condition = expression();
-        }
-        consume(EbsTokenType.SEMICOLON, "Expected ';' after loop condition.");
-
-        // Increment
-        Statement increment = null;
-        if (!check(EbsTokenType.RPAREN)) {
-            increment = assignmentStatement(false);
-        }
-        consume(EbsTokenType.RPAREN, "Expected ')' after for clauses.");
-
-        // Body
-        consume(EbsTokenType.LBRACE, "Expected '{' to start for body.");
-        loopDepth++;
-        BlockStatement body = (BlockStatement) block();
-        loopDepth--;
-
-        return new ForStatement(line, initializer, condition, increment, body);
     }
 
     private Statement foreachStatement() throws ParseError {

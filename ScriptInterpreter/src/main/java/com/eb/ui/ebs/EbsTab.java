@@ -768,8 +768,8 @@ public class EbsTab extends Tab {
 
 // ---------- EBS syntax highlighting ----------
     private static final String[] EBS_KEYWORDS = new String[]{
-        "var", "print", "call", "return",
-        "if", "then", "else", "while", "do", "foreach", "in", "break", "continue",
+        "var", "print", "call", "return", "function",
+        "if", "then", "else", "while", "do", "for", "to", "step", "loop", "foreach", "in", "break", "continue",
         // SQL-ish tokens you support in the language:
         "connect", "use", "cursor", "open", "close", "connection",
         "select", "from", "where", "order", "by", "group", "having"
@@ -1453,8 +1453,8 @@ public class EbsTab extends Tab {
      * Check if a string is a keyword
      */
     private boolean isKeyword(String name) {
-        String[] keywords = {"if", "then", "else", "while", "do", "for", "foreach", 
-            "in", "break", "continue", "return", "var", "const", "print", "call",
+        String[] keywords = {"if", "then", "else", "while", "do", "for", "to", "step", "loop", "foreach", 
+            "in", "break", "continue", "return", "var", "const", "print", "call", "function",
             "import", "try", "exceptions", "when", "raise", "exception",
             "connect", "use", "cursor", "open", "close", "connection",
             "select", "from", "where", "order", "by", "group", "having",

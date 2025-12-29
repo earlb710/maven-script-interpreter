@@ -27,6 +27,9 @@ public enum EbsTokenType implements LexerToken {
     IF(PrintStyle.KEYWORD, Category.KEYWORD, "if"), THEN(PrintStyle.KEYWORD, Category.KEYWORD, "then"), ELSE(PrintStyle.KEYWORD, Category.KEYWORD, "else"),
     // Loop
     FOR(PrintStyle.KEYWORD, Category.KEYWORD, "for"),
+    TO(PrintStyle.KEYWORD, Category.KEYWORD, "to"),
+    STEP(PrintStyle.KEYWORD, Category.KEYWORD, "step"),
+    LOOP(PrintStyle.KEYWORD, Category.KEYWORD, "loop"),
     FOREACH(PrintStyle.KEYWORD, Category.KEYWORD, "foreach"), IN(PrintStyle.KEYWORD, Category.KEYWORD, "in"),
     WHILE(PrintStyle.KEYWORD, Category.KEYWORD, "while"), DO(PrintStyle.KEYWORD, Category.KEYWORD, "do"), BREAK(PrintStyle.KEYWORD, Category.KEYWORD, "break", "exit"), CONTINUE(PrintStyle.KEYWORD, Category.KEYWORD, "continue"),
     // Exception handling
