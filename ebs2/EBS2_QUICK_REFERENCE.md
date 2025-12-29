@@ -457,9 +457,11 @@ var txt = {"a", "b", "c"}.join(",")   // "a,b,c"
 var result = "a,b,c".split(",").join(".")        // "a.b.c"
 var result = "  hello  ".trim().toUpper()        // "HELLO"
 var sorted = {3, 1, 2}.sort()                    // {1, 2, 3} - ascending (default)
-var sorted = {3, 1, 2}.sort.reverse              // {3, 2, 1} - optional parentheses
+var sorted = {3, 1, 2}.sort                      // {1, 2, 3} - optional parentheses
+var sorted = {3, 1, 2}.reverseSort()             // {3, 2, 1} - descending
+var sorted = {3, 1, 2}.reverseSort               // {3, 2, 1} - optional parentheses
 var sorted = {3, 1, 2}.sort("ascending")         // {1, 2, 3}
-var sorted = {3, 1, 2}.sort("descending")        // {3, 2, 1}
+var sorted = {3, 1, 2}.sort("descending")        // {3, 2, 1} - alternative
 var result = "a,b,c,a".replaceFirst("a", "x").findLast("x")  // 6
 
 // Array modification

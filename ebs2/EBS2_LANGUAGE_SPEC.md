@@ -2668,21 +2668,27 @@ var reversed = {1, 2, 3, 4}.reverse()        // {4, 3, 2, 1}
 var sorted = {3, 1, 4, 1, 5}.sort()                    // {1, 1, 3, 4, 5}
 var sorted = {3, 1, 4, 1, 5}.sort("ascending")         // {1, 1, 3, 4, 5}
 
-// Sort array in descending order
+// Sort array in descending order - use .reverseSort()
+var sorted = {3, 1, 4, 1, 5}.reverseSort()             // {5, 4, 3, 1, 1}
+
+// Alternative: sort with parameter (less convenient)
 var sorted = {3, 1, 4, 1, 5}.sort("descending")        // {5, 4, 3, 1, 1}
 
 // Sort with chaining - parentheses optional for methods with optional parameters
-var result = {3, 1, 2}.sort().reverse()                // {3, 2, 1}
-var result = {3, 1, 2}.sort.reverse                    // {3, 2, 1} - also valid
-var result = {3, 1, 2}.sort("descending")              // {3, 2, 1}
+var result = {3, 1, 2}.sort                            // {1, 2, 3}
+var result = {3, 1, 2}.reverseSort                     // {3, 2, 1}
 ```
 
 **Note on Optional Parentheses:**
-For methods with optional parameters (like `.sort()`, `.reverse()`, etc.), parentheses are optional when calling without arguments:
+For methods with optional parameters (like `.sort()`, `.reverseSort()`, `.reverse()`, etc.), parentheses are optional when calling without arguments:
 ```javascript
 // Both are valid and equivalent
-var result = {3, 1, 2}.sort().reverse()
-var result = {3, 1, 2}.sort.reverse
+var result = {3, 1, 2}.sort()
+var result = {3, 1, 2}.sort
+
+// Descending sort
+var result = {3, 1, 2}.reverseSort()
+var result = {3, 1, 2}.reverseSort
 
 // When providing arguments, parentheses are required
 var result = {3, 1, 2}.sort("descending")
@@ -2701,7 +2707,7 @@ var result = "a,b,c,a".replaceFirst("a", "x").findLast("x")
 // Result: 6 (index of last 'x')
 
 // Chain array operations
-var result = {3, 1, 4, 1, 5}.sort().reverse()
+var result = {3, 1, 4, 1, 5}.reverseSort()
 // Result: {5, 4, 3, 1, 1}
 
 var result = {1, 2, 3, 4, 5}.copy(1, 4).reverse()
@@ -2741,11 +2747,12 @@ var result = "hello,world".split(",").join(" ").toUpper()
 | `.append(x)` | N/A (use `+`) | `{1,2,3}.append(4)` | array (alias for add) |
 | `.addFirst(x)` | N/A (use `+`) | `{1,2,3}.addFirst(0)` | array (add at start) |
 | `.remove(idx)` | N/A | `{1,2,3}.remove(1)` | array (remove at index) |
-| `.reverse()` | `"Hello".reverse()` | `{1,2,3}.reverse()` | text/array |
+| `.reverse()` | `"Hello".reverse()` | `{1,2,3}.reverse()` | text/array (reverse order) |
 | `.sort()` | N/A | `{3,1,2}.sort()` or `{3,1,2}.sort` | array (ascending) |
+| `.reverseSort()` | N/A | `{3,1,2}.reverseSort()` or `{3,1,2}.reverseSort` | array (descending) |
 | `.sort(order)` | N/A | `{3,1,2}.sort("descending")` | array (asc/desc) |
 
-**Note:** Methods with optional parameters like `.sort()` and `.reverse()` can be called without parentheses when no arguments are provided: `{3,1,2}.sort.reverse` is equivalent to `{3,1,2}.sort().reverse()`.
+**Note:** Methods with optional parameters like `.sort()`, `.reverseSort()`, and `.reverse()` can be called without parentheses when no arguments are provided: `{3,1,2}.sort.reverse` is equivalent to `{3,1,2}.sort().reverse()`.
 
 **Best Practices:**
 
