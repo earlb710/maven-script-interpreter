@@ -664,7 +664,7 @@ end main
 
 ## 🔍 Checking Types (Debugging)
 
-When you're learning or debugging, it's helpful to check what type of data you have. Use `typeof` to find out:
+When you're learning or debugging, it's helpful to check what type of data you have. Use the postfix `typeof` operator to find out:
 
 ```javascript
 program TypeChecker
@@ -675,21 +675,32 @@ main
     var scores = {95, 87, 92}
     var ready = true
     
-    // Check the type of each variable
-    print "age is:", typeof age           // Prints: number
-    print "name is:", typeof name         // Prints: text
-    print "scores is:", typeof scores     // Prints: array
-    print "ready is:", typeof ready       // Prints: flag
-    
-    // Use typeof to make decisions
+    // Use typeof to make decisions (postfix operator with type keywords)
     var mystery = 42
     
-    if typeof mystery = "number" then
+    if mystery typeof number then
         print "It's a number: " + mystery
-    else if typeof mystery = "text" then
+    else if mystery typeof text then
         print "It's text: " + mystery
     else
         print "It's something else"
+    end if
+    
+    // Check different types
+    if age typeof number then
+        print "age is a number"
+    end if
+    
+    if name typeof text then
+        print "name is text"
+    end if
+    
+    if scores typeof array then
+        print "scores is an array"
+    end if
+    
+    if ready typeof flag then
+        print "ready is a boolean"
     end if
 end main
 ```
@@ -699,10 +710,8 @@ end main
 - **Learning:** Shows you what type your variables are
 - **Safety:** Check types before doing operations
 
-**Tip:** Use `typeof` with `log` to debug without showing output to users:
-```javascript
-log "The type of x is:", typeof x
-```
+**Syntax:** `variable typeof TypeName` (postfix operator, no strings)
+**Type keywords:** `number`, `text`, `flag`, `array`, `record`
 
 ## What's Next
 

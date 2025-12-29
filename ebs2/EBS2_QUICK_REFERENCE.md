@@ -284,8 +284,8 @@ var emp as EmployeeType = {
 print person.name              // "Alice"
 print emp.department           // "Engineering"
 
-// typeof with type references (case-insensitive)
-if typeof emp = PersonType then
+// typeof with type references (postfix operator, case-insensitive)
+if emp typeof PersonType then
     print "Is a PersonType"
 end if
 
@@ -360,22 +360,38 @@ log "Debug message"            // Debug output only
 ### Type Checking
 
 ```javascript
+// Postfix typeof operator (no strings)
 var x = 42
-print typeof x                 // "number"
-
 var name = "Alice"
-print typeof name              // "text"
-
 var items = {1, 2, 3}
-print typeof items             // "array"
 
-// Use in conditionals
-if typeof value = "number" then
+// Use in conditionals with type keywords
+if x typeof number then
     print "It's a number"
+end if
+
+if name typeof text then
+    print "It's text"
+end if
+
+if items typeof array then
+    print "It's an array"
+end if
+
+// With named record types
+record type PersonType
+    name as text
+end record
+
+var person as PersonType = record { name: "Bob" }
+
+if person typeof PersonType then
+    print "Is a PersonType"
 end if
 ```
 
-**Type names:** `"number"`, `"text"`, `"flag"`, `"array"`, `"array.text"`, `"array.number"`, `"record"`, `"indicator"`, `"date"`, `"function"`, `"procedure"`
+**Type keywords:** `number`, `text`, `flag`, `array`, `record`, `indicator`, `date`, `function`, `procedure`
+**Syntax:** `variable typeof TypeName` (postfix operator, case-insensitive)
 
 ### String Operations
 

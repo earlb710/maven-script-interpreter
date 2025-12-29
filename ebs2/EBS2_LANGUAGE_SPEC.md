@@ -1100,25 +1100,21 @@ print mgr.teamSize          // 8 (from ManagerType)
 **Type checking with extended records:**
 
 ```javascript
-// typeof shows all types in inheritance chain
-print typeof emp            // "EmployeeType, PersonType"
-print typeof mgr            // "ManagerType, EmployeeType, PersonType"
-
-// Check if record is of specific type (case-insensitive)
-if typeof emp = PersonType then
+// Check if record is of specific type (postfix typeof operator)
+if emp typeof PersonType then
     print emp.name + " is a PersonType"
 end if
 
-if typeof mgr = EmployeeType then
+if mgr typeof EmployeeType then
     print mgr.name + " is an EmployeeType"
 end if
 
 // Type-specific conditionals with inheritance checking
-if typeof value = ManagerType then
+if value typeof ManagerType then
     print "Manager with team size: " + value.teamSize
-else if typeof value = EmployeeType then
+else if value typeof EmployeeType then
     print "Employee in department: " + value.department
-else if typeof value = PersonType then
+else if value typeof PersonType then
     print "Person named: " + value.name
 end if
 ```
@@ -1127,18 +1123,18 @@ end if
 - ✅ **Code Reuse** - Inherit fields from base record types
 - ✅ **Type Hierarchy** - Build logical type relationships
 - ✅ **Maintainability** - Update base types and changes propagate
-- ✅ **Type Safety** - `typeof` uses type references (case-insensitive)
+- ✅ **Type Safety** - Postfix `typeof` operator (case-insensitive)
 - ✅ **Flexibility** - Mix and match inheritance as needed
 
 **Naming Convention:**
 - Always use `Type` suffix for record type names (e.g., `PersonType`, `EmployeeType`)
 - This distinguishes type definitions from variable names
-- Enables case-insensitive type checking with `typeof`
+- Enables case-insensitive type checking with postfix `typeof`
 
 **Note:** When extending records:
 - All fields from parent records are included
 - New fields are added (not overwritten)
-- `typeof` can compare against type references directly (no strings needed)
+- Use postfix `typeof` operator: `variable typeof TypeName`
 - Type checking is case-insensitive
 - Field names must be unique across the inheritance chain
 
@@ -2533,49 +2529,32 @@ end if
 ### Type Checking and Debugging (Intermediate)
 
 ```javascript
-// Check the type of a variable
+// Check the type of a variable (postfix typeof operator)
 var x = 42
-var type = typeof x              // "number"
-
 var name = "Alice"
-print typeof name                // "text"
-
 var items = {1, 2, 3}
-print typeof items               // "array"
-
 var person = record { name: "Bob", age: 30 }
-print typeof person              // "record"
-
 var flag = true
-print typeof flag                // "flag"
 
-// Use typeof for debugging
-log "x is of type:", typeof x
-
-// Use typeof in conditionals with primitives (use strings)
-if typeof value = "number" then
+// Use typeof in conditionals (no strings - use type keywords)
+if value typeof number then
     print "It's a number: " + value
-else if typeof value = "text" then
+else if value typeof text then
     print "It's text: " + value
-else if typeof value = "array" then
+else if value typeof array then
     print "It's an array with " + (count of value) + " items"
-else if typeof value = "record" then
+else if value typeof record then
     print "It's a record"
-else if typeof value = "flag" then
+else if value typeof flag then
     print "It's a boolean: " + value
 end if
 
 // Check specific array types
 var numbers = {1, 2, 3}
-print typeof numbers             // "array" (generic array)
-
 var names as array.text = {"Alice", "Bob"}
-print typeof names               // "array.text" (typed array)
-
 var students as array.record(StudentType) = { /* ... */ }
-print typeof students            // "array.record"
 
-// For named record types, use type references (not strings)
+// For named record types, use type references
 record type PersonType
     name as text
     age as number
@@ -2583,33 +2562,43 @@ end record
 
 var employee as PersonType = record { name: "Alice", age: 30 }
 
-// Type checking with type references (case-insensitive, no strings)
-if typeof employee = PersonType then
+// Type checking with type references (case-insensitive, postfix)
+if employee typeof PersonType then
     print "Is a PersonType"
+end if
+
+// Combined type checks
+if x typeof number then
+    print "x is a number"
+end if
+
+if names typeof array then
+    print "names is an array"
 end if
 ```
 
-**Type Names Returned by `typeof`:**
+**Type Keywords for `typeof` Operator:**
 
-For **primitive types**, `typeof` returns string values:
-- `"number"` - for numeric values
-- `"text"` - for string values
-- `"flag"` - for boolean (yes/no, true/false)
-- `"array"` - for generic arrays
-- `"array.text"` - for typed text arrays
-- `"array.number"` - for typed number arrays
-- `"array.flag"` - for typed boolean arrays
-- `"array.record"` - for arrays of records
-- `"indicator"` - for indicator/enum types
-- `"date"` - for date/time values
-- `"function"` - for function references
-- `"procedure"` - for procedure references
+Use type keywords (not strings) with postfix `typeof` operator:
+- `number` - for numeric values
+- `text` - for string values
+- `flag` - for boolean (yes/no, true/false)
+- `array` - for generic arrays
+- `record` - for anonymous record types
+- `indicator` - for indicator/enum types
+- `date` - for date/time values
+- `function` - for function references
+- `procedure` - for procedure references
 
-For **named record types**, `typeof` returns the type itself (not a string):
-- Use type references directly: `if typeof x = PersonType then`
+For **named record types**, use the type name directly:
+- Use type references: `if x typeof PersonType then`
 - Comparison is case-insensitive
-- Do not use string literals for record type checking
 - Use `Type` suffix naming convention (e.g., `PersonType`, `EmployeeType`)
+
+**Syntax:**
+- Postfix operator: `variable typeof TypeName`
+- No `=` operator needed
+- No string literals - use type keywords or type references directly
 
 **Note:** Similar to Java's `instanceof`, `typeof` allows runtime type checking for debugging and conditional logic based on data types.
 
