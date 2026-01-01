@@ -1394,7 +1394,12 @@ public class Parser {
                                     maxLength = (Integer) lengthToken.literal;
                                     advance();
                                 } else if (lengthToken.literal instanceof Long) {
-                                    maxLength = ((Long) lengthToken.literal).intValue();
+                                    long longValue = (Long) lengthToken.literal;
+                                    // Check for overflow
+                                    if (longValue > Integer.MAX_VALUE || longValue < Integer.MIN_VALUE) {
+                                        throw error(lengthToken, "maxLength value " + longValue + " exceeds integer range.");
+                                    }
+                                    maxLength = (int) longValue;
                                     advance();
                                 } else {
                                     throw error(lengthToken, "maxLength value must be an integer.");

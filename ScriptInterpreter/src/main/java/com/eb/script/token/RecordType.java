@@ -177,6 +177,10 @@ public class RecordType implements Serializable {
             Object fieldValue = getFieldValueIgnoreCase(record, fieldName);
             boolean fieldExists = jsonFieldsLowerCase.contains(fieldName.toLowerCase());
             
+            // Note: Mandatory fields with defaults are considered satisfied by the default value.
+            // The default will be applied during conversion if the field is not present.
+            // Mandatory means "cannot be null after defaults are applied", not "must be explicitly provided".
+            
             // If field doesn't exist and has no default, check if it's mandatory
             if (!fieldExists && !metadata.hasDefaultValue()) {
                 if (metadata.isMandatory()) {
