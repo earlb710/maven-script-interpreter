@@ -30,21 +30,17 @@ public class TestBinaryDatatype {
             System.out.println("✓ binary.fromBase64 works correctly");
             System.out.println();
             
-            // Test 3: Test binary.fromByteArray (datatype function)
-            System.out.println("Test 3: Testing binary.fromByteArray");
+            // Test 3: Test binary.toString (datatype function)
+            System.out.println("Test 3: Testing binary.toString");
             String script3 = """
-                var arr: array.byte[4];
-                arr[0] = 1;
-                arr[1] = 2;
-                arr[2] = 3;
-                arr[3] = 4;
-                var bin: binary = binary.fromByteArray(arr);
-                print "Created binary from byte array";
+                var bin: binary = binary.fromBase64("SGVsbG8gV29ybGQ=");
+                var text: string = binary.toString(bin);
+                print "Text: " + text;
                 """;
             RuntimeContext ctx3 = Parser.parse("test3", script3);
             Interpreter interp3 = new Interpreter();
             interp3.interpret(ctx3);
-            System.out.println("✓ binary.fromByteArray works correctly");
+            System.out.println("✓ binary.toString works correctly");
             System.out.println();
             
             // Test 4: Test .length property access (variable chain function)

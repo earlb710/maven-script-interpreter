@@ -11,17 +11,12 @@ print "   Created binary data from base64";
 print "   Note: binary.fromBase64() is a datatype function";
 print "";
 
-// Example 2: Create binary from byte array (datatype function)
-print "2. Creating binary from byte array:";
-var byteArr: array.byte[5];
-byteArr[0] = 72;
-byteArr[1] = 101;
-byteArr[2] = 108;
-byteArr[3] = 108;
-byteArr[4] = 111;
-var binFromArray: binary = binary.fromByteArray(byteArr);
-print "   Created binary from byte array";
-print "   Note: binary.fromByteArray() is a datatype function";
+// Example 2: Convert binary to string (datatype function)
+print "2. Converting binary to string:";
+var textBin: binary = binary.fromBase64("SGVsbG8gV29ybGQ=");
+var textStr: string = binary.toString(textBin);
+print "   Text from binary: " + textStr;
+print "   Note: binary.toString() is a datatype function";
 print "";
 
 // Example 3: Access length property (variable chain)
@@ -36,7 +31,7 @@ print "=== Datatype Functions vs Variable Chain Functions ===";
 print "";
 print "DATATYPE FUNCTIONS (callable as binary.*):";
 print "  - binary.fromBase64(string) -> binary";
-print "  - binary.fromByteArray(array.byte) -> binary";
+print "  - binary.toString(binary, encoding?) -> string";
 print "";
 print "VARIABLE CHAIN FUNCTIONS (to be called on variable):";
 print "  - var.length -> int (property, already works)";

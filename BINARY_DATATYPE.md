@@ -14,10 +14,10 @@ var imageBytes: binary = binary.fromBase64("...");
 The binary datatype distinguishes between two types of functions:
 
 ### Datatype Functions (Static)
-Factory methods that create new binary instances. These are called on the `binary` type itself:
+Factory and conversion methods. These are called on the `binary` type itself:
 
 - `binary.fromBase64(string)` - Creates binary from Base64 string
-- `binary.fromByteArray(array.byte)` - Creates binary from byte array
+- `binary.toString(binary, encoding?)` - Converts binary to string (default: UTF-8)
 
 ### Variable Chain Functions
 Instance methods/properties called on binary variables. These operate on existing binary data:
@@ -41,12 +41,13 @@ var data: binary = binary.fromBase64("SGVsbG8gV29ybGQ=");
 // data now contains the decoded bytes: "Hello World"
 ```
 
-### 2. `binary.fromByteArray(array.byte) -> binary` (Datatype Function)
-Creates binary data from an EBS byte array.
+### 2. `binary.toString(binary, encoding?) -> string` (Datatype Function)
+Converts binary data to a string using the specified encoding (default: UTF-8).
 
 ```ebs
-var arr: array.byte[3] = [1, 2, 3];
-var data: binary = binary.fromByteArray(arr);
+var data: binary = binary.fromBase64("SGVsbG8gV29ybGQ=");
+var text: string = binary.toString(data);  // Returns: "Hello World"
+var utf8Text: string = binary.toString(data, "UTF-8");
 ```
 
 ### 3. `.length` (Property - Variable Chain)
@@ -74,10 +75,8 @@ The following methods should be called on the binary variable but require parser
 // From Base64 string
 var imageBytes: binary = binary.fromBase64(base64ImageString);
 
-// From byte array
-var arr: array.byte[10];
-// ... populate array ...
-var binData: binary = binary.fromByteArray(arr);
+// Convert binary to text
+var text: string = binary.toString(imageBytes);
 ```
 
 ### Checking Binary Size
@@ -102,7 +101,7 @@ While `binary` and `array.byte` both work with byte data, they serve different p
 |---------|--------|------------|
 | Purpose | Binary data (images, files) | General-purpose byte arrays |
 | Type | `byte[]` | `ArrayFixedByte` |
-| Factory Methods | `binary.fromBase64()`, `binary.fromByteArray()` | Array literals, `array.*` functions |
+| Factory Methods | `binary.fromBase64()` | Array literals, `array.*` functions |
 | Best For | File I/O, images, serialization | Numeric computations, buffers |
 
 ## Testing
@@ -138,7 +137,7 @@ mvn exec:java -Dexec.mainClass="com.eb.script.Run" -Dexec.args="../test_binary_d
 
 The separation between datatype functions and variable chain functions eliminates ambiguity:
 
-- **Datatype functions** (`binary.fromBase64`, `binary.fromByteArray`) can only be called as static methods since they create new instances
+- **Datatype functions** (`binary.fromBase64`, `binary.toString`) can be called as static methods
 - **Variable chain functions** (`.length`, `.get()`, `.slice()`, etc.) operate on existing instances and should be called on the variable
 
 This design makes the API clearer and aligns with object-oriented principles where factory methods are static and instance methods are called on objects.

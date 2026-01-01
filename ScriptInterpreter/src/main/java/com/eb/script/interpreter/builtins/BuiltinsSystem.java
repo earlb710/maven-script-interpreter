@@ -72,7 +72,7 @@ public class BuiltinsSystem {
             case "array.asintmap" -> arrayAsIntmap(args);
             case "array.asint" -> arrayAsInt(args);
             case "binary.frombase64" -> binaryFromBase64(args);
-            case "binary.frombytearray" -> binaryFromByteArray(args);
+            case "binary.tostring" -> binaryToString(args);
             default -> throw new InterpreterError("Unknown System builtin: " + name);
         };
     }
@@ -653,18 +653,28 @@ public class BuiltinsSystem {
     }
 
     /**
-     * Create binary data from byte array.
-     * binary.fromByteArray(byteArray) -> binary
+     * Convert binary data to string.
+     * binary.toString(binary, encoding?) -> string
+     * Default encoding is UTF-8
      */
-    private static Object binaryFromByteArray(Object[] args) throws InterpreterError {
-        Object arr = args[0];
-        if (arr == null) {
-            return new byte[0];
+    private static Object binaryToString(Object[] args) throws InterpreterError {
+        Object bin = args[0];
+        if (bin == null) {
+            return "";
         }
-        if (!(arr instanceof ArrayFixedByte afb)) {
-            throw new InterpreterError("binary.fromByteArray: expected byte array (array.byte), got " + arr.getClass().getSimpleName());
+        if (!(bin instanceof byte[] bytes)) {
+            throw new InterpreterError("binary.toString: expected binary (byte[]), got " + bin.getClass().getSimpleName());
         }
         
-        return afb.getAll().clone();
+        String encoding = "UTF-8";
+        if (args.length > 1 && args[1] != null) {
+            encoding = (String) args[1];
+        }
+        
+        try {
+            return new String(bytes, encoding);
+        } catch (java.io.UnsupportedEncodingException ex) {
+            throw new InterpreterError("binary.toString: unsupported encoding: " + encoding);
+        }
     }
 }

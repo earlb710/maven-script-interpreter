@@ -781,9 +781,11 @@ public final class Builtins {
                 "binary.fromBase64", DataType.BINARY,
                 newParam("base64", DataType.STRING)
         ));
+        // Conversion method
         addBuiltin(info(
-                "binary.fromByteArray", DataType.BINARY,
-                newParam("array", DataType.ARRAY, true)
+                "binary.toString", DataType.STRING,
+                newParam("binary", DataType.BINARY, true),
+                newParam("encoding", DataType.STRING, false) // optional encoding (default: UTF-8)
         ));
 
         // ==========================
