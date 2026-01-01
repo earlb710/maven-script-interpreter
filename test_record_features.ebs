@@ -8,9 +8,9 @@ print "";
 print "Test 1: Default Values";
 print "----------------------";
 var person: record {
-    name: string(mandatory),
-    age: int(default:0),
-    status: string(default:"active")
+    name: string[mandatory],
+    age: int[default:0],
+    status: string[default:"active"]
 };
 
 person = {"name": "Alice"};
@@ -28,9 +28,9 @@ print "";
 print "Test 2: Mandatory Fields";
 print "------------------------";
 var employee: record {
-    id: int(mandatory),
-    name: string(mandatory),
-    department: string(default:"Unassigned")
+    id: int[mandatory],
+    name: string[mandatory],
+    department: string[default:"Unassigned"]
 };
 
 employee = {"id": 101, "name": "Bob Smith"};
@@ -48,9 +48,9 @@ print "";
 print "Test 3: Maximum Length Constraints";
 print "----------------------------------";
 var user: record {
-    username: string(mandatory, maxlength:20),
-    email: string(maxlength:50),
-    bio: string(maxlength:100)
+    username: string[mandatory, maxlength:20],
+    email: string[maxlength:50],
+    bio: string[maxlength:100]
 };
 
 user = {"username": "johndoe", "email": "john@example.com", "bio": "Software developer"};
@@ -68,11 +68,11 @@ print "";
 print "Test 4: Combined Constraints";
 print "----------------------------";
 var product: record {
-    name: string(mandatory, maxlength:50),
-    sku: string(mandatory, maxlength:20),
-    price: double(default:0.0),
-    quantity: int(default:0),
-    inStock: bool(default:true)
+    name: string[mandatory, maxlength:50],
+    sku: string[mandatory, maxlength:20],
+    price: double[default:0.0],
+    quantity: int[default:0],
+    inStock: bool[default:true]
 };
 
 product = {"name": "Premium Widget", "sku": "PWD-001"};
@@ -92,9 +92,9 @@ print "";
 print "Test 5: Using record.validate() Function";
 print "----------------------------------------";
 var config: record {
-    host: string(mandatory),
-    port: int(default:8080),
-    timeout: int(default:30)
+    host: string[mandatory],
+    port: int[default:8080],
+    timeout: int[default:30]
 };
 
 config = {"host": "localhost"};

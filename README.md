@@ -292,11 +292,11 @@ The record type system supports field-level constraints and validation, allowing
 ```javascript
 // Basic record with field properties
 var user: record {
-    username: string(mandatory, maxlength:20),
-    email: string(mandatory, maxlength:100),
-    displayName: string(default:"Guest"),
-    bio: string(maxlength:500),
-    isActive: bool(default:true)
+    username: string[mandatory, maxlength:20],
+    email: string[mandatory, maxlength:100],
+    displayName: string[default:"Guest"],
+    bio: string[maxlength:500],
+    isActive: bool[default:true]
 };
 
 // Only mandatory fields needed - defaults are applied automatically
@@ -326,13 +326,13 @@ if call record.validate("user") then {
 ```javascript
 // Product catalog with various constraints
 var product: record {
-    sku: string(mandatory, maxlength:20),
-    name: string(mandatory, maxlength:100),
-    description: string(maxlength:500),
-    price: double(default:0.0),
-    quantity: int(default:0),
-    category: string(default:"General"),
-    available: bool(default:true)
+    sku: string[mandatory, maxlength:20],
+    name: string[mandatory, maxlength:100],
+    description: string[maxlength:500],
+    price: double[default:0.0],
+    quantity: int[default:0],
+    category: string[default:"General"],
+    available: bool[default:true]
 };
 
 // Minimal product creation
@@ -352,11 +352,11 @@ product = {
 
 ```javascript
 var employee: record {
-    id: int(mandatory),
-    name: string(mandatory, maxlength:50),
-    email: string(mandatory, maxlength:100),
-    department: string(default:"Unassigned"),
-    salary: double(default:0.0)
+    id: int[mandatory],
+    name: string[mandatory, maxlength:50],
+    email: string[mandatory, maxlength:100],
+    department: string[default:"Unassigned"],
+    salary: double[default:0.0]
 };
 ```
 

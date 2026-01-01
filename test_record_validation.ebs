@@ -7,8 +7,8 @@ print "";
 // Test 1: Missing mandatory field
 print "Test 1: Testing mandatory field validation";
 var person: record {
-    name: string(mandatory),
-    age: int(default:0)
+    name: string[mandatory],
+    age: int[default:0]
 };
 
 // Valid person with mandatory field
@@ -35,8 +35,8 @@ print "";
 // Test 3: Max length validation
 print "Test 3: Testing max length validation";
 var user: record {
-    username: string(mandatory, maxlength:10),
-    bio: string(maxlength:50)
+    username: string[mandatory, maxlength:10],
+    bio: string[maxlength:50]
 };
 
 // Valid user within limits
@@ -60,10 +60,10 @@ print "";
 // Test 4: Combined constraints
 print "Test 4: Testing combined constraints";
 var product: record {
-    name: string(mandatory, maxlength:30),
-    sku: string(mandatory, maxlength:20),
-    price: double(default:0.0),
-    inStock: bool(default:true)
+    name: string[mandatory, maxlength:30],
+    sku: string[mandatory, maxlength:20],
+    price: double[default:0.0],
+    inStock: bool[default:true]
 };
 
 product = {"name": "Widget Pro", "sku": "WP-001"};
@@ -82,10 +82,10 @@ print "";
 // Test 5: Nested constraints
 print "Test 5: Testing multiple field types with constraints";
 var config: record {
-    host: string(mandatory, maxlength:100),
-    port: int(default:8080),
-    ssl: bool(default:false),
-    apiKey: string(maxlength:64, default:"none")
+    host: string[mandatory, maxlength:100],
+    port: int[default:8080],
+    ssl: bool[default:false],
+    apiKey: string[maxlength:64, default:"none"]
 };
 
 config = {"host": "api.example.com"};

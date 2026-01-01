@@ -2,8 +2,8 @@
 print "Test: Record with string default value";
 
 var person: record {
-    name: string(mandatory),
-    status: string(default:"active")
+    name: string[mandatory],
+    status: string[default:"active"]
 };
 
 person = {"name": "John"};

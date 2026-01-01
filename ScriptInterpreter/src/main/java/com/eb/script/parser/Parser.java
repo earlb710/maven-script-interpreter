@@ -1361,16 +1361,16 @@ public class Parser {
             }
             
             // Add field to record type
-            // Parse optional field properties: (mandatory, maxlength:50, default:"value")
+            // Parse optional field properties: [mandatory, maxlength:50, default:"value"]
             boolean isMandatory = false;
             Integer maxLength = null;
             Object defaultValue = null;
             
-            if (check(EbsTokenType.LPAREN)) {
-                advance(); // consume '('
+            if (check(EbsTokenType.LBRACKET)) {
+                advance(); // consume '['
                 
-                // Parse field properties until we hit the closing paren
-                while (!check(EbsTokenType.RPAREN) && !isAtEnd()) {
+                // Parse field properties until we hit the closing bracket
+                while (!check(EbsTokenType.RBRACKET) && !isAtEnd()) {
                     EbsToken propertyToken = peek();
                     
                     if (propertyToken.type == EbsTokenType.IDENTIFIER) {
@@ -1444,15 +1444,15 @@ public class Parser {
                         throw error(propertyToken, "Expected field property name in field properties.");
                     }
                     
-                    // Check for comma (more properties) or closing paren (end of properties)
+                    // Check for comma (more properties) or closing bracket (end of properties)
                     if (check(EbsTokenType.COMMA)) {
                         advance(); // consume comma
-                    } else if (!check(EbsTokenType.RPAREN)) {
-                        throw error(peek(), "Expected ',' or ')' in field properties.");
+                    } else if (!check(EbsTokenType.RBRACKET)) {
+                        throw error(peek(), "Expected ',' or ']' in field properties.");
                     }
                 }
                 
-                consume(EbsTokenType.RPAREN, "Expected ')' after field properties.");
+                consume(EbsTokenType.RBRACKET, "Expected ']' after field properties.");
             }
             
             // Add field to record type with metadata
