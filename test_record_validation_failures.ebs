@@ -1,0 +1,83 @@
+// Test script for record validation failures
+// Tests: mandatory field violation, max length violation
+
+print "=== Record Validation Failure Tests ===";
+print "";
+
+// Test 1: Missing mandatory field
+print "Test 1: Missing mandatory field (should fail)";
+var person: record {
+    name: string(mandatory),
+    age: int(default:0)
+};
+
+// Try to create without mandatory name field - should fail validation
+exceptions {
+    person = {"age": 25};
+    if call record.validate("person") then {
+        print "✗ Person validation should have failed";
+    } else {
+        print "✓ Person validation correctly failed";
+    }
+} when any {
+    print "✓ Error caught as expected";
+}
+print "";
+
+// Test 2: Max length violation
+print "Test 2: Max length violation (should fail)";
+var user: record {
+    username: string(mandatory, maxlength:10)
+};
+
+// Create with username within limit
+user = {"username": "john"};
+if call record.validate("user") then {
+    print "✓ User with short username is valid";
+} else {
+    print "✗ User validation should have succeeded";
+}
+
+// Try to update with username exceeding limit
+exceptions {
+    user = {"username": "verylongusername"};
+    if call record.validate("user") then {
+        print "✗ User validation should have failed for long username";
+    } else {
+        print "✓ User validation correctly failed for long username";
+    }
+} when any {
+    print "✓ Error caught as expected for long username";
+}
+print "";
+
+// Test 3: Multiple mandatory fields
+print "Test 3: Multiple mandatory fields";
+var employee: record {
+    id: int(mandatory),
+    name: string(mandatory),
+    email: string(mandatory)
+};
+
+// Valid employee
+employee = {"id": 1, "name": "Alice", "email": "alice@company.com"};
+if call record.validate("employee") then {
+    print "✓ Employee with all mandatory fields is valid";
+} else {
+    print "✗ Employee validation should have succeeded";
+}
+
+// Try with missing email
+exceptions {
+    employee = {"id": 2, "name": "Bob"};
+    if call record.validate("employee") then {
+        print "✗ Employee validation should have failed";
+    } else {
+        print "✓ Employee validation correctly failed for missing email";
+    }
+} when any {
+    print "✓ Error caught as expected for missing mandatory field";
+}
+print "";
+
+print "=== All validation failure tests completed ===";

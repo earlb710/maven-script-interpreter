@@ -1,0 +1,103 @@
+// Test script for record validation - showing console error messages
+// Tests: mandatory field violation, max length violation
+
+print "=== Record Validation Tests (Errors Expected) ===";
+print "";
+
+// Test 1: Missing mandatory field
+print "Test 1: Testing mandatory field validation";
+var person: record {
+    name: string(mandatory),
+    age: int(default:0)
+};
+
+// Valid person with mandatory field
+person = {"name": "John", "age": 25};
+if call record.validate("person") then {
+    print "✓ Valid person record passes validation";
+} else {
+    print "✗ Valid person record failed validation";
+}
+print "";
+
+// Test 2: Default values work
+print "Test 2: Testing default value application";
+person = {"name": "Jane"};
+print "Person name: " + person.name;
+print "Person age (default): " + person.age;
+if call record.validate("person") then {
+    print "✓ Person with default age passes validation";
+} else {
+    print "✗ Person with default age failed validation";
+}
+print "";
+
+// Test 3: Max length validation
+print "Test 3: Testing max length validation";
+var user: record {
+    username: string(mandatory, maxlength:10),
+    bio: string(maxlength:50)
+};
+
+// Valid user within limits
+user = {"username": "john", "bio": "Developer"};
+if call record.validate("user") then {
+    print "✓ User with short username passes validation";
+} else {
+    print "✗ User with short username failed validation";
+}
+print "";
+
+// Create user at the boundary (exactly 10 characters)
+user = {"username": "johndoe123", "bio": "Software engineer and code enthusiast"};
+if call record.validate("user") then {
+    print "✓ User with 10-char username passes validation";
+} else {
+    print "✗ User with 10-char username failed validation";
+}
+print "";
+
+// Test 4: Combined constraints
+print "Test 4: Testing combined constraints";
+var product: record {
+    name: string(mandatory, maxlength:30),
+    sku: string(mandatory, maxlength:20),
+    price: double(default:0.0),
+    inStock: bool(default:true)
+};
+
+product = {"name": "Widget Pro", "sku": "WP-001"};
+print "Product name: " + product.name;
+print "Product SKU: " + product.sku;
+print "Product price (default): " + product.price;
+print "Product in stock (default): " + product.inStock;
+
+if call record.validate("product") then {
+    print "✓ Product with defaults passes validation";
+} else {
+    print "✗ Product with defaults failed validation";
+}
+print "";
+
+// Test 5: Nested constraints
+print "Test 5: Testing multiple field types with constraints";
+var config: record {
+    host: string(mandatory, maxlength:100),
+    port: int(default:8080),
+    ssl: bool(default:false),
+    apiKey: string(maxlength:64, default:"none")
+};
+
+config = {"host": "api.example.com"};
+if call record.validate("config") then {
+    print "✓ Config with all defaults passes validation";
+    print "  Host: " + config.host;
+    print "  Port: " + config.port;
+    print "  SSL: " + config.ssl;
+    print "  API Key: " + config.apiKey;
+} else {
+    print "✗ Config with defaults failed validation";
+}
+print "";
+
+print "=== All validation tests completed successfully ===";

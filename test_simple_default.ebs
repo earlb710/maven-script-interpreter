@@ -1,0 +1,11 @@
+// Simple test of record with default string value
+print "Test: Record with string default value";
+
+var person: record {
+    name: string(mandatory),
+    status: string(default:"active")
+};
+
+person = {"name": "John"};
+print "Name: " + person.name;
+print "Status: " + person.status;

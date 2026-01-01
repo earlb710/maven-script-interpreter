@@ -18,6 +18,9 @@ public class RecordType implements Serializable {
     // Field definitions: field name -> field type (for primitive types)
     private final Map<String, DataType> fields;
     
+    // Field metadata: field name -> RecordFieldMetadata (constraints, defaults, etc.)
+    private final Map<String, RecordFieldMetadata> fieldMetadata;
+    
     // Nested record definitions: field name -> nested RecordType (for record types)
     private final Map<String, RecordType> nestedRecords;
     
@@ -26,6 +29,7 @@ public class RecordType implements Serializable {
      */
     public RecordType() {
         this.fields = new LinkedHashMap<>();
+        this.fieldMetadata = new LinkedHashMap<>();
         this.nestedRecords = new LinkedHashMap<>();
     }
     
@@ -35,6 +39,7 @@ public class RecordType implements Serializable {
      */
     public RecordType(Map<String, DataType> fields) {
         this.fields = new LinkedHashMap<>(fields);
+        this.fieldMetadata = new LinkedHashMap<>();
         this.nestedRecords = new LinkedHashMap<>();
     }
     
@@ -45,6 +50,32 @@ public class RecordType implements Serializable {
      */
     public void addField(String name, DataType type) {
         fields.put(name, type);
+        // Create default metadata if not already set
+        if (!fieldMetadata.containsKey(name)) {
+            fieldMetadata.put(name, new RecordFieldMetadata(name, type));
+        }
+    }
+    
+    /**
+     * Add a field to this record type with metadata
+     * @param name Field name
+     * @param type Field data type
+     * @param mandatory Whether field is required (not null)
+     * @param maxLength Maximum length for string fields (null for no limit)
+     * @param defaultValue Default value for the field (null for no default)
+     */
+    public void addField(String name, DataType type, boolean mandatory, Integer maxLength, Object defaultValue) {
+        fields.put(name, type);
+        fieldMetadata.put(name, new RecordFieldMetadata(name, type, mandatory, maxLength, defaultValue));
+    }
+    
+    /**
+     * Add a field to this record type with metadata object
+     * @param metadata Field metadata containing all field properties
+     */
+    public void addField(RecordFieldMetadata metadata) {
+        fields.put(metadata.getFieldName(), metadata.getFieldType());
+        fieldMetadata.put(metadata.getFieldName(), metadata);
     }
     
     /**
@@ -56,6 +87,10 @@ public class RecordType implements Serializable {
         nestedRecords.put(name, recordType);
         // Also mark in fields map that this is a RECORD type
         fields.put(name, DataType.RECORD);
+        // Create default metadata for nested record
+        if (!fieldMetadata.containsKey(name)) {
+            fieldMetadata.put(name, new RecordFieldMetadata(name, DataType.RECORD));
+        }
     }
     
     /**
@@ -94,6 +129,23 @@ public class RecordType implements Serializable {
     }
     
     /**
+     * Get field metadata for a specific field
+     * @param name Field name
+     * @return RecordFieldMetadata for the field, or null if field doesn't exist
+     */
+    public RecordFieldMetadata getFieldMetadata(String name) {
+        return fieldMetadata.get(name);
+    }
+    
+    /**
+     * Get all field metadata
+     * @return Map of field names to metadata
+     */
+    public Map<String, RecordFieldMetadata> getAllFieldMetadata() {
+        return new LinkedHashMap<>(fieldMetadata);
+    }
+    
+    /**
      * Validate that a value matches this record type structure
      * @param value The value to validate (should be a Map)
      * @return true if value is valid for this record type
@@ -110,25 +162,55 @@ public class RecordType implements Serializable {
         @SuppressWarnings("unchecked")
         Map<String, Object> record = (Map<String, Object>) value;
         
-        // First, check that all required fields from the RecordType definition exist in the JSON
         // Create a case-insensitive set of JSON field names for O(1) lookup
         Set<String> jsonFieldsLowerCase = new HashSet<>();
         for (String jsonField : record.keySet()) {
             jsonFieldsLowerCase.add(jsonField.toLowerCase());
         }
         
-        // Check each required field exists in the JSON
-        for (String requiredField : fields.keySet()) {
-            if (!jsonFieldsLowerCase.contains(requiredField.toLowerCase())) {
-                System.err.println("Error: Required field '" + requiredField + "' is missing from JSON object");
-                return false;
+        // Check all defined fields against their metadata
+        for (Map.Entry<String, RecordFieldMetadata> entry : fieldMetadata.entrySet()) {
+            String fieldName = entry.getKey();
+            RecordFieldMetadata metadata = entry.getValue();
+            
+            // Check if field exists in the record (case-insensitive)
+            Object fieldValue = getFieldValueIgnoreCase(record, fieldName);
+            boolean fieldExists = jsonFieldsLowerCase.contains(fieldName.toLowerCase());
+            
+            // Note: Mandatory fields with defaults are considered satisfied by the default value.
+            // The default will be applied during conversion if the field is not present.
+            // Mandatory means "cannot be null after defaults are applied", not "must be explicitly provided".
+            
+            // If field doesn't exist and has no default, check if it's mandatory
+            if (!fieldExists && !metadata.hasDefaultValue()) {
+                if (metadata.isMandatory()) {
+                    System.err.println("Error: Mandatory field '" + fieldName + "' is missing from record");
+                    return false;
+                }
+                // Non-mandatory field without default - skip validation
+                continue;
+            }
+            
+            // If field exists, validate it using metadata
+            if (fieldExists) {
+                // Check if this field is a nested record
+                if (metadata.getFieldType() == DataType.RECORD) {
+                    RecordType nestedType = getNestedRecordTypeIgnoreCase(fieldName);
+                    if (nestedType != null && !nestedType.validateValue(fieldValue)) {
+                        return false;
+                    }
+                } else {
+                    // Use metadata validation which checks type, mandatory, and max length
+                    if (!metadata.validate(fieldValue)) {
+                        return false;
+                    }
+                }
             }
         }
         
-        // Then, check that all fields in the record match the defined types
+        // Check that all fields in the record are declared
         for (Map.Entry<String, Object> entry : record.entrySet()) {
             String fieldName = entry.getKey();
-            Object fieldValue = entry.getValue();
             
             // Use case-insensitive lookup for field types
             DataType expectedType = getFieldTypeIgnoreCase(fieldName);
@@ -136,18 +218,6 @@ public class RecordType implements Serializable {
                 // Field not defined in record type - reject undeclared fields
                 System.err.println("Error: Field '" + fieldName + "' is not declared in record type");
                 return false;
-            }
-            
-            // Check if this field is a nested record
-            if (expectedType == DataType.RECORD) {
-                RecordType nestedType = getNestedRecordTypeIgnoreCase(fieldName);
-                if (nestedType != null && !nestedType.validateValue(fieldValue)) {
-                    return false;
-                }
-            } else {
-                if (!expectedType.isDataType(fieldValue)) {
-                    return false;
-                }
             }
         }
         
@@ -164,6 +234,40 @@ public class RecordType implements Serializable {
         }
         // Try case-insensitive match
         for (Map.Entry<String, DataType> entry : fields.entrySet()) {
+            if (entry.getKey().equalsIgnoreCase(name)) {
+                return entry.getValue();
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * Get field value with case-insensitive lookup
+     */
+    private Object getFieldValueIgnoreCase(Map<String, Object> record, String name) {
+        // Try exact match first
+        if (record.containsKey(name)) {
+            return record.get(name);
+        }
+        // Try case-insensitive match
+        for (Map.Entry<String, Object> entry : record.entrySet()) {
+            if (entry.getKey().equalsIgnoreCase(name)) {
+                return entry.getValue();
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * Get field metadata with case-insensitive lookup
+     */
+    private RecordFieldMetadata getFieldMetadataIgnoreCase(String name) {
+        // Try exact match first
+        if (fieldMetadata.containsKey(name)) {
+            return fieldMetadata.get(name);
+        }
+        // Try case-insensitive match
+        for (Map.Entry<String, RecordFieldMetadata> entry : fieldMetadata.entrySet()) {
             if (entry.getKey().equalsIgnoreCase(name)) {
                 return entry.getValue();
             }
@@ -189,9 +293,9 @@ public class RecordType implements Serializable {
     }
     
     /**
-     * Convert a value to match this record type's field types
+     * Convert a value to match this record type's field types and apply defaults
      * @param value The value to convert (should be a Map)
-     * @return Converted value with proper field types
+     * @return Converted value with proper field types and default values applied
      */
     public Object convertValue(Object value) {
         if (value == null) {
@@ -205,6 +309,19 @@ public class RecordType implements Serializable {
         @SuppressWarnings("unchecked")
         Map<String, Object> record = (Map<String, Object>) value;
         Map<String, Object> converted = new LinkedHashMap<>();
+        
+        // First, apply default values for missing fields
+        for (Map.Entry<String, RecordFieldMetadata> entry : fieldMetadata.entrySet()) {
+            String fieldName = entry.getKey();
+            RecordFieldMetadata metadata = entry.getValue();
+            
+            // Check if field is missing in the input
+            Object fieldValue = getFieldValueIgnoreCase(record, fieldName);
+            if (fieldValue == null && metadata.hasDefaultValue()) {
+                // Apply default value
+                converted.put(fieldName, metadata.getDefaultValue());
+            }
+        }
         
         // Convert each field to its declared type
         for (Map.Entry<String, Object> entry : record.entrySet()) {
