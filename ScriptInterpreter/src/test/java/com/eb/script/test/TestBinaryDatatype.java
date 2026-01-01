@@ -62,7 +62,7 @@ public class TestBinaryDatatype {
             
             System.out.println("All binary datatype tests passed!");
             System.out.println();
-            System.out.println("Note: Variable chain functions (get, set, slice, concat, toBase64, toByteArray)");
+            System.out.println("Note: Variable chain functions (get, set, slice, concat, toBase64)");
             System.out.println("should be called on the variable itself, not as static binary.* functions.");
             System.out.println("These require method-style call support in the parser.");
             

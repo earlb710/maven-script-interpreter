@@ -28,7 +28,6 @@ Instance methods/properties called on binary variables. These operate on existin
 - `.slice(start, end?)` - Extract portion
 - `.concat(other)` - Concatenate with another binary
 - `.toBase64()` - Convert to Base64 string
-- `.toByteArray()` - Convert to byte array
 
 **Note:** Variable chain methods require method-style call support in the parser. Currently, only property access (`.length`) is fully supported.
 
@@ -67,7 +66,6 @@ The following methods should be called on the binary variable but require parser
 - `data.slice(start, end?)` - Extract portion of binary
 - `data.concat(other)` - Concatenate two binary arrays
 - `data.toBase64()` - Convert to Base64 string
-- `data.toByteArray()` - Convert to byte array
 
 ## Use Cases
 

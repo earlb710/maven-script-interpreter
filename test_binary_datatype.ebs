@@ -45,7 +45,6 @@ print "  - var.set(index, value) (requires method support)";
 print "  - var.slice(start, end?) -> binary (requires method support)";
 print "  - var.concat(other) -> binary (requires method support)";
 print "  - var.toBase64() -> string (requires method support)";
-print "  - var.toByteArray() -> array.byte (requires method support)";
 print "";
 
 print "=== All binary datatype examples completed ===";
