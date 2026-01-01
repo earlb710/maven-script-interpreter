@@ -4,62 +4,49 @@
 print "=== Binary Datatype Examples ===";
 print "";
 
-// Example 1: Create binary data from Base64
+// Example 1: Create binary data from Base64 (datatype function)
 print "1. Creating binary from Base64 string:";
 var binaryData: binary = binary.fromBase64("SGVsbG8gV29ybGQ=");
 print "   Created binary data from base64";
-print "   Length: " + binary.length(binaryData) + " bytes";
+print "   Note: binary.fromBase64() is a datatype function";
 print "";
 
-// Example 2: Access individual bytes
-print "2. Accessing individual bytes:";
-var firstByte: byte = binary.get(binaryData, 0);
-print "   First byte: " + firstByte;
-var lastByte: byte = binary.get(binaryData, binary.length(binaryData) - 1);
-print "   Last byte: " + lastByte;
+// Example 2: Create binary from byte array (datatype function)
+print "2. Creating binary from byte array:";
+var byteArr: array.byte[5];
+byteArr[0] = 72;
+byteArr[1] = 101;
+byteArr[2] = 108;
+byteArr[3] = 108;
+byteArr[4] = 111;
+var binFromArray: binary = binary.fromByteArray(byteArr);
+print "   Created binary from byte array";
+print "   Note: binary.fromByteArray() is a datatype function";
 print "";
 
-// Example 3: Modify binary data
-print "3. Modifying binary data:";
-call binary.set(binaryData, 0, 88);
-var newFirstByte: byte = binary.get(binaryData, 0);
-print "   Modified first byte to: " + newFirstByte;
+// Example 3: Access length property (variable chain)
+print "3. Accessing length property:";
+var data: binary = binary.fromBase64("SGVsbG8gV29ybGQ=");
+var len: int = data.length;
+print "   Data length: " + len + " bytes";
+print "   Note: .length is a property accessed on the variable";
 print "";
 
-// Example 4: Slice binary data
-print "4. Slicing binary data:";
-var originalData: binary = binary.fromBase64("SGVsbG8gV29ybGQ=");
-var slice1: binary = binary.slice(originalData, 0, 5);
-var slice2: binary = binary.slice(originalData, 6);
-print "   Original: SGVsbG8gV29ybGQ=";
-print "   Slice [0,5): " + binary.toBase64(slice1);
-print "   Slice [6,end): " + binary.toBase64(slice2);
+print "=== Datatype Functions vs Variable Chain Functions ===";
 print "";
-
-// Example 5: Concatenate binary data
-print "5. Concatenating binary data:";
-var part1: binary = binary.fromBase64("SGVs");
-var part2: binary = binary.fromBase64("bG8=");
-var combined: binary = binary.concat(part1, part2);
-print "   Part 1: SGVs";
-print "   Part 2: bG8=";
-print "   Combined: " + binary.toBase64(combined);
+print "DATATYPE FUNCTIONS (callable as binary.*):";
+print "  - binary.fromBase64(string) -> binary";
+print "  - binary.fromByteArray(array.byte) -> binary";
 print "";
-
-// Example 6: Convert between binary and byte array
-print "6. Converting to/from byte array:";
-var binData: binary = binary.fromBase64("AQIDBA==");
-var byteArray = binary.toByteArray(binData);
-print "   Binary length: " + binary.length(binData);
-print "   Array length: " + byteArray.length;
-var binaryAgain: binary = binary.fromByteArray(byteArray);
-print "   Converted back: " + binary.toBase64(binaryAgain);
-print "";
-
-// Example 7: Working with empty binary
-print "7. Working with empty binary:";
-var emptyBinary: binary = binary.fromBase64("");
-print "   Empty binary length: " + binary.length(emptyBinary);
+print "VARIABLE CHAIN FUNCTIONS (to be called on variable):";
+print "  - var.length -> int (property, already works)";
+print "  - var.get(index) -> byte (requires method support)";
+print "  - var.set(index, value) (requires method support)";
+print "  - var.slice(start, end?) -> binary (requires method support)";
+print "  - var.concat(other) -> binary (requires method support)";
+print "  - var.toBase64() -> string (requires method support)";
+print "  - var.toByteArray() -> array.byte (requires method support)";
 print "";
 
 print "=== All binary datatype examples completed ===";
+

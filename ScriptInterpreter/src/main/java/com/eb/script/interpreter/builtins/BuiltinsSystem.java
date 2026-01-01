@@ -71,14 +71,7 @@ public class BuiltinsSystem {
             case "array.asbyte" -> arrayAsByte(args);
             case "array.asintmap" -> arrayAsIntmap(args);
             case "array.asint" -> arrayAsInt(args);
-            case "binary.length" -> binaryLength(args);
-            case "binary.get" -> binaryGet(args);
-            case "binary.set" -> binarySet(args);
-            case "binary.slice" -> binarySlice(args);
-            case "binary.concat" -> binaryConcat(args);
-            case "binary.tobase64" -> binaryToBase64(args);
             case "binary.frombase64" -> binaryFromBase64(args);
-            case "binary.tobytearray" -> binaryToByteArray(args);
             case "binary.frombytearray" -> binaryFromByteArray(args);
             default -> throw new InterpreterError("Unknown System builtin: " + name);
         };
@@ -640,142 +633,7 @@ public class BuiltinsSystem {
         return com.eb.script.interpreter.screen.ScreenFactory.getEventCount(screenName, itemName, eventType);
     }
 
-    // --- Binary builtin implementations ---
-
-    /**
-     * Get the length of binary data.
-     * binary.length(binary) -> int
-     */
-    private static Object binaryLength(Object[] args) throws InterpreterError {
-        Object bin = args[0];
-        if (bin == null) {
-            return 0;
-        }
-        if (bin instanceof byte[] bytes) {
-            return bytes.length;
-        }
-        throw new InterpreterError("binary.length: expected binary (byte[]), got " + bin.getClass().getSimpleName());
-    }
-
-    /**
-     * Get byte at specified index.
-     * binary.get(binary, index) -> byte
-     */
-    private static Object binaryGet(Object[] args) throws InterpreterError {
-        Object bin = args[0];
-        if (bin == null) {
-            throw new InterpreterError("binary.get: binary is null");
-        }
-        if (!(bin instanceof byte[] bytes)) {
-            throw new InterpreterError("binary.get: expected binary (byte[]), got " + bin.getClass().getSimpleName());
-        }
-        
-        int index = (Integer) args[1];
-        if (index < 0 || index >= bytes.length) {
-            throw new InterpreterError("binary.get: index " + index + " out of bounds [0.." + (bytes.length - 1) + "]");
-        }
-        
-        return bytes[index];
-    }
-
-    /**
-     * Set byte at specified index.
-     * binary.set(binary, index, value) -> null
-     */
-    private static Object binarySet(Object[] args) throws InterpreterError {
-        Object bin = args[0];
-        if (bin == null) {
-            throw new InterpreterError("binary.set: binary is null");
-        }
-        if (!(bin instanceof byte[] bytes)) {
-            throw new InterpreterError("binary.set: expected binary (byte[]), got " + bin.getClass().getSimpleName());
-        }
-        
-        int index = (Integer) args[1];
-        if (index < 0 || index >= bytes.length) {
-            throw new InterpreterError("binary.set: index " + index + " out of bounds [0.." + (bytes.length - 1) + "]");
-        }
-        
-        byte value = (Byte) args[2];
-        bytes[index] = value;
-        return null;
-    }
-
-    /**
-     * Extract a slice of binary data.
-     * binary.slice(binary, start, end?) -> binary
-     * If end is not provided, slices to the end.
-     */
-    private static Object binarySlice(Object[] args) throws InterpreterError {
-        Object bin = args[0];
-        if (bin == null) {
-            return new byte[0];
-        }
-        if (!(bin instanceof byte[] bytes)) {
-            throw new InterpreterError("binary.slice: expected binary (byte[]), got " + bin.getClass().getSimpleName());
-        }
-        
-        int start = (Integer) args[1];
-        int end = (args.length > 2 && args[2] != null) ? (Integer) args[2] : bytes.length;
-        
-        if (start < 0 || start > bytes.length) {
-            throw new InterpreterError("binary.slice: start index " + start + " out of bounds [0.." + bytes.length + "]");
-        }
-        if (end < start || end > bytes.length) {
-            throw new InterpreterError("binary.slice: end index " + end + " out of bounds [" + start + ".." + bytes.length + "]");
-        }
-        
-        byte[] result = new byte[end - start];
-        System.arraycopy(bytes, start, result, 0, end - start);
-        return result;
-    }
-
-    /**
-     * Concatenate two binary data arrays.
-     * binary.concat(binary1, binary2) -> binary
-     */
-    private static Object binaryConcat(Object[] args) throws InterpreterError {
-        Object bin1 = args[0];
-        Object bin2 = args[1];
-        
-        if (bin1 == null && bin2 == null) {
-            return new byte[0];
-        }
-        if (bin1 == null) {
-            return bin2;
-        }
-        if (bin2 == null) {
-            return bin1;
-        }
-        
-        if (!(bin1 instanceof byte[] bytes1)) {
-            throw new InterpreterError("binary.concat: first argument expected binary (byte[]), got " + bin1.getClass().getSimpleName());
-        }
-        if (!(bin2 instanceof byte[] bytes2)) {
-            throw new InterpreterError("binary.concat: second argument expected binary (byte[]), got " + bin2.getClass().getSimpleName());
-        }
-        
-        byte[] result = new byte[bytes1.length + bytes2.length];
-        System.arraycopy(bytes1, 0, result, 0, bytes1.length);
-        System.arraycopy(bytes2, 0, result, bytes1.length, bytes2.length);
-        return result;
-    }
-
-    /**
-     * Convert binary data to Base64 string.
-     * binary.toBase64(binary) -> string
-     */
-    private static Object binaryToBase64(Object[] args) throws InterpreterError {
-        Object bin = args[0];
-        if (bin == null) {
-            return "";
-        }
-        if (!(bin instanceof byte[] bytes)) {
-            throw new InterpreterError("binary.toBase64: expected binary (byte[]), got " + bin.getClass().getSimpleName());
-        }
-        
-        return java.util.Base64.getEncoder().encodeToString(bytes);
-    }
+    // --- Binary builtin implementations (datatype functions only) ---
 
     /**
      * Create binary data from Base64 string.
@@ -792,22 +650,6 @@ public class BuiltinsSystem {
         } catch (IllegalArgumentException ex) {
             throw new InterpreterError("binary.fromBase64: invalid base64: " + ex.getMessage());
         }
-    }
-
-    /**
-     * Convert binary data to byte array.
-     * binary.toByteArray(binary) -> array.byte
-     */
-    private static Object binaryToByteArray(Object[] args) throws InterpreterError {
-        Object bin = args[0];
-        if (bin == null) {
-            return new ArrayFixedByte(0);
-        }
-        if (!(bin instanceof byte[] bytes)) {
-            throw new InterpreterError("binary.toByteArray: expected binary (byte[]), got " + bin.getClass().getSimpleName());
-        }
-        
-        return new ArrayFixedByte(bytes.clone());
     }
 
     /**
