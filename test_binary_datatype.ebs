@@ -1,0 +1,65 @@
+// Example script demonstrating the binary datatype
+// This datatype is useful for handling binary data like images, files, etc.
+
+print "=== Binary Datatype Examples ===";
+print "";
+
+// Example 1: Create binary data from Base64
+print "1. Creating binary from Base64 string:";
+var binaryData: binary = binary.fromBase64("SGVsbG8gV29ybGQ=");
+print "   Created binary data from base64";
+print "   Length: " + binary.length(binaryData) + " bytes";
+print "";
+
+// Example 2: Access individual bytes
+print "2. Accessing individual bytes:";
+var firstByte: byte = binary.get(binaryData, 0);
+print "   First byte: " + firstByte;
+var lastByte: byte = binary.get(binaryData, binary.length(binaryData) - 1);
+print "   Last byte: " + lastByte;
+print "";
+
+// Example 3: Modify binary data
+print "3. Modifying binary data:";
+call binary.set(binaryData, 0, 88);
+var newFirstByte: byte = binary.get(binaryData, 0);
+print "   Modified first byte to: " + newFirstByte;
+print "";
+
+// Example 4: Slice binary data
+print "4. Slicing binary data:";
+var originalData: binary = binary.fromBase64("SGVsbG8gV29ybGQ=");
+var slice1: binary = binary.slice(originalData, 0, 5);
+var slice2: binary = binary.slice(originalData, 6);
+print "   Original: SGVsbG8gV29ybGQ=";
+print "   Slice [0,5): " + binary.toBase64(slice1);
+print "   Slice [6,end): " + binary.toBase64(slice2);
+print "";
+
+// Example 5: Concatenate binary data
+print "5. Concatenating binary data:";
+var part1: binary = binary.fromBase64("SGVs");
+var part2: binary = binary.fromBase64("bG8=");
+var combined: binary = binary.concat(part1, part2);
+print "   Part 1: SGVs";
+print "   Part 2: bG8=";
+print "   Combined: " + binary.toBase64(combined);
+print "";
+
+// Example 6: Convert between binary and byte array
+print "6. Converting to/from byte array:";
+var binData: binary = binary.fromBase64("AQIDBA==");
+var byteArray = binary.toByteArray(binData);
+print "   Binary length: " + binary.length(binData);
+print "   Array length: " + byteArray.length;
+var binaryAgain: binary = binary.fromByteArray(byteArray);
+print "   Converted back: " + binary.toBase64(binaryAgain);
+print "";
+
+// Example 7: Working with empty binary
+print "7. Working with empty binary:";
+var emptyBinary: binary = binary.fromBase64("");
+print "   Empty binary length: " + binary.length(emptyBinary);
+print "";
+
+print "=== All binary datatype examples completed ===";
