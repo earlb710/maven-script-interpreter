@@ -71,6 +71,7 @@ public class BuiltinsSystem {
             case "array.asbyte" -> arrayAsByte(args);
             case "array.asintmap" -> arrayAsIntmap(args);
             case "array.asint" -> arrayAsInt(args);
+            case "binary.frombase64" -> binaryFromBase64(args);
             default -> throw new InterpreterError("Unknown System builtin: " + name);
         };
     }
@@ -79,7 +80,7 @@ public class BuiltinsSystem {
      * Checks if the given builtin name is a System/Array/Sleep/Util builtin.
      */
     public static boolean handles(String name) {
-        return name.startsWith("system.") || name.startsWith("sys.") || name.startsWith("array.") || name.equals("thread.sleep") || name.startsWith("util.");
+        return name.startsWith("system.") || name.startsWith("sys.") || name.startsWith("array.") || name.startsWith("binary.") || name.equals("thread.sleep") || name.startsWith("util.");
     }
 
     // --- Individual builtin implementations ---
@@ -629,5 +630,24 @@ public class BuiltinsSystem {
         final String eventType = (String) args[2];
         
         return com.eb.script.interpreter.screen.ScreenFactory.getEventCount(screenName, itemName, eventType);
+    }
+
+    // --- Binary builtin implementations (datatype functions only) ---
+
+    /**
+     * Create binary data from Base64 string.
+     * binary.fromBase64(base64String) -> binary
+     */
+    private static Object binaryFromBase64(Object[] args) throws InterpreterError {
+        String b64 = (String) args[0];
+        if (b64 == null || b64.isEmpty()) {
+            return new byte[0];
+        }
+        
+        try {
+            return java.util.Base64.getDecoder().decode(b64);
+        } catch (IllegalArgumentException ex) {
+            throw new InterpreterError("binary.fromBase64: invalid base64: " + ex.getMessage());
+        }
     }
 }

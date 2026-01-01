@@ -782,6 +782,15 @@ public final class Builtins {
         ));
 
         // ==========================
+        // BINARY builtins (datatype functions only)
+        // ==========================
+        // Factory method that creates binary data (cannot be called on a variable)
+        addBuiltin(info(
+                "binary.fromBase64", DataType.BINARY,
+                newParam("base64", DataType.STRING)
+        ));
+
+        // ==========================
         // QUEUE builtins
         // ==========================
         addBuiltin(info(

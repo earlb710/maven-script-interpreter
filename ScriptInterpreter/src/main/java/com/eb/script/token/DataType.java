@@ -28,6 +28,7 @@ public enum DataType {
     MAP(java.util.Map.class),
     BITMAP(Byte.class),
     INTMAP(Integer.class),
+    BINARY(byte[].class),
     IMAGE(EbsImage.class),
     VECTOR_IMAGE(EbsVectorImage.class),
     CANVAS(EbsCanvas.class),
@@ -90,6 +91,9 @@ public enum DataType {
                 }
                 case INTMAP -> {
                     return new Integer[length];
+                }
+                case BINARY -> {
+                    return new byte[length][];
                 }
                 case IMAGE -> {
                     return new EbsImage[length];
@@ -157,6 +161,10 @@ public enum DataType {
         if (type == INTMAP) {
             // Accept Integer objects as intmaps
             return value instanceof Integer || value instanceof Number;
+        }
+        if (type == BINARY) {
+            // Accept byte arrays as binary
+            return value instanceof byte[];
         }
         // For other types, allow subclasses (e.g., HashMap instanceof Map)
         return dataClass.isInstance(value);
@@ -284,6 +292,12 @@ public enum DataType {
             case INTMAP -> {
                 // Convert to int for intmap type
                 value = convertToInt(value);
+            }
+            case BINARY -> {
+                // Binary accepts byte[] as-is, no conversion needed
+                if (!(value instanceof byte[])) {
+                    throw new RuntimeException("Cannot convert " + value.getClass().getSimpleName() + " to binary (byte[])");
+                }
             }
             default -> {
             }

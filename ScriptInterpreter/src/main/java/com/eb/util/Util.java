@@ -120,6 +120,8 @@ public class Util {
                     array.getDataType() == DataType.VECTOR_IMAGE;
                 case CANVAS ->
                     array.getDataType() == DataType.CANVAS;
+                case BINARY ->
+                    false; // Binary is not an array type
                 case JSON ->
                     true;
                 case ANY ->
@@ -157,6 +159,8 @@ public class Util {
                     value instanceof com.eb.script.image.EbsVectorImage;
                 case CANVAS ->
                     value instanceof com.eb.script.image.EbsCanvas;
+                case BINARY ->
+                    value instanceof byte[];
                 case ANY ->
                     true;
                 default ->
