@@ -9,6 +9,7 @@ A powerful script interpreter for the EBS (Earl Bosch Script) language, featurin
 - **Bitmap Type**: Define named bit fields within a byte (8-bit) for compact storage of flags and small values
 - **Intmap Type**: Define named bit fields within an integer (32-bit) for storing larger bit-packed data structures
 - **typeof Operator**: Get the type of any variable or expression at runtime (e.g., `typeof a` returns `"string"`)
+- **Record Field Properties**: Enhanced record types with field-level constraints including default values, mandatory fields, and maximum length validation
 - **Screen Component Types**: Type tracking for JavaFX screen components with `typeof` returning "Screen.Xxx" format and comprehensive introspection properties (`.javafx`, `.properties`, `.children`, `.parent`, `.tree`, `.events`, `.snapshot`) for both components and containers
 - **Exception Handling**: Robust error handling with `try-exceptions-when` syntax to catch specific or any errors
 - **Interactive Console**: JavaFX-based IDE with rich text editing
@@ -283,6 +284,90 @@ print typeof int("42");  // Output: int
 - For records, displays the complete structure with field names and types
 
 See `scripts/test/test_typeof_operator.ebs` for more examples.
+
+### Record Types with Field Properties
+
+The record type system supports field-level constraints and validation, allowing you to define structured data with enforced rules:
+
+```javascript
+// Basic record with field properties
+var user: record {
+    username: string(mandatory, maxlength:20),
+    email: string(mandatory, maxlength:100),
+    displayName: string(default:"Guest"),
+    bio: string(maxlength:500),
+    isActive: bool(default:true)
+};
+
+// Only mandatory fields needed - defaults are applied automatically
+user = {
+    "username": "johndoe",
+    "email": "john@example.com"
+};
+
+// Access fields (defaults have been applied)
+print user.displayName;  // Output: Guest
+print user.isActive;     // Output: Y
+
+// Explicit validation
+if call record.validate("user") then {
+    print "User record is valid";
+}
+```
+
+**Available Field Properties:**
+
+- `mandatory` / `required` / `notnull` - Field must be present in the data (unless a default is provided)
+- `maxlength:N` / `maxlen:N` - Maximum string length (N = integer)
+- `default:value` - Default value applied when field is not provided
+
+**Field Properties Examples:**
+
+```javascript
+// Product catalog with various constraints
+var product: record {
+    sku: string(mandatory, maxlength:20),
+    name: string(mandatory, maxlength:100),
+    description: string(maxlength:500),
+    price: double(default:0.0),
+    quantity: int(default:0),
+    category: string(default:"General"),
+    available: bool(default:true)
+};
+
+// Minimal product creation
+product = {
+    "sku": "WIDGET-001",
+    "name": "Premium Widget"
+};
+
+// Defaults are applied:
+// product.price = 0.0
+// product.quantity = 0
+// product.category = "General"
+// product.available = true
+```
+
+**Combining Multiple Properties:**
+
+```javascript
+var employee: record {
+    id: int(mandatory),
+    name: string(mandatory, maxlength:50),
+    email: string(mandatory, maxlength:100),
+    department: string(default:"Unassigned"),
+    salary: double(default:0.0)
+};
+```
+
+**Validation:**
+
+- Validation occurs automatically during record assignment
+- Use `record.validate("variableName")` for explicit validation
+- Validation checks mandatory fields, max length constraints, and data types
+- Descriptive error messages are provided for constraint violations
+
+See [RECORD_ENHANCEMENTS.md](RECORD_ENHANCEMENTS.md) for complete documentation, more examples, and implementation details.
 
 ### Exception Handling
 
