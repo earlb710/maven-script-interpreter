@@ -97,7 +97,7 @@ print "";
 // Test 5: Record with all string fields and different properties
 print "Test 5: Various field property combinations";
 var config: record {
-    host: string(mandatory, default:"localhost"),
+    host: string(mandatory),
     port: int(default:8080),
     ssl: bool(default:false),
     timeout: int(default:30),
