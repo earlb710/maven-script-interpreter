@@ -11,11 +11,11 @@ The record type system has been enhanced to support field-level metadata includi
 
 ## Syntax
 
-Field properties are specified in parentheses after the field type:
+Field properties are specified directly after the field type without any delimiters:
 
 ```javascript
 var recordName: record {
-    fieldName: type(property1, property2:value, ...),
+    fieldName: type property1 property2:value ...,
     ...
 };
 ```
@@ -27,8 +27,8 @@ Marks a field as required. The field must be present in the record data.
 
 ```javascript
 var person: record {
-    name: string(mandatory),
-    email: string(required)
+    name: string mandatory,
+    email: string required
 };
 
 // Must provide mandatory fields
@@ -40,8 +40,8 @@ Specifies the maximum length for string fields (N is an integer).
 
 ```javascript
 var user: record {
-    username: string(maxlength:20),
-    bio: string(maxlen:500)
+    username: string maxlength:20,
+    bio: string maxlen:500
 };
 
 // Strings are validated against max length
@@ -53,10 +53,10 @@ Provides a default value that will be used if the field is not present in the da
 
 ```javascript
 var product: record {
-    name: string(mandatory),
-    price: double(default:0.0),
-    quantity: int(default:1),
-    status: string(default:"available")
+    name: string mandatory,
+    price: double default:0.0,
+    quantity: int default:1,
+    status: string default:"available"
 };
 
 // Only name is required, others get defaults
@@ -68,15 +68,15 @@ product = {"name": "Widget"};
 
 ### Combining Properties
 
-Multiple properties can be combined on a single field:
+Multiple properties can be combined on a single field by listing them in sequence:
 
 ```javascript
 var employee: record {
-    id: int(mandatory),
-    name: string(mandatory, maxlength:50),
-    email: string(mandatory, maxlength:100),
-    department: string(default:"Unassigned"),
-    salary: double(default:0.0)
+    id: int mandatory,
+    name: string mandatory maxlength:50,
+    email: string mandatory maxlength:100,
+    department: string default:"Unassigned",
+    salary: double default:0.0
 };
 ```
 
@@ -88,7 +88,7 @@ Record validation happens automatically during assignment. If a record violates 
 
 ```javascript
 var user: record {
-    username: string(mandatory, maxlength:10)
+    username: string mandatory maxlength:10
 };
 
 // This will throw an error - username too long
@@ -104,8 +104,8 @@ Use the `record.validate()` builtin function to explicitly validate a record:
 
 ```javascript
 var person: record {
-    name: string(mandatory),
-    age: int(default:0)
+    name: string mandatory,
+    age: int default:0
 };
 
 person = {"name": "Alice"};
@@ -125,12 +125,12 @@ if call record.validate("person") then {
 
 ```javascript
 var userProfile: record {
-    username: string(mandatory, maxlength:20),
-    email: string(mandatory, maxlength:100),
-    displayName: string(maxlength:50, default:"Anonymous"),
-    bio: string(maxlength:500),
-    isActive: bool(default:true),
-    createdAt: string(default:"2024-01-01")
+    username: string mandatory maxlength:20,
+    email: string mandatory maxlength:100,
+    displayName: string maxlength:50 default:"Anonymous",
+    bio: string maxlength:500,
+    isActive: bool default:true,
+    createdAt: string default:"2024-01-01"
 };
 
 // Create profile - only required fields needed
@@ -152,13 +152,13 @@ print "Active: " + userProfile.isActive;
 
 ```javascript
 var product: record {
-    sku: string(mandatory, maxlength:20),
-    name: string(mandatory, maxlength:100),
-    description: string(maxlength:500),
-    price: double(default:0.0),
-    quantity: int(default:0),
-    category: string(default:"General"),
-    available: bool(default:true)
+    sku: string mandatory maxlength:20,
+    name: string mandatory maxlength:100,
+    description: string maxlength:500,
+    price: double default:0.0,
+    quantity: int default:0,
+    category: string default:"General",
+    available: bool default:true
 };
 
 // Minimal product creation
@@ -179,12 +179,12 @@ if call record.validate("product") then {
 
 ```javascript
 var config: record {
-    host: string(mandatory),
-    port: int(default:8080),
-    ssl: bool(default:false),
-    timeout: int(default:30),
-    apiKey: string(maxlength:64, default:"none"),
-    maxConnections: int(default:100)
+    host: string mandatory,
+    port: int default:8080,
+    ssl: bool default:false,
+    timeout: int default:30,
+    apiKey: string maxlength:64 default:"none",
+    maxConnections: int default:100
 };
 
 // Simple configuration
