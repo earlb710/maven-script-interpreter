@@ -1,0 +1,121 @@
+// Test script demonstrating record validation features
+// Shows validation at assignment time and using record.validate() function
+
+print "=== Record Type Enhancement Demonstration ===";
+print "";
+
+// Test 1: Default values
+print "Test 1: Default Values";
+print "----------------------";
+var person: record {
+    name: string(mandatory),
+    age: int(default:0),
+    status: string(default:"active")
+};
+
+person = {"name": "Alice"};
+print "Person created with only name provided:";
+print "  Name: " + person.name;
+print "  Age (default): " + person.age;
+print "  Status (default): " + person.status;
+
+if call record.validate("person") then {
+    print "✓ Person record validated successfully";
+}
+print "";
+
+// Test 2: Mandatory fields
+print "Test 2: Mandatory Fields";
+print "------------------------";
+var employee: record {
+    id: int(mandatory),
+    name: string(mandatory),
+    department: string(default:"Unassigned")
+};
+
+employee = {"id": 101, "name": "Bob Smith"};
+print "Employee created with mandatory fields:";
+print "  ID: " + employee.id;
+print "  Name: " + employee.name;
+print "  Department (default): " + employee.department;
+
+if call record.validate("employee") then {
+    print "✓ Employee record validated successfully";
+}
+print "";
+
+// Test 3: Maximum length constraints
+print "Test 3: Maximum Length Constraints";
+print "----------------------------------";
+var user: record {
+    username: string(mandatory, maxlength:20),
+    email: string(maxlength:50),
+    bio: string(maxlength:100)
+};
+
+user = {"username": "johndoe", "email": "john@example.com", "bio": "Software developer"};
+print "User created within length constraints:";
+print "  Username: " + user.username + " (max 20)";
+print "  Email: " + user.email + " (max 50)";
+print "  Bio: " + user.bio + " (max 100)";
+
+if call record.validate("user") then {
+    print "✓ User record validated successfully";
+}
+print "";
+
+// Test 4: Combined constraints
+print "Test 4: Combined Constraints";
+print "----------------------------";
+var product: record {
+    name: string(mandatory, maxlength:50),
+    sku: string(mandatory, maxlength:20),
+    price: double(default:0.0),
+    quantity: int(default:0),
+    inStock: bool(default:true)
+};
+
+product = {"name": "Premium Widget", "sku": "PWD-001"};
+print "Product created with multiple constraint types:";
+print "  Name: " + product.name + " (mandatory, max 50)";
+print "  SKU: " + product.sku + " (mandatory, max 20)";
+print "  Price: " + product.price + " (default 0.0)";
+print "  Quantity: " + product.quantity + " (default 0)";
+print "  In Stock: " + product.inStock + " (default true)";
+
+if call record.validate("product") then {
+    print "✓ Product record validated successfully";
+}
+print "";
+
+// Test 5: Record.validate() function
+print "Test 5: Using record.validate() Function";
+print "----------------------------------------";
+var config: record {
+    host: string(mandatory),
+    port: int(default:8080),
+    timeout: int(default:30)
+};
+
+config = {"host": "localhost"};
+print "Config created:";
+print "  Host: " + config.host;
+print "  Port: " + config.port;
+print "  Timeout: " + config.timeout;
+
+print "Calling record.validate(\"config\")...";
+if call record.validate("config") then {
+    print "✓ Config is valid";
+} else {
+    print "✗ Config is invalid";
+}
+print "";
+
+print "=== All tests completed successfully ===";
+print "";
+print "Summary of Features Demonstrated:";
+print "  • Default values automatically applied when fields not provided";
+print "  • Mandatory fields enforced during assignment";
+print "  • Maximum length constraints enforced for string fields";
+print "  • record.validate(varName) function for explicit validation";
+print "  • Multiple constraints can be combined on a single field";

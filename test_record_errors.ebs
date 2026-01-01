@@ -1,0 +1,38 @@
+// Test script showing validation errors
+// This script intentionally creates invalid records to show error messages
+
+print "=== Record Validation Error Test ===";
+print "";
+
+// Test 1: Exceed max length
+print "Test 1: Testing max length exceeded (expect error message)";
+var user: record {
+    username: string(mandatory, maxlength:10)
+};
+
+// This should fail - username is 17 characters
+user = {"username": "verylongusername"};
+if call record.validate("user") then {
+    print "✗ Validation should have failed";
+} else {
+    print "✓ Validation correctly reported failure";
+}
+print "";
+
+// Test 2: Missing mandatory field
+print "Test 2: Testing missing mandatory field (expect error message)";
+var person: record {
+    name: string(mandatory),
+    age: int
+};
+
+// This should fail - missing mandatory name field
+person = {"age": 25};
+if call record.validate("person") then {
+    print "✗ Validation should have failed";
+} else {
+    print "✓ Validation correctly reported failure";
+}
+print "";
+
+print "=== Error validation tests completed ===";

@@ -1404,15 +1404,30 @@ public class Parser {
                             case "default":
                                 // Expect colon and value
                                 consume(EbsTokenType.COLON, "Expected ':' after 'default' in field properties.");
-                                EbsToken defaultToken = peek();
-                                advance();
                                 
-                                // Convert the default value based on field type
-                                if (defaultToken.literal != null) {
-                                    if (fieldType != null) {
-                                        defaultValue = fieldType.convertValue(defaultToken.literal);
-                                    } else {
-                                        defaultValue = defaultToken.literal;
+                                // Check if it's a quoted string literal
+                                EbsToken defaultToken = peek();
+                                if (defaultToken.type == EbsTokenType.QUOTE1 || defaultToken.type == EbsTokenType.QUOTE2) {
+                                    EbsTokenType quoteType = defaultToken.type;
+                                    advance(); // consume opening quote
+                                    EbsToken stringToken = consume(EbsTokenType.STRING, "Expected string value after quote.");
+                                    consume(quoteType, "Expected closing quote after string value.");
+                                    
+                                    // Use the string literal as default value
+                                    if (stringToken.literal instanceof String) {
+                                        defaultValue = (String) stringToken.literal;
+                                    }
+                                } else {
+                                    // It's a non-string literal (number, bool, etc.)
+                                    advance();
+                                    
+                                    // Convert the default value based on field type
+                                    if (defaultToken.literal != null) {
+                                        if (fieldType != null) {
+                                            defaultValue = fieldType.convertValue(defaultToken.literal);
+                                        } else {
+                                            defaultValue = defaultToken.literal;
+                                        }
                                     }
                                 }
                                 break;
