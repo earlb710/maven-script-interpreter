@@ -72,7 +72,6 @@ public class BuiltinsSystem {
             case "array.asintmap" -> arrayAsIntmap(args);
             case "array.asint" -> arrayAsInt(args);
             case "binary.frombase64" -> binaryFromBase64(args);
-            case "binary.tostring" -> binaryToString(args);
             default -> throw new InterpreterError("Unknown System builtin: " + name);
         };
     }
@@ -649,32 +648,6 @@ public class BuiltinsSystem {
             return java.util.Base64.getDecoder().decode(b64);
         } catch (IllegalArgumentException ex) {
             throw new InterpreterError("binary.fromBase64: invalid base64: " + ex.getMessage());
-        }
-    }
-
-    /**
-     * Convert binary data to string.
-     * binary.toString(binary, encoding?) -> string
-     * Default encoding is UTF-8
-     */
-    private static Object binaryToString(Object[] args) throws InterpreterError {
-        Object bin = args[0];
-        if (bin == null) {
-            return "";
-        }
-        if (!(bin instanceof byte[] bytes)) {
-            throw new InterpreterError("binary.toString: expected binary (byte[]), got " + bin.getClass().getSimpleName());
-        }
-        
-        String encoding = "UTF-8";
-        if (args.length > 1 && args[1] != null) {
-            encoding = (String) args[1];
-        }
-        
-        try {
-            return new String(bytes, encoding);
-        } catch (java.io.UnsupportedEncodingException ex) {
-            throw new InterpreterError("binary.toString: unsupported encoding: " + encoding);
         }
     }
 }

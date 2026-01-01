@@ -11,30 +11,30 @@ print "   Created binary data from base64";
 print "   Note: binary.fromBase64() is a datatype function";
 print "";
 
-// Example 2: Convert binary to string (datatype function)
-print "2. Converting binary to string:";
-var textBin: binary = binary.fromBase64("SGVsbG8gV29ybGQ=");
-var textStr: string = binary.toString(textBin);
-print "   Text from binary: " + textStr;
-print "   Note: binary.toString() is a datatype function";
-print "";
-
-// Example 3: Access length property (variable chain)
-print "3. Accessing length property:";
+// Example 2: Access length property (variable chain function)
+print "2. Accessing length property:";
 var data: binary = binary.fromBase64("SGVsbG8gV29ybGQ=");
 var len: int = data.length;
 print "   Data length: " + len + " bytes";
 print "   Note: .length is a property accessed on the variable";
 print "";
 
+// Example 3: Note about variable chain functions
+print "3. Variable chain functions (require parser support):";
+print "   data.toString() - convert to string";
+print "   data.get(0) - get byte at index";
+print "   data.slice(0, 5) - extract portion";
+print "   data.toBase64() - convert to base64";
+print "";
+
 print "=== Datatype Functions vs Variable Chain Functions ===";
 print "";
 print "DATATYPE FUNCTIONS (callable as binary.*):";
 print "  - binary.fromBase64(string) -> binary";
-print "  - binary.toString(binary, encoding?) -> string";
 print "";
 print "VARIABLE CHAIN FUNCTIONS (to be called on variable):";
 print "  - var.length -> int (property, already works)";
+print "  - var.toString(encoding?) -> string (requires method support)";
 print "  - var.get(index) -> byte (requires method support)";
 print "  - var.set(index, value) (requires method support)";
 print "  - var.slice(start, end?) -> binary (requires method support)";

@@ -14,15 +14,15 @@ var imageBytes: binary = binary.fromBase64("...");
 The binary datatype distinguishes between two types of functions:
 
 ### Datatype Functions (Static)
-Factory and conversion methods. These are called on the `binary` type itself:
+Factory method. Called on the `binary` type itself:
 
 - `binary.fromBase64(string)` - Creates binary from Base64 string
-- `binary.toString(binary, encoding?)` - Converts binary to string (default: UTF-8)
 
 ### Variable Chain Functions
 Instance methods/properties called on binary variables. These operate on existing binary data:
 
 - `.length` - Property access (returns int)
+- `.toString(encoding?)` - Convert to string (default: UTF-8)
 - `.get(index)` - Get byte at index
 - `.set(index, value)` - Set byte at index  
 - `.slice(start, end?)` - Extract portion
@@ -41,16 +41,7 @@ var data: binary = binary.fromBase64("SGVsbG8gV29ybGQ=");
 // data now contains the decoded bytes: "Hello World"
 ```
 
-### 2. `binary.toString(binary, encoding?) -> string` (Datatype Function)
-Converts binary data to a string using the specified encoding (default: UTF-8).
-
-```ebs
-var data: binary = binary.fromBase64("SGVsbG8gV29ybGQ=");
-var text: string = binary.toString(data);  // Returns: "Hello World"
-var utf8Text: string = binary.toString(data, "UTF-8");
-```
-
-### 3. `.length` (Property - Variable Chain)
+### 2. `.length` (Property - Variable Chain)
 Returns the length of the binary data in bytes.
 
 ```ebs
@@ -62,6 +53,7 @@ var len: int = data.length;  // Returns: 5
 
 The following methods should be called on the binary variable but require parser enhancements for method-style calls:
 
+- `data.toString(encoding?)` - Convert to string (default UTF-8)
 - `data.get(index)` - Get byte at specified index
 - `data.set(index, value)` - Set byte at specified index
 - `data.slice(start, end?)` - Extract portion of binary
@@ -75,8 +67,9 @@ The following methods should be called on the binary variable but require parser
 // From Base64 string
 var imageBytes: binary = binary.fromBase64(base64ImageString);
 
-// Convert binary to text
-var text: string = binary.toString(imageBytes);
+// Convert binary to text (variable chain function - requires parser support)
+// Future: var text: string = imageBytes.toString();
+// Future: var utf8Text: string = imageBytes.toString("UTF-8");
 ```
 
 ### Checking Binary Size
@@ -137,8 +130,8 @@ mvn exec:java -Dexec.mainClass="com.eb.script.Run" -Dexec.args="../test_binary_d
 
 The separation between datatype functions and variable chain functions eliminates ambiguity:
 
-- **Datatype functions** (`binary.fromBase64`, `binary.toString`) can be called as static methods
-- **Variable chain functions** (`.length`, `.get()`, `.slice()`, etc.) operate on existing instances and should be called on the variable
+- **Datatype functions** (`binary.fromBase64`) are called as static methods to create new instances
+- **Variable chain functions** (`.length`, `.toString()`, `.get()`, `.slice()`, etc.) operate on existing instances and should be called on the variable
 
 This design makes the API clearer and aligns with object-oriented principles where factory methods are static and instance methods are called on objects.
 

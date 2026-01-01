@@ -776,16 +776,10 @@ public final class Builtins {
         // ==========================
         // BINARY builtins (datatype functions only)
         // ==========================
-        // Factory methods that create binary data (cannot be called on a variable)
+        // Factory method that creates binary data (cannot be called on a variable)
         addBuiltin(info(
                 "binary.fromBase64", DataType.BINARY,
                 newParam("base64", DataType.STRING)
-        ));
-        // Conversion method
-        addBuiltin(info(
-                "binary.toString", DataType.STRING,
-                newParam("binary", DataType.BINARY, true),
-                newParam("encoding", DataType.STRING, false) // optional encoding (default: UTF-8)
         ));
 
         // ==========================
