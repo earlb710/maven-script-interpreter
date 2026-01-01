@@ -1361,10 +1361,94 @@ public class Parser {
             }
             
             // Add field to record type
+            // Parse optional field properties: (mandatory, maxlength:50, default:"value")
+            boolean isMandatory = false;
+            Integer maxLength = null;
+            Object defaultValue = null;
+            
+            if (check(EbsTokenType.LPAREN)) {
+                advance(); // consume '('
+                
+                // Parse field properties until we hit the closing paren
+                while (!check(EbsTokenType.RPAREN) && !isAtEnd()) {
+                    EbsToken propertyToken = peek();
+                    
+                    if (propertyToken.type == EbsTokenType.IDENTIFIER) {
+                        String propertyName = ((String) propertyToken.literal).toLowerCase();
+                        advance(); // consume property name
+                        
+                        switch (propertyName) {
+                            case "mandatory":
+                            case "notnull":
+                            case "required":
+                                isMandatory = true;
+                                break;
+                            
+                            case "maxlength":
+                            case "maxlen":
+                                // Expect colon and integer value
+                                consume(EbsTokenType.COLON, "Expected ':' after '" + propertyName + "' in field properties.");
+                                EbsToken lengthToken = peek();
+                                // Check if it's an integer literal
+                                if (lengthToken.literal instanceof Integer) {
+                                    maxLength = (Integer) lengthToken.literal;
+                                    advance();
+                                } else if (lengthToken.literal instanceof Long) {
+                                    maxLength = ((Long) lengthToken.literal).intValue();
+                                    advance();
+                                } else {
+                                    throw error(lengthToken, "maxLength value must be an integer.");
+                                }
+                                break;
+                            
+                            case "default":
+                                // Expect colon and value
+                                consume(EbsTokenType.COLON, "Expected ':' after 'default' in field properties.");
+                                EbsToken defaultToken = peek();
+                                advance();
+                                
+                                // Convert the default value based on field type
+                                if (defaultToken.literal != null) {
+                                    if (fieldType != null) {
+                                        defaultValue = fieldType.convertValue(defaultToken.literal);
+                                    } else {
+                                        defaultValue = defaultToken.literal;
+                                    }
+                                }
+                                break;
+                            
+                            default:
+                                throw error(propertyToken, "Unknown field property '" + propertyName + "'. Expected: mandatory, maxlength, or default.");
+                        }
+                    } else {
+                        throw error(propertyToken, "Expected field property name in field properties.");
+                    }
+                    
+                    // Check for comma (more properties) or closing paren (end of properties)
+                    if (check(EbsTokenType.COMMA)) {
+                        advance(); // consume comma
+                    } else if (!check(EbsTokenType.RPAREN)) {
+                        throw error(peek(), "Expected ',' or ')' in field properties.");
+                    }
+                }
+                
+                consume(EbsTokenType.RPAREN, "Expected ')' after field properties.");
+            }
+            
+            // Add field to record type with metadata
             if (nestedRecordType != null) {
                 recordType.addNestedRecord((String) fieldName.literal, nestedRecordType);
             } else {
-                recordType.addField((String) fieldName.literal, fieldType);
+                // Create field metadata and add field
+                com.eb.script.token.RecordFieldMetadata metadata = 
+                    new com.eb.script.token.RecordFieldMetadata(
+                        (String) fieldName.literal, 
+                        fieldType, 
+                        isMandatory, 
+                        maxLength, 
+                        defaultValue
+                    );
+                recordType.addField(metadata);
             }
             
             // Check for comma (more fields) or closing brace (end of record)

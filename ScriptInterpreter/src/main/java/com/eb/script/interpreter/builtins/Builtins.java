@@ -261,6 +261,14 @@ public final class Builtins {
         ));
 
         // ==========================
+        // RECORD builtins
+        // ==========================
+        addBuiltin(info(
+                "record.validate", DataType.BOOL, // validates a record against its type definition
+                newParam("varName", DataType.STRING) // variable name to validate
+        ));
+
+        // ==========================
         // STRING builtins
         // ==========================
         addBuiltin(info(
@@ -2123,6 +2131,11 @@ public final class Builtins {
             return dispatchMapBuiltin(name, args);
         }
         
+        // Record builtins
+        if (name.startsWith("record.")) {
+            return dispatchRecordBuiltin(name, args, env);
+        }
+        
         // CSS builtins
         if (BuiltinsCss.handles(name)) {
             return BuiltinsCss.dispatch(context, name, args);
@@ -2260,6 +2273,39 @@ public final class Builtins {
                 yield unsortedMap;
             }
             default -> throw new InterpreterError("Unknown map builtin: " + name);
+        };
+    }
+    
+    /**
+     * Dispatch record-related builtins.
+     */
+    private static Object dispatchRecordBuiltin(String name, Object[] args, Environment env) throws InterpreterError {
+        return switch (name) {
+            case "record.validate" -> {
+                if (args.length < 1) {
+                    throw new InterpreterError("record.validate requires 1 argument: variable name (string)");
+                }
+                Object varNameArg = args[0];
+                if (!(varNameArg instanceof String)) {
+                    throw new InterpreterError("record.validate requires a string argument (variable name)");
+                }
+                
+                String varName = (String) varNameArg;
+                
+                // Get the variable value from the environment
+                Object value = env.get(varName);
+                
+                // Get the record type for this variable
+                com.eb.script.token.RecordType recordType = env.getEnvironmentValues().getRecordType(varName);
+                if (recordType == null) {
+                    throw new InterpreterError("record.validate: variable '" + varName + "' does not have a record type definition");
+                }
+                
+                // Validate the value against the record type
+                boolean isValid = recordType.validateValue(value);
+                yield Boolean.valueOf(isValid);
+            }
+            default -> throw new InterpreterError("Unknown record builtin: " + name);
         };
     }
     
