@@ -774,6 +774,52 @@ public final class Builtins {
         ));
 
         // ==========================
+        // BINARY builtins
+        // ==========================
+        addBuiltin(info(
+                "binary.length", DataType.INTEGER,
+                newParam("binary", DataType.BINARY, true)
+        ));
+        addBuiltin(info(
+                "binary.get", DataType.BYTE,
+                newParam("binary", DataType.BINARY, true),
+                newParam("index", DataType.INTEGER)
+        ));
+        addBuiltin(info(
+                "binary.set", null,
+                newParam("binary", DataType.BINARY, true),
+                newParam("index", DataType.INTEGER),
+                newParam("value", DataType.BYTE)
+        ));
+        addBuiltin(info(
+                "binary.slice", DataType.BINARY,
+                newParam("binary", DataType.BINARY, true),
+                newParam("start", DataType.INTEGER),
+                newParam("end", DataType.INTEGER, false)
+        ));
+        addBuiltin(info(
+                "binary.concat", DataType.BINARY,
+                newParam("binary1", DataType.BINARY, true),
+                newParam("binary2", DataType.BINARY, true)
+        ));
+        addBuiltin(info(
+                "binary.toBase64", DataType.STRING,
+                newParam("binary", DataType.BINARY, true)
+        ));
+        addBuiltin(info(
+                "binary.fromBase64", DataType.BINARY,
+                newParam("base64", DataType.STRING)
+        ));
+        addBuiltin(info(
+                "binary.toByteArray", DataType.ARRAY,
+                newParam("binary", DataType.BINARY, true)
+        ));
+        addBuiltin(info(
+                "binary.fromByteArray", DataType.BINARY,
+                newParam("array", DataType.ARRAY, true)
+        ));
+
+        // ==========================
         // QUEUE builtins
         // ==========================
         addBuiltin(info(

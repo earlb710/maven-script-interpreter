@@ -49,6 +49,7 @@ public enum EbsTokenType implements LexerToken {
     SORTED(PrintStyle.KEYWORD, Category.KEYWORD, "sorted"),
     BITMAP(PrintStyle.DATA, DataType.BITMAP, "bitmap"),
     INTMAP(PrintStyle.DATA, DataType.INTMAP, "intmap"),
+    BINARY(PrintStyle.DATA, DataType.BINARY, "binary"),
     IMAGE(PrintStyle.DATA, DataType.IMAGE, "imagedata"),
     VECTOR_IMAGE(PrintStyle.DATA, DataType.VECTOR_IMAGE, "vector"),
     CANVAS(PrintStyle.DATA, DataType.CANVAS, "canvas"),
