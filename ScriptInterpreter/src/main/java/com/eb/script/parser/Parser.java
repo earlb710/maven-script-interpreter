@@ -1361,98 +1361,87 @@ public class Parser {
             }
             
             // Add field to record type
-            // Parse optional field properties: [mandatory, maxlength:50, default:"value"]
+            // Parse optional field properties: mandatory, maxlength:50, default:"value"
             boolean isMandatory = false;
             Integer maxLength = null;
             Object defaultValue = null;
             
-            if (check(EbsTokenType.LBRACKET)) {
-                advance(); // consume '['
+            // Parse field properties directly after type (no delimiters)
+            // Properties continue until we hit a comma or closing brace
+            while (!check(EbsTokenType.COMMA) && !check(EbsTokenType.RBRACE) && !isAtEnd()) {
+                EbsToken propertyToken = peek();
                 
-                // Parse field properties until we hit the closing bracket
-                while (!check(EbsTokenType.RBRACKET) && !isAtEnd()) {
-                    EbsToken propertyToken = peek();
+                if (propertyToken.type == EbsTokenType.IDENTIFIER) {
+                    String propertyName = ((String) propertyToken.literal).toLowerCase();
+                    advance(); // consume property name
                     
-                    if (propertyToken.type == EbsTokenType.IDENTIFIER) {
-                        String propertyName = ((String) propertyToken.literal).toLowerCase();
-                        advance(); // consume property name
+                    switch (propertyName) {
+                        case "mandatory":
+                        case "notnull":
+                        case "required":
+                            isMandatory = true;
+                            break;
                         
-                        switch (propertyName) {
-                            case "mandatory":
-                            case "notnull":
-                            case "required":
-                                isMandatory = true;
-                                break;
-                            
-                            case "maxlength":
-                            case "maxlen":
-                                // Expect colon and integer value
-                                consume(EbsTokenType.COLON, "Expected ':' after '" + propertyName + "' in field properties.");
-                                EbsToken lengthToken = peek();
-                                // Check if it's an integer literal
-                                if (lengthToken.literal instanceof Integer) {
-                                    maxLength = (Integer) lengthToken.literal;
-                                    advance();
-                                } else if (lengthToken.literal instanceof Long) {
-                                    long longValue = (Long) lengthToken.literal;
-                                    // Check for overflow
-                                    if (longValue > Integer.MAX_VALUE || longValue < Integer.MIN_VALUE) {
-                                        throw error(lengthToken, "maxLength value " + longValue + " exceeds integer range.");
-                                    }
-                                    maxLength = (int) longValue;
-                                    advance();
-                                } else {
-                                    throw error(lengthToken, "maxLength value must be an integer.");
+                        case "maxlength":
+                        case "maxlen":
+                            // Expect colon and integer value
+                            consume(EbsTokenType.COLON, "Expected ':' after '" + propertyName + "' in field properties.");
+                            EbsToken lengthToken = peek();
+                            // Check if it's an integer literal
+                            if (lengthToken.literal instanceof Integer) {
+                                maxLength = (Integer) lengthToken.literal;
+                                advance();
+                            } else if (lengthToken.literal instanceof Long) {
+                                long longValue = (Long) lengthToken.literal;
+                                // Check for overflow
+                                if (longValue > Integer.MAX_VALUE || longValue < Integer.MIN_VALUE) {
+                                    throw error(lengthToken, "maxLength value " + longValue + " exceeds integer range.");
                                 }
-                                break;
+                                maxLength = (int) longValue;
+                                advance();
+                            } else {
+                                throw error(lengthToken, "maxLength value must be an integer.");
+                            }
+                            break;
+                        
+                        case "default":
+                            // Expect colon and value
+                            consume(EbsTokenType.COLON, "Expected ':' after 'default' in field properties.");
                             
-                            case "default":
-                                // Expect colon and value
-                                consume(EbsTokenType.COLON, "Expected ':' after 'default' in field properties.");
+                            // Check if it's a quoted string literal
+                            EbsToken defaultToken = peek();
+                            if (defaultToken.type == EbsTokenType.QUOTE1 || defaultToken.type == EbsTokenType.QUOTE2) {
+                                EbsTokenType quoteType = defaultToken.type;
+                                advance(); // consume opening quote
+                                EbsToken stringToken = consume(EbsTokenType.STRING, "Expected string value after quote.");
+                                consume(quoteType, "Expected closing quote after string value.");
                                 
-                                // Check if it's a quoted string literal
-                                EbsToken defaultToken = peek();
-                                if (defaultToken.type == EbsTokenType.QUOTE1 || defaultToken.type == EbsTokenType.QUOTE2) {
-                                    EbsTokenType quoteType = defaultToken.type;
-                                    advance(); // consume opening quote
-                                    EbsToken stringToken = consume(EbsTokenType.STRING, "Expected string value after quote.");
-                                    consume(quoteType, "Expected closing quote after string value.");
-                                    
-                                    // Use the string literal as default value
-                                    if (stringToken.literal instanceof String) {
-                                        defaultValue = (String) stringToken.literal;
-                                    }
-                                } else {
-                                    // It's a non-string literal (number, bool, etc.)
-                                    advance();
-                                    
-                                    // Convert the default value based on field type
-                                    if (defaultToken.literal != null) {
-                                        if (fieldType != null) {
-                                            defaultValue = fieldType.convertValue(defaultToken.literal);
-                                        } else {
-                                            defaultValue = defaultToken.literal;
-                                        }
+                                // Use the string literal as default value
+                                if (stringToken.literal instanceof String) {
+                                    defaultValue = (String) stringToken.literal;
+                                }
+                            } else {
+                                // It's a non-string literal (number, bool, etc.)
+                                advance();
+                                
+                                // Convert the default value based on field type
+                                if (defaultToken.literal != null) {
+                                    if (fieldType != null) {
+                                        defaultValue = fieldType.convertValue(defaultToken.literal);
+                                    } else {
+                                        defaultValue = defaultToken.literal;
                                     }
                                 }
-                                break;
-                            
-                            default:
-                                throw error(propertyToken, "Unknown field property '" + propertyName + "'. Expected: mandatory, maxlength, or default.");
-                        }
-                    } else {
-                        throw error(propertyToken, "Expected field property name in field properties.");
+                            }
+                            break;
+                        
+                        default:
+                            throw error(propertyToken, "Unknown field property '" + propertyName + "'. Expected: mandatory, maxlength, or default.");
                     }
-                    
-                    // Check for comma (more properties) or closing bracket (end of properties)
-                    if (check(EbsTokenType.COMMA)) {
-                        advance(); // consume comma
-                    } else if (!check(EbsTokenType.RBRACKET)) {
-                        throw error(peek(), "Expected ',' or ']' in field properties.");
-                    }
+                } else {
+                    // Not an identifier, so no more properties
+                    break;
                 }
-                
-                consume(EbsTokenType.RBRACKET, "Expected ']' after field properties.");
             }
             
             // Add field to record type with metadata

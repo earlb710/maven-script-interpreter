@@ -7,7 +7,7 @@ print "";
 // Test 1: Exceed max length
 print "Test 1: Testing max length exceeded (expect error message)";
 var user: record {
-    username: string[mandatory, maxlength:10]
+    username: string mandatory maxlength:10
 };
 
 // This should fail - username is 17 characters
@@ -22,7 +22,7 @@ print "";
 // Test 2: Missing mandatory field
 print "Test 2: Testing missing mandatory field (expect error message)";
 var person: record {
-    name: string[mandatory],
+    name: string mandatory,
     age: int
 };
 

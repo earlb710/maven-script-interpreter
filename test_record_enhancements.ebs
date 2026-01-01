@@ -7,8 +7,8 @@ print "";
 // Test 1: Basic record with field properties
 print "Test 1: Record with mandatory field and default value";
 var person: record {
-    name: string[mandatory],
-    age: int[default:0],
+    name: string mandatory,
+    age: int default:0,
     email: string
 };
 
@@ -27,10 +27,10 @@ print "";
 // Test 2: Default value application
 print "Test 2: Default value application";
 var product: record {
-    name: string[mandatory],
-    price: double[default:0.0],
-    quantity: int[default:1],
-    category: string[default:"General"]
+    name: string mandatory,
+    price: double default:0.0,
+    quantity: int default:1,
+    category: string default:"General"
 };
 
 product = {"name": "Widget"};
@@ -49,8 +49,8 @@ print "";
 // Test 3: Maximum length validation
 print "Test 3: Maximum length validation";
 var user: record {
-    username: string[mandatory, maxlength:20],
-    bio: string[maxlength:100]
+    username: string mandatory maxlength:20,
+    bio: string maxlength:100
 };
 
 // Should work - within max length
@@ -68,11 +68,11 @@ print "";
 // Test 4: Multiple constraints combined
 print "Test 4: Multiple constraints combined";
 var employee: record {
-    id: int[mandatory],
-    name: string[mandatory, maxlength:50],
-    email: string[mandatory, maxlength:100],
-    department: string[default:"Unassigned"],
-    salary: double[default:0.0]
+    id: int mandatory,
+    name: string mandatory maxlength:50,
+    email: string mandatory maxlength:100,
+    department: string default:"Unassigned",
+    salary: double default:0.0
 };
 
 employee = {
@@ -97,11 +97,11 @@ print "";
 // Test 5: Record with all string fields and different properties
 print "Test 5: Various field property combinations";
 var config: record {
-    host: string[mandatory],
-    port: int[default:8080],
-    ssl: bool[default:false],
-    timeout: int[default:30],
-    apiKey: string[maxlength:64]
+    host: string mandatory,
+    port: int default:8080,
+    ssl: bool default:false,
+    timeout: int default:30,
+    apiKey: string maxlength:64
 };
 
 config = {"host": "api.example.com", "apiKey": "abc123xyz789"};

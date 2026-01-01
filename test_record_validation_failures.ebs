@@ -7,8 +7,8 @@ print "";
 // Test 1: Missing mandatory field
 print "Test 1: Missing mandatory field (should fail)";
 var person: record {
-    name: string[mandatory],
-    age: int[default:0]
+    name: string mandatory,
+    age: int default:0
 };
 
 // Try to create without mandatory name field - should fail validation
@@ -27,7 +27,7 @@ print "";
 // Test 2: Max length violation
 print "Test 2: Max length violation (should fail)";
 var user: record {
-    username: string[mandatory, maxlength:10]
+    username: string mandatory maxlength:10
 };
 
 // Create with username within limit
@@ -54,9 +54,9 @@ print "";
 // Test 3: Multiple mandatory fields
 print "Test 3: Multiple mandatory fields";
 var employee: record {
-    id: int[mandatory],
-    name: string[mandatory],
-    email: string[mandatory]
+    id: int mandatory,
+    name: string mandatory,
+    email: string mandatory
 };
 
 // Valid employee
