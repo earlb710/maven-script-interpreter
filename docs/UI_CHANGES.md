@@ -1,98 +1,119 @@
-# UI Changes: Edit Menu Enhancements
+# UI Changes: Project Management Menu Items
 
-## Summary
-Enhanced Edit menu with Copy/Cut/Paste/Undo/Redo/Close menu items with keyboard shortcuts for both the main application and screen windows.
+## File Menu Updates
 
-## Changes in Main Application Window
-
-### Edit Menu (EbsMenu.java)
-The Edit menu includes comprehensive editing operations:
+The File menu has been updated with new project management options. The menu structure now looks like this:
 
 ```
-Edit
-├── Cut (Ctrl+X)
-├── Copy (Ctrl+C)
-├── Paste (Ctrl+V)
-├── ───────────────
-├── Undo (Ctrl+Z)
-├── Redo (Ctrl+Y)
-├── ───────────────
-├── Find (Ctrl+F)
-├── Replace (Ctrl+H)
-├── ───────────────
-├── Show/Hide Line Numbers (Ctrl+L)
-├── ───────────────
-└── Close (Ctrl+W)
+File
+├── New Script File (Ctrl+N)
+├── Open file… (Ctrl+O)
+├── ─────────────────────────
+├── New Project… (Ctrl+Shift+N)     ← NEW
+├── Open Project… (Ctrl+Shift+O)    ← NEW
+├── ─────────────────────────
+├── Recent files
+│   ├── (recent files list)
+│   └── Clear list
+├── ─────────────────────────
+└── Exit (Ctrl+Q)
 ```
 
-### Behavior
-- **Cut/Copy/Paste**: Standard clipboard operations on the active editor tab
-- **Undo/Redo**: Undo and redo text editing operations in the active editor tab
-- **Tabs**: Pressing Ctrl+W or selecting Edit > Close will close the currently active tab
-- **Console Tab**: The main Console tab is protected and will NOT close (it's marked as non-closable)
-- **File Tabs**: All file tabs (EbsTab instances) can be closed using this menu item
+## New Menu Items
 
-## Changes in Screen Windows
+### 1. New Project… (Ctrl+Shift+N)
 
-### Screen Windows Menu Bar (ScreenFactory.java)
-Screen windows created via EBS scripts now include a menu bar with a fully-featured Edit menu:
+**Location:** File menu, after "Open file…" item
 
-```
-Edit
-├── Cut (Ctrl+X)          ← NEW
-├── Copy (Ctrl+C)         ← NEW
-├── Paste (Ctrl+V)        ← NEW
-├── ───────────────
-├── Undo (Ctrl+Z)         ← NEW
-├── Redo (Ctrl+Y)         ← NEW
-├── ───────────────
-└── Close (Ctrl+W)
-```
+**Keyboard Shortcut:** Ctrl+Shift+N
 
-### Behavior
-- **Cut/Copy/Paste**: Work with the currently focused text control (TextField, TextArea, PasswordField) in the screen
-- **Undo/Redo**: Work with the currently focused text control's undo/redo history
-- **Close**: Pressing Ctrl+W or selecting Edit > Close will close the screen window
-- **Focus-based**: All operations automatically apply to whichever text control has keyboard focus
-- This works for all screen windows created via the `screen` statement in EBS
+**Functionality:**
+- Opens a directory chooser dialog
+- Prompts user to select a directory for the new project
+- Creates a `project.json` file with default configuration
+- Loads the project into the global `project` variable
+- Displays success message in console
 
-## Technical Implementation
-
-1. **EbsMenu.java**: Contains full Edit menu implementation for main application
-   ```java
-   MenuItem cutItem = new MenuItem("Cut");
-   cutItem.setAccelerator(new KeyCodeCombination(KeyCode.X, KeyCombination.CONTROL_DOWN));
-   // Similar for Copy, Paste, Undo, Redo...
+**Dialog Flow:**
+1. User selects directory
+2. If `project.json` already exists:
+   - Shows confirmation dialog asking to overwrite
+   - User can confirm or cancel
+3. Creates `project.json` with default values
+4. Loads project configuration globally
+5. Console output:
+   ```
+   New project created: /path/to/project/project.json
+   Project loaded into global variable 'project'
    ```
 
-2. **EbsHandler.java**: Added `closeTab(Tab tab)` method to delegate to TabHandler
+### 2. Open Project… (Ctrl+Shift+O)
 
-3. **TabHandler.java**: Implemented `closeTab(Tab tab)` to remove tab from TabPane
+**Location:** File menu, after "New Project…" item
 
-4. **ScreenFactory.java**: 
-   - Enhanced `createScreenMenuBar(Stage stage)` helper method
-   - Modified screen creation to include menu bar at top of BorderPane
-   - Menu bar includes Edit menu with Cut/Copy/Paste/Undo/Redo/Close operations
-   - All text editing operations use `stage.getScene().getFocusOwner()` to get the currently focused control
-   - Operations are type-checked and applied to TextField and TextArea controls
+**Keyboard Shortcut:** Ctrl+Shift+O
 
-## Code Example for Screen Windows
-```java
-// Cut operation on focused text control
-cutItem.setOnAction(e -> {
-    javafx.scene.Node focusOwner = stage.getScene().getFocusOwner();
-    if (focusOwner instanceof javafx.scene.control.TextField) {
-        ((javafx.scene.control.TextField) focusOwner).cut();
-    } else if (focusOwner instanceof javafx.scene.control.TextArea) {
-        ((javafx.scene.control.TextArea) focusOwner).cut();
-    }
-});
+**Functionality:**
+- Opens a file chooser dialog filtered to `project.json` files
+- Prompts user to select a `project.json` file
+- Parses and loads the project configuration
+- Applies CSS files specified in the project
+- Stores project data in the global `project` variable
+- Displays success message in console
+
+**Dialog Flow:**
+1. User selects `project.json` file
+2. Parses JSON configuration
+3. Loads configuration into global environment
+4. Applies CSS stylesheets (if specified)
+5. Console output:
+   ```
+   Project opened: /path/to/project/project.json
+   Project loaded into global variable 'project'
+   CSS loaded: console.css
+   ```
+
+## Visual Elements
+
+Both menu items are positioned in a logical group separated by menu separators:
+- First separator after "Open file…"
+- Second separator after "Open Project…"
+- This creates a clear visual grouping of file operations vs. project operations
+
+## Console Output Examples
+
+### Creating a New Project:
+```
+New project created: /home/user/MyProject/project.json
+Project loaded into global variable 'project'
 ```
 
-## Safety Features
-- Console tab cannot be closed (protected by `tab.isClosable()` check)
-- Only closable tabs respond to the Close command
-- Screen windows close cleanly with proper cleanup via Stage.close()
-- Edit operations (Cut/Copy/Paste/Undo/Redo) only work when a text control has focus
-- No-op if focus is on non-text controls (buttons, labels, etc.)
+### Opening an Existing Project:
+```
+Project opened: /home/user/MyProject/project.json
+Project loaded into global variable 'project'
+CSS loaded: console.css
+```
 
+### Error Cases:
+```
+Failed to create new project: Unable to write to directory
+```
+
+```
+Failed to open project: Invalid project.json: root must be a JSON object
+```
+
+## Keyboard Shortcuts Summary
+
+| Action | Shortcut |
+|--------|----------|
+| New Script File | Ctrl+N |
+| Open File | Ctrl+O |
+| **New Project** | **Ctrl+Shift+N** |
+| **Open Project** | **Ctrl+Shift+O** |
+| Save | Ctrl+S |
+| Save As | Ctrl+Shift+S |
+| Exit | Ctrl+Q |
+
+Note: The shortcuts follow the pattern where Shift modifier converts file operations to project operations.

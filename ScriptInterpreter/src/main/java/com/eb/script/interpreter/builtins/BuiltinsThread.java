@@ -1,20 +1,25 @@
 package com.eb.script.interpreter.builtins;
 
-import com.eb.script.interpreter.Interpreter;
-import com.eb.script.interpreter.InterpreterContext;
-import com.eb.script.interpreter.InterpreterError;
-import com.eb.script.interpreter.statement.CallStatement;
-import com.eb.script.interpreter.statement.Parameter;
-import com.eb.script.interpreter.expression.LiteralExpression;
-import com.eb.script.token.DataType;
-import javafx.application.Platform;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+
+import com.eb.script.interpreter.Interpreter;
+import com.eb.script.interpreter.InterpreterContext;
+import com.eb.script.interpreter.InterpreterError;
+import com.eb.script.interpreter.expression.LiteralExpression;
+import com.eb.script.interpreter.statement.CallStatement;
+import com.eb.script.interpreter.statement.Parameter;
+import com.eb.script.token.DataType;
+
+import javafx.application.Platform;
 
 /**
  * Built-in functions for thread-based timer operations.
@@ -35,8 +40,32 @@ public class BuiltinsThread {
      * Single shared executor for all periodic timers.
      * Using a scheduled thread pool allows multiple timers to run concurrently.
      * Pool size is set to 4 to handle typical workloads; could be made configurable via system property if needed.
+     * This is mutable so it can be recreated after shutdown.
      */
-    private static final ScheduledExecutorService SCHEDULER = Executors.newScheduledThreadPool(4);
+    private static volatile ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(4);
+    
+    /**
+     * Lock for thread-safe scheduler access and recreation.
+     */
+    private static final Object SCHEDULER_LOCK = new Object();
+
+    /**
+     * Gets the scheduler, recreating it if it has been shutdown.
+     * @return A valid, non-shutdown ScheduledExecutorService
+     */
+    private static ScheduledExecutorService getScheduler() {
+        ScheduledExecutorService s = scheduler;
+        if (s == null || s.isShutdown()) {
+            synchronized (SCHEDULER_LOCK) {
+                s = scheduler;
+                if (s == null || s.isShutdown()) {
+                    scheduler = Executors.newScheduledThreadPool(4);
+                    s = scheduler;
+                }
+            }
+        }
+        return s;
+    }
 
     /**
      * Registry of active thread timers by name.
@@ -251,7 +280,7 @@ public class BuiltinsThread {
         Runnable timerTask = createTimerTask(timerName, finalCallbackName, targetScreen, context);
 
         // Schedule the task to run repeatedly
-        ScheduledFuture<?> future = SCHEDULER.scheduleAtFixedRate(
+        ScheduledFuture<?> future = getScheduler().scheduleAtFixedRate(
             timerTask,
             periodMs,  // initial delay
             periodMs,  // period
@@ -374,7 +403,7 @@ public class BuiltinsThread {
         Runnable timerTask = createTimerTask(timerName, finalCallbackName, currentScreen, context);
 
         // Reschedule the task
-        ScheduledFuture<?> newFuture = SCHEDULER.scheduleAtFixedRate(
+        ScheduledFuture<?> newFuture = getScheduler().scheduleAtFixedRate(
             timerTask,
             timerInfo.periodMs,
             timerInfo.periodMs,
@@ -590,14 +619,17 @@ public class BuiltinsThread {
         THREAD_TIMERS.clear();
 
         // Shutdown the scheduler
-        SCHEDULER.shutdown();
-        try {
-            if (!SCHEDULER.awaitTermination(5, TimeUnit.SECONDS)) {
-                SCHEDULER.shutdownNow();
+        ScheduledExecutorService s = scheduler;
+        if (s != null) {
+            s.shutdown();
+            try {
+                if (!s.awaitTermination(5, TimeUnit.SECONDS)) {
+                    s.shutdownNow();
+                }
+            } catch (InterruptedException e) {
+                s.shutdownNow();
+                Thread.currentThread().interrupt();
             }
-        } catch (InterruptedException e) {
-            SCHEDULER.shutdownNow();
-            Thread.currentThread().interrupt();
         }
     }
 }

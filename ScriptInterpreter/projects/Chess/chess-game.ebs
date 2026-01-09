@@ -386,65 +386,63 @@ function clearCapturedPieces() {
 // Save current game state to undo stack (before making a move)
 function saveGameState() {
     // Only save for 2-player games
-    if selectedGameMode != "2 player" then {
-        return;
+    if selectedGameMode == "2 player" then {
+        
+        // Check if we have space in undo stack
+        if undoStackCount < 10 then {
+            // Save board state using calculated index (copy all 64 cells)
+            for (var i: int = 0; i < 64; i++) {
+                undoBoards[undoStackCount * 64 + i] = board[i];
+            }
+            
+            // Save game variables
+            undoStackCurrentPlayer[undoStackCount] = currentPlayer;
+            undoStackTimerWhite[undoStackCount] = timerWhite;
+            undoStackTimerBlack[undoStackCount] = timerBlack;
+            
+            // Save castling rights
+            undoStackWhiteKingMoved[undoStackCount] = whiteKingMoved;
+            undoStackBlackKingMoved[undoStackCount] = blackKingMoved;
+            undoStackWhiteKingsideRookMoved[undoStackCount] = whiteKingsideRookMoved;
+            undoStackWhiteQueensideRookMoved[undoStackCount] = whiteQueensideRookMoved;
+            undoStackBlackKingsideRookMoved[undoStackCount] = blackKingsideRookMoved;
+            undoStackBlackQueensideRookMoved[undoStackCount] = blackQueensideRookMoved;
+            
+            // Save en passant state
+            undoStackEnPassantTargetX[undoStackCount] = enPassantTargetX;
+            undoStackEnPassantTargetY[undoStackCount] = enPassantTargetY;
+            
+            // Save captured pieces using calculated index
+            undoStackCapturedWhiteCount[undoStackCount] = capturedWhiteCount;
+            undoStackCapturedBlackCount[undoStackCount] = capturedBlackCount;
+            for (var i: int = 0; i < capturedWhiteCount; i++) {
+                undoStackCapturedWhitePieces[undoStackCount * 16 + i] = capturedWhitePieces[i];
+            }
+            for (var i: int = 0; i < capturedBlackCount; i++) {
+                undoStackCapturedBlackPieces[undoStackCount * 16 + i] = capturedBlackPieces[i];
+            }
+            
+            // Save move history
+            undoStackMoveHistory[undoStackCount] = chessScreen.moveHistory;
+            
+            // Save last move tracking
+            undoStackLastMoveFromX[undoStackCount] = lastMoveFromX;
+            undoStackLastMoveFromY[undoStackCount] = lastMoveFromY;
+            undoStackLastMoveToX[undoStackCount] = lastMoveToX;
+            undoStackLastMoveToY[undoStackCount] = lastMoveToY;
+            
+            // Increment stack count
+            undoStackCount = undoStackCount + 1;
+            
+            // Clear redo stack when a new move is made
+            redoStackCount = 0;
+            
+            // Update button states
+            call updateUndoRedoButtons();
+        } else {
+            print "Undo stack full (max 10 moves), cannot save more states";
+        }
     }
-    
-    // Check if we have space in undo stack
-    if undoStackCount >= 10 then {
-        print "Undo stack full (max 10 moves), cannot save more states";
-        return;
-    }
-    
-    // Save board state using calculated index (copy all 64 cells)
-    for (var i: int = 0; i < 64; i++) {
-        undoBoards[undoStackCount * 64 + i] = board[i];
-    }
-    
-    // Save game variables
-    undoStackCurrentPlayer[undoStackCount] = currentPlayer;
-    undoStackTimerWhite[undoStackCount] = timerWhite;
-    undoStackTimerBlack[undoStackCount] = timerBlack;
-    
-    // Save castling rights
-    undoStackWhiteKingMoved[undoStackCount] = whiteKingMoved;
-    undoStackBlackKingMoved[undoStackCount] = blackKingMoved;
-    undoStackWhiteKingsideRookMoved[undoStackCount] = whiteKingsideRookMoved;
-    undoStackWhiteQueensideRookMoved[undoStackCount] = whiteQueensideRookMoved;
-    undoStackBlackKingsideRookMoved[undoStackCount] = blackKingsideRookMoved;
-    undoStackBlackQueensideRookMoved[undoStackCount] = blackQueensideRookMoved;
-    
-    // Save en passant state
-    undoStackEnPassantTargetX[undoStackCount] = enPassantTargetX;
-    undoStackEnPassantTargetY[undoStackCount] = enPassantTargetY;
-    
-    // Save captured pieces using calculated index
-    undoStackCapturedWhiteCount[undoStackCount] = capturedWhiteCount;
-    undoStackCapturedBlackCount[undoStackCount] = capturedBlackCount;
-    for (var i: int = 0; i < capturedWhiteCount; i++) {
-        undoStackCapturedWhitePieces[undoStackCount * 16 + i] = capturedWhitePieces[i];
-    }
-    for (var i: int = 0; i < capturedBlackCount; i++) {
-        undoStackCapturedBlackPieces[undoStackCount * 16 + i] = capturedBlackPieces[i];
-    }
-    
-    // Save move history
-    undoStackMoveHistory[undoStackCount] = chessScreen.moveHistory;
-    
-    // Save last move tracking
-    undoStackLastMoveFromX[undoStackCount] = lastMoveFromX;
-    undoStackLastMoveFromY[undoStackCount] = lastMoveFromY;
-    undoStackLastMoveToX[undoStackCount] = lastMoveToX;
-    undoStackLastMoveToY[undoStackCount] = lastMoveToY;
-    
-    // Increment stack count
-    undoStackCount = undoStackCount + 1;
-    
-    // Clear redo stack when a new move is made
-    redoStackCount = 0;
-    
-    // Update button states
-    call updateUndoRedoButtons();
 }
 
 // Restore game state from undo stack at given index
@@ -707,23 +705,22 @@ function redoMove() {
 // Update undo/redo button states (enable/disable)
 function updateUndoRedoButtons() {
     // Only applicable for 2-player games
-    if selectedGameMode != "2 player" then {
-        return;
+    if selectedGameMode == "2 player" then {
+        // Update undo button
+        if undoStackCount > 0 then {
+            call scr.setproperty("chessScreen.undoBtn", "disabled", false);
+        } else {
+            call scr.setproperty("chessScreen.undoBtn", "disabled", true);
+        }
+        
+        // Update redo button
+        if redoStackCount > 0 then {
+            call scr.setproperty("chessScreen.redoBtn", "disabled", false);
+        } else {
+            call scr.setproperty("chessScreen.redoBtn", "disabled", true);
+        }
     }
-    
-    // Update undo button
-    if undoStackCount > 0 then {
-        call scr.setproperty("chessScreen.undoBtn", "disabled", false);
-    } else {
-        call scr.setproperty("chessScreen.undoBtn", "disabled", true);
-    }
-    
-    // Update redo button
-    if redoStackCount > 0 then {
-        call scr.setproperty("chessScreen.redoBtn", "disabled", false);
-    } else {
-        call scr.setproperty("chessScreen.redoBtn", "disabled", true);
-    }
+    // For 1-player mode, do nothing (buttons are hidden)
 }
 
 // Clear undo/redo history (for new game)
@@ -1900,13 +1897,24 @@ movePiece(fromX: int, fromY: int, toX: int, toY: int) {
 
 // Handle cell click - select piece and show valid moves, or move piece if valid destination
 handleCellClick(x: int, y: int) {
+    // Flag to track if we should process this click
+    var shouldProcess: bool = true;
+    
     // Don't allow moves if game is over
     if gameOver then {
-        return;
+        shouldProcess = false;
+    }
+    
+    // In 1-player mode, only allow moves when it's the human's turn
+    if shouldProcess && selectedGameMode == "1 player" then {
+        if currentPlayer != humanPlayerColor then {
+            chessScreen.statusMessage = "Wait for computer to move...";
+            shouldProcess = false;
+        }
     }
     
     // Check if a piece is already selected
-    if selectedX >= 0 && selectedY >= 0 then {
+    if shouldProcess && selectedX >= 0 && selectedY >= 0 then {
         // A piece is selected - check if clicked position is a valid move destination
         var moves = call validMoves(selectedX, selectedY);
         var isValidMove: bool = false;
@@ -2784,26 +2792,26 @@ handleStartGame() {
     call clearUndoRedoHistory();
     
     // Show/hide undo/redo buttons based on game mode
-    if selectedGameMode == "2 player" then {
-        call scr.setproperty("chessScreen.undoBtn", "visible", true);
-        call scr.setproperty("chessScreen.redoBtn", "visible", true);
+    if selectedGameMode == \"2 player\" then {
+        call scr.setproperty(\"chessScreen.undoBtn\", \"visible\", true);
+        call scr.setproperty(\"chessScreen.redoBtn\", \"visible\", true);
     } else {
-        call scr.setproperty("chessScreen.undoBtn", "visible", false);
-        call scr.setproperty("chessScreen.redoBtn", "visible", false);
+        call scr.setproperty(\"chessScreen.undoBtn\", \"visible\", false);
+        call scr.setproperty(\"chessScreen.redoBtn\", \"visible\", false);
     }
     
     // Timer display is automatically updated via varRef binding to whiteTimer and blackTimer variables
     
     // Start the game timer (updates every 100ms = 0.1 seconds)
     // Use qualified name to link timer to screen
-    call thread.timerStart("chessScreen.chessTimer", 100, "timerCallback");
+    call thread.timerStart(\"chessScreen.chessTimer\", 100, \"timerCallback\");
     
-    print "";
+    print \"\";
     
     // In 1-player mode, if computer plays white (currentPlayer=WHITE and humanPlayerColor=BLACK), 
     // trigger computer move immediately after screen renders
-    if selectedGameMode == "1 player" && humanPlayerColor == BLACK then {
-        call util.runlater("makeComputerMove");
+    if selectedGameMode == \"1 player\" && humanPlayerColor == BLACK then {
+        call util.runlater(\"makeComputerMove\");
     }
 }
 
@@ -3191,140 +3199,141 @@ makeComputerMove() {
     var selectedMove: json = call selectBestMoveEasy(currentPlayer);
     
     if selectedMove == null then {
-        return;
-    }
-    
-    // Extract move coordinates
-    var fromX: int = selectedMove.fromX;
-    var fromY: int = selectedMove.fromY;
-    var toX: int = selectedMove.toX;
-    var toY: int = selectedMove.toY;
-    
-    // Get information about the move before executing it
-    var sourceCellValue: int = call getPieceAt(fromX, fromY);
-    var destCellValue: int = call getPieceAt(toX, toY);
-    var isCapture: bool = false;
-    var capturedPieceType: int = EMPTY;
-    var capturedPieceColor: int = WHITE;
-    
-    // Check if this is a capture move
-    if destCellValue != -1 then {
-        var destCell = ChessCell(destCellValue);
-        if destCell.pieceType != EMPTY then {
-            isCapture = true;
-            capturedPieceType = destCell.pieceType;
-            capturedPieceColor = destCell.pieceColor;
-            // Track the captured piece for display
-            call addCapturedPiece(capturedPieceType, capturedPieceColor);
-        }
-    }
-    
-    var sourceCell = ChessCell(sourceCellValue);
-    var movingPieceType: int = sourceCell.pieceType;
-    var movingPieceColor: int = sourceCell.pieceColor;
-    
-    // Calculate elapsed time and add delay if needed (minimum 1 second)
-    // Wait until 1 second has passed before showing the computer's move
-    var endTime = call date.now();
-    var endMs: long = call date.toEpochMs(endTime);
-    var elapsedMs: long = endMs - startMs;
-    
-    if elapsedMs < 1000 then {
-        var delayMs: long = 1000 - elapsedMs;
-        call thread.sleep(delayMs);
-    }
-    
-    // Clear the human player's move arrows before showing computer's move
-    if lastMoveFromX >= 0 && lastMoveFromY >= 0 then {
-        call clearIndicator(lastMoveFromX, lastMoveFromY);
-    }
-    if lastMoveToX >= 0 && lastMoveToY >= 0 then {
-        call clearIndicator(lastMoveToX, lastMoveToY);
-    }
-    
-    // Move the piece
-    call movePiece(fromX, fromY, toX, toY);
-    
-    // Show the last move with blue arrows
-    call showLastMove(fromX, fromY, toX, toY);
-    
-    // Format and add move to history
-    var moveNotation: string = call formatMove(fromX, fromY, toX, toY, movingPieceType, movingPieceColor, isCapture, capturedPieceType, capturedPieceColor);
-    var playerName: string;
-    if currentPlayer == WHITE then {
-        playerName = "White";
+        // No valid moves available
+        // Don't use return - just skip the rest using else block
     } else {
-        playerName = "Black";
-    }
-    var moveEntry: string = playerName + " (Computer): " + moveNotation + "\n";
-    chessScreen.moveHistory = chessScreen.moveHistory + moveEntry;
-    
-    // Switch to next player
-    if currentPlayer == WHITE then {
-        currentPlayer = BLACK;
-    } else {
-        currentPlayer = WHITE;
-    }
-    
-    // Check for checkmate or stalemate
-    var isInCheckmate: bool = call isCheckmate(currentPlayer);
-    var isInStalemate: bool = call isStalemate(currentPlayer);
-    
-    if isInCheckmate then {
-        gameOver = true;
+        // Extract move coordinates
+        var fromX: int = selectedMove.fromX;
+        var fromY: int = selectedMove.fromY;
+        var toX: int = selectedMove.toX;
+        var toY: int = selectedMove.toY;
         
-        // Stop the game timer
-        call thread.timerStop("chessScreen.chessTimer");
+        // Get information about the move before executing it
+        var sourceCellValue: int = call getPieceAt(fromX, fromY);
+        var destCellValue: int = call getPieceAt(toX, toY);
+        var isCapture: bool = false;
+        var capturedPieceType: int = EMPTY;
+        var capturedPieceColor: int = WHITE;
         
-        // Mark the losing king with a larger red cross
-        var kingPos: posType = call findKing(currentPlayer);
-        if kingPos.x >= 0 then {
-            call setIndicator(kingPos.x, kingPos.y, "checkmate");
+        // Check if this is a capture move
+        if destCellValue != -1 then {
+            var destCell = ChessCell(destCellValue);
+            if destCell.pieceType != EMPTY then {
+                isCapture = true;
+                capturedPieceType = destCell.pieceType;
+                capturedPieceColor = destCell.pieceColor;
+                // Track the captured piece for display
+                call addCapturedPiece(capturedPieceType, capturedPieceColor);
+            }
         }
         
-        // Update status message
-        var winner: string;
+        var sourceCell = ChessCell(sourceCellValue);
+        var movingPieceType: int = sourceCell.pieceType;
+        var movingPieceColor: int = sourceCell.pieceColor;
+        
+        // Calculate elapsed time and add delay if needed (minimum 1 second)
+        // Wait until 1 second has passed before showing the computer's move
+        var endTime = call date.now();
+        var endMs: long = call date.toEpochMs(endTime);
+        var elapsedMs: long = endMs - startMs;
+        
+        if elapsedMs < 1000 then {
+            var delayMs: long = 1000 - elapsedMs;
+            call thread.sleep(delayMs);
+        }
+        
+        // Clear the human player's move arrows before showing computer's move
+        if lastMoveFromX >= 0 && lastMoveFromY >= 0 then {
+            call clearIndicator(lastMoveFromX, lastMoveFromY);
+        }
+        if lastMoveToX >= 0 && lastMoveToY >= 0 then {
+            call clearIndicator(lastMoveToX, lastMoveToY);
+        }
+        
+        // Move the piece
+        call movePiece(fromX, fromY, toX, toY);
+        
+        // Show the last move with blue arrows
+        call showLastMove(fromX, fromY, toX, toY);
+        
+        // Format and add move to history
+        var moveNotation: string = call formatMove(fromX, fromY, toX, toY, movingPieceType, movingPieceColor, isCapture, capturedPieceType, capturedPieceColor);
+        var playerName: string;
         if currentPlayer == WHITE then {
-            winner = "Black";
-            chessScreen.statusMessage = "Checkmate! Black wins!";
+            playerName = "White";
         } else {
-            winner = "White";
-            chessScreen.statusMessage = "Checkmate! White wins!";
+            playerName = "Black";
         }
+        var moveEntry: string = playerName + " (Computer): " + moveNotation + "\n";
+        chessScreen.moveHistory = chessScreen.moveHistory + moveEntry;
         
-        // Show game over dialog
-        call showGameOverDialog(winner, "checkmate");
-    } else if isInStalemate then {
-        gameOver = true;
-        
-        // Stop the game timer
-        call thread.timerStop("chessScreen.chessTimer");
-        
-        // Mark both kings with red crosses
-        var whiteKingPos: posType = call findKing(WHITE);
-        var blackKingPos: posType = call findKing(BLACK);
-        
-        if whiteKingPos.x >= 0 then {
-            call setIndicator(whiteKingPos.x, whiteKingPos.y, "invalid");
-        }
-        if blackKingPos.x >= 0 then {
-            call setIndicator(blackKingPos.x, blackKingPos.y, "invalid");
-        }
-        
-        chessScreen.statusMessage = "Stalemate! Game is a draw.";
-        
-        // Show game over dialog
-        call showGameOverDialog("Draw", "stalemate");
-    } else {
-        // Normal game continues
-        if currentPlayer == BLACK then {
-            chessScreen.statusMessage = "Black to move";
+        // Switch to next player
+        if currentPlayer == WHITE then {
+            currentPlayer = BLACK;
         } else {
-            chessScreen.statusMessage = "White to move";
+            currentPlayer = WHITE;
         }
+        
+        // Check for checkmate or stalemate
+        var isInCheckmate: bool = call isCheckmate(currentPlayer);
+        var isInStalemate: bool = call isStalemate(currentPlayer);
+        
+        if isInCheckmate then {
+            gameOver = true;
+            
+            // Stop the game timer
+            call thread.timerStop("chessScreen.chessTimer");
+            
+            // Mark the losing king with a larger red cross
+            var kingPos: posType = call findKing(currentPlayer);
+            if kingPos.x >= 0 then {
+                call setIndicator(kingPos.x, kingPos.y, "checkmate");
+            }
+            
+            // Update status message
+            var winner: string;
+            if currentPlayer == WHITE then {
+                winner = "Black";
+                chessScreen.statusMessage = "Checkmate! Black wins!";
+            } else {
+                winner = "White";
+                chessScreen.statusMessage = "Checkmate! White wins!";
+            }
+            
+            // Show game over dialog
+            call showGameOverDialog(winner, "checkmate");
+        } else if isInStalemate then {
+            gameOver = true;
+            
+            // Stop the game timer
+            call thread.timerStop("chessScreen.chessTimer");
+            
+            // Mark both kings with red crosses
+            var whiteKingPos: posType = call findKing(WHITE);
+            var blackKingPos: posType = call findKing(BLACK);
+            
+            if whiteKingPos.x >= 0 then {
+                call setIndicator(whiteKingPos.x, whiteKingPos.y, "invalid");
+            }
+            if blackKingPos.x >= 0 then {
+                call setIndicator(blackKingPos.x, blackKingPos.y, "invalid");
+            }
+            
+            chessScreen.statusMessage = "Stalemate! Game is a draw.";
+            
+            // Show game over dialog
+            call showGameOverDialog("Draw", "stalemate");
+        } else {
+            // Normal game continues
+            if currentPlayer == BLACK then {
+                chessScreen.statusMessage = "Black to move";
+            } else {
+                chessScreen.statusMessage = "White to move";
+            }
+        }
+        
+        call updateTimerColors();
     }
-    
-    call updateTimerColors();
 }
 
 screen chessScreen = {
@@ -3656,7 +3665,7 @@ screen chessScreen = {
                                 {"name": "lblEmpty2", "layoutPos": "0,9", "display": {"type": "label", "labelText": "", "style": "-fx-min-width: 25; -fx-min-height: 25;"}},
                                 
                                 {"name": "lblRow8L", "layoutPos": "1,0", "display": {"type": "label", "labelText": "8", "labelColor": "$COLOR_TEXT_RULER", "labelFontSize": "14px", "labelBold": true, "style": "-fx-min-width: 25; -fx-min-height: 60; -fx-alignment: center;"}},
-                                {"name": "board00", "layoutPos": "1,1", "varRef": "b00", "display": {"type": "image", "fitWidth": 60, "fitHeight": 60, "preserveRatio": false, "onClick": "call handleCellClick(0, 0);", "style": "-fx-cursor: hand;"}},
+                                {"name": "board00", "layoutPos": "1,1", "varRef": "b00", "display": {"type": "image", "fitWidth": 60, "fitHeight": 60, "preserveRatio": false, "onClick": "print \"CLICK ON 0,0\"; call handleCellClick(0, 0);", "style": "-fx-cursor: hand;"}},
                                 {"name": "ind00", "layoutPos": "1,1", "varRef": "i00", "display": {"type": "image", "fitWidth": 60, "fitHeight": 60, "preserveRatio": false, "pickOnBounds": true, "style": "-fx-mouse-transparent: true;"}},
                                 {"name": "cell00", "layoutPos": "1,1", "varRef": "c00", "tooltip": "R-8a", "display": {"type": "image", "fitWidth": 60, "fitHeight": 60, "preserveRatio": true, "pickOnBounds": true, "style": "-fx-mouse-transparent: true;"}},
                                 {"name": "board01", "layoutPos": "1,2", "varRef": "b01", "display": {"type": "image", "fitWidth": 60, "fitHeight": 60, "preserveRatio": false, "onClick": "call handleCellClick(1, 0);", "style": "-fx-cursor: hand;"}},

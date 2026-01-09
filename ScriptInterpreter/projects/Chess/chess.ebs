@@ -1,6 +1,8 @@
 // Import chess game logic and functions
 import "chess-game.ebs";
 
+print "=== CHESS.EBS LOADED WITH DEBUG VERSION ===";
+
 // Startup dialog screen definition
 screen startupDialog = {
     "title": "Chess Game - Start",

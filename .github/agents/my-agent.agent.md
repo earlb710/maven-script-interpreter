@@ -12,3 +12,4 @@ description:
 
 Make changes to ScriptInterperter project.
 Important classes to know : Builtins, Token, Lexer, Parser, Interpreter
+can access .ebs files directly
