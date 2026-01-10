@@ -2651,15 +2651,11 @@ handleStartGame() {
     if startupDialog.gameMode == "1" then {
         selectedGameMode = "1 player";
         
-        // Randomly assign white or black to human player
-        // Generate random number: 0 or 1
-        humanPlayerColor = call random.nextLong(0, 2);
+        // In 1-player mode, human always plays as WHITE and goes first
+        // This provides a better user experience and avoids confusion
+        humanPlayerColor = WHITE;
         
-        if humanPlayerColor == WHITE then {
-            print "You are playing as WHITE. White starts first.";
-        } else {
-            print "You are playing as BLACK. White (computer) starts first.";
-        }
+        print "You are playing as WHITE. You will move first.";
     } else {
         selectedGameMode = "2 player";
     }
@@ -2808,11 +2804,8 @@ handleStartGame() {
     
     print \"\";
     
-    // In 1-player mode, if computer plays white (currentPlayer=WHITE and humanPlayerColor=BLACK), 
-    // trigger computer move immediately after screen renders
-    if selectedGameMode == \"1 player\" && humanPlayerColor == BLACK then {
-        call util.runlater(\"makeComputerMove\");
-    }
+    // In 1-player mode, human always plays as WHITE and moves first
+    // Computer (playing BLACK) will move after human makes their first move
 }
 
 // Handle Exit button click from startup dialog
