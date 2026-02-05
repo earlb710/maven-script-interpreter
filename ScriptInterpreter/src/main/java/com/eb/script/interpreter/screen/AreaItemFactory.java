@@ -450,6 +450,8 @@ public class AreaItemFactory {
         if (isRadioButtonGroup(control)) {
             javafx.scene.layout.VBox vbox = (javafx.scene.layout.VBox) control;
             // Apply properties to each RadioButton in the group
+            // Note: We iterate through all children and check instanceof because the VBox
+            // might contain other layout nodes in the future (e.g., labels, separators)
             for (javafx.scene.Node child : vbox.getChildren()) {
                 if (child instanceof RadioButton) {
                     applyCommonPropertiesToControl(child, item);
@@ -538,8 +540,11 @@ public class AreaItemFactory {
     
     /**
      * Helper method to check if a control is a VBox containing RadioButtons.
+     * The VBox is marked as a RadioButton group by the presence of a "toggleGroup" property,
+     * which is set in createControlByType() when creating radio button groups from options.
      * @param control The control to check
      * @return true if the control is a RadioButton group VBox, false otherwise
+     * @see #createControlByType(ItemType, DisplayItem) where the "toggleGroup" property is set
      */
     private static boolean isRadioButtonGroup(Node control) {
         if (control instanceof javafx.scene.layout.VBox) {
@@ -693,7 +698,7 @@ public class AreaItemFactory {
                     applyStyleProperty(spinner, alignmentStyle);
                     // Also try to set on the editor if accessible
                     if (spinner.getEditor() != null) {
-                        spinner.getEditor().setStyle(alignmentStyle);
+                        applyStyleProperty(spinner.getEditor(), alignmentStyle);
                     }
                 }
             }
