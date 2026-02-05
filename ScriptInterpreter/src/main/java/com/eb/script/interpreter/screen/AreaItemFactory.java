@@ -515,12 +515,27 @@ public class AreaItemFactory {
 
         // Apply custom style from metadata (overrides default)
         if (metadata.style != null && !metadata.style.isEmpty()) {
-            String currentStyle = control.getStyle();
-            if (currentStyle == null || currentStyle.isEmpty()) {
-                control.setStyle(metadata.style);
-            } else {
-                control.setStyle(currentStyle + "; " + metadata.style);
-            }
+            applyStyleProperty(control, metadata.style);
+        }
+    }
+
+    /**
+     * Helper method to apply a CSS style property to a control.
+     * Properly handles null current styles to avoid "null; " prefix.
+     * 
+     * @param control The control to apply the style to
+     * @param cssProperty The CSS property string (e.g., "-fx-text-fill: red;")
+     */
+    private static void applyStyleProperty(Node control, String cssProperty) {
+        if (cssProperty == null || cssProperty.isEmpty()) {
+            return;
+        }
+        
+        String currentStyle = control.getStyle();
+        if (currentStyle == null || currentStyle.isEmpty()) {
+            control.setStyle(cssProperty);
+        } else {
+            control.setStyle(currentStyle + " " + cssProperty);
         }
     }
 
@@ -543,24 +558,12 @@ public class AreaItemFactory {
                     if (child instanceof RadioButton) {
                         // Apply text color to individual radio buttons
                         if (item.textColor != null && !item.textColor.isEmpty()) {
-                            String currentStyle = child.getStyle();
-                            String colorStyle = "-fx-text-fill: " + item.textColor + ";";
-                            if (currentStyle == null || currentStyle.isEmpty()) {
-                                child.setStyle(colorStyle);
-                            } else {
-                                child.setStyle(currentStyle + " " + colorStyle);
-                            }
+                            applyStyleProperty(child, "-fx-text-fill: " + item.textColor + ";");
                         }
                         
                         // Apply background color to individual radio buttons
                         if (item.backgroundColor != null && !item.backgroundColor.isEmpty()) {
-                            String currentStyle = child.getStyle();
-                            String bgStyle = "-fx-background-color: " + item.backgroundColor + ";";
-                            if (currentStyle == null || currentStyle.isEmpty()) {
-                                child.setStyle(bgStyle);
-                            } else {
-                                child.setStyle(currentStyle + " " + bgStyle);
-                            }
+                            applyStyleProperty(child, "-fx-background-color: " + item.backgroundColor + ";");
                         }
                     }
                 }
@@ -667,14 +670,7 @@ public class AreaItemFactory {
                     textField.setAlignment(pos);
                 } else if (control instanceof TextArea || control instanceof ComboBox) {
                     // TextArea and ComboBox don't have setAlignment, use CSS
-                    String currentStyle = control.getStyle();
-                    String newStyle;
-                    if (currentStyle == null || currentStyle.isEmpty()) {
-                        newStyle = alignmentStyle;
-                    } else {
-                        newStyle = currentStyle + " " + alignmentStyle;
-                    }
-                    control.setStyle(newStyle);
+                    applyStyleProperty(control, alignmentStyle);
                 } else if (control instanceof Spinner) {
                     // For Spinner, we need to access the internal TextField
                     Spinner<?> spinner = (Spinner<?>) control;
@@ -712,24 +708,12 @@ public class AreaItemFactory {
 
         // Apply text color
         if (item.textColor != null && !item.textColor.isEmpty()) {
-            String currentStyle = control.getStyle();
-            String colorStyle = "-fx-text-fill: " + item.textColor + ";";
-            if (currentStyle == null || currentStyle.isEmpty()) {
-                control.setStyle(colorStyle);
-            } else {
-                control.setStyle(currentStyle + " " + colorStyle);
-            }
+            applyStyleProperty(control, "-fx-text-fill: " + item.textColor + ";");
         }
 
         // Apply background color
         if (item.backgroundColor != null && !item.backgroundColor.isEmpty()) {
-            String currentStyle = control.getStyle();
-            String bgStyle = "-fx-background-color: " + item.backgroundColor + ";";
-            if (currentStyle == null || currentStyle.isEmpty()) {
-                control.setStyle(bgStyle);
-            } else {
-                control.setStyle(currentStyle + " " + bgStyle);
-            }
+            applyStyleProperty(control, "-fx-background-color: " + item.backgroundColor + ";");
         }
     }
 
@@ -783,13 +767,8 @@ public class AreaItemFactory {
         
         // Apply the combined style to the control
         if (itemStyle.length() > 0) {
-            String currentStyle = control.getStyle();
-            //System.out.println("[DEBUG]   Current style before applying: '" + currentStyle + "'");
-            if (currentStyle == null || currentStyle.isEmpty()) {
-                control.setStyle(itemStyle.toString());
-            } else {
-                control.setStyle(currentStyle + " " + itemStyle.toString());
-            }
+            //System.out.println("[DEBUG]   Current style before applying: '" + control.getStyle() + "'");
+            applyStyleProperty(control, itemStyle.toString());
             //System.out.println("[DEBUG]   Final style after applying: '" + control.getStyle() + "'");
         } else {
             //System.out.println("[DEBUG]   No styles to apply (itemStyle is empty)");
