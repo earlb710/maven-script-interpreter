@@ -36,7 +36,9 @@ public class AreaItemFactory {
         if (metadata == null) {
             // If no metadata provided, create a simple Label as fallback
             Label label = new Label("No metadata");
-            applyCommonProperties(label, item);
+            if (item != null) {
+                applyCommonProperties(label, item);
+            }
             return label;
         }
 
@@ -439,6 +441,41 @@ public class AreaItemFactory {
      * Applies common properties that can be set on most controls.
      */
     private static void applyCommonProperties(Node control, AreaItem item) {
+        // Null check for item parameter
+        if (item == null) {
+            return;
+        }
+        
+        // Special handling for VBox containing RadioButtons (radio button group)
+        if (control instanceof javafx.scene.layout.VBox) {
+            javafx.scene.layout.VBox vbox = (javafx.scene.layout.VBox) control;
+            // Check if this VBox contains a ToggleGroup (indicates it's a radio button group)
+            if (vbox.getProperties().containsKey("toggleGroup")) {
+                // Apply properties to each RadioButton in the group
+                for (javafx.scene.Node child : vbox.getChildren()) {
+                    if (child instanceof RadioButton) {
+                        applyCommonPropertiesToControl(child, item);
+                    }
+                }
+                // Also apply visibility and disabled state to the container itself
+                if (item.visible != null) {
+                    control.setVisible(item.visible);
+                }
+                if (item.disabled != null) {
+                    control.setDisable(item.disabled);
+                }
+                return;
+            }
+        }
+        
+        // Apply to the control directly
+        applyCommonPropertiesToControl(control, item);
+    }
+    
+    /**
+     * Helper method to apply common properties directly to a single control.
+     */
+    private static void applyCommonPropertiesToControl(Node control, AreaItem item) {
         // Apply visibility
         if (item.visible != null) {
             control.setVisible(item.visible);
@@ -478,7 +515,12 @@ public class AreaItemFactory {
 
         // Apply custom style from metadata (overrides default)
         if (metadata.style != null && !metadata.style.isEmpty()) {
-            control.setStyle(control.getStyle() + "; " + metadata.style);
+            String currentStyle = control.getStyle();
+            if (currentStyle == null || currentStyle.isEmpty()) {
+                control.setStyle(metadata.style);
+            } else {
+                control.setStyle(currentStyle + "; " + metadata.style);
+            }
         }
     }
 
@@ -486,6 +528,47 @@ public class AreaItemFactory {
      * Applies item-specific display properties to the control.
      */
     private static void applyItemSpecificProperties(Node control, AreaItem item, DisplayItem metadata) {
+        // Null check for item parameter
+        if (item == null) {
+            return;
+        }
+        
+        // Special handling for VBox containing RadioButtons (radio button group)
+        if (control instanceof javafx.scene.layout.VBox) {
+            javafx.scene.layout.VBox vbox = (javafx.scene.layout.VBox) control;
+            // Check if this VBox contains a ToggleGroup (indicates it's a radio button group)
+            if (vbox.getProperties().containsKey("toggleGroup")) {
+                // Apply editable and color properties to each RadioButton in the group
+                for (javafx.scene.Node child : vbox.getChildren()) {
+                    if (child instanceof RadioButton) {
+                        // Apply text color to individual radio buttons
+                        if (item.textColor != null && !item.textColor.isEmpty()) {
+                            String currentStyle = child.getStyle();
+                            String colorStyle = "-fx-text-fill: " + item.textColor + ";";
+                            if (currentStyle == null || currentStyle.isEmpty()) {
+                                child.setStyle(colorStyle);
+                            } else {
+                                child.setStyle(currentStyle + " " + colorStyle);
+                            }
+                        }
+                        
+                        // Apply background color to individual radio buttons
+                        if (item.backgroundColor != null && !item.backgroundColor.isEmpty()) {
+                            String currentStyle = child.getStyle();
+                            String bgStyle = "-fx-background-color: " + item.backgroundColor + ";";
+                            if (currentStyle == null || currentStyle.isEmpty()) {
+                                child.setStyle(bgStyle);
+                            } else {
+                                child.setStyle(currentStyle + " " + bgStyle);
+                            }
+                        }
+                    }
+                }
+                // Don't continue with the rest of the method for radio button groups
+                return;
+            }
+        }
+        
         // Apply prompt text for input controls (placeholder hint text)
         if (metadata != null && metadata.promptHelp != null && !metadata.promptHelp.isEmpty()) {
             if (control instanceof TextField) {
