@@ -447,25 +447,22 @@ public class AreaItemFactory {
         }
         
         // Special handling for VBox containing RadioButtons (radio button group)
-        if (control instanceof javafx.scene.layout.VBox) {
+        if (isRadioButtonGroup(control)) {
             javafx.scene.layout.VBox vbox = (javafx.scene.layout.VBox) control;
-            // Check if this VBox contains a ToggleGroup (indicates it's a radio button group)
-            if (vbox.getProperties().containsKey("toggleGroup")) {
-                // Apply properties to each RadioButton in the group
-                for (javafx.scene.Node child : vbox.getChildren()) {
-                    if (child instanceof RadioButton) {
-                        applyCommonPropertiesToControl(child, item);
-                    }
+            // Apply properties to each RadioButton in the group
+            for (javafx.scene.Node child : vbox.getChildren()) {
+                if (child instanceof RadioButton) {
+                    applyCommonPropertiesToControl(child, item);
                 }
-                // Also apply visibility and disabled state to the container itself
-                if (item.visible != null) {
-                    control.setVisible(item.visible);
-                }
-                if (item.disabled != null) {
-                    control.setDisable(item.disabled);
-                }
-                return;
             }
+            // Also apply visibility and disabled state to the container itself
+            if (item.visible != null) {
+                control.setVisible(item.visible);
+            }
+            if (item.disabled != null) {
+                control.setDisable(item.disabled);
+            }
+            return;
         }
         
         // Apply to the control directly
@@ -535,7 +532,37 @@ public class AreaItemFactory {
         if (currentStyle == null || currentStyle.isEmpty()) {
             control.setStyle(cssProperty);
         } else {
-            control.setStyle(currentStyle + " " + cssProperty);
+            control.setStyle(currentStyle + "; " + cssProperty);
+        }
+    }
+    
+    /**
+     * Helper method to check if a control is a VBox containing RadioButtons.
+     * @param control The control to check
+     * @return true if the control is a RadioButton group VBox, false otherwise
+     */
+    private static boolean isRadioButtonGroup(Node control) {
+        if (control instanceof javafx.scene.layout.VBox) {
+            javafx.scene.layout.VBox vbox = (javafx.scene.layout.VBox) control;
+            return vbox.getProperties().containsKey("toggleGroup");
+        }
+        return false;
+    }
+    
+    /**
+     * Helper method to apply text and background colors to a control.
+     * @param control The control to apply colors to
+     * @param item The AreaItem containing color properties
+     */
+    private static void applyColorProperties(Node control, AreaItem item) {
+        // Apply text color
+        if (item.textColor != null && !item.textColor.isEmpty()) {
+            applyStyleProperty(control, "-fx-text-fill: " + item.textColor + ";");
+        }
+
+        // Apply background color
+        if (item.backgroundColor != null && !item.backgroundColor.isEmpty()) {
+            applyStyleProperty(control, "-fx-background-color: " + item.backgroundColor + ";");
         }
     }
 
@@ -549,27 +576,16 @@ public class AreaItemFactory {
         }
         
         // Special handling for VBox containing RadioButtons (radio button group)
-        if (control instanceof javafx.scene.layout.VBox) {
+        if (isRadioButtonGroup(control)) {
             javafx.scene.layout.VBox vbox = (javafx.scene.layout.VBox) control;
-            // Check if this VBox contains a ToggleGroup (indicates it's a radio button group)
-            if (vbox.getProperties().containsKey("toggleGroup")) {
-                // Apply editable and color properties to each RadioButton in the group
-                for (javafx.scene.Node child : vbox.getChildren()) {
-                    if (child instanceof RadioButton) {
-                        // Apply text color to individual radio buttons
-                        if (item.textColor != null && !item.textColor.isEmpty()) {
-                            applyStyleProperty(child, "-fx-text-fill: " + item.textColor + ";");
-                        }
-                        
-                        // Apply background color to individual radio buttons
-                        if (item.backgroundColor != null && !item.backgroundColor.isEmpty()) {
-                            applyStyleProperty(child, "-fx-background-color: " + item.backgroundColor + ";");
-                        }
-                    }
+            // Apply color properties to each RadioButton in the group
+            for (javafx.scene.Node child : vbox.getChildren()) {
+                if (child instanceof RadioButton) {
+                    applyColorProperties(child, item);
                 }
-                // Don't continue with the rest of the method for radio button groups
-                return;
             }
+            // Don't continue with the rest of the method for radio button groups
+            return;
         }
         
         // Apply prompt text for input controls (placeholder hint text)
@@ -674,12 +690,7 @@ public class AreaItemFactory {
                 } else if (control instanceof Spinner) {
                     // For Spinner, we need to access the internal TextField
                     Spinner<?> spinner = (Spinner<?>) control;
-                    String currentStyle = spinner.getStyle();
-                    if (currentStyle == null || currentStyle.isEmpty()) {
-                        spinner.setStyle(alignmentStyle);
-                    } else {
-                        spinner.setStyle(currentStyle + " " + alignmentStyle);
-                    }
+                    applyStyleProperty(spinner, alignmentStyle);
                     // Also try to set on the editor if accessible
                     if (spinner.getEditor() != null) {
                         spinner.getEditor().setStyle(alignmentStyle);
@@ -706,15 +717,8 @@ public class AreaItemFactory {
             }
         }
 
-        // Apply text color
-        if (item.textColor != null && !item.textColor.isEmpty()) {
-            applyStyleProperty(control, "-fx-text-fill: " + item.textColor + ";");
-        }
-
-        // Apply background color
-        if (item.backgroundColor != null && !item.backgroundColor.isEmpty()) {
-            applyStyleProperty(control, "-fx-background-color: " + item.backgroundColor + ";");
-        }
+        // Apply color properties
+        applyColorProperties(control, item);
     }
 
     /**
