@@ -36,7 +36,9 @@ public class AreaItemFactory {
         if (metadata == null) {
             // If no metadata provided, create a simple Label as fallback
             Label label = new Label("No metadata");
-            applyCommonProperties(label, item);
+            if (item != null) {
+                applyCommonProperties(label, item);
+            }
             return label;
         }
 
@@ -439,6 +441,40 @@ public class AreaItemFactory {
      * Applies common properties that can be set on most controls.
      */
     private static void applyCommonProperties(Node control, AreaItem item) {
+        // Null check for item parameter
+        if (item == null) {
+            return;
+        }
+        
+        // Special handling for VBox containing RadioButtons (radio button group)
+        if (isRadioButtonGroup(control)) {
+            javafx.scene.layout.VBox vbox = (javafx.scene.layout.VBox) control;
+            // Apply properties to each RadioButton in the group
+            // Note: We iterate through all children and check instanceof because the VBox
+            // might contain other layout nodes in the future (e.g., labels, separators)
+            for (javafx.scene.Node child : vbox.getChildren()) {
+                if (child instanceof RadioButton) {
+                    applyCommonPropertiesToControl(child, item);
+                }
+            }
+            // Also apply visibility and disabled state to the container itself
+            if (item.visible != null) {
+                control.setVisible(item.visible);
+            }
+            if (item.disabled != null) {
+                control.setDisable(item.disabled);
+            }
+            return;
+        }
+        
+        // Apply to the control directly
+        applyCommonPropertiesToControl(control, item);
+    }
+    
+    /**
+     * Helper method to apply common properties directly to a single control.
+     */
+    private static void applyCommonPropertiesToControl(Node control, AreaItem item) {
         // Apply visibility
         if (item.visible != null) {
             control.setVisible(item.visible);
@@ -478,7 +514,60 @@ public class AreaItemFactory {
 
         // Apply custom style from metadata (overrides default)
         if (metadata.style != null && !metadata.style.isEmpty()) {
-            control.setStyle(control.getStyle() + "; " + metadata.style);
+            applyStyleProperty(control, metadata.style);
+        }
+    }
+
+    /**
+     * Helper method to apply a CSS style property to a control.
+     * Properly handles null current styles to avoid "null; " prefix.
+     * 
+     * @param control The control to apply the style to
+     * @param cssProperty The CSS property string (e.g., "-fx-text-fill: red;")
+     */
+    private static void applyStyleProperty(Node control, String cssProperty) {
+        if (cssProperty == null || cssProperty.isEmpty()) {
+            return;
+        }
+        
+        String currentStyle = control.getStyle();
+        if (currentStyle == null || currentStyle.isEmpty()) {
+            control.setStyle(cssProperty);
+        } else {
+            control.setStyle(currentStyle + "; " + cssProperty);
+        }
+    }
+    
+    /**
+     * Helper method to check if a control is a VBox containing RadioButtons.
+     * The VBox is marked as a RadioButton group by the presence of a "toggleGroup" property,
+     * which is set in createControlByType() when creating radio button groups from options.
+     * @param control The control to check
+     * @return true if the control is a RadioButton group VBox, false otherwise
+     * @see #createControlByType(ItemType, DisplayItem) where the "toggleGroup" property is set
+     */
+    private static boolean isRadioButtonGroup(Node control) {
+        if (control instanceof javafx.scene.layout.VBox) {
+            javafx.scene.layout.VBox vbox = (javafx.scene.layout.VBox) control;
+            return vbox.getProperties().containsKey("toggleGroup");
+        }
+        return false;
+    }
+    
+    /**
+     * Helper method to apply text and background colors to a control.
+     * @param control The control to apply colors to
+     * @param item The AreaItem containing color properties
+     */
+    private static void applyColorProperties(Node control, AreaItem item) {
+        // Apply text color
+        if (item.textColor != null && !item.textColor.isEmpty()) {
+            applyStyleProperty(control, "-fx-text-fill: " + item.textColor + ";");
+        }
+
+        // Apply background color
+        if (item.backgroundColor != null && !item.backgroundColor.isEmpty()) {
+            applyStyleProperty(control, "-fx-background-color: " + item.backgroundColor + ";");
         }
     }
 
@@ -486,6 +575,24 @@ public class AreaItemFactory {
      * Applies item-specific display properties to the control.
      */
     private static void applyItemSpecificProperties(Node control, AreaItem item, DisplayItem metadata) {
+        // Null check for item parameter
+        if (item == null) {
+            return;
+        }
+        
+        // Special handling for VBox containing RadioButtons (radio button group)
+        if (isRadioButtonGroup(control)) {
+            javafx.scene.layout.VBox vbox = (javafx.scene.layout.VBox) control;
+            // Apply color properties to each RadioButton in the group
+            for (javafx.scene.Node child : vbox.getChildren()) {
+                if (child instanceof RadioButton) {
+                    applyColorProperties(child, item);
+                }
+            }
+            // Don't continue with the rest of the method for radio button groups
+            return;
+        }
+        
         // Apply prompt text for input controls (placeholder hint text)
         if (metadata != null && metadata.promptHelp != null && !metadata.promptHelp.isEmpty()) {
             if (control instanceof TextField) {
@@ -584,26 +691,14 @@ public class AreaItemFactory {
                     textField.setAlignment(pos);
                 } else if (control instanceof TextArea || control instanceof ComboBox) {
                     // TextArea and ComboBox don't have setAlignment, use CSS
-                    String currentStyle = control.getStyle();
-                    String newStyle;
-                    if (currentStyle == null || currentStyle.isEmpty()) {
-                        newStyle = alignmentStyle;
-                    } else {
-                        newStyle = currentStyle + " " + alignmentStyle;
-                    }
-                    control.setStyle(newStyle);
+                    applyStyleProperty(control, alignmentStyle);
                 } else if (control instanceof Spinner) {
                     // For Spinner, we need to access the internal TextField
                     Spinner<?> spinner = (Spinner<?>) control;
-                    String currentStyle = spinner.getStyle();
-                    if (currentStyle == null || currentStyle.isEmpty()) {
-                        spinner.setStyle(alignmentStyle);
-                    } else {
-                        spinner.setStyle(currentStyle + " " + alignmentStyle);
-                    }
+                    applyStyleProperty(spinner, alignmentStyle);
                     // Also try to set on the editor if accessible
                     if (spinner.getEditor() != null) {
-                        spinner.getEditor().setStyle(alignmentStyle);
+                        applyStyleProperty(spinner.getEditor(), alignmentStyle);
                     }
                 }
             }
@@ -627,27 +722,8 @@ public class AreaItemFactory {
             }
         }
 
-        // Apply text color
-        if (item.textColor != null && !item.textColor.isEmpty()) {
-            String currentStyle = control.getStyle();
-            String colorStyle = "-fx-text-fill: " + item.textColor + ";";
-            if (currentStyle == null || currentStyle.isEmpty()) {
-                control.setStyle(colorStyle);
-            } else {
-                control.setStyle(currentStyle + " " + colorStyle);
-            }
-        }
-
-        // Apply background color
-        if (item.backgroundColor != null && !item.backgroundColor.isEmpty()) {
-            String currentStyle = control.getStyle();
-            String bgStyle = "-fx-background-color: " + item.backgroundColor + ";";
-            if (currentStyle == null || currentStyle.isEmpty()) {
-                control.setStyle(bgStyle);
-            } else {
-                control.setStyle(currentStyle + " " + bgStyle);
-            }
-        }
+        // Apply color properties
+        applyColorProperties(control, item);
     }
 
     /**
@@ -700,13 +776,8 @@ public class AreaItemFactory {
         
         // Apply the combined style to the control
         if (itemStyle.length() > 0) {
-            String currentStyle = control.getStyle();
-            //System.out.println("[DEBUG]   Current style before applying: '" + currentStyle + "'");
-            if (currentStyle == null || currentStyle.isEmpty()) {
-                control.setStyle(itemStyle.toString());
-            } else {
-                control.setStyle(currentStyle + " " + itemStyle.toString());
-            }
+            //System.out.println("[DEBUG]   Current style before applying: '" + control.getStyle() + "'");
+            applyStyleProperty(control, itemStyle.toString());
             //System.out.println("[DEBUG]   Final style after applying: '" + control.getStyle() + "'");
         } else {
             //System.out.println("[DEBUG]   No styles to apply (itemStyle is empty)");
